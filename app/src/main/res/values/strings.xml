@@ -44,6 +44,8 @@
     <string name="analysis_under">Under</string>
     <string name="analysis_normal">Normal</string>
     <string name="analysis_over">Over</string>
+    <string name="analysis_insights">Insights</string>
+    <string name="analysis_chart_coming_soon">Chart coming soon</string>
 
     <!-- Body Tabs -->
     <string name="tab_body">Body</string>

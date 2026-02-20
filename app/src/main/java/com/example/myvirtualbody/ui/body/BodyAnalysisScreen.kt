@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -150,7 +152,6 @@ fun BodyAnalysisScreen(
                 bodyScore = bodyScore,
                 modifier = Modifier
                     .weight(0.4f)
-                    .offset(y = (-10).dp)
             )
         }
     }
@@ -172,7 +173,7 @@ private fun BodyTopBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
-            shape = RoundedCornerShape(20.dp),
+            shape = RoundedCornerShape(BodyDimens.cornerXLarge),
             color = Color.White.copy(alpha = 0.8f),
             border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.4f))
         ) {
@@ -190,7 +191,7 @@ private fun BodyTopBar(
             fontWeight = FontWeight.Bold
         )
         Surface(
-            shape = RoundedCornerShape(20.dp),
+            shape = RoundedCornerShape(BodyDimens.cornerXLarge),
             color = BodyPrimary,
             shadowElevation = 10.dp
         ) {
@@ -415,6 +416,9 @@ private fun BodyModelPreview(
         if (modelNode != null) return@LaunchedEffect
 
         isLoading = true
+        val glbBounds = withContext(Dispatchers.IO) {
+            parseGlbSceneBounds(context, BODY_MODEL_ASSET_PATH)
+        }
 
         runCatching {
             val maxBonesInModel = withContext(Dispatchers.IO) {
@@ -435,34 +439,43 @@ private fun BodyModelPreview(
                 val node = ModelNode(
                     modelInstance = instance,
                     autoAnimate = false,
-                    scaleToUnits = 1.0f,
+                    scaleToUnits = null,
                     centerOrigin = null
                 )
-                // Model extents = full size; center Y = half height so feet (bottom of bbox) sit at y = 0.
-                val modelCenterY = (node.extents.y / 2f).coerceIn(0.01f, 1e6f)
-                node.position = Position(x = 0f, y = modelCenterY, z = 0f)
+                // Prefer GLB bounds for framing when available (runtime bbox may be tiny/unstable).
+                val frameSizeX = (glbBounds?.width ?: node.size.x).coerceIn(0.01f, 1e6f)
+                val frameSizeY = (glbBounds?.height ?: node.size.y).coerceIn(0.01f, 1e6f)
+                val frameSizeZ = (glbBounds?.depth ?: node.size.z).coerceIn(0.01f, 1e6f)
+                val halfHeight = (node.extents.y * 0.5f).coerceIn(0.01f, 1e6f)
+                val runtimeCenterY = node.center.y
+                val glbMinY = glbBounds?.let { it.centerY - (it.height * 0.5f) }
+                val nodePositionY = if (glbBounds != null && glbMinY != null) {
+                    // Align GLB feet (minY) with SceneView bottom baseline y=0.
+                    (-glbMinY).coerceIn(-1e6f, 1e6f)
+                } else {
+                    // Fallback: align runtime bbox bottom.
+                    (-runtimeCenterY + halfHeight).coerceIn(-1e6f, 1e6f)
+                }
+                // Look slightly above center so feet sit near bottom while full body remains visible.
+                val modelCenterY = (nodePositionY + frameSizeY * 0.58f).coerceIn(0.01f, 1e6f)
+                node.position = Position(x = 0f, y = nodePositionY, z = 0f)
 
-                // Frame entire model: calculate distance so full bounding box fits in frustum (frontal view).
-                val sizeX = node.size.x.coerceIn(0.01f, 1e6f)
-                val sizeY = node.size.y.coerceIn(0.01f, 1e6f)
-                val sizeZ = node.size.z.coerceIn(0.01f, 1e6f)
-                
-                // Use vertical FOV (typically 45°) to calculate distance needed to fit model height
-                val verticalFovDeg = 45f
+                // Frame entire model: use bounding-sphere distance so full bbox fits in frustum.
+                val diagonal = sqrt(
+                    frameSizeX * frameSizeX +
+                        frameSizeY * frameSizeY +
+                        frameSizeZ * frameSizeZ
+                )
+                val sphereRadius = diagonal * 0.5f
+                // Use conservative FOV: on portrait screens horizontal FOV < 45°, so 45° overestimates
+                // distance and camera ends up too close; use effective FOV so full body fits.
+                val verticalFovDeg = 40f
                 val halfFovRad = Math.toRadians((verticalFovDeg / 2f).toDouble()).toFloat()
-                
-                // Calculate distance needed to fit height (vertical dimension)
-                val fitDistanceByHeight = (sizeY * 0.5f) / tan(halfFovRad)
-                
-                // Calculate distance needed to fit width (horizontal dimension)
-                // Assuming aspect ratio ~1:1, horizontal FOV ≈ vertical FOV
-                val fitDistanceByWidth = (sizeX * 0.5f) / tan(halfFovRad)
-                
-                // Use the larger distance to ensure both width and height fit
-                val fitDistance = max(fitDistanceByHeight, fitDistanceByWidth)
-                
-                // Add padding (1.5x) to ensure full model visible including extremities
-                val cameraDistance = (fitDistance * 1.5f).coerceIn(2f, 300f)
+                val fitDistance = sphereRadius / tan(halfFovRad)
+                val fitByBottom = (frameSizeY * 0.58f) / tan(halfFovRad)
+                // Keep full model visible but avoid being too far.
+                val cameraDistance = max(fitByBottom * 1.0f, fitDistance * 0.94f)
+                    .coerceIn(2f, 300f)
 
                 // Frontal view: camera on -Z looking at +Z; model rotated 180° so front faces camera.
                 val lookAt = Position(x = 0f, y = modelCenterY, z = 0f)
@@ -471,18 +484,27 @@ private fun BodyModelPreview(
                 cameraNode.position = orbitHomePosition
                 cameraNode.lookAt(orbitTargetPosition)
 
+                // Debug: camera framing (filter logcat by BODY_DEV_LOG_TAG)
+                Log.d(
+                    BODY_DEV_LOG_TAG,
+                    "Camera framing v5: source=${if (glbBounds != null) "glbBounds" else "runtime"} " +
+                        "frameSize=($frameSizeX, $frameSizeY, $frameSizeZ) " +
+                        "node.size=(${node.size.x}, ${node.size.y}, ${node.size.z}) " +
+                        "node.extents=(${node.extents.x}, ${node.extents.y}, ${node.extents.z}) " +
+                        "runtimeCenterY=$runtimeCenterY glbCenterY=${glbBounds?.centerY} glbMinY=$glbMinY " +
+                        "modelCenterY=$modelCenterY sphereRadius=$sphereRadius fitDistance=$fitDistance cameraDistance=$cameraDistance " +
+                        "cameraNode.position=(${cameraNode.position.x}, ${cameraNode.position.y}, ${cameraNode.position.z}) lookAt=(${lookAt.x}, ${lookAt.y}, ${lookAt.z})"
+                )
+
                 // Apply initial frontal yaw so the model faces the camera on first load.
                 node.rotation = Rotation(0f, 180f, 0f)
 
-                if (BODY_DEV_MODE) {
-                    val bounds = withContext(Dispatchers.IO) { parseGlbSceneBounds(context, BODY_MODEL_ASSET_PATH) }
-                    if (bounds != null) {
-                        Log.d(
-                            BODY_DEV_LOG_TAG,
-                            "GLB bounds: w=${bounds.width} h=${bounds.height} d=${bounds.depth} centerY=${bounds.centerY}; " +
-                                "runtime size=${node.size.x}x${node.size.y}x${node.size.z} cameraZ=-$cameraDistance"
-                        )
-                    }
+                if (BODY_DEV_MODE && glbBounds != null) {
+                    Log.d(
+                        BODY_DEV_LOG_TAG,
+                        "GLB bounds: w=${glbBounds.width} h=${glbBounds.height} d=${glbBounds.depth} centerY=${glbBounds.centerY}; " +
+                            "runtime size=${node.size.x}x${node.size.y}x${node.size.z} cameraZ=-$cameraDistance"
+                    )
                 }
 
                 modelNode = node
@@ -692,7 +714,7 @@ private fun BmiCard(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight()
-                            .background(BodyAmberLight, RoundedCornerShape(2.dp))
+                            .background(BodyAmberLight, RoundedCornerShape(BodyDimens.cornerSmall))
                     )
                     Box(
                         modifier = Modifier
@@ -704,7 +726,7 @@ private fun BmiCard(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight()
-                            .background(BodyRoseLight, RoundedCornerShape(2.dp))
+                            .background(BodyRoseLight, RoundedCornerShape(BodyDimens.cornerSmall))
                     )
                 }
                 Box(
@@ -714,7 +736,7 @@ private fun BmiCard(
                         .size(4.dp, 8.dp)
                         .background(
                             MaterialTheme.colorScheme.onSurface,
-                            RoundedCornerShape(2.dp)
+                            RoundedCornerShape(BodyDimens.cornerSmall)
                         )
                 )
             }
@@ -758,6 +780,7 @@ private fun BodyBottomBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .navigationBarsPadding()
             .height(BodyDimens.bottomBarHeight)
             .background(MaterialTheme.colorScheme.surface)
             .border(1.dp, TopBarBorder)

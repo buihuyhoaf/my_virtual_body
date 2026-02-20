@@ -21,10 +21,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.myvirtualbody.R
 import com.example.myvirtualbody.ui.theme.BodyPrimary
 import com.example.myvirtualbody.ui.theme.BodyPrimaryLight
 import com.example.myvirtualbody.ui.theme.GlassChipBackgroundEnd
@@ -32,6 +30,9 @@ import com.example.myvirtualbody.ui.theme.GlassChipBackgroundStart
 import com.example.myvirtualbody.ui.theme.GlassChipBorder
 import com.example.myvirtualbody.ui.theme.GlassChipIconBackground
 import com.example.myvirtualbody.ui.theme.ScoreRingTrack
+
+private val DashboardChipShape = RoundedCornerShape(BodyDimens.cornerXLarge)
+private val DashboardProgressShape = RoundedCornerShape(BodyDimens.cornerSmall)
 
 @Composable
 fun FloatingMetricChip(
@@ -41,10 +42,10 @@ fun FloatingMetricChip(
 ) {
     Surface(
         modifier = modifier.widthIn(min = 92.dp),
-        shape = RoundedCornerShape(12.dp),
+        shape = DashboardChipShape,
         color = Color.Transparent,
         border = androidx.compose.foundation.BorderStroke(1.dp, GlassChipBorder),
-        shadowElevation = 5.dp
+        shadowElevation = 4.dp
     ) {
         Row(
             modifier = Modifier
@@ -52,7 +53,7 @@ fun FloatingMetricChip(
                     brush = Brush.linearGradient(
                         listOf(GlassChipBackgroundStart, GlassChipBackgroundEnd)
                     ),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = DashboardChipShape
                 )
                 .padding(horizontal = 8.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -63,7 +64,7 @@ fun FloatingMetricChip(
                     .size(22.dp)
                     .background(
                         color = GlassChipIconBackground,
-                        shape = RoundedCornerShape(6.dp)
+                        shape = DashboardChipShape
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -91,10 +92,10 @@ fun BodyScoreChip(
     val clamped = score.coerceIn(0, 100)
     Surface(
         modifier = modifier.widthIn(min = 92.dp),
-        shape = RoundedCornerShape(12.dp),
+        shape = DashboardChipShape,
         color = Color.Transparent,
         border = androidx.compose.foundation.BorderStroke(1.dp, GlassChipBorder),
-        shadowElevation = 5.dp
+        shadowElevation = 4.dp
     ) {
         Row(
             modifier = Modifier
@@ -102,7 +103,7 @@ fun BodyScoreChip(
                     brush = Brush.linearGradient(
                         listOf(GlassChipBackgroundStart, GlassChipBackgroundEnd)
                     ),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = DashboardChipShape
                 )
                 .padding(horizontal = 8.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -120,22 +121,15 @@ fun BodyScoreChip(
                 Box(
                     modifier = Modifier
                         .size(12.dp)
-                        .background(BodyPrimaryLight, RoundedCornerShape(999.dp))
+                        .background(BodyPrimaryLight, DashboardProgressShape)
                 )
             }
-            Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                Text(
-                    text = stringResource(R.string.analysis_body_score),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = clamped.toString(),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = BodyPrimary
-                )
-            }
+            Text(
+                text = clamped.toString(),
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.ExtraBold,
+                color = BodyPrimary
+            )
         }
     }
 }

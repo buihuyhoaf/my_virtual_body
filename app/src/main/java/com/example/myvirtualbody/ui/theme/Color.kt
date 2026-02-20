@@ -36,9 +36,9 @@ val MuscleMetricColor = Color(0xFF10B981)
 val FatMetricColor = Color(0xFFF43F5E)
 
 // Dashboard chips / indicators
-val GlassChipBackgroundStart = Color(0xCCFFFFFF)
-val GlassChipBackgroundEnd = Color(0xB3EEF4FF)
-val GlassChipBorder = Color(0x80FFFFFF)
+val GlassChipBackgroundStart = Color(0xFFFFFFFF)
+val GlassChipBackgroundEnd = Color(0xFFFFFFFF)
+val GlassChipBorder = Color(0x4DFFFFFF)          // 30% white
 val GlassChipIconBackground = Color(0x262B7CEE)
 val ScoreRingTrack = Color(0x66E2E8F0)
 val BmiNormalColor = Color(0xFF22C55E)
