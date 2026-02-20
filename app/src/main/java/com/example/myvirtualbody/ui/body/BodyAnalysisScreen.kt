@@ -82,8 +82,12 @@ import io.github.sceneview.rememberModelLoader
 import io.github.sceneview.rememberRenderer
 import io.github.sceneview.rememberScene
 import io.github.sceneview.rememberView
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.nio.charset.Charset
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 
 private val BodyPrimaryColor = Color(0xFF2B7CEE)
 private val BodyEmeraldColor = Color(0xFF10B981)
@@ -92,10 +96,13 @@ private val BodyRoseColor = Color(0xFFF43F5E)
 private val BodySceneBackgroundColor = Color(0xFF1A2332)
 private const val BODY_DEV_LOG_TAG = "BodyMorphDebug"
 private const val BODY_DEV_MODE = true
+private const val FILAMENT_MAX_BONES = 256
+private const val BODY_MODEL_ASSET_PATH = "models/male_asian4.glb"
+private const val BELLY_FAT_MORPH_INDEX = 0
+private const val BELLY_FAT_MORPH_NAME = "bell_fat"
 
 private data class BodyDevTuning(
-    val key1: Float = 0f,
-    val key2: Float = 0f
+    val bellyFat: Float = 0f
 )
 
 /**
@@ -114,8 +121,7 @@ fun BodyAnalysisScreen(
     onEditClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var devKey1 by remember { mutableFloatStateOf(0f) }
-    var devKey2 by remember { mutableFloatStateOf(0f) }
+    var devBellyFat by remember { mutableFloatStateOf(0f) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -141,8 +147,7 @@ fun BodyAnalysisScreen(
             BodyPreviewSection(
                 isDevMode = BODY_DEV_MODE,
                 devTuning = BodyDevTuning(
-                    key1 = devKey1,
-                    key2 = devKey2
+                    bellyFat = devBellyFat
                 ),
                 modifier = Modifier.weight(0.65f)
             )
@@ -150,10 +155,8 @@ fun BodyAnalysisScreen(
                 uiState = uiState,
                 onEditClick = onEditClick,
                 isDevMode = BODY_DEV_MODE,
-                devKey1 = devKey1,
-                devKey2 = devKey2,
-                onDevKey1Changed = { devKey1 = it },
-                onDevKey2Changed = { devKey2 = it },
+                devBellyFat = devBellyFat,
+                onDevBellyFatChanged = { devBellyFat = it },
                 modifier = Modifier
                     .weight(0.35f)
                     .fillMaxHeight()
@@ -386,16 +389,17 @@ private fun BodyModelPreview(
             }
         )
 
-        when {
-            error != null -> Text(
-                text = error!!,
+        error?.let { message ->
+            Text(
+                text = message,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier
                     .align(Alignment.Center)
                     .background(MaterialTheme.colorScheme.surface)
             )
-
-            isLoading -> CircularProgressIndicator(
+        }
+        if (isLoading) {
+            CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center)
             )
         }
@@ -410,12 +414,22 @@ private fun BodyModelPreview(
         error = null
 
         runCatching {
-            // Filament/gltfio typically require engine thread (main) for loading
+            val maxBonesInModel = withContext(Dispatchers.IO) {
+                readMaxJointCountFromGlb(context, BODY_MODEL_ASSET_PATH)
+            }
+            if (maxBonesInModel != null && maxBonesInModel > FILAMENT_MAX_BONES) {
+                throw IllegalStateException(
+                    "Model has $maxBonesInModel bones (> $FILAMENT_MAX_BONES). " +
+                            "Please reduce rig complexity or test on a higher-end renderer."
+                )
+            }
+            // Filament/gltfio typically require engine thread (main) for loading.
             withContext(Dispatchers.Main.immediate) {
-                modelLoader.createModelInstance("models/male_asian1.glb")
+                modelLoader.createModelInstance(BODY_MODEL_ASSET_PATH)
             }
         }.fold(
             onSuccess = { instance ->
+                error = null
                 val node = ModelNode(
                     modelInstance = instance,
                     autoAnimate = false,
@@ -451,28 +465,25 @@ private fun BodyModelPreview(
         isLoading = false
     }
 
-    // Dev morph tuning for male_asian1.glb via indexes [0]=Key 1 and [1]=Key 2.
+    // Dev morph tuning for male_asian4.glb via morph "bell_fat" (index 0).
     LaunchedEffect(modelNode, devTuning) {
         val node = modelNode ?: return@LaunchedEffect
         val tuning = devTuning ?: BodyDevTuning()
 
-        // Weight order MUST match GLB morph target order: [Key 1, Key 2].
-        val morphWeights = floatArrayOf(
-            tuning.key1.coerceIn(0f, 1f),
-            tuning.key2.coerceIn(0f, 1f)
-        )
+        // male_asian4.glb -> index 0 is "bell_fat".
+        val morphWeights = floatArrayOf(tuning.bellyFat.coerceIn(0f, 1f))
         runCatching {
-            node.setMorphWeights(morphWeights, 0)
+            node.setMorphWeights(morphWeights, BELLY_FAT_MORPH_INDEX)
         }.onSuccess {
             Log.d(
                 BODY_DEV_LOG_TAG,
-                "setMorphWeights success indexes [0]=Key 1, [1]=Key 2 " +
+                "setMorphWeights success index [$BELLY_FAT_MORPH_INDEX]=$BELLY_FAT_MORPH_NAME " +
                         morphWeights.joinToString(prefix = "[", postfix = "]")
             )
         }.onFailure { throwable ->
             Log.w(
                 BODY_DEV_LOG_TAG,
-                "setMorphWeights failed for indexes [0]=Key 1, [1]=Key 2: ${throwable.message}",
+                "setMorphWeights failed for index [$BELLY_FAT_MORPH_INDEX]=$BELLY_FAT_MORPH_NAME: ${throwable.message}",
                 throwable
             )
         }
@@ -484,10 +495,8 @@ private fun AnalysisPanel(
     uiState: BodyUiState,
     onEditClick: () -> Unit,
     isDevMode: Boolean,
-    devKey1: Float,
-    devKey2: Float,
-    onDevKey1Changed: (Float) -> Unit,
-    onDevKey2Changed: (Float) -> Unit,
+    devBellyFat: Float,
+    onDevBellyFatChanged: (Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
@@ -503,10 +512,8 @@ private fun AnalysisPanel(
     ) {
         if (isDevMode) {
             DevControlsCard(
-                key1 = devKey1,
-                key2 = devKey2,
-                onKey1Changed = onDevKey1Changed,
-                onKey2Changed = onDevKey2Changed
+                bellyFat = devBellyFat,
+                onBellyFatChanged = onDevBellyFatChanged
             )
             Spacer(modifier = Modifier.height(BodyDimens.spacingMedium))
         }
@@ -568,10 +575,8 @@ private fun AnalysisPanel(
 
 @Composable
 private fun DevControlsCard(
-    key1: Float,
-    key2: Float,
-    onKey1Changed: (Float) -> Unit,
-    onKey2Changed: (Float) -> Unit,
+    bellyFat: Float,
+    onBellyFatChanged: (Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -595,14 +600,9 @@ private fun DevControlsCard(
         )
         Spacer(modifier = Modifier.height(BodyDimens.spacingSmall))
         DevSliderRow(
-            label = "Key 1 (index 0)",
-            value = key1,
-            onValueChanged = onKey1Changed
-        )
-        DevSliderRow(
-            label = "Key 2 (index 1)",
-            value = key2,
-            onValueChanged = onKey2Changed
+            label = "Belly Fat (bell_fat, index 0)",
+            value = bellyFat,
+            onValueChanged = onBellyFatChanged
         )
     }
 }
@@ -879,4 +879,42 @@ enum class BodyTab(
     Nutrition(label = "Nutrition", icon = Icons.Default.Restaurant),
     Workout(label = "Workout", icon = Icons.Default.FitnessCenter),
     Progress(label = "Progress", icon = Icons.Outlined.TrendingUp)
+}
+
+private fun readMaxJointCountFromGlb(context: android.content.Context, assetPath: String): Int? {
+    val data = runCatching { context.assets.open(assetPath).use { it.readBytes() } }.getOrNull()
+        ?: return null
+    if (data.size < 20) return null
+
+    val header = ByteBuffer.wrap(data, 0, 12).order(ByteOrder.LITTLE_ENDIAN)
+    val magic = header.int
+    if (magic != 0x46546C67) return null // "glTF"
+
+    var offset = 12
+    while (offset + 8 <= data.size) {
+        val chunkHeader = ByteBuffer.wrap(data, offset, 8).order(ByteOrder.LITTLE_ENDIAN)
+        val chunkLength = chunkHeader.int
+        val chunkType = chunkHeader.int
+        offset += 8
+
+        if (chunkLength < 0 || offset + chunkLength > data.size) return null
+        if (chunkType == 0x4E4F534A) { // "JSON"
+            val jsonText = String(data, offset, chunkLength, Charset.forName("UTF-8"))
+            val root = runCatching { JSONObject(jsonText) }.getOrNull() ?: return null
+            val skins = root.optJSONArray("skins") ?: return 0
+
+            var maxJointCount = 0
+            for (i in 0 until skins.length()) {
+                val skin = skins.optJSONObject(i) ?: continue
+                val joints = skin.optJSONArray("joints") ?: continue
+                if (joints.length() > maxJointCount) {
+                    maxJointCount = joints.length()
+                }
+            }
+            return maxJointCount
+        }
+
+        offset += chunkLength
+    }
+    return null
 }
