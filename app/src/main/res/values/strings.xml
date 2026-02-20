@@ -1,3 +1,53 @@
 <resources>
     <string name="app_name">MyVirtualBody</string>
+
+    <!-- Body Analysis Screen -->
+    <string name="body_analysis">ANALYSIS</string>
+    <string name="body_quick_stats">Quick Stats</string>
+    <string name="body_height">Height</string>
+    <string name="body_weight">Weight</string>
+    <string name="body_body_fat">Body Fat %</string>
+    <string name="body_muscle_mass">Muscle Mass</string>
+    <string name="body_bmi">BMI</string>
+    <string name="body_edit_profile">Edit Profile</string>
+    <string name="body_placeholder">--</string>
+    <string name="body_unit_percent">%</string>
+    <string name="analysis_basic_info">Basic Info</string>
+    <string name="analysis_body_score">Body Score</string>
+    <string name="analysis_score_scale">/100</string>
+    <string name="analysis_score_subtitle">Overall body condition</string>
+    <string name="analysis_score_trend_badge">+3% from last week</string>
+    <string name="analysis_trend_week">+2.3% this week</string>
+    <string name="analysis_calories">Calories</string>
+    <string name="analysis_consume">Consume</string>
+    <string name="analysis_burn">Burn</string>
+    <string name="analysis_calories_value">%1$d/%2$d kcal</string>
+    <string name="analysis_distribution_value">%1$d percent</string>
+    <string name="analysis_muscle_distribution">Muscle Distribution</string>
+    <string name="analysis_fat_distribution">Fat Distribution</string>
+    <string name="analysis_body_composition">Body Composition</string>
+    <string name="analysis_muscle">Muscle</string>
+    <string name="analysis_fat">Fat</string>
+    <string name="analysis_arms">Arms</string>
+    <string name="analysis_legs">Legs</string>
+    <string name="analysis_abdomen">Abdomen</string>
+    <string name="analysis_ai_insight">AI Insight</string>
+    <string name="analysis_ai_insight_summary">Body score is %1$d with %2$s BMI trend. Keep your current routine consistent for better recovery and composition balance.</string>
+    <string name="analysis_condition_optimal">Optimal Condition</string>
+    <string name="analysis_condition_stable">Stable Condition</string>
+    <string name="analysis_condition_attention">Needs Attention</string>
+    <string name="analysis_bmi_status_badge">BMI: %1$s (%2$s)</string>
+    <string name="analysis_info">info</string>
+    <string name="analysis_fat_percentage">Fat Percentage</string>
+    <string name="analysis_bmi_analysis">BMI Analysis</string>
+    <string name="analysis_normal_range">Normal Range</string>
+    <string name="analysis_under">Under</string>
+    <string name="analysis_normal">Normal</string>
+    <string name="analysis_over">Over</string>
+
+    <!-- Body Tabs -->
+    <string name="tab_body">Body</string>
+    <string name="tab_nutrition">Nutrition</string>
+    <string name="tab_workout">Workout</string>
+    <string name="tab_progress">Progress</string>
 </resources>

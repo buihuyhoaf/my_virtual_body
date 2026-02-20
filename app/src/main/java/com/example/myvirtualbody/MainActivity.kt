@@ -47,7 +47,6 @@ class MainActivity : ComponentActivity() {
                     onBackClick = { finish() },
                     onSettingsClick = { /* Handle settings */ },
                     onTabSelected = { tab: BodyTab -> selectedTab = tab },
-                    onEditClick = { /* Handle edit */ },
                     modifier = Modifier.fillMaxSize()
                 )
             }
