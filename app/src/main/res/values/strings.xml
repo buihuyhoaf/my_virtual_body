@@ -46,6 +46,37 @@
     <string name="analysis_over">Over</string>
     <string name="analysis_insights">Insights</string>
     <string name="analysis_chart_coming_soon">Chart coming soon</string>
+    <string name="analysis_panel_today_energy">Today\'s Energy</string>
+    <string name="analysis_panel_status_deficit">Deficit</string>
+    <string name="analysis_panel_status_surplus">Surplus</string>
+    <string name="analysis_panel_calories_remaining">Calories remaining</string>
+    <string name="analysis_panel_percent_value">%1$d%%</string>
+    <string name="analysis_panel_number_grouped">%1$,d</string>
+    <string name="analysis_panel_intake">Intake</string>
+    <string name="analysis_panel_burned">Burned</string>
+    <string name="analysis_panel_intake_value">Intake: %1$,d</string>
+    <string name="analysis_panel_goal_value">Goal: %1$,d</string>
+    <string name="analysis_panel_meals_today">Meals Today</string>
+    <string name="analysis_panel_see_all">See All</string>
+    <string name="analysis_panel_macro_format">P %1$dg • C %2$dg • F %3$dg</string>
+    <string name="analysis_panel_kcal_value">%1$d kcal</string>
+    <string name="analysis_panel_activities">Activities</string>
+    <string name="analysis_panel_view_logs">View Logs</string>
+    <string name="analysis_panel_activity_meta">%1$s • %2$s</string>
+    <string name="analysis_panel_weekly_analytics">Weekly Analytics</string>
+    <string name="analysis_panel_weekly_subtitle">Net caloric balance trend</string>
+    <string name="analysis_panel_meal_quinoa_power_bowl">Quinoa Power Bowl</string>
+    <string name="analysis_panel_meal_greek_yogurt">Greek Yogurt</string>
+    <string name="analysis_panel_meal_salmon_rice">Salmon &amp; Rice</string>
+    <string name="analysis_panel_meal_type_lunch">Lunch</string>
+    <string name="analysis_panel_meal_type_snack">Snack</string>
+    <string name="analysis_panel_meal_type_dinner">Dinner</string>
+    <string name="analysis_panel_activity_morning_run">Morning Run</string>
+    <string name="analysis_panel_activity_evening_walk">Evening Walk</string>
+    <string name="analysis_panel_activity_morning_run_duration">45 min</string>
+    <string name="analysis_panel_activity_evening_walk_duration">35 min</string>
+    <string name="analysis_panel_activity_intensity_high">High Intensity</string>
+    <string name="analysis_panel_activity_intensity_low">Low Intensity</string>
 
     <!-- Body Tabs -->
     <string name="tab_body">Body</string>
