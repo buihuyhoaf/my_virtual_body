@@ -16,7 +16,7 @@ import com.hoabui.virtualbody3d.ui.theme.tokens.darkGymToken
 import com.hoabui.virtualbody3d.ui.theme.tokens.lightGymToken
 
 /**
- * Theme host for GymToken: provides Material3 and token access in one place.
+ * Theme host for GymToken: Rose Social Calm. Provides Material3 and token access in one place.
  */
 @Composable
 fun GymTheme(
@@ -53,21 +53,21 @@ object GymTheme {
 private fun com.hoabui.virtualbody3d.ui.theme.tokens.semantic.SemanticColorTokens.toMaterialColorScheme(
     isDark: Boolean
 ): ColorScheme {
-    val primaryContainer = if (isDark) primary.copy(alpha = 0.20f) else primary.copy(alpha = 0.12f)
-    val surfaceVariant = if (isDark) surface.copy(alpha = 0.92f) else surface
-    val outline = if (isDark) textSecondary.copy(alpha = 0.55f) else textSecondary.copy(alpha = 0.40f)
+    val primaryContainer = primarySoft
+    val surfaceVariant = surfaceSubtle
+    val outline = borderStrong
 
     return if (isDark) {
         darkColorScheme(
             primary = primary,
-            onPrimary = background,
+            onPrimary = onPrimary,
             secondary = primary,
             background = background,
             surface = surface,
             onBackground = textPrimary,
             onSurface = textPrimary,
             error = error,
-            onError = background,
+            onError = onError,
             primaryContainer = primaryContainer,
             onPrimaryContainer = textPrimary,
             surfaceVariant = surfaceVariant,
@@ -77,14 +77,14 @@ private fun com.hoabui.virtualbody3d.ui.theme.tokens.semantic.SemanticColorToken
     } else {
         lightColorScheme(
             primary = primary,
-            onPrimary = background,
+            onPrimary = onPrimary,
             secondary = primary,
             background = background,
             surface = surface,
             onBackground = textPrimary,
             onSurface = textPrimary,
             error = error,
-            onError = surface,
+            onError = onError,
             primaryContainer = primaryContainer,
             onPrimaryContainer = textPrimary,
             surfaceVariant = surfaceVariant,

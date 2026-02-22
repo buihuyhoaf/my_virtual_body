@@ -21,9 +21,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.DirectionsRun
-import androidx.compose.material.icons.filled.LocalDining
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -39,19 +36,19 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.ui.calendar.extensions.estimatedKcal
+import com.hoabui.virtualbody3d.ui.calendar.extensions.toCalendarOffset
+import com.hoabui.virtualbody3d.ui.calendar.extensions.toIcon
+import com.hoabui.virtualbody3d.ui.calendar.model.MonthGridUiModel
 import com.hoabui.virtualbody3d.ui.calendar.state.DailyItem
 import com.hoabui.virtualbody3d.ui.calendar.state.DailyItemType
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -59,7 +56,6 @@ import java.time.format.TextStyle
 import java.util.Locale
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlin.math.absoluteValue
 
 @Composable
 fun CalendarScreen(
@@ -113,25 +109,15 @@ fun CalendarScreen(
             .padding(horizontal = token.spacing.md, vertical = token.spacing.xs),
         verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
     ) {
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(token.radius.lg),
-            color = token.colors.calendarYearBackground,
-            shadowElevation = 2.dp
-        ) {
-            Text(
-                text = visibleYear.toString(),
-                style = token.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = token.colors.textPrimary,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = token.spacing.md, vertical = token.spacing.xs)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(token.spacing.lg))
+        Text(
+            text = visibleYear.toString(),
+            style = token.typography.headlineMedium,
+            color = token.calendar.yearTextColor,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = token.spacing.md, vertical = token.spacing.md)
+        )
 
         Box(
             modifier = Modifier
@@ -144,8 +130,7 @@ fun CalendarScreen(
                     .fillMaxSize()
                     .padding(bottom = 14.dp),
                 shape = RoundedCornerShape(token.radius.lg),
-                color = token.colors.surface,
-                shadowElevation = 1.dp
+                color = token.colors.surface
             ) {
                 Column(
                     modifier = Modifier
@@ -184,13 +169,13 @@ fun CalendarScreen(
                     .align(Alignment.BottomCenter)
                     .offset(y = (-12).dp),
                 shape = RoundedCornerShape(
-                    topStart = token.radius.lg,
-                    topEnd = token.radius.lg,
+                    topStart = token.radius.xl,
+                    topEnd = token.radius.xl,
                     bottomStart = 0.dp,
                     bottomEnd = 0.dp
                 ),
                 color = token.colors.surfaceOverlay,
-                shadowElevation = 8.dp
+                border = androidx.compose.foundation.BorderStroke(1.dp, token.calendar.panelBorder)
             ) {
                 Column(
                     modifier = Modifier
@@ -231,28 +216,21 @@ private fun CalendarMonthSection(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(token.spacing.md)
     ) {
-        Surface(
-            shape = RoundedCornerShape(token.radius.md),
-            color = token.colors.primarySoft
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
         ) {
-            Column(
+            Text(
+                text = month.month.getDisplayName(TextStyle.FULL, Locale.ENGLISH).uppercase(Locale.ENGLISH),
+                style = token.typography.labelLarge,
+                color = token.calendar.monthTextColor
+            )
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = token.spacing.md, vertical = token.spacing.xs),
-                verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
-            ) {
-                Text(
-                    text = month.month.getDisplayName(TextStyle.FULL, Locale.ENGLISH),
-                    style = token.typography.headlineSmall,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(token.colors.surfaceBorder)
-                )
-            }
+                    .height(1.dp)
+                    .background(token.calendar.monthDividerColor)
+            )
         }
 
         cells.chunked(7).forEach { week ->
@@ -297,7 +275,7 @@ private fun CalendarDayCell(
     val badgeCount = (items.size - 1).coerceAtLeast(0)
     val placeholderResId = R.drawable.ic_launcher_foreground
     val scale by animateFloatAsState(targetValue = if (selected) 1.05f else 1f, label = "day_scale")
-    val cellShape = RoundedCornerShape(token.radius.lg)
+    val cellShape = RoundedCornerShape(token.radius.md)
     val badgeText = if (badgeCount > 9) "9+" else "+$badgeCount"
 
     Box(
@@ -307,22 +285,17 @@ private fun CalendarDayCell(
                 scaleX = scale
                 scaleY = scale
             }
-            .shadow(
-                elevation = if (selected) 4.dp else 1.dp,
-                shape = cellShape,
-                clip = false
-            )
             .clip(cellShape)
-            .background(if (selected) token.colors.primarySoft else token.colors.surface)
+            .background(if (selected) token.calendar.selectedDayBackground else token.colors.surface)
             .border(
                 width = when {
-                    selected -> 2.dp
+                    selected -> 1.5.dp
                     isToday -> 1.dp
                     else -> 0.dp
                 },
                 color = when {
-                    selected -> token.colors.primary
-                    isToday -> token.colors.surfaceBorder
+                    selected -> token.calendar.selectedBorderColor
+                    isToday -> token.calendar.todayBorderColor
                     else -> token.colors.backgroundTransparent
                 },
                 shape = cellShape
@@ -330,13 +303,21 @@ private fun CalendarDayCell(
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Image(
-            painter = painterResource(id = thumbnail?.thumbnailResId ?: placeholderResId),
-            contentDescription = "Day thumbnail ${date.dayOfMonth}",
-            contentScale = ContentScale.Crop,
-            alpha = if (items.isEmpty()) 0.45f else 1f,
-            modifier = Modifier.fillMaxSize()
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(4.dp)
+                .clip(RoundedCornerShape(token.radius.sm)),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(id = thumbnail?.thumbnailResId ?: placeholderResId),
+                contentDescription = "Day thumbnail ${date.dayOfMonth}",
+                contentScale = ContentScale.Crop,
+                alpha = if (items.isEmpty()) 0.45f else 1f,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
         if (badgeCount > 0) {
             Box(
                 modifier = Modifier
@@ -408,8 +389,7 @@ private fun CalendarDetailPanel(
                 items(items = dailyItems, key = { it.id }) { item ->
                     Surface(
                         shape = RoundedCornerShape(token.radius.md),
-                        color = token.colors.surface,
-                        shadowElevation = 1.dp
+                        color = token.colors.surface
                     ) {
                         Row(
                             modifier = Modifier
@@ -460,11 +440,6 @@ private fun CalendarDetailPanel(
     }
 }
 
-private data class MonthGridUiModel(
-    val month: YearMonth,
-    val cells: List<LocalDate?>
-)
-
 private fun buildMonthCells(month: YearMonth): List<LocalDate?> {
     val firstDay = month.atDay(1).dayOfWeek.toCalendarOffset()
     val days = (1..month.lengthOfMonth()).map { day -> month.atDay(day) }
@@ -472,29 +447,4 @@ private fun buildMonthCells(month: YearMonth): List<LocalDate?> {
     val all = leading + days
     val trailing = (7 - (all.size % 7)).let { if (it == 7) 0 else it }
     return all + List(trailing) { null }
-}
-
-private fun DayOfWeek.toCalendarOffset(): Int {
-    val sundayFirst = listOf(
-        DayOfWeek.SUNDAY,
-        DayOfWeek.MONDAY,
-        DayOfWeek.TUESDAY,
-        DayOfWeek.WEDNESDAY,
-        DayOfWeek.THURSDAY,
-        DayOfWeek.FRIDAY,
-        DayOfWeek.SATURDAY
-    )
-    return sundayFirst.indexOf(this)
-}
-
-private fun DailyItem.toIcon(): ImageVector {
-    return when (type) {
-        DailyItemType.Meal -> Icons.Default.LocalDining
-        DailyItemType.Activity -> Icons.AutoMirrored.Filled.DirectionsRun
-    }
-}
-
-private fun DailyItem.estimatedKcal(): Int? {
-    if (type != DailyItemType.Meal) return null
-    return 220 + (id.hashCode().absoluteValue % 280)
 }

@@ -4,32 +4,34 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
 /**
- * Primitive color tokens contain only raw brand values.
- * No semantic meaning should be attached at this layer.
+ * Primitive color tokens for Rose Social Calm theme.
+ * Raw brand values only; no semantic meaning at this layer.
  */
 @Immutable
 data class PrimitiveColorTokens(
-    val green500: Color,
-    val green300: Color,
-    val gray950: Color,
-    val gray900: Color,
-    val gray800: Color,
-    val gray600: Color,
-    val gray200: Color,
-    val white: Color,
-    val red500: Color
+    val rose500: Color,
+    val rose400: Color,
+    val rose100: Color,
+    val neutral0: Color,
+    val neutral50: Color,
+    val neutral100: Color,
+    val neutral200: Color,
+    val neutral600: Color,
+    val neutral900: Color,
+    val mint400: Color
 ) {
     companion object {
         fun default(): PrimitiveColorTokens = PrimitiveColorTokens(
-            green500 = Color(0xFF7CFF6B),
-            green300 = Color(0xFFB0FFA7),
-            gray950 = Color(0xFF0A0C0A),
-            gray900 = Color(0xFF121512),
-            gray800 = Color(0xFF171C17),
-            gray600 = Color(0xFF99A29A),
-            gray200 = Color(0xFFDCE4DC),
-            white = Color(0xFFFFFFFF),
-            red500 = Color(0xFFFF6F7A)
+            rose500 = Color(0xFFE11D48),
+            rose400 = Color(0xFFF43F5E),
+            rose100 = Color(0xFFFFE4E6),
+            neutral0 = Color(0xFFFFFFFF),
+            neutral50 = Color(0xFFFAFAFB),
+            neutral100 = Color(0xFFF3F4F6),
+            neutral200 = Color(0xFFE5E7EB),
+            neutral600 = Color(0xFF6B7280),
+            neutral900 = Color(0xFF111827),
+            mint400 = Color(0xFF34D399)
         )
     }
 }

@@ -11,13 +11,17 @@ import androidx.compose.ui.unit.dp
 data class PrimitiveRadiusTokens(
     val sm: Dp,
     val md: Dp,
-    val lg: Dp
+    val lg: Dp,
+    val xl: Dp,
+    val pill: Dp
 ) {
     companion object {
         fun default(): PrimitiveRadiusTokens = PrimitiveRadiusTokens(
             sm = 8.dp,
             md = 16.dp,
-            lg = 24.dp
+            lg = 24.dp,
+            xl = 32.dp,
+            pill = 999.dp
         )
     }
 }

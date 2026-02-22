@@ -5,24 +5,33 @@ import androidx.compose.ui.graphics.Color
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveColorTokens
 
 /**
- * Semantic colors translate primitive brand values into UI meaning.
+ * Semantic colors for Rose Social Calm theme.
+ * Maps primitive brand values to UI meaning.
+ * Legacy names (surfaceBorder, outlineSoft, dashboard*, etc.) are aliased to new semantics for UI compatibility.
  */
 @Immutable
 data class SemanticColorTokens(
     val primary: Color,
+    val primarySoft: Color,
     val background: Color,
     val surface: Color,
+    val surfaceElevated: Color,
+    val surfaceSubtle: Color,
+    val borderSubtle: Color,
+    val borderStrong: Color,
     val textPrimary: Color,
     val textSecondary: Color,
+    val textMuted: Color,
     val error: Color,
-    val primarySoft: Color,
-    val primarySelected: Color,
-    val backgroundTransparent: Color,
-    val backgroundScrim: Color,
-    val surfaceOverlay: Color,
+    val onPrimary: Color,
+    val onError: Color,
     val surfaceBorder: Color,
     val outlineSoft: Color,
+    val surfaceOverlay: Color,
+    val backgroundTransparent: Color,
+    val backgroundScrim: Color,
     val previewTrack: Color,
+    val primarySelected: Color,
     val dashboardPanelBackground: Color,
     val dashboardHandle: Color,
     val dashboardNutritionCardBackground: Color,
@@ -33,62 +42,93 @@ data class SemanticColorTokens(
     val dashboardSummaryCardBackground: Color,
     val dashboardFloatingNavBackground: Color,
     val dashboardFloatingNavBorder: Color,
-    val calendarYearBackground: Color
+    val calendarYearBackground: Color,
+    val calendarSelectedBorder: Color
 )
 
-fun darkSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens = SemanticColorTokens(
-    primary = primitive.green500,
-    background = primitive.gray950,
-    surface = primitive.gray900,
-    textPrimary = primitive.white,
-    textSecondary = primitive.gray600,
-    error = primitive.red500,
-    primarySoft = primitive.green500.copy(alpha = 0.10f),
-    primarySelected = primitive.green500.copy(alpha = 0.16f),
-    backgroundTransparent = Color.Transparent,
-    backgroundScrim = primitive.gray950.copy(alpha = 0.24f),
-    surfaceOverlay = primitive.white.copy(alpha = 0.80f),
-    surfaceBorder = primitive.white.copy(alpha = 0.20f),
-    outlineSoft = primitive.gray600.copy(alpha = 0.50f),
-    previewTrack = primitive.white.copy(alpha = 0.08f),
-    dashboardPanelBackground = primitive.gray900,
-    dashboardHandle = primitive.gray600.copy(alpha = 0.50f),
-    dashboardNutritionCardBackground = primitive.gray800,
-    dashboardNutritionCardBorder = primitive.white.copy(alpha = 0.12f),
-    dashboardRingTrack = primitive.white.copy(alpha = 0.14f),
-    dashboardMealCardBackground = primitive.gray800,
-    dashboardMealImageBackground = primitive.gray900,
-    dashboardSummaryCardBackground = primitive.gray800,
-    dashboardFloatingNavBackground = primitive.gray800,
-    dashboardFloatingNavBorder = primitive.white.copy(alpha = 0.14f),
-    calendarYearBackground = primitive.green500.copy(alpha = 0.55f)
-)
+fun lightSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens {
+    val borderSubtle = primitive.neutral200
+    val surface = primitive.neutral0
+    val surfaceSubtle = primitive.neutral100
+    val background = primitive.neutral50
+    val primarySoft = primitive.rose100
+    return SemanticColorTokens(
+        primary = primitive.rose500,
+        primarySoft = primarySoft,
+        background = background,
+        surface = surface,
+        surfaceElevated = surface,
+        surfaceSubtle = surfaceSubtle,
+        borderSubtle = borderSubtle,
+        borderStrong = primitive.neutral600,
+        textPrimary = primitive.neutral900,
+        textSecondary = primitive.neutral600,
+        textMuted = primitive.neutral600.copy(alpha = 0.7f),
+        error = primitive.rose400,
+        onPrimary = primitive.neutral0,
+        onError = primitive.neutral0,
+        surfaceBorder = borderSubtle,
+        outlineSoft = borderSubtle,
+        surfaceOverlay = surface,
+        backgroundTransparent = Color.Transparent,
+        backgroundScrim = primitive.neutral900.copy(alpha = 0.16f),
+        previewTrack = surfaceSubtle,
+        primarySelected = primarySoft,
+        dashboardPanelBackground = surface,
+        dashboardHandle = primitive.neutral600.copy(alpha = 0.40f),
+        dashboardNutritionCardBackground = surface,
+        dashboardNutritionCardBorder = borderSubtle,
+        dashboardRingTrack = primitive.neutral900.copy(alpha = 0.14f),
+        dashboardMealCardBackground = surface,
+        dashboardMealImageBackground = surfaceSubtle,
+        dashboardSummaryCardBackground = surface,
+        dashboardFloatingNavBackground = surface,
+        dashboardFloatingNavBorder = borderSubtle,
+        calendarYearBackground = primarySoft.copy(alpha = 0.55f),
+        calendarSelectedBorder = Color(0xFFF9A8B8)
+    )
+}
 
-// Light semantic mapping is intentionally basic and ready for expansion.
-fun lightSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens = SemanticColorTokens(
-    primary = primitive.green500,
-    background = primitive.white,
-    surface = primitive.gray200,
-    textPrimary = primitive.gray900,
-    textSecondary = primitive.gray600,
-    error = primitive.red500,
-    primarySoft = primitive.green500.copy(alpha = 0.10f),
-    primarySelected = primitive.green500.copy(alpha = 0.16f),
-    backgroundTransparent = Color.Transparent,
-    backgroundScrim = primitive.gray900.copy(alpha = 0.16f),
-    surfaceOverlay = primitive.white,
-    surfaceBorder = primitive.gray600.copy(alpha = 0.20f),
-    outlineSoft = primitive.gray600.copy(alpha = 0.40f),
-    previewTrack = primitive.gray900.copy(alpha = 0.08f),
-    dashboardPanelBackground = primitive.gray200,
-    dashboardHandle = primitive.gray600.copy(alpha = 0.40f),
-    dashboardNutritionCardBackground = primitive.white,
-    dashboardNutritionCardBorder = primitive.gray600.copy(alpha = 0.16f),
-    dashboardRingTrack = primitive.gray900.copy(alpha = 0.14f),
-    dashboardMealCardBackground = primitive.white,
-    dashboardMealImageBackground = primitive.gray200,
-    dashboardSummaryCardBackground = primitive.white,
-    dashboardFloatingNavBackground = primitive.white,
-    dashboardFloatingNavBorder = primitive.gray600.copy(alpha = 0.18f),
-    calendarYearBackground = primitive.green500.copy(alpha = 0.55f)
-)
+fun darkSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens {
+    val borderSubtle = primitive.neutral600.copy(alpha = 0.30f)
+    val borderStrong = primitive.neutral200
+    val surface = primitive.neutral900
+    val surfaceSubtle = primitive.neutral600.copy(alpha = 0.16f)
+    val background = primitive.neutral900
+    val primarySoft = primitive.rose100.copy(alpha = 0.24f)
+    return SemanticColorTokens(
+        primary = primitive.rose500,
+        primarySoft = primarySoft,
+        background = background,
+        surface = surface,
+        surfaceElevated = surface,
+        surfaceSubtle = surfaceSubtle,
+        borderSubtle = borderSubtle,
+        borderStrong = borderStrong,
+        textPrimary = primitive.neutral0,
+        textSecondary = primitive.neutral200,
+        textMuted = primitive.neutral200.copy(alpha = 0.7f),
+        error = primitive.rose400,
+        onPrimary = primitive.neutral0,
+        onError = primitive.neutral0,
+        surfaceBorder = borderSubtle,
+        outlineSoft = borderSubtle,
+        surfaceOverlay = primitive.neutral0.copy(alpha = 0.80f),
+        backgroundTransparent = Color.Transparent,
+        backgroundScrim = primitive.neutral900.copy(alpha = 0.24f),
+        previewTrack = primitive.neutral0.copy(alpha = 0.08f),
+        primarySelected = primarySoft,
+        dashboardPanelBackground = surface,
+        dashboardHandle = primitive.neutral600.copy(alpha = 0.50f),
+        dashboardNutritionCardBackground = surface,
+        dashboardNutritionCardBorder = primitive.neutral0.copy(alpha = 0.12f),
+        dashboardRingTrack = primitive.neutral0.copy(alpha = 0.14f),
+        dashboardMealCardBackground = surface,
+        dashboardMealImageBackground = surface,
+        dashboardSummaryCardBackground = surface,
+        dashboardFloatingNavBackground = surface,
+        dashboardFloatingNavBorder = primitive.neutral0.copy(alpha = 0.14f),
+        calendarYearBackground = primarySoft.copy(alpha = 0.55f),
+        calendarSelectedBorder = Color(0xFFE8A0B0)
+    )
+}
