@@ -1,6 +1,8 @@
 package com.hoabui.virtualbody3d.di
 
 import com.hoabui.virtualbody3d.domain.repository.BodyRepository
+import com.hoabui.virtualbody3d.domain.repository.BodyDashboardRepository
+import com.hoabui.virtualbody3d.domain.usecase.GetBodyDashboardDataUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetBodyMetricsUseCase
 import dagger.Module
 import dagger.Provides
@@ -16,5 +18,12 @@ object UseCaseModule {
         bodyRepository: BodyRepository
     ): GetBodyMetricsUseCase {
         return GetBodyMetricsUseCase(bodyRepository)
+    }
+
+    @Provides
+    fun provideGetBodyDashboardDataUseCase(
+        bodyDashboardRepository: BodyDashboardRepository
+    ): GetBodyDashboardDataUseCase {
+        return GetBodyDashboardDataUseCase(bodyDashboardRepository)
     }
 }

@@ -36,9 +36,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.ui.body.state.ActivityItem
+import com.hoabui.virtualbody3d.domain.model.ActivityItem
+import com.hoabui.virtualbody3d.domain.model.FoodLogItem
 import com.hoabui.virtualbody3d.ui.body.state.BodyUiState
-import com.hoabui.virtualbody3d.ui.body.state.FoodLogItem
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 @Composable

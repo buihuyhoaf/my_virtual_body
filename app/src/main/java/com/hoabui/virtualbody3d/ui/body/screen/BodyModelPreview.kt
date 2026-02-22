@@ -3,7 +3,6 @@ package com.hoabui.virtualbody3d.ui.body.screen
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
@@ -80,9 +79,7 @@ fun BodyModelPreview(
         SceneView.createEnvironment(environmentLoader, isOpaque = false)
     }
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(GymTheme.token.colors.background)
+        modifier = modifier.fillMaxSize()
     ) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
@@ -103,6 +100,7 @@ fun BodyModelPreview(
                     sharedActivity = context as? androidx.activity.ComponentActivity,
                     sharedLifecycle = lifecycle
                 ).also { sceneView ->
+                    sceneView.setBackgroundColor(android.graphics.Color.TRANSPARENT)
                     sceneView.setOnTouchListener(object : View.OnTouchListener {
                         private var lastX = 0f
 

@@ -22,7 +22,18 @@ data class SemanticColorTokens(
     val surfaceOverlay: Color,
     val surfaceBorder: Color,
     val outlineSoft: Color,
-    val previewTrack: Color
+    val previewTrack: Color,
+    val dashboardPanelBackground: Color,
+    val dashboardHandle: Color,
+    val dashboardNutritionCardBackground: Color,
+    val dashboardNutritionCardBorder: Color,
+    val dashboardRingTrack: Color,
+    val dashboardMealCardBackground: Color,
+    val dashboardMealImageBackground: Color,
+    val dashboardSummaryCardBackground: Color,
+    val dashboardFloatingNavBackground: Color,
+    val dashboardFloatingNavBorder: Color,
+    val calendarYearBackground: Color
 )
 
 fun darkSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens = SemanticColorTokens(
@@ -39,7 +50,18 @@ fun darkSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens = S
     surfaceOverlay = primitive.white.copy(alpha = 0.80f),
     surfaceBorder = primitive.white.copy(alpha = 0.20f),
     outlineSoft = primitive.gray600.copy(alpha = 0.50f),
-    previewTrack = primitive.white.copy(alpha = 0.08f)
+    previewTrack = primitive.white.copy(alpha = 0.08f),
+    dashboardPanelBackground = primitive.gray900,
+    dashboardHandle = primitive.gray600.copy(alpha = 0.50f),
+    dashboardNutritionCardBackground = primitive.gray800,
+    dashboardNutritionCardBorder = primitive.white.copy(alpha = 0.12f),
+    dashboardRingTrack = primitive.white.copy(alpha = 0.14f),
+    dashboardMealCardBackground = primitive.gray800,
+    dashboardMealImageBackground = primitive.gray900,
+    dashboardSummaryCardBackground = primitive.gray800,
+    dashboardFloatingNavBackground = primitive.gray800,
+    dashboardFloatingNavBorder = primitive.white.copy(alpha = 0.14f),
+    calendarYearBackground = primitive.green500.copy(alpha = 0.55f)
 )
 
 // Light semantic mapping is intentionally basic and ready for expansion.
@@ -57,5 +79,16 @@ fun lightSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens = 
     surfaceOverlay = primitive.white,
     surfaceBorder = primitive.gray600.copy(alpha = 0.20f),
     outlineSoft = primitive.gray600.copy(alpha = 0.40f),
-    previewTrack = primitive.gray900.copy(alpha = 0.08f)
+    previewTrack = primitive.gray900.copy(alpha = 0.08f),
+    dashboardPanelBackground = primitive.gray200,
+    dashboardHandle = primitive.gray600.copy(alpha = 0.40f),
+    dashboardNutritionCardBackground = primitive.white,
+    dashboardNutritionCardBorder = primitive.gray600.copy(alpha = 0.16f),
+    dashboardRingTrack = primitive.gray900.copy(alpha = 0.14f),
+    dashboardMealCardBackground = primitive.white,
+    dashboardMealImageBackground = primitive.gray200,
+    dashboardSummaryCardBackground = primitive.white,
+    dashboardFloatingNavBackground = primitive.white,
+    dashboardFloatingNavBorder = primitive.gray600.copy(alpha = 0.18f),
+    calendarYearBackground = primitive.green500.copy(alpha = 0.55f)
 )

@@ -77,8 +77,23 @@
     <string name="analysis_panel_activity_evening_walk_duration">35 min</string>
     <string name="analysis_panel_activity_intensity_high">High Intensity</string>
     <string name="analysis_panel_activity_intensity_low">Low Intensity</string>
+    <string name="analysis_dashboard_today">Today • Fri, 20 Feb</string>
+    <string name="analysis_dashboard_notifications">Notifications</string>
+    <string name="analysis_dashboard_greeting_day">Good morning</string>
+    <string name="analysis_dashboard_greeting_night">Good evening</string>
+    <string name="analysis_dashboard_kcal_value">%1$,d kcal</string>
+    <string name="analysis_dashboard_intake_burned">Intake %1$,d • Burned %2$,d</string>
+    <string name="analysis_dashboard_goal_value">%1$,d goal</string>
+    <string name="analysis_dashboard_workout_value">45 min</string>
+    <string name="analysis_dashboard_workout_subtitle">Strength session</string>
+    <string name="analysis_dashboard_sleep">Sleep</string>
+    <string name="analysis_dashboard_sleep_value">7h 40m</string>
+    <string name="analysis_dashboard_sleep_subtitle">Recovery score 84%%</string>
 
     <!-- Body Tabs -->
+    <string name="tab_home">Home</string>
+    <string name="tab_add">Add</string>
+    <string name="tab_calendar">Calendar</string>
     <string name="tab_body">Body</string>
     <string name="tab_nutrition">Nutrition</string>
     <string name="tab_workout">Workout</string>
