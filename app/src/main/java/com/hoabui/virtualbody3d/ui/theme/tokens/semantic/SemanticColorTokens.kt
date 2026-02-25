@@ -64,7 +64,7 @@ fun lightSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens {
         textPrimary = primitive.neutral900,
         textSecondary = primitive.neutral600,
         textMuted = primitive.neutral600.copy(alpha = 0.7f),
-        error = primitive.rose400,
+        error = Color(0xFFEF4444),
         onPrimary = primitive.neutral0,
         onError = primitive.neutral0,
         surfaceBorder = borderSubtle,
@@ -85,7 +85,7 @@ fun lightSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens {
         dashboardFloatingNavBackground = surface,
         dashboardFloatingNavBorder = borderSubtle,
         calendarYearBackground = primarySoft.copy(alpha = 0.55f),
-        calendarSelectedBorder = Color(0xFFF9A8B8)
+        calendarSelectedBorder = primitive.rose500
     )
 }
 
@@ -108,7 +108,7 @@ fun darkSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens {
         textPrimary = primitive.neutral0,
         textSecondary = primitive.neutral200,
         textMuted = primitive.neutral200.copy(alpha = 0.7f),
-        error = primitive.rose400,
+        error = Color(0xFFEF4444),
         onPrimary = primitive.neutral0,
         onError = primitive.neutral0,
         surfaceBorder = borderSubtle,
@@ -129,6 +129,6 @@ fun darkSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens {
         dashboardFloatingNavBackground = surface,
         dashboardFloatingNavBorder = primitive.neutral0.copy(alpha = 0.14f),
         calendarYearBackground = primarySoft.copy(alpha = 0.55f),
-        calendarSelectedBorder = Color(0xFFE8A0B0)
+        calendarSelectedBorder = primitive.rose500
     )
 }

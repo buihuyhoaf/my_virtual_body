@@ -21,21 +21,21 @@ fun gymTypographyTokens(): SemanticTypographyTokens = SemanticTypographyTokens(
     material = Typography(
         displayLarge = TextStyle(
             fontFamily = InterFontFamily,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.SemiBold,
             fontSize = 30.sp,
             lineHeight = 34.sp,
             letterSpacing = (-0.3).sp
         ),
         displayMedium = TextStyle(
             fontFamily = InterFontFamily,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.SemiBold,
             fontSize = 26.sp,
             lineHeight = 32.sp,
             letterSpacing = (-0.2).sp
         ),
         displaySmall = TextStyle(
             fontFamily = InterFontFamily,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Medium,
             fontSize = 24.sp,
             lineHeight = 30.sp,
             letterSpacing = (-0.2).sp

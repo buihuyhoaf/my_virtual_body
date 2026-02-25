@@ -17,7 +17,7 @@ data class ElevationTokens(
         fun default(): ElevationTokens = ElevationTokens(
             level0 = 0.dp,
             level1 = 2.dp,
-            level2 = 8.dp
+            level2 = 4.dp
         )
     }
 }

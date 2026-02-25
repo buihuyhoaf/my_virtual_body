@@ -22,9 +22,9 @@ data class PrimitiveColorTokens(
 ) {
     companion object {
         fun default(): PrimitiveColorTokens = PrimitiveColorTokens(
-            rose500 = Color(0xFFE11D48),
-            rose400 = Color(0xFFF43F5E),
-            rose100 = Color(0xFFFFE4E6),
+            rose500 = Color(0xFFA5B4FC),
+            rose400 = Color(0xFF818CF8),
+            rose100 = Color(0xFFE0E7FF),
             neutral0 = Color(0xFFFFFFFF),
             neutral50 = Color(0xFFFAFAFB),
             neutral100 = Color(0xFFF3F4F6),
