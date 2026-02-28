@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- White cat logo for login branding. Use on brand primary (plum) background. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- Cat head -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M24,8 C18,8 14,14 14,20 C14,24 16,27 18,29 L18,32 C18,34 20,36 22,36 L26,36 C28,36 30,34 30,32 L30,29 C32,27 34,24 34,20 C34,14 30,8 24,8 Z" />
+    <!-- Left ear -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M18,8 L14,2 L20,10 Z" />
+    <!-- Right ear -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M30,8 L34,2 L28,10 Z" />
+    <!-- Left eye -->
+    <path
+        android:fillColor="#8E3B46"
+        android:pathData="M20,20 L22,22 L20,24 L18,22 Z" />
+    <!-- Right eye -->
+    <path
+        android:fillColor="#8E3B46"
+        android:pathData="M28,20 L30,22 L28,24 L26,22 Z" />
+    <!-- Nose -->
+    <path
+        android:fillColor="#8E3B46"
+        android:pathData="M24,26 L25,28 L24,29 L23,28 Z" />
+    <!-- Whiskers (optional, subtle) -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="0.5"
+        android:pathData="M14,24 L10,24"
+        android:fillColor="#00000000" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="0.5"
+        android:pathData="M34,24 L38,24"
+        android:fillColor="#00000000" />
+</vector>

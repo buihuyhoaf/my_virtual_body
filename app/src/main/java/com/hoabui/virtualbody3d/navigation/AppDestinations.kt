@@ -4,28 +4,50 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.hoabui.virtualbody3d.R
+
+object Routes {
+    const val ONBOARDING = "onboarding"
+    const val LOGIN = "login"
+    const val HOME = "home"
+    const val ADD = "add"
+    const val CALENDAR = "calendar"
+}
 
 sealed class AppDestination(
     val route: String,
     val labelResId: Int,
     val icon: ImageVector
 ) {
+    data object Onboarding : AppDestination(
+        route = Routes.ONBOARDING,
+        labelResId = R.string.app_name,
+        icon = Icons.Default.Info
+    )
+
+    data object Login : AppDestination(
+        route = Routes.LOGIN,
+        labelResId = R.string.login_sign_in,
+        icon = Icons.Default.Person
+    )
+
     data object Home : AppDestination(
-        route = "home",
+        route = Routes.HOME,
         labelResId = R.string.tab_home,
         icon = Icons.Default.Home
     )
 
     data object Add : AppDestination(
-        route = "add",
+        route = Routes.ADD,
         labelResId = R.string.tab_add,
         icon = Icons.Default.AddCircle
     )
 
     data object Calendar : AppDestination(
-        route = "calendar",
+        route = Routes.CALENDAR,
         labelResId = R.string.tab_calendar,
         icon = Icons.Default.CalendarMonth
     )
@@ -39,10 +61,5 @@ sealed class AppDestination(
             Calendar
         )
     }
-}
-
-object AuthDestination {
-    const val Onboarding: String = "onboarding"
-    const val Login: String = "login"
 }
 

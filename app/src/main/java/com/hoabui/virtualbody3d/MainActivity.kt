@@ -13,7 +13,6 @@ import androidx.compose.runtime.setValue
 import com.hoabui.virtualbody3d.core.utils.Constants
 import com.hoabui.virtualbody3d.navigation.AppDestination
 import com.hoabui.virtualbody3d.navigation.AppNavigationRoot
-import com.hoabui.virtualbody3d.navigation.AuthDestination
 import com.hoabui.virtualbody3d.ui.splash.SplashScreen
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -43,10 +42,9 @@ class MainActivity : ComponentActivity() {
                                 false
                             )
                         ) {
-                            // Onboarding done -> go to login screen
-                            AuthDestination.Login
+                            AppDestination.Login.route
                         } else {
-                            AuthDestination.Onboarding
+                            AppDestination.Onboarding.route
                         }
                 }
 

@@ -33,39 +33,39 @@ fun AppNavGraph(
         startDestination = startDestination,
         modifier = modifier
     ) {
-        composable(route = AuthDestination.Onboarding) {
+        composable(route = AppDestination.Onboarding.route) {
             OnboardingScreen(
                 onComplete = {
                     onOnboardingCompleted()
-                    navController.navigate(AuthDestination.Login) {
-                        popUpTo(AuthDestination.Onboarding) {
+                    navController.navigate(AppDestination.Login.route) {
+                        popUpTo(AppDestination.Onboarding.route) {
                             inclusive = true
                         }
                     }
                 }
             )
         }
-        composable(route = AuthDestination.Login) {
+        composable(route = AppDestination.Login.route) {
             LoginScreen(
                 onSignIn = { _, _ ->
                     navController.navigate(AppDestination.startDestination.route) {
-                        popUpTo(AuthDestination.Login) { inclusive = true }
+                        popUpTo(AppDestination.Login.route) { inclusive = true }
                     }
                 },
                 onForgotPassword = { /* TODO: handle forgot password navigation */ },
                 onSignUp = {
                     navController.navigate(AppDestination.startDestination.route) {
-                        popUpTo(AuthDestination.Login) { inclusive = true }
+                        popUpTo(AppDestination.Login.route) { inclusive = true }
                     }
                 },
                 onSignInWithGoogle = {
                     navController.navigate(AppDestination.startDestination.route) {
-                        popUpTo(AuthDestination.Login) { inclusive = true }
+                        popUpTo(AppDestination.Login.route) { inclusive = true }
                     }
                 },
                 onSignInWithApple = {
                     navController.navigate(AppDestination.startDestination.route) {
-                        popUpTo(AuthDestination.Login) { inclusive = true }
+                        popUpTo(AppDestination.Login.route) { inclusive = true }
                     }
                 }
             )
