@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">MyVirtualBody</string>
+    <string name="splash_app_name">Akane</string>
 
     <!-- Body Analysis Screen -->
     <string name="body_analysis">ANALYSIS</string>
@@ -98,4 +99,29 @@
     <string name="tab_nutrition">Nutrition</string>
     <string name="tab_workout">Workout</string>
     <string name="tab_progress">Progress</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_slide1_title">Your body, archived.</string>
+    <string name="onboarding_slide1_subtitle">A private space to document your physical journey with clarity and care.</string>
+    <string name="onboarding_slide2_title">Intelligent insights.</string>
+    <string name="onboarding_slide2_subtitle">Understand your proportions and posture through elegant 3D visualizations.</string>
+    <string name="onboarding_slide3_title">Awareness is progress.</string>
+    <string name="onboarding_slide3_subtitle">Observe subtle changes over time and build a deeper connection with yourself.</string>
+    <string name="onboarding_disclaimer">Not a medical device. This app does not provide medical advice.</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_start">Start</string>
+
+    <!-- Login -->
+    <string name="login_welcome_back">Welcome back</string>
+    <string name="login_email">Email</string>
+    <string name="login_email_placeholder">example@email.com</string>
+    <string name="login_password">Password</string>
+    <string name="login_password_placeholder">••••••••</string>
+    <string name="login_forgot_password">Forgot password?</string>
+    <string name="login_sign_in">Sign in</string>
+    <string name="login_or_continue_with">or continue with</string>
+    <string name="login_continue_google">Continue with Google</string>
+    <string name="login_continue_apple">Continue with Apple</string>
+    <string name="login_no_account">Don\'t have an account?</string>
+    <string name="login_sign_up">Sign up</string>
 </resources>

@@ -16,7 +16,7 @@ import com.hoabui.virtualbody3d.ui.theme.tokens.darkGymToken
 import com.hoabui.virtualbody3d.ui.theme.tokens.lightGymToken
 
 /**
- * Theme host for GymToken: Rose Social Calm. Provides Material3 and token access in one place.
+ * Theme host for GymToken: warm terracotta body-inspired. Provides Material3 and token access in one place.
  */
 @Composable
 fun GymTheme(
@@ -69,7 +69,7 @@ private fun com.hoabui.virtualbody3d.ui.theme.tokens.semantic.SemanticColorToken
             error = error,
             onError = onError,
             primaryContainer = primaryContainer,
-            onPrimaryContainer = textPrimary,
+            onPrimaryContainer = onPrimaryContainer,
             surfaceVariant = surfaceVariant,
             onSurfaceVariant = textSecondary,
             outline = outline
@@ -86,7 +86,7 @@ private fun com.hoabui.virtualbody3d.ui.theme.tokens.semantic.SemanticColorToken
             error = error,
             onError = onError,
             primaryContainer = primaryContainer,
-            onPrimaryContainer = textPrimary,
+            onPrimaryContainer = onPrimaryContainer,
             surfaceVariant = surfaceVariant,
             onSurfaceVariant = textSecondary,
             outline = outline

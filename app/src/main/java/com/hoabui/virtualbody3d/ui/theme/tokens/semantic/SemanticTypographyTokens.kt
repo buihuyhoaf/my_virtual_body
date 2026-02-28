@@ -8,8 +8,8 @@ import androidx.compose.ui.unit.sp
 import com.hoabui.virtualbody3d.ui.theme.font.InterFontFamily
 
 /**
- * Full typography scale for Rose Social Calm theme.
- * Uses Inter variable font; soft Instagram-like social vibe.
+ * Full typography scale for warm terracotta body-inspired theme.
+ * Uses Inter variable font.
  * Overrides entire Material3 Typography to eliminate fallbacks.
  */
 @Immutable

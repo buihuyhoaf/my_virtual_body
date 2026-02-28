@@ -5,7 +5,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * Elevation scale for Rose Social Calm theme.
+ * Elevation scale for warm terracotta body-inspired theme.
  */
 @Immutable
 data class ElevationTokens(

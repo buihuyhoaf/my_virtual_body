@@ -40,3 +40,9 @@ sealed class AppDestination(
         )
     }
 }
+
+object AuthDestination {
+    const val Onboarding: String = "onboarding"
+    const val Login: String = "login"
+}
+

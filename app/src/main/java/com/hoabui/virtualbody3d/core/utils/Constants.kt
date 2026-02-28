@@ -1,6 +1,9 @@
 package com.hoabui.virtualbody3d.core.utils
 
 object Constants {
+    const val PREFS_NAME = "virtual_body_prefs"
+    const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
+
     const val BODY_DEV_LOG_TAG = "BodyMorphDebug"
     const val BODY_DEV_MODE = true
     const val FILAMENT_MAX_BONES = 256

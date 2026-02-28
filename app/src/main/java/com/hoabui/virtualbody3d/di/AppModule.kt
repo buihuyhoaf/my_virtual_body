@@ -2,6 +2,7 @@ package com.hoabui.virtualbody3d.di
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.hoabui.virtualbody3d.core.utils.Constants
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,6 +21,6 @@ object AppModule {
     @Provides
     @Singleton
     fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
-        return context.getSharedPreferences("virtual_body_prefs", Context.MODE_PRIVATE)
+        return context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
     }
 }

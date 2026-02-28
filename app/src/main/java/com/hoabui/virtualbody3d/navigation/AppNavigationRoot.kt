@@ -6,11 +6,16 @@ import androidx.navigation.compose.rememberNavController
 import com.hoabui.virtualbody3d.ui.body.viewmodel.BodyViewModel
 
 @Composable
-fun AppNavigationRoot() {
+fun AppNavigationRoot(
+    startDestination: String,
+    onOnboardingCompleted: () -> Unit
+) {
     val navController = rememberNavController()
     val sharedViewModel: BodyViewModel = hiltViewModel()
     AppScaffoldLayout(
         navController = navController,
-        sharedViewModel = sharedViewModel
+        sharedViewModel = sharedViewModel,
+        startDestination = startDestination,
+        onOnboardingCompleted = onOnboardingCompleted
     )
 }

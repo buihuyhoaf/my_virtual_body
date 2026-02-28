@@ -15,20 +15,61 @@ import androidx.navigation.compose.composable
 import com.hoabui.virtualbody3d.ui.body.screen.BodyAnalysisRoute
 import com.hoabui.virtualbody3d.ui.body.viewmodel.BodyViewModel
 import com.hoabui.virtualbody3d.ui.calendar.screen.CalendarScreen
+import com.hoabui.virtualbody3d.ui.login.LoginScreen
+import com.hoabui.virtualbody3d.ui.onboarding.OnboardingScreen
 
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
     sharedViewModel: BodyViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    startDestination: String,
+    onOnboardingCompleted: () -> Unit
 ) {
     val screenState by sharedViewModel.screenState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
-        startDestination = AppDestination.startDestination.route,
+        startDestination = startDestination,
         modifier = modifier
     ) {
+        composable(route = AuthDestination.Onboarding) {
+            OnboardingScreen(
+                onComplete = {
+                    onOnboardingCompleted()
+                    navController.navigate(AuthDestination.Login) {
+                        popUpTo(AuthDestination.Onboarding) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
+        }
+        composable(route = AuthDestination.Login) {
+            LoginScreen(
+                onSignIn = { _, _ ->
+                    navController.navigate(AppDestination.startDestination.route) {
+                        popUpTo(AuthDestination.Login) { inclusive = true }
+                    }
+                },
+                onForgotPassword = { /* TODO: handle forgot password navigation */ },
+                onSignUp = {
+                    navController.navigate(AppDestination.startDestination.route) {
+                        popUpTo(AuthDestination.Login) { inclusive = true }
+                    }
+                },
+                onSignInWithGoogle = {
+                    navController.navigate(AppDestination.startDestination.route) {
+                        popUpTo(AuthDestination.Login) { inclusive = true }
+                    }
+                },
+                onSignInWithApple = {
+                    navController.navigate(AppDestination.startDestination.route) {
+                        popUpTo(AuthDestination.Login) { inclusive = true }
+                    }
+                }
+            )
+        }
         composable(route = AppDestination.Home.route) {
             BodyAnalysisRoute(viewModel = sharedViewModel)
         }
