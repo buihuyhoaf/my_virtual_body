@@ -11,11 +11,11 @@ import com.hoabui.virtualbody3d.ui.body.viewmodel.BodyViewModel
 
 @Composable
 fun AppScaffoldLayout(
+    modifier: Modifier = Modifier,
     navController: NavHostController,
     sharedViewModel: BodyViewModel,
     startDestination: String,
-    onOnboardingCompleted: () -> Unit,
-    modifier: Modifier = Modifier
+    onOnboardingCompleted: () -> Unit
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -35,9 +35,9 @@ fun AppScaffoldLayout(
         }
     ) { innerPadding ->
         AppNavGraph(
+            modifier = Modifier.padding(innerPadding),
             navController = navController,
             sharedViewModel = sharedViewModel,
-            modifier = Modifier.padding(innerPadding),
             startDestination = startDestination,
             onOnboardingCompleted = onOnboardingCompleted
         )

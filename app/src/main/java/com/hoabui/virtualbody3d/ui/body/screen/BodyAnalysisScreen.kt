@@ -68,19 +68,19 @@ fun BodyAnalysisRoute(
 ) {
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
     BodyAnalysisScreen(
+        modifier = Modifier.fillMaxSize(),
         uiState = screenState.uiState,
         dashboardUiState = screenState.dashboardUiState,
-        selectedDate = screenState.selectedDate ?: LocalDate.now(),
-        modifier = Modifier.fillMaxSize()
+        selectedDate = screenState.selectedDate ?: LocalDate.now()
     )
 }
 
 @Composable
 fun BodyAnalysisScreen(
+    modifier: Modifier = Modifier,
     uiState: BodyUiState,
     dashboardUiState: BodyDashboardUiState,
-    selectedDate: LocalDate,
-    modifier: Modifier = Modifier
+    selectedDate: LocalDate
 ) {
     val token = GymTheme.token
     val bodyScore = ((uiState.bmiScalePosition ?: 0.76f) * 100f).toInt().coerceIn(0, 100)
@@ -91,27 +91,27 @@ fun BodyAnalysisScreen(
             .padding(token.spacing.md)
     ) {
         BodyPreviewSection(
+            modifier = Modifier.weight(DashboardDefaults.heroSectionWeight),
             uiState = uiState,
-            bodyScore = bodyScore,
-            modifier = Modifier.weight(DashboardDefaults.heroSectionWeight)
+            bodyScore = bodyScore
         )
         DashboardPanel(
+            modifier = Modifier.weight(DashboardDefaults.dashboardSectionWeight),
             selectedDate = selectedDate,
             nutritionSummary = dashboardUiState.nutrition,
             meals = dashboardUiState.meals,
-            summaries = dashboardUiState.summaries,
-            modifier = Modifier.weight(DashboardDefaults.dashboardSectionWeight)
+            summaries = dashboardUiState.summaries
         )
     }
 }
 
 @Composable
 private fun DashboardPanel(
+    modifier: Modifier = Modifier,
     selectedDate: LocalDate,
     nutritionSummary: NutritionSummaryUiState,
     meals: List<MealUiState>,
-    summaries: List<SummaryCardUiState>,
-    modifier: Modifier = Modifier
+    summaries: List<SummaryCardUiState>
 ) {
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis
@@ -168,9 +168,9 @@ private fun DashboardPanel(
 
 @Composable
 private fun NutritionCard(
+    modifier: Modifier = Modifier,
     selectedDate: LocalDate,
-    summary: NutritionSummaryUiState,
-    modifier: Modifier = Modifier
+    summary: NutritionSummaryUiState
 ) {
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis
@@ -219,9 +219,9 @@ private fun NutritionCard(
                 )
             }
             CaloriesProgressRing(
+                modifier = Modifier.size(bodyToken.dashboardNutritionRingSize),
                 progress = progress,
-                centerLabel = stringResource(R.string.analysis_dashboard_goal_value, summary.goal),
-                modifier = Modifier.size(bodyToken.dashboardNutritionRingSize)
+                centerLabel = stringResource(R.string.analysis_dashboard_goal_value, summary.goal)
             )
         }
     }
@@ -229,8 +229,8 @@ private fun NutritionCard(
 
 @Composable
 private fun MealItem(
-    item: MealUiState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    item: MealUiState
 ) {
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis
@@ -274,9 +274,9 @@ private fun MealItem(
 
 @Composable
 private fun CaloriesProgressRing(
+    modifier: Modifier = Modifier,
     progress: Float,
-    centerLabel: String,
-    modifier: Modifier = Modifier
+    centerLabel: String
 ) {
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis
@@ -326,12 +326,12 @@ private fun SummaryGrid(
     ) {
         summaries.forEach { summary ->
             SummaryCard(
+                modifier = Modifier.weight(1f),
                 title = summary.type.toTitle(),
                 value = summary.value,
                 subtitle = summary.subtitle,
                 progress = summary.progress,
-                icon = summary.type.toIcon(),
-                modifier = Modifier.weight(1f)
+                icon = summary.type.toIcon()
             )
         }
     }
@@ -339,12 +339,12 @@ private fun SummaryGrid(
 
 @Composable
 private fun SummaryCard(
+    modifier: Modifier = Modifier,
     title: String,
     value: String,
     subtitle: String,
     progress: Float,
-    icon: ImageVector,
-    modifier: Modifier = Modifier
+    icon: ImageVector
 ) {
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis
@@ -397,9 +397,9 @@ private fun SummaryCard(
 
 @Composable
 private fun BodyPreviewSection(
+    modifier: Modifier = Modifier,
     uiState: BodyUiState,
-    bodyScore: Int,
-    modifier: Modifier = Modifier
+    bodyScore: Int
 ) {
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis

@@ -47,8 +47,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun OnboardingScreen(
-    onComplete: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onComplete: () -> Unit
 ) {
     val token = GymTheme.token
     val colors = token.colors

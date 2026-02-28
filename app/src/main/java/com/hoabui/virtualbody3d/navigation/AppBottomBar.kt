@@ -24,8 +24,8 @@ import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 @Composable
 fun AppBottomBar(
-    navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    navController: NavHostController
 ) {
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis

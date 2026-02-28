@@ -20,9 +20,9 @@ import com.hoabui.virtualbody3d.ui.onboarding.OnboardingScreen
 
 @Composable
 fun AppNavGraph(
+    modifier: Modifier = Modifier,
     navController: NavHostController,
     sharedViewModel: BodyViewModel,
-    modifier: Modifier = Modifier,
     startDestination: String,
     onOnboardingCompleted: () -> Unit
 ) {

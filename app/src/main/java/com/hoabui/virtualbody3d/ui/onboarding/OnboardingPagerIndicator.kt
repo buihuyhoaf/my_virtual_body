@@ -20,8 +20,8 @@ import com.hoabui.virtualbody3d.ui.theme.tokens.component.OnboardingTokens
  */
 @Composable
 fun OnboardingPagerIndicator(
-    pagerState: PagerState,
     modifier: Modifier = Modifier,
+    pagerState: PagerState,
     tokens: OnboardingTokens,
     selectedColor: Color,
     unselectedColor: Color

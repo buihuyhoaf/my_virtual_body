@@ -59,12 +59,12 @@ import kotlinx.coroutines.flow.filter
 
 @Composable
 fun CalendarScreen(
+    modifier: Modifier = Modifier,
     months: List<YearMonth>,
     selectedDate: LocalDate?,
     dailyItemsByDate: Map<LocalDate, List<DailyItem>>,
     onDateSelected: (LocalDate) -> Unit,
-    onLoadMoreMonths: () -> Unit,
-    modifier: Modifier = Modifier
+    onLoadMoreMonths: () -> Unit
 ) {
     val token = GymTheme.token
     val listState = rememberLazyListState()
@@ -192,9 +192,9 @@ fun CalendarScreen(
                             .background(token.colors.surfaceBorder)
                     )
                     CalendarDetailPanel(
+                        modifier = Modifier.fillMaxSize(),
                         selectedDate = selectedDate,
-                        dailyItems = selectedDate?.let { dailyItemsByDate[it] }.orEmpty(),
-                        modifier = Modifier.fillMaxSize()
+                        dailyItems = selectedDate?.let { dailyItemsByDate[it] }.orEmpty()
                     )
                 }
             }
@@ -247,12 +247,12 @@ private fun CalendarMonthSection(
                         )
                     } else {
                         CalendarDayCell(
+                            modifier = Modifier.weight(1f),
                             date = date,
                             isToday = date == today,
                             items = dailyItemsByDate[date].orEmpty(),
                             selected = date == selectedDate,
-                            onClick = { onDateSelected(date) },
-                            modifier = Modifier.weight(1f)
+                            onClick = { onDateSelected(date) }
                         )
                     }
                 }
@@ -263,12 +263,12 @@ private fun CalendarMonthSection(
 
 @Composable
 private fun CalendarDayCell(
+    modifier: Modifier = Modifier,
     date: LocalDate,
     isToday: Boolean,
     items: List<DailyItem>,
     selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onClick: () -> Unit
 ) {
     val token = GymTheme.token
     val thumbnail = items.firstOrNull()
@@ -338,9 +338,9 @@ private fun CalendarDayCell(
 
 @Composable
 private fun CalendarDetailPanel(
+    modifier: Modifier = Modifier,
     selectedDate: LocalDate?,
-    dailyItems: List<DailyItem>,
-    modifier: Modifier = Modifier
+    dailyItems: List<DailyItem>
 ) {
     val token = GymTheme.token
     val mealCount = dailyItems.count { it.type == DailyItemType.Meal }

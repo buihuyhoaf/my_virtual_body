@@ -33,8 +33,8 @@ import java.util.Locale
 
 @Composable
 fun AppTopBar(
-    onNotificationClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNotificationClick: () -> Unit
 ) {
     val token = GymTheme.token
     val now = LocalTime.now()

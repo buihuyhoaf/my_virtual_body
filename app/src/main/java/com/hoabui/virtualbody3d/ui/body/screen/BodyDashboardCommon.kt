@@ -27,9 +27,9 @@ import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 @Composable
 fun FloatingMetricChip(
+    modifier: Modifier = Modifier,
     icon: ImageVector,
-    value: String,
-    modifier: Modifier = Modifier
+    value: String
 ) {
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis
@@ -83,8 +83,8 @@ fun FloatingMetricChip(
 
 @Composable
 fun BodyScoreChip(
-    score: Int,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    score: Int
 ) {
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis

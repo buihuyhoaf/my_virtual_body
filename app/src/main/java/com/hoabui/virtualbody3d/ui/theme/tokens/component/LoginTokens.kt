@@ -2,7 +2,6 @@ package com.hoabui.virtualbody3d.ui.theme.tokens.component
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveRadiusTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveSpacingTokens
 
@@ -25,7 +24,7 @@ fun gymLoginTokens(
 ): LoginTokens = LoginTokens(
     inputCornerRadius = radius.md,
     ctaCornerRadius = radius.lg,
-    logoSize = 48.dp,
-    primaryButtonHeight = spacing.xl + spacing.md,
-    socialButtonHeight = spacing.lg + spacing.xs
+    logoSize = spacing.xxxl,
+    primaryButtonHeight = spacing.xxl,
+    socialButtonHeight = spacing.xxl
 )
