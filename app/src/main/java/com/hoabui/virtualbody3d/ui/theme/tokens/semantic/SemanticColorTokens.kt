@@ -47,7 +47,15 @@ data class SemanticColorTokens(
     val calendarYearBackground: Color,
     val calendarSelectedBorder: Color,
     val splashBackground: Color,
-    val splashCardBackground: Color
+    val splashCardBackground: Color,
+    val initialSetupProgressDotUnselected: Color,
+    val initialSetupSkipText: Color,
+    val initialSetupOptionBorder: Color,
+    val initialSetupOptionSelectedBg: Color,
+    val initialSetupStep4IconBg: Color,
+    val initialSetupStep4IconBorder: Color,
+    val initialSetupStep4DecorationBg: Color,
+    val initialSetupOptionUnselectedIcon: Color
 )
 
 fun lightSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens {
@@ -89,7 +97,15 @@ fun lightSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens {
         calendarYearBackground = primitive.primaryContainerLight,
         calendarSelectedBorder = primitive.primary,
         splashBackground = primitive.primary,
-        splashCardBackground = primitive.splashCard
+        splashCardBackground = primitive.splashCard,
+        initialSetupProgressDotUnselected = primitive.outlineLight,
+        initialSetupSkipText = primitive.textSecondaryLight,
+        initialSetupOptionBorder = primitive.outlineLight,
+        initialSetupOptionSelectedBg = primitive.primaryContainerLight,
+        initialSetupStep4IconBg = primitive.surfaceVariantLight,
+        initialSetupStep4IconBorder = primitive.outlineLight,
+        initialSetupStep4DecorationBg = primitive.surfaceVariantLight,
+        initialSetupOptionUnselectedIcon = primitive.textSecondaryLight
     )
 }
 
@@ -132,6 +148,14 @@ fun darkSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens {
         calendarYearBackground = primitive.primaryContainerDark,
         calendarSelectedBorder = primitive.primary,
         splashBackground = primitive.primary,
-        splashCardBackground = primitive.splashCard
+        splashCardBackground = primitive.splashCard,
+        initialSetupProgressDotUnselected = primitive.outlineDark,
+        initialSetupSkipText = primitive.textSecondaryDark,
+        initialSetupOptionBorder = primitive.outlineDark,
+        initialSetupOptionSelectedBg = primitive.primaryContainerDark,
+        initialSetupStep4IconBg = primitive.surfaceVariantDark,
+        initialSetupStep4IconBorder = primitive.outlineDark,
+        initialSetupStep4DecorationBg = primitive.surfaceVariantDark,
+        initialSetupOptionUnselectedIcon = primitive.textSecondaryDark
     )
 }

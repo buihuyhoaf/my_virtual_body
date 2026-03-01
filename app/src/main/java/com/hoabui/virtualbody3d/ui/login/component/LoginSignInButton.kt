@@ -1,5 +1,6 @@
 package com.hoabui.virtualbody3d.ui.login.component
 
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +22,7 @@ fun LoginSignInButton(
     token: GymToken,
     onClick: () -> Unit
 ) {
+    Log.d("LoginPerf", "LoginSignInButton recompose at ${System.currentTimeMillis()}")
     val colors = token.colors
     val typography = token.typography
     val loginTokens = token.login

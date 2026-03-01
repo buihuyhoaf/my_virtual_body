@@ -111,6 +111,53 @@
     <string name="onboarding_next">Next</string>
     <string name="onboarding_start">Start</string>
 
+    <!-- Initial Setup (post-login) -->
+    <string name="initial_setup_title">Initial Setup</string>
+    <string name="initial_setup_step">Step %1$d of 4</string>
+    <string name="initial_setup_step1_title">Why are you here?</string>
+    <string name="initial_setup_step1_option_observe">Observe changes</string>
+    <string name="initial_setup_step1_option_posture">Understand posture</string>
+    <string name="initial_setup_step1_option_awareness">Build awareness</string>
+    <string name="initial_setup_step1_option_exploring">Just exploring</string>
+    <string name="initial_setup_step2_title">What\'s your focus?</string>
+    <string name="initial_setup_step2_muscle">Muscle</string>
+    <string name="initial_setup_step2_fat_loss">Fat Loss</string>
+    <string name="initial_setup_step2_posture">Posture</string>
+    <string name="initial_setup_step2_health">Health</string>
+    <string name="initial_setup_step2_performance">Performance</string>
+    <string name="initial_setup_step2_observation">Observation</string>
+    <string name="initial_setup_step3_title">What would you like to focus on?</string>
+    <string name="initial_setup_step3_posture">Posture</string>
+    <string name="initial_setup_step3_upper_body">Upper Body</string>
+    <string name="initial_setup_step3_core">Core</string>
+    <string name="initial_setup_step3_lower_body">Lower Body</string>
+    <string name="initial_setup_step3_full_body">Full Body</string>
+    <string name="initial_setup_step4_title">Create your baseline</string>
+    <string name="initial_setup_step4_subtitle">This is your starting point. Begin your journey of self-discovery.</string>
+    <string name="initial_setup_skip">Skip</string>
+    <string name="initial_setup_continue">Continue</string>
+    <string name="initial_setup_begin">Begin</string>
+
+    <!-- Create Baseline (post-initial-setup) -->
+    <string name="create_baseline_title">Add Baseline</string>
+    <string name="create_baseline_hint">Frame your InBody result</string>
+    <string name="create_baseline_capture">Capture Photo</string>
+    <string name="create_baseline_upload">Upload from Gallery</string>
+    <string name="create_baseline_skip">Skip for now</string>
+    <string name="create_baseline_viewfinder">Viewfinder</string>
+    <string name="confirm_image_title">Confirm Image</string>
+    <string name="confirm_image_subtitle">Make sure the InBody result is clear and readable.</string>
+    <string name="confirm_image_cancel">Cancel</string>
+    <string name="confirm_image_upload">Upload</string>
+    <string name="review_extracted_title">Review extracted data</string>
+    <string name="review_confirm_baseline">Confirm baseline</string>
+    <string name="review_back">Back</string>
+    <string name="error_dialog_title">Error</string>
+    <string name="error_ok">OK</string>
+    <string name="loading_processing">Processing…</string>
+    <string name="loading_uploading">Uploading…</string>
+    <string name="loading_extracting">Extracting data…</string>
+
     <!-- Login -->
     <string name="login_welcome_back">Welcome back</string>
     <string name="login_email">Email</string>

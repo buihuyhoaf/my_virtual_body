@@ -3,6 +3,7 @@ package com.hoabui.virtualbody3d.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
@@ -12,6 +13,8 @@ import com.hoabui.virtualbody3d.R
 object Routes {
     const val ONBOARDING = "onboarding"
     const val LOGIN = "login"
+    const val INITIAL_SETUP = "initial_setup"
+    const val CREATE_BASELINE = "create_baseline"
     const val HOME = "home"
     const val ADD = "add"
     const val CALENDAR = "calendar"
@@ -32,6 +35,18 @@ sealed class AppDestination(
         route = Routes.LOGIN,
         labelResId = R.string.login_sign_in,
         icon = Icons.Default.Person
+    )
+
+    data object InitialSetup : AppDestination(
+        route = Routes.INITIAL_SETUP,
+        labelResId = R.string.initial_setup_title,
+        icon = Icons.Default.Info
+    )
+
+    data object CreateBaseline : AppDestination(
+        route = Routes.CREATE_BASELINE,
+        labelResId = R.string.create_baseline_title,
+        icon = Icons.Default.CameraAlt
     )
 
     data object Home : AppDestination(

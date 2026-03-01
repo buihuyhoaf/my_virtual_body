@@ -1,5 +1,6 @@
 package com.hoabui.virtualbody3d.ui.login.component
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -26,6 +27,7 @@ fun LoginLogo(
     modifier: Modifier = Modifier,
     token: GymToken
 ) {
+    Log.d("LoginPerf", "LoginLogo recompose at ${System.currentTimeMillis()}")
     val colors = token.colors
     val spacing = token.spacing
     val loginTokens = token.login

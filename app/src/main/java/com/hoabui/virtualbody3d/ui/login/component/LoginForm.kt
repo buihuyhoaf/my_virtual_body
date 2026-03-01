@@ -1,5 +1,6 @@
 package com.hoabui.virtualbody3d.ui.login.component
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -42,6 +44,7 @@ fun LoginForm(
     onTogglePasswordVisible: () -> Unit,
     onForgotPassword: () -> Unit
 ) {
+    Log.d("LoginPerf", "LoginForm recompose at ${System.currentTimeMillis()}")
     val colors = token.colors
     val spacing = token.spacing
     val typography = token.typography
@@ -64,7 +67,9 @@ fun LoginForm(
         OutlinedTextField(
             value = state.email,
             onValueChange = onEmailChanged,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { if (it.isFocused) Log.d("LoginPerf", "Email field FOCUSED at ${System.currentTimeMillis()}") },
             placeholder = {
                 Text(
                     stringResource(R.string.login_email_placeholder),
@@ -88,7 +93,9 @@ fun LoginForm(
         OutlinedTextField(
             value = state.password,
             onValueChange = onPasswordChanged,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { if (it.isFocused) Log.d("LoginPerf", "Password field FOCUSED at ${System.currentTimeMillis()}") },
             placeholder = {
                 Text(
                     stringResource(R.string.login_password_placeholder),

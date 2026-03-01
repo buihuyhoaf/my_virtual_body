@@ -1,5 +1,6 @@
 package com.hoabui.virtualbody3d.ui.theme
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.ui.graphics.Color
@@ -16,7 +17,9 @@ fun outlinedTextFieldColors(
     unfocusedLeadingIconColor: Color = colors.textSecondary,
     focusedTrailingIconColor: Color = colors.primary,
     unfocusedTrailingIconColor: Color = colors.textMuted
-) = OutlinedTextFieldDefaults.colors(
+): androidx.compose.material3.TextFieldColors {
+    Log.d("LoginPerf", "outlinedTextFieldColors() called at ${System.currentTimeMillis()}")
+    return OutlinedTextFieldDefaults.colors(
     focusedBorderColor = colors.primary,
     unfocusedBorderColor = colors.borderStrong,
     focusedContainerColor = Color.Transparent,
@@ -28,4 +31,5 @@ fun outlinedTextFieldColors(
     unfocusedLeadingIconColor = unfocusedLeadingIconColor,
     focusedTrailingIconColor = focusedTrailingIconColor,
     unfocusedTrailingIconColor = unfocusedTrailingIconColor
-)
+    )
+}

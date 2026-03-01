@@ -6,12 +6,14 @@ import androidx.compose.ui.unit.Dp
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.BodyAnalysisTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.ButtonTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.CalendarTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.CreateBaselineTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.CardTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.ControlPanelTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.LoginTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.OnboardingTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.SliderTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymCalendarTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymCreateBaselineTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymLoginTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymOnboardingTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymBodyAnalysisTokens
@@ -44,7 +46,8 @@ data class GymToken(
     val bodyAnalysis: BodyAnalysisTokens,
     val calendar: CalendarTokens,
     val onboarding: OnboardingTokens,
-    val login: LoginTokens
+    val login: LoginTokens,
+    val createBaseline: CreateBaselineTokens
 )
 
 @Immutable
@@ -101,7 +104,8 @@ fun darkGymToken(
     bodyAnalysis = gymBodyAnalysisTokens(primitiveSpacing),
     calendar = gymCalendarTokens(colors),
     onboarding = gymOnboardingTokens(primitiveSpacing),
-    login = gymLoginTokens(primitiveSpacing, primitiveRadius)
+    login = gymLoginTokens(primitiveSpacing, primitiveRadius),
+    createBaseline = gymCreateBaselineTokens(primitiveSpacing, primitiveColors)
     )
 }
 
@@ -139,6 +143,7 @@ fun lightGymToken(
     bodyAnalysis = gymBodyAnalysisTokens(primitiveSpacing),
     calendar = gymCalendarTokens(colors),
     onboarding = gymOnboardingTokens(primitiveSpacing),
-    login = gymLoginTokens(primitiveSpacing, primitiveRadius)
+    login = gymLoginTokens(primitiveSpacing, primitiveRadius),
+    createBaseline = gymCreateBaselineTokens(primitiveSpacing, primitiveColors)
     )
 }

@@ -1,5 +1,6 @@
 package com.hoabui.virtualbody3d.ui.login.component
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -22,6 +23,7 @@ fun LoginFooter(
     token: GymToken,
     onSignUp: () -> Unit
 ) {
+    Log.d("LoginPerf", "LoginFooter recompose at ${System.currentTimeMillis()}")
     val colors = token.colors
     val spacing = token.spacing
     val typography = token.typography

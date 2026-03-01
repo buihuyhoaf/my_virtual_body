@@ -15,6 +15,8 @@ import androidx.navigation.compose.composable
 import com.hoabui.virtualbody3d.ui.body.screen.BodyAnalysisRoute
 import com.hoabui.virtualbody3d.ui.body.viewmodel.BodyViewModel
 import com.hoabui.virtualbody3d.ui.calendar.screen.CalendarScreen
+import com.hoabui.virtualbody3d.ui.createbaseline.CreateBaselineScreen
+import com.hoabui.virtualbody3d.ui.initialsetup.InitialSetupScreen
 import com.hoabui.virtualbody3d.ui.login.LoginScreen
 import com.hoabui.virtualbody3d.ui.onboarding.OnboardingScreen
 
@@ -48,24 +50,42 @@ fun AppNavGraph(
         composable(route = AppDestination.Login.route) {
             LoginScreen(
                 onSignIn = { _, _ ->
-                    navController.navigate(AppDestination.startDestination.route) {
+                    navController.navigate(AppDestination.InitialSetup.route) {
                         popUpTo(AppDestination.Login.route) { inclusive = true }
                     }
                 },
                 onForgotPassword = { /* TODO: handle forgot password navigation */ },
                 onSignUp = {
-                    navController.navigate(AppDestination.startDestination.route) {
+                    navController.navigate(AppDestination.InitialSetup.route) {
                         popUpTo(AppDestination.Login.route) { inclusive = true }
                     }
                 },
                 onSignInWithGoogle = {
-                    navController.navigate(AppDestination.startDestination.route) {
+                    navController.navigate(AppDestination.InitialSetup.route) {
                         popUpTo(AppDestination.Login.route) { inclusive = true }
                     }
                 },
                 onSignInWithApple = {
-                    navController.navigate(AppDestination.startDestination.route) {
+                    navController.navigate(AppDestination.InitialSetup.route) {
                         popUpTo(AppDestination.Login.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable(route = AppDestination.InitialSetup.route) {
+            InitialSetupScreen(
+                onComplete = {
+                    navController.navigate(AppDestination.CreateBaseline.route) {
+                        popUpTo(AppDestination.InitialSetup.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable(route = AppDestination.CreateBaseline.route) {
+            CreateBaselineScreen(
+                onComplete = {
+                    navController.navigate(AppDestination.startDestination.route) {
+                        popUpTo(AppDestination.CreateBaseline.route) { inclusive = true }
                     }
                 }
             )

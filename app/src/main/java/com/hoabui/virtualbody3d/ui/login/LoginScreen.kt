@@ -1,11 +1,13 @@
 package com.hoabui.virtualbody3d.ui.login
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -37,6 +39,7 @@ fun LoginScreen(
     onSignInWithGoogle: () -> Unit = {},
     onSignInWithApple: () -> Unit = {},
 ) {
+    Log.d("LoginPerf", "LoginScreen recompose at ${System.currentTimeMillis()}")
     val token = GymTheme.token
     val colors = token.colors
     val spacing = token.spacing
@@ -59,6 +62,7 @@ fun LoginScreen(
             .fillMaxSize()
             .background(colors.surface)
             .windowInsetsPadding(WindowInsets.safeDrawing)
+            .windowInsetsPadding(WindowInsets.ime)
             .padding(horizontal = spacing.xl, vertical = spacing.lg)
     ) {
         LoginLogo(token = token)
