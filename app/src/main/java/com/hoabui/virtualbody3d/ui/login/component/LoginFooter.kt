@@ -42,7 +42,7 @@ fun LoginFooter(
         ) {
             Text(
                 text = stringResource(R.string.login_sign_up),
-                style = typography.headlineSmall,
+                style = typography.labelLarge,
                 color = colors.textBlack
             )
         }
