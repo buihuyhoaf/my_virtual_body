@@ -8,6 +8,7 @@ data class BodyScreenState(
     val uiState: BodyUiState = BodyUiState(),
     val dashboardUiState: BodyDashboardUiState = BodyDashboardUiState(),
     val selectedDate: LocalDate? = null,
+    val selectedRegion: BodyRegion? = null,
     val calendarMonths: List<YearMonth> = emptyList(),
     val dailyItemsByDate: Map<LocalDate, List<DailyItem>> = emptyMap()
 )

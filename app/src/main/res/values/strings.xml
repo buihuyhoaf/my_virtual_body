@@ -90,6 +90,14 @@
     <string name="analysis_dashboard_sleep">Sleep</string>
     <string name="analysis_dashboard_sleep_value">7h 40m</string>
     <string name="analysis_dashboard_sleep_subtitle">Recovery score 84%%</string>
+    <string name="analysis_view_detailed_analysis">View detailed analysis</string>
+
+    <!-- Body regions (Home screen region row) -->
+    <string name="body_region_upper_body">Upper Body</string>
+    <string name="body_region_core">Core</string>
+    <string name="body_region_glutes">Glutes</string>
+    <string name="body_region_thighs">Thighs</string>
+    <string name="body_region_arms">Arms</string>
 
     <!-- Body Tabs -->
     <string name="tab_home">Home</string>

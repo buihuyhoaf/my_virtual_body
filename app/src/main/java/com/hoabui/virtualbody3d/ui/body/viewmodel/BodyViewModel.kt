@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.domain.usecase.GetBodyDashboardDataUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetBodyMetricsUseCase
+import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
 import com.hoabui.virtualbody3d.ui.body.state.BodyScreenState
 import com.hoabui.virtualbody3d.ui.calendar.state.DailyItem
 import com.hoabui.virtualbody3d.ui.calendar.state.DailyItemType
@@ -38,6 +39,10 @@ class BodyViewModel @Inject constructor(
 
     fun onDateSelected(date: LocalDate) {
         _screenState.value = _screenState.value.copy(selectedDate = date)
+    }
+
+    fun onRegionSelected(region: BodyRegion) {
+        _screenState.value = _screenState.value.copy(selectedRegion = region)
     }
 
     fun loadMoreCalendarMonths() {

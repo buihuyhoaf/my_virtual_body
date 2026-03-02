@@ -49,7 +49,21 @@ data class BodyAnalysisTokens(
     val dashboardScrollContentBottomSpacing: Dp,
     val dashboardFloatingNavHorizontalPadding: Dp,
     val dashboardFloatingNavVerticalPadding: Dp,
-    val dashboardFloatingNavBottomPadding: Dp
+    val dashboardFloatingNavBottomPadding: Dp,
+    val metricChipMinWidth: Dp,
+    val metricChipIconContainerSize: Dp,
+    val metricChipIconSize: Dp,
+    val scoreChipMinWidth: Dp,
+    val scoreChipProminentMinWidth: Dp,
+    val scoreChipProgressSize: Dp,
+    val scoreChipProminentProgressSize: Dp,
+    val scoreChipInnerSize: Dp,
+    val scoreChipProminentInnerSize: Dp,
+    val scoreChipStrokeWidth: Dp,
+    val scoreChipProminentStrokeWidth: Dp,
+    val bodyRegionItemWidth: Dp,
+    val bodyRegionItemHeight: Dp,
+    val bodyRegionPlaceholderSize: Dp
 )
 
 fun gymBodyAnalysisTokens(spacing: PrimitiveSpacingTokens): BodyAnalysisTokens = BodyAnalysisTokens(
@@ -91,5 +105,19 @@ fun gymBodyAnalysisTokens(spacing: PrimitiveSpacingTokens): BodyAnalysisTokens =
     dashboardScrollContentBottomSpacing = 88.dp,
     dashboardFloatingNavHorizontalPadding = spacing.md,
     dashboardFloatingNavVerticalPadding = spacing.xs,
-    dashboardFloatingNavBottomPadding = spacing.md
+    dashboardFloatingNavBottomPadding = spacing.md,
+    metricChipMinWidth = 92.dp,
+    metricChipIconContainerSize = 22.dp,
+    metricChipIconSize = 13.dp,
+    scoreChipMinWidth = 92.dp,
+    scoreChipProminentMinWidth = 108.dp,
+    scoreChipProgressSize = 22.dp,
+    scoreChipProminentProgressSize = 28.dp,
+    scoreChipInnerSize = 12.dp,
+    scoreChipProminentInnerSize = 14.dp,
+    scoreChipStrokeWidth = 4.dp,
+    scoreChipProminentStrokeWidth = 5.dp,
+    bodyRegionItemWidth = 80.dp,
+    bodyRegionItemHeight = 88.dp,
+    bodyRegionPlaceholderSize = 40.dp
 )

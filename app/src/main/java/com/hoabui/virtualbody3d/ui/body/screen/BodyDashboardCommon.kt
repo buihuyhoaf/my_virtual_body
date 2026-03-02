@@ -22,7 +22,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 @Composable
@@ -35,7 +34,7 @@ fun FloatingMetricChip(
     val bodyToken = token.bodyAnalysis
     val chipShape = RoundedCornerShape(token.radius.lg)
     Surface(
-        modifier = modifier.widthIn(min = 92.dp),
+        modifier = modifier.widthIn(min = bodyToken.metricChipMinWidth),
         shape = chipShape,
         color = Color.Transparent,
         border = BorderStroke(bodyToken.topBarBorderWidth, token.colors.surfaceBorder),
@@ -51,14 +50,14 @@ fun FloatingMetricChip(
                 )
                 .padding(
                     horizontal = token.spacing.xs,
-                    vertical = bodyToken.bottomBarSelectedVerticalPadding + token.spacing.xxs * 0.5f
+                    vertical = bodyToken.bottomBarSelectedVerticalPadding
                 ),
-            horizontalArrangement = Arrangement.spacedBy(token.spacing.xxs + token.spacing.xxs * 0.5f),
+            horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(22.dp)
+                    .size(bodyToken.metricChipIconContainerSize)
                     .background(
                         color = token.colors.primarySoft,
                         shape = chipShape
@@ -69,7 +68,7 @@ fun FloatingMetricChip(
                     imageVector = icon,
                     contentDescription = null,
                     tint = token.colors.primary,
-                    modifier = Modifier.size(13.dp)
+                    modifier = Modifier.size(bodyToken.metricChipIconSize)
                 )
             }
             Text(
@@ -84,15 +83,19 @@ fun FloatingMetricChip(
 @Composable
 fun BodyScoreChip(
     modifier: Modifier = Modifier,
-    score: Int
+    score: Int,
+    prominent: Boolean = false
 ) {
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis
     val chipShape = RoundedCornerShape(token.radius.lg)
     val progressShape = RoundedCornerShape(token.radius.sm)
     val clamped = score.coerceIn(0, 100)
+    val textStyle = if (prominent) MaterialTheme.typography.titleMedium else MaterialTheme.typography.labelLarge
     Surface(
-        modifier = modifier.widthIn(min = 92.dp),
+        modifier = modifier.widthIn(
+            min = if (prominent) bodyToken.scoreChipProminentMinWidth else bodyToken.scoreChipMinWidth
+        ),
         shape = chipShape,
         color = Color.Transparent,
         border = BorderStroke(bodyToken.topBarBorderWidth, token.colors.surfaceBorder),
@@ -107,31 +110,43 @@ fun BodyScoreChip(
                     shape = chipShape
                 )
                 .padding(
-                    horizontal = token.spacing.xs,
-                    vertical = bodyToken.bottomBarSelectedVerticalPadding + token.spacing.xxs * 0.5f
+                    horizontal = if (prominent) token.spacing.md else token.spacing.xs,
+                    vertical = bodyToken.bottomBarSelectedVerticalPadding
                 ),
-            horizontalArrangement = Arrangement.spacedBy(token.spacing.xxs + token.spacing.xxs * 0.5f),
+            horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(
                     progress = { clamped / 100f },
-                    modifier = Modifier.size(22.dp),
-                    strokeWidth = 4.dp,
+                    modifier = Modifier.size(
+                        if (prominent) bodyToken.scoreChipProminentProgressSize else bodyToken.scoreChipProgressSize
+                    ),
+                    strokeWidth = if (prominent) {
+                        bodyToken.scoreChipProminentStrokeWidth
+                    } else {
+                        bodyToken.scoreChipStrokeWidth
+                    },
                     color = token.colors.primary,
                     trackColor = token.colors.outlineSoft,
                     strokeCap = StrokeCap.Round
                 )
                 Box(
                     modifier = Modifier
-                        .size(12.dp)
+                        .size(
+                            if (prominent) {
+                                bodyToken.scoreChipProminentInnerSize
+                            } else {
+                                bodyToken.scoreChipInnerSize
+                            }
+                        )
                         .background(token.colors.primarySoft, progressShape)
                 )
             }
             Text(
                 text = clamped.toString(),
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.ExtraBold,
+                style = textStyle,
+                fontWeight = FontWeight.Bold,
                 color = token.colors.primary
             )
         }

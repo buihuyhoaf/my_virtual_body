@@ -38,6 +38,7 @@ import io.github.sceneview.rememberModelLoader
 import io.github.sceneview.rememberRenderer
 import io.github.sceneview.rememberScene
 import io.github.sceneview.rememberView
+import com.google.android.filament.ColorGrading
 import com.google.android.filament.Skybox
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -79,6 +80,12 @@ fun BodyModelPreview(
     val environment = rememberEnvironment(environmentLoader) {
         SceneView.createEnvironment(environmentLoader, isOpaque = false)
     }
+    val colorGrading = remember(engine) {
+        ColorGrading.Builder()
+            .toneMapping(ColorGrading.ToneMapping.LINEAR)
+            .exposure(1.2f)
+            .build(engine)
+    }
     Box(
         modifier = modifier.fillMaxSize()
     ) {
@@ -105,6 +112,7 @@ fun BodyModelPreview(
                     sceneView.skybox = Skybox.Builder()
                         .color(1f, 1f, 1f, 1f)
                         .build(engine)
+                    view.setColorGrading(colorGrading)
                     sceneView.setOnTouchListener(object : View.OnTouchListener {
                         private var lastX = 0f
 

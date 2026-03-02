@@ -14,4 +14,10 @@ object Constants {
     const val BELLY_FAT_MORPH_INDEX = 0
     const val BELLY_FAT_MORPH_NAME = "bell_fat"
     const val TOTAL_INITIAL_SETUP_STEPS = 4
+
+    // Body Analysis / Home screen constants
+    const val BODY_ANALYSIS_MAX_MEALS_DISPLAYED: Int = 3
+    const val BODY_ANALYSIS_PROGRESS_RING_START_ANGLE: Float = -90f
+    const val BODY_ANALYSIS_PROGRESS_RING_SWEEP_ANGLE: Float = 360f
+    const val BODY_ANALYSIS_MEAL_NAME_MAX_LINES: Int = 2
 }
