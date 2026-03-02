@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -15,7 +16,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -28,13 +32,14 @@ import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.createbaseline.component.CreateBaselineActionsSection
 import com.hoabui.virtualbody3d.ui.createbaseline.component.CreateBaselineLoadingOverlay
 import com.hoabui.virtualbody3d.ui.createbaseline.component.CreateBaselinePreviewDialog
-import com.hoabui.virtualbody3d.ui.createbaseline.component.CreateBaselineReviewDialog
+import com.hoabui.virtualbody3d.ui.createbaseline.component.CreateBaselineReviewBottomSheet
 import com.hoabui.virtualbody3d.ui.createbaseline.component.CreateBaselineViewfinderSection
 import com.hoabui.virtualbody3d.ui.createbaseline.viewmodel.CreateBaselineEvent
 import com.hoabui.virtualbody3d.ui.createbaseline.viewmodel.CreateBaselineUiState
 import com.hoabui.virtualbody3d.ui.createbaseline.viewmodel.CreateBaselineViewModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateBaselineScreen(
     modifier: Modifier = Modifier,
@@ -42,7 +47,9 @@ fun CreateBaselineScreen(
     viewModel: CreateBaselineViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val reviewState by viewModel.reviewState.collectAsStateWithLifecycle()
     val captureTrigger by viewModel.captureTrigger.collectAsStateWithLifecycle(initialValue = 0)
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val token = GymTheme.token
     val colors = token.colors
     val spacing = token.spacing
@@ -120,11 +127,22 @@ fun CreateBaselineScreen(
                 onCancel = viewModel::onPreviewCancel,
                 onUpload = { viewModel.onConfirmUpload(s.file) }
             )
-            is CreateBaselineUiState.ReviewExtracted -> CreateBaselineReviewDialog(
-                data = s.data,
-                onConfirm = viewModel::onConfirmBaseline,
-                onDismiss = viewModel::onReviewDismiss
-            )
+            is CreateBaselineUiState.ReviewExtracted -> {
+                if (reviewState != null) {
+                    ModalBottomSheet(
+                        onDismissRequest = viewModel::onReviewDismiss,
+                        sheetState = sheetState
+                    ) {
+                        CreateBaselineReviewBottomSheet(
+                            reviewState = reviewState!!,
+                            onUpdateField = viewModel::updateReviewField,
+                            onConfirm = viewModel::onConfirmBaseline,
+                            onRetake = viewModel::onReviewDismiss,
+                            modifier = Modifier.fillMaxHeight(0.9f)
+                        )
+                    }
+                }
+            }
             is CreateBaselineUiState.Error -> CreateBaselineErrorSnackbarOrDialog(
                 message = s.message,
                 onDismiss = viewModel::onErrorDismiss

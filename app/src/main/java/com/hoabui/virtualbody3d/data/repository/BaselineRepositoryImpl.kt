@@ -21,12 +21,21 @@ class BaselineRepositoryImpl @Inject constructor() : BaselineRepository {
         delay(SIMULATED_OCR_MS)
         if (!file.exists()) throw IllegalStateException("File no longer exists")
         ExtractedData(
-            weight = "72.5 kg",
-            bodyFatPercent = "18.2%",
-            muscleMass = "32.1 kg",
+            weight = "72.5",
+            bodyFatPercent = "18.2",
+            muscleMass = "32.1",
             bmi = "22.4",
+            bodyFatMass = "13.2",
+            fatFreeMass = "59.3",
+            bmr = "1680",
+            visceralFatLevel = "5",
             rawLines = listOf("Weight: 72.5 kg", "Body fat: 18.2%", "Muscle: 32.1 kg", "BMI: 22.4")
         )
+    }
+
+    override suspend fun saveBaseline(data: ExtractedData) = withContext(Dispatchers.IO) {
+        delay(500) // Simulate persist
+        // TODO: persist to local DB or API
     }
 
     companion object {

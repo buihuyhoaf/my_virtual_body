@@ -20,4 +20,10 @@ interface BaselineRepository {
      * @throws Exception on extraction failure
      */
     suspend fun extractData(file: File): ExtractedData
+
+    /**
+     * Saves the confirmed baseline data (e.g. to local DB or API).
+     * @throws Exception on save failure
+     */
+    suspend fun saveBaseline(data: ExtractedData)
 }

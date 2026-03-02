@@ -38,6 +38,7 @@ import io.github.sceneview.rememberModelLoader
 import io.github.sceneview.rememberRenderer
 import io.github.sceneview.rememberScene
 import io.github.sceneview.rememberView
+import com.google.android.filament.Skybox
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -101,6 +102,9 @@ fun BodyModelPreview(
                     sharedLifecycle = lifecycle
                 ).also { sceneView ->
                     sceneView.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                    sceneView.skybox = Skybox.Builder()
+                        .color(1f, 1f, 1f, 1f)
+                        .build(engine)
                     sceneView.setOnTouchListener(object : View.OnTouchListener {
                         private var lastX = 0f
 

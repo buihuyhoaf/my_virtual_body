@@ -9,5 +9,9 @@ data class ExtractedData(
     val bodyFatPercent: String,
     val muscleMass: String,
     val bmi: String,
+    val bodyFatMass: String = "",
+    val fatFreeMass: String = "",
+    val bmr: String = "",
+    val visceralFatLevel: String = "",
     val rawLines: List<String> = emptyList()
 )
