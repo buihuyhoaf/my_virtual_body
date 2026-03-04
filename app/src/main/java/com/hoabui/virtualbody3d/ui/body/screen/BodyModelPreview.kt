@@ -29,12 +29,12 @@ import io.github.sceneview.math.Position
 import io.github.sceneview.math.Rotation
 import io.github.sceneview.node.ModelNode
 import io.github.sceneview.rememberCameraNode
-import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberEnvironment
 import io.github.sceneview.rememberEnvironmentLoader
 import io.github.sceneview.rememberMainLightNode
 import io.github.sceneview.rememberMaterialLoader
 import io.github.sceneview.rememberModelLoader
+import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberRenderer
 import io.github.sceneview.rememberScene
 import io.github.sceneview.rememberView
@@ -49,6 +49,14 @@ import java.nio.charset.Charset
 import kotlin.math.max
 import kotlin.math.sqrt
 import kotlin.math.tan
+import java.util.concurrent.ConcurrentHashMap
+
+/** Cache for GLB metadata (bounds + maxJointCount) by asset path. Model is static so parse once per path. */
+private object GlbMetadataCache {
+    private val cache = ConcurrentHashMap<String, GlbMetadata>()
+    fun getOrPut(context: android.content.Context, path: String, parse: (android.content.Context, String) -> GlbMetadata): GlbMetadata =
+        cache.getOrPut(path) { parse(context, path) }
+}
 
 @Composable
 fun BodyModelPreview(
@@ -108,15 +116,11 @@ fun BodyModelPreview(
                     sharedActivity = context as? androidx.activity.ComponentActivity,
                     sharedLifecycle = lifecycle
                 ).also { sceneView ->
-                    sceneView.setBackgroundColor(android.graphics.Color.TRANSPARENT)
-                    sceneView.skybox = Skybox.Builder()
-                        .color(1f, 1f, 1f, 1f)
-                        .build(engine)
                     view.setColorGrading(colorGrading)
                     sceneView.setOnTouchListener(object : View.OnTouchListener {
                         private var lastX = 0f
 
-                        override fun onTouch(v: android.view.View?, event: MotionEvent): Boolean {
+                        override fun onTouch(v: View?, event: MotionEvent): Boolean {
                             when (event.actionMasked) {
                                 MotionEvent.ACTION_DOWN -> {
                                     lastX = event.x
@@ -168,25 +172,26 @@ fun BodyModelPreview(
         if (modelNode != null) return@LaunchedEffect
 
         isLoading = true
-        val glbBounds = withContext(Dispatchers.IO) {
-            parseGlbSceneBounds(context, BODY_MODEL_ASSET_PATH)
+        val metadata = withContext(Dispatchers.IO) {
+            GlbMetadataCache.getOrPut(context, BODY_MODEL_ASSET_PATH, ::parseGlbMetadata)
         }
+        val glbBounds = metadata.bounds
 
-        runCatching {
-            val maxBonesInModel = withContext(Dispatchers.IO) {
-                readMaxJointCountFromGlb(context, BODY_MODEL_ASSET_PATH)
-            }
+        val instance = runCatching {
+            val maxBonesInModel = metadata.maxJointCount
             if (maxBonesInModel != null && maxBonesInModel > FILAMENT_MAX_BONES) {
                 throw IllegalStateException(
                     "Model has $maxBonesInModel bones (> $FILAMENT_MAX_BONES). " +
                         "Please reduce rig complexity or test on a higher-end renderer."
                 )
             }
-            withContext(Dispatchers.Main.immediate) {
-                modelLoader.createModelInstance(BODY_MODEL_ASSET_PATH)
+            withContext(Dispatchers.IO) {
+                modelLoader.loadModelInstance(BODY_MODEL_ASSET_PATH)
             }
-        }.fold(
-            onSuccess = { instance ->
+        }.getOrNull()
+
+        withContext(Dispatchers.Main.immediate) {
+            if (instance != null) {
                 val node = ModelNode(
                     modelInstance = instance,
                     autoAnimate = false,
@@ -249,18 +254,27 @@ fun BodyModelPreview(
 
                 modelNode = node
                 sceneView.addChildNode(node)
-            },
-            onFailure = { }
-        )
-        isLoading = false
+            }
+            isLoading = false
+        }
     }
 }
 
-private fun parseGlbSceneBounds(context: android.content.Context, assetPath: String): GlbSceneBounds? {
-    val data = runCatching { context.assets.open(assetPath).use { it.readBytes() } }.getOrNull() ?: return null
-    if (data.size < 20) return null
+private data class GlbMetadata(
+    val bounds: GlbSceneBounds?,
+    val maxJointCount: Int?
+)
+
+/**
+ * Reads the GLB asset once and parses both scene bounds and max joint count from the JSON chunk.
+ * Avoids reading the file twice (previously parseGlbSceneBounds + readMaxJointCountFromGlb).
+ */
+private fun parseGlbMetadata(context: android.content.Context, assetPath: String): GlbMetadata {
+    val data = runCatching { context.assets.open(assetPath).use { it.readBytes() } }.getOrNull()
+        ?: return GlbMetadata(bounds = null, maxJointCount = null)
+    if (data.size < 20) return GlbMetadata(bounds = null, maxJointCount = null)
     val header = ByteBuffer.wrap(data, 0, 12).order(ByteOrder.LITTLE_ENDIAN)
-    if (header.int != 0x46546C67) return null
+    if (header.int != 0x46546C67) return GlbMetadata(bounds = null, maxJointCount = null)
     var offset = 12
     while (offset + 8 <= data.size) {
         val chunkHeader = ByteBuffer.wrap(data, offset, 8).order(ByteOrder.LITTLE_ENDIAN)
@@ -273,7 +287,7 @@ private fun parseGlbSceneBounds(context: android.content.Context, assetPath: Str
             continue
         }
         val jsonText = String(data, offset, chunkLength, Charset.forName("UTF-8"))
-        val root = runCatching { JSONObject(jsonText) }.getOrNull() ?: return null
+        val root = runCatching { JSONObject(jsonText) }.getOrNull() ?: break
         val accessors = root.optJSONArray("accessors") ?: break
         val meshes = root.optJSONArray("meshes") ?: break
         var minX = Float.POSITIVE_INFINITY
@@ -310,46 +324,18 @@ private fun parseGlbSceneBounds(context: android.content.Context, assetPath: Str
                 if (posIndex in 0 until accessors.length()) mergeAccessor(posIndex)
             }
         }
-        if (minX == Float.POSITIVE_INFINITY) return null
-        return GlbSceneBounds(minX, minY, minZ, maxX, maxY, maxZ)
-    }
-    return null
-}
-
-private fun readMaxJointCountFromGlb(context: android.content.Context, assetPath: String): Int? {
-    val data = runCatching { context.assets.open(assetPath).use { it.readBytes() } }.getOrNull()
-        ?: return null
-    if (data.size < 20) return null
-
-    val header = ByteBuffer.wrap(data, 0, 12).order(ByteOrder.LITTLE_ENDIAN)
-    val magic = header.int
-    if (magic != 0x46546C67) return null
-
-    var offset = 12
-    while (offset + 8 <= data.size) {
-        val chunkHeader = ByteBuffer.wrap(data, offset, 8).order(ByteOrder.LITTLE_ENDIAN)
-        val chunkLength = chunkHeader.int
-        val chunkType = chunkHeader.int
-        offset += 8
-
-        if (chunkLength < 0 || offset + chunkLength > data.size) return null
-        if (chunkType == 0x4E4F534A) {
-            val jsonText = String(data, offset, chunkLength, Charset.forName("UTF-8"))
-            val root = runCatching { JSONObject(jsonText) }.getOrNull() ?: return null
-            val skins = root.optJSONArray("skins") ?: return 0
-
-            var maxJointCount = 0
+        val bounds = if (minX == Float.POSITIVE_INFINITY) null
+        else GlbSceneBounds(minX, minY, minZ, maxX, maxY, maxZ)
+        var maxJointCount = 0
+        val skins = root.optJSONArray("skins")
+        if (skins != null) {
             for (i in 0 until skins.length()) {
                 val skin = skins.optJSONObject(i) ?: continue
                 val joints = skin.optJSONArray("joints") ?: continue
-                if (joints.length() > maxJointCount) {
-                    maxJointCount = joints.length()
-                }
+                if (joints.length() > maxJointCount) maxJointCount = joints.length()
             }
-            return maxJointCount
         }
-
-        offset += chunkLength
+        return GlbMetadata(bounds = bounds, maxJointCount = if (maxJointCount > 0) maxJointCount else null)
     }
-    return null
+    return GlbMetadata(bounds = null, maxJointCount = null)
 }
