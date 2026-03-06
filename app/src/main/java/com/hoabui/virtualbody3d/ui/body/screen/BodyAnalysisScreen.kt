@@ -1,5 +1,6 @@
 package com.hoabui.virtualbody3d.ui.body.screen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,9 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocalDining
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,13 +23,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.body.components.DashboardPanel
 import com.hoabui.virtualbody3d.ui.body.components.HeroSection
-import com.hoabui.virtualbody3d.ui.body.screen.BodyModelPreview
 import com.hoabui.virtualbody3d.ui.body.state.BodyDashboardUiState
 import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
 import com.hoabui.virtualbody3d.ui.body.state.BodyUiState
@@ -154,10 +153,13 @@ private fun BodyRegionItem(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                BodyModelPreview(
+                Image(
                     modifier = Modifier
                         .fillMaxSize()
-                        .clip(RoundedCornerShape(token.radius.md))
+                        .clip(RoundedCornerShape(token.radius.md)),
+                    painter = painterResource(id = R.drawable.muscles),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
                 )
             }
             Text(

@@ -18,45 +18,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.google.android.filament.ColorGrading
 import com.hoabui.virtualbody3d.core.utils.Constants.BODY_DEV_LOG_TAG
 import com.hoabui.virtualbody3d.core.utils.Constants.BODY_DEV_MODE
 import com.hoabui.virtualbody3d.core.utils.Constants.BODY_MODEL_ASSET_PATH
 import com.hoabui.virtualbody3d.core.utils.Constants.FILAMENT_MAX_BONES
-import com.hoabui.virtualbody3d.ui.body.state.GlbSceneBounds
-import com.hoabui.virtualbody3d.ui.theme.GymTheme
+import com.hoabui.virtualbody3d.ui.body.GlbMetadataCache
+import com.hoabui.virtualbody3d.ui.body.parseGlbMetadata
+import com.hoabui.virtualbody3d.ui.body.provider.LocalBodyModelProvider
 import io.github.sceneview.SceneView
 import io.github.sceneview.math.Position
 import io.github.sceneview.math.Rotation
 import io.github.sceneview.node.ModelNode
 import io.github.sceneview.rememberCameraNode
+import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberEnvironment
 import io.github.sceneview.rememberEnvironmentLoader
 import io.github.sceneview.rememberMainLightNode
 import io.github.sceneview.rememberMaterialLoader
 import io.github.sceneview.rememberModelLoader
-import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberRenderer
 import io.github.sceneview.rememberScene
 import io.github.sceneview.rememberView
-import com.google.android.filament.ColorGrading
-import com.google.android.filament.Skybox
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.nio.charset.Charset
 import kotlin.math.max
 import kotlin.math.sqrt
 import kotlin.math.tan
-import java.util.concurrent.ConcurrentHashMap
-
-/** Cache for GLB metadata (bounds + maxJointCount) by asset path. Model is static so parse once per path. */
-private object GlbMetadataCache {
-    private val cache = ConcurrentHashMap<String, GlbMetadata>()
-    fun getOrPut(context: android.content.Context, path: String, parse: (android.content.Context, String) -> GlbMetadata): GlbMetadata =
-        cache.getOrPut(path) { parse(context, path) }
-}
 
 @Composable
 fun BodyModelPreview(
@@ -64,6 +52,7 @@ fun BodyModelPreview(
 ) {
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val provider = LocalBodyModelProvider.current
 
     var isLoading by remember { mutableStateOf(true) }
     var modelNode by remember { mutableStateOf<ModelNode?>(null) }
@@ -72,10 +61,17 @@ fun BodyModelPreview(
     var orbitHomePosition by remember { mutableStateOf(Position(x = 0f, y = 0f, z = 4f)) }
     var orbitTargetPosition by remember { mutableStateOf(Position(x = 0f, y = 0f, z = 0f)) }
 
-    val engine = rememberEngine()
-    val modelLoader = rememberModelLoader(engine)
-    val materialLoader = rememberMaterialLoader(engine)
-    val environmentLoader = rememberEnvironmentLoader(engine)
+    val localEngine = rememberEngine()
+    val localModelLoader = rememberModelLoader(localEngine)
+    val localMaterialLoader = rememberMaterialLoader(localEngine)
+    val localEnvironmentLoader = rememberEnvironmentLoader(localEngine)
+
+    val useShared = provider.isReady()
+    val engine = if (useShared) provider.getEngine()!! else localEngine
+    val modelLoader = if (useShared) provider.getModelLoader()!! else localModelLoader
+    val materialLoader = if (useShared) provider.getMaterialLoader()!! else localMaterialLoader
+    val environmentLoader = if (useShared) provider.getEnvironmentLoader()!! else localEnvironmentLoader
+
     val scene = rememberScene(engine)
     val view = rememberView(engine)
     val renderer = rememberRenderer(engine)
@@ -167,7 +163,7 @@ fun BodyModelPreview(
         }
     }
 
-    LaunchedEffect(sceneViewRef) {
+    LaunchedEffect(sceneViewRef, useShared) {
         val sceneView = sceneViewRef ?: return@LaunchedEffect
         if (modelNode != null) return@LaunchedEffect
 
@@ -177,18 +173,22 @@ fun BodyModelPreview(
         }
         val glbBounds = metadata.bounds
 
-        val instance = runCatching {
-            val maxBonesInModel = metadata.maxJointCount
-            if (maxBonesInModel != null && maxBonesInModel > FILAMENT_MAX_BONES) {
-                throw IllegalStateException(
-                    "Model has $maxBonesInModel bones (> $FILAMENT_MAX_BONES). " +
-                        "Please reduce rig complexity or test on a higher-end renderer."
-                )
-            }
-            withContext(Dispatchers.IO) {
-                modelLoader.loadModelInstance(BODY_MODEL_ASSET_PATH)
-            }
-        }.getOrNull()
+        val instance = if (useShared) {
+            provider.getPreloadedInstance()
+        } else {
+            runCatching {
+                val maxBonesInModel = metadata.maxJointCount
+                if (maxBonesInModel != null && maxBonesInModel > FILAMENT_MAX_BONES) {
+                    throw IllegalStateException(
+                        "Model has $maxBonesInModel bones (> $FILAMENT_MAX_BONES). " +
+                            "Please reduce rig complexity or test on a higher-end renderer."
+                    )
+                }
+                withContext(Dispatchers.IO) {
+                    modelLoader.loadModelInstance(BODY_MODEL_ASSET_PATH)
+                }
+            }.getOrNull()
+        }
 
         withContext(Dispatchers.Main.immediate) {
             if (instance != null) {
@@ -258,84 +258,4 @@ fun BodyModelPreview(
             isLoading = false
         }
     }
-}
-
-private data class GlbMetadata(
-    val bounds: GlbSceneBounds?,
-    val maxJointCount: Int?
-)
-
-/**
- * Reads the GLB asset once and parses both scene bounds and max joint count from the JSON chunk.
- * Avoids reading the file twice (previously parseGlbSceneBounds + readMaxJointCountFromGlb).
- */
-private fun parseGlbMetadata(context: android.content.Context, assetPath: String): GlbMetadata {
-    val data = runCatching { context.assets.open(assetPath).use { it.readBytes() } }.getOrNull()
-        ?: return GlbMetadata(bounds = null, maxJointCount = null)
-    if (data.size < 20) return GlbMetadata(bounds = null, maxJointCount = null)
-    val header = ByteBuffer.wrap(data, 0, 12).order(ByteOrder.LITTLE_ENDIAN)
-    if (header.int != 0x46546C67) return GlbMetadata(bounds = null, maxJointCount = null)
-    var offset = 12
-    while (offset + 8 <= data.size) {
-        val chunkHeader = ByteBuffer.wrap(data, offset, 8).order(ByteOrder.LITTLE_ENDIAN)
-        val chunkLength = chunkHeader.int
-        val chunkType = chunkHeader.int
-        offset += 8
-        if (chunkLength < 0 || offset + chunkLength > data.size) break
-        if (chunkType != 0x4E4F534A) {
-            offset += chunkLength
-            continue
-        }
-        val jsonText = String(data, offset, chunkLength, Charset.forName("UTF-8"))
-        val root = runCatching { JSONObject(jsonText) }.getOrNull() ?: break
-        val accessors = root.optJSONArray("accessors") ?: break
-        val meshes = root.optJSONArray("meshes") ?: break
-        var minX = Float.POSITIVE_INFINITY
-        var minY = Float.POSITIVE_INFINITY
-        var minZ = Float.POSITIVE_INFINITY
-        var maxX = Float.NEGATIVE_INFINITY
-        var maxY = Float.NEGATIVE_INFINITY
-        var maxZ = Float.NEGATIVE_INFINITY
-        fun mergeAccessor(accIndex: Int) {
-            val acc = accessors.optJSONObject(accIndex) ?: return
-            val minArr = acc.optJSONArray("min") ?: return
-            val maxArr = acc.optJSONArray("max") ?: return
-            if (minArr.length() < 3 || maxArr.length() < 3) return
-            val mx = minArr.optDouble(0).toFloat()
-            val my = minArr.optDouble(1).toFloat()
-            val mz = minArr.optDouble(2).toFloat()
-            val bigX = maxArr.optDouble(0).toFloat()
-            val bigY = maxArr.optDouble(1).toFloat()
-            val bigZ = maxArr.optDouble(2).toFloat()
-            if (mx < minX) minX = mx
-            if (my < minY) minY = my
-            if (mz < minZ) minZ = mz
-            if (bigX > maxX) maxX = bigX
-            if (bigY > maxY) maxY = bigY
-            if (bigZ > maxZ) maxZ = bigZ
-        }
-        for (i in 0 until meshes.length()) {
-            val mesh = meshes.optJSONObject(i) ?: continue
-            val primitives = mesh.optJSONArray("primitives") ?: continue
-            for (j in 0 until primitives.length()) {
-                val prim = primitives.optJSONObject(j) ?: continue
-                val attrs = prim.optJSONObject("attributes") ?: continue
-                val posIndex = attrs.optInt("POSITION", -1)
-                if (posIndex in 0 until accessors.length()) mergeAccessor(posIndex)
-            }
-        }
-        val bounds = if (minX == Float.POSITIVE_INFINITY) null
-        else GlbSceneBounds(minX, minY, minZ, maxX, maxY, maxZ)
-        var maxJointCount = 0
-        val skins = root.optJSONArray("skins")
-        if (skins != null) {
-            for (i in 0 until skins.length()) {
-                val skin = skins.optJSONObject(i) ?: continue
-                val joints = skin.optJSONArray("joints") ?: continue
-                if (joints.length() > maxJointCount) maxJointCount = joints.length()
-            }
-        }
-        return GlbMetadata(bounds = bounds, maxJointCount = if (maxJointCount > 0) maxJointCount else null)
-    }
-    return GlbMetadata(bounds = null, maxJointCount = null)
 }
