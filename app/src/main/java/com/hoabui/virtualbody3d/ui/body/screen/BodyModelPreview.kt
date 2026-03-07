@@ -67,10 +67,10 @@ fun BodyModelPreview(
     val localEnvironmentLoader = rememberEnvironmentLoader(localEngine)
 
     val useShared = provider.isReady()
-    val engine = if (useShared) provider.getEngine()!! else localEngine
-    val modelLoader = if (useShared) provider.getModelLoader()!! else localModelLoader
-    val materialLoader = if (useShared) provider.getMaterialLoader()!! else localMaterialLoader
-    val environmentLoader = if (useShared) provider.getEnvironmentLoader()!! else localEnvironmentLoader
+    val engine = (if (useShared) provider.getEngine() else null) ?: localEngine
+    val modelLoader = (if (useShared) provider.getModelLoader() else null) ?: localModelLoader
+    val materialLoader = (if (useShared) provider.getMaterialLoader() else null) ?: localMaterialLoader
+    val environmentLoader = (if (useShared) provider.getEnvironmentLoader() else null) ?: localEnvironmentLoader
 
     val scene = rememberScene(engine)
     val view = rememberView(engine)

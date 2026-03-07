@@ -45,16 +45,19 @@ class MainActivity : ComponentActivity() {
                     LaunchedEffect(Unit) {
                         delay(SPLASH_DURATION_MS)
                         showSplash = false
-                        startDestination =
-                            if (sharedPreferences.getBoolean(
-                                    Constants.KEY_ONBOARDING_COMPLETED,
-                                    false
-                                )
-                            ) {
-                                AppDestination.Login.route
-                            } else {
-                                AppDestination.Onboarding.route
-                            }
+                        // Tạm thời luôn vào Home. Sau này bỏ comment và xóa dòng startDestination = Home.route
+                        // để dùng lại logic: đã onboarding -> Login, chưa -> Onboarding.
+                        startDestination = AppDestination.Home.route
+//                        startDestination =
+//                            if (sharedPreferences.getBoolean(
+//                                    Constants.KEY_ONBOARDING_COMPLETED,
+//                                    false
+//                                )
+//                            ) {
+//                                AppDestination.Login.route
+//                            } else {
+//                                AppDestination.Onboarding.route
+//                            }
                     }
 
                     when {
@@ -74,6 +77,6 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
-        private const val SPLASH_DURATION_MS = 2_000L
+        private const val SPLASH_DURATION_MS = 3_500L
     }
 }

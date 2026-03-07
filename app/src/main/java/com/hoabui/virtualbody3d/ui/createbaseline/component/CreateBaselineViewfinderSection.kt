@@ -22,7 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import com.hoabui.virtualbody3d.ui.createbaseline.CreateBaselineCameraContent
+import com.hoabui.virtualbody3d.ui.camera.CameraCaptureContent
 import com.hoabui.virtualbody3d.ui.theme.tokens.RadiusTokens
 import java.io.File
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.CreateBaselineTokens
@@ -36,8 +36,8 @@ fun CreateBaselineViewfinderSection(
     createBaselineTokens: CreateBaselineTokens,
     showCamera: Boolean = true,
     captureTrigger: Int = 0,
-    onImageCaptured: ((File) -> Unit)? = null,
-    onCaptureError: ((String) -> Unit)? = null
+    onImageCaptured: (File) -> Unit = {},
+    onCaptureError: (String) -> Unit = {}
 ) {
     val density = LocalDensity.current
     val cornerSizePx = with(density) { createBaselineTokens.cornerMarkerSize.toPx() }
@@ -60,7 +60,7 @@ fun CreateBaselineViewfinderSection(
             .clip(RoundedCornerShape(radius.xl))
     ) {
         if (showCamera) {
-            CreateBaselineCameraContent(
+            CameraCaptureContent(
                 modifier = Modifier.fillMaxSize(),
                 captureTrigger = captureTrigger,
                 onImageCaptured = onImageCaptured,

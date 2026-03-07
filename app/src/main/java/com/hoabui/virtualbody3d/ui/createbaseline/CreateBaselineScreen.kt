@@ -91,8 +91,8 @@ fun CreateBaselineScreen(
                 createBaselineTokens = token.createBaseline,
                 showCamera = state !is CreateBaselineUiState.PreviewReady && state !is CreateBaselineUiState.ReviewExtracted && state !is CreateBaselineUiState.Error,
                 captureTrigger = captureTrigger,
-                onImageCaptured = if (state is CreateBaselineUiState.Idle || state is CreateBaselineUiState.CameraActive) viewModel::onImageCaptured else null,
-                onCaptureError = if (state is CreateBaselineUiState.Idle || state is CreateBaselineUiState.CameraActive) viewModel::onCaptureError else null
+                onImageCaptured = viewModel::onImageCaptured,
+                onCaptureError = viewModel::onCaptureError
             )
             Spacer(modifier = Modifier.height(spacing.md))
             CreateBaselineActionsSection(

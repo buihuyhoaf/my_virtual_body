@@ -1,6 +1,7 @@
 package com.hoabui.virtualbody3d.ui.splash
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,7 +28,7 @@ import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import kotlinx.coroutines.launch
 
-private const val LOGO_ANIMATION_DURATION_MS = 500
+private const val LOGO_ANIMATION_DURATION_MS = 1_200
 
 /**
  * Splash screen: plum background, centered rounded card with app logo (no text).
@@ -45,17 +46,15 @@ fun SplashScreen(
     val alpha = remember { Animatable(0f) }
 
     LaunchedEffect(Unit) {
+        val animSpec = tween<Float>(
+            durationMillis = LOGO_ANIMATION_DURATION_MS,
+            easing = FastOutSlowInEasing
+        )
         launch {
-            scale.animateTo(
-                targetValue = 1f,
-                animationSpec = tween(durationMillis = LOGO_ANIMATION_DURATION_MS)
-            )
+            scale.animateTo(targetValue = 1f, animationSpec = animSpec)
         }
         launch {
-            alpha.animateTo(
-                targetValue = 1f,
-                animationSpec = tween(durationMillis = LOGO_ANIMATION_DURATION_MS)
-            )
+            alpha.animateTo(targetValue = 1f, animationSpec = animSpec)
         }
     }
 
