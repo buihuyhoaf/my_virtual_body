@@ -6,13 +6,17 @@ import androidx.compose.ui.unit.Dp
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.BodyAnalysisTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.ButtonTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.CalendarTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.CameraTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.CreateBaselineTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.CardTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.ControlPanelTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.LoginTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.OnboardingTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.SliderTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.StatusPopupTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.ThinkingCardTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymCalendarTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymCameraTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymCreateBaselineTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymLoginTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymOnboardingTokens
@@ -21,6 +25,8 @@ import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymButtonTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymCardTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymControlPanelTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymSliderTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymStatusPopupTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymThinkingCardTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveColorTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveRadiusTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveSpacingTokens
@@ -47,7 +53,10 @@ data class GymToken(
     val calendar: CalendarTokens,
     val onboarding: OnboardingTokens,
     val login: LoginTokens,
-    val createBaseline: CreateBaselineTokens
+    val createBaseline: CreateBaselineTokens,
+    val camera: CameraTokens,
+    val statusPopup: StatusPopupTokens,
+    val thinkingCard: ThinkingCardTokens
 )
 
 @Immutable
@@ -105,7 +114,10 @@ fun darkGymToken(
     calendar = gymCalendarTokens(colors),
     onboarding = gymOnboardingTokens(primitiveSpacing),
     login = gymLoginTokens(primitiveSpacing, primitiveRadius),
-    createBaseline = gymCreateBaselineTokens(primitiveSpacing, primitiveColors)
+    createBaseline = gymCreateBaselineTokens(primitiveSpacing, primitiveColors),
+    camera = gymCameraTokens(primitiveSpacing),
+    statusPopup = gymStatusPopupTokens(primitiveSpacing, primitiveRadius),
+    thinkingCard = gymThinkingCardTokens(primitiveSpacing, primitiveRadius)
     )
 }
 
@@ -144,6 +156,9 @@ fun lightGymToken(
     calendar = gymCalendarTokens(colors),
     onboarding = gymOnboardingTokens(primitiveSpacing),
     login = gymLoginTokens(primitiveSpacing, primitiveRadius),
-    createBaseline = gymCreateBaselineTokens(primitiveSpacing, primitiveColors)
+    createBaseline = gymCreateBaselineTokens(primitiveSpacing, primitiveColors),
+    camera = gymCameraTokens(primitiveSpacing),
+    statusPopup = gymStatusPopupTokens(primitiveSpacing, primitiveRadius),
+    thinkingCard = gymThinkingCardTokens(primitiveSpacing, primitiveRadius)
     )
 }

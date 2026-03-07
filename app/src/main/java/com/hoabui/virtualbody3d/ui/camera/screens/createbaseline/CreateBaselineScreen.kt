@@ -1,17 +1,13 @@
-package com.hoabui.virtualbody3d.ui.createbaseline
+package com.hoabui.virtualbody3d.ui.camera.screens.createbaseline
 
+import android.Manifest
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -29,14 +25,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.ui.createbaseline.component.CreateBaselineActionsSection
-import com.hoabui.virtualbody3d.ui.createbaseline.component.CreateBaselineLoadingOverlay
-import com.hoabui.virtualbody3d.ui.createbaseline.component.CreateBaselinePreviewDialog
-import com.hoabui.virtualbody3d.ui.createbaseline.component.CreateBaselineReviewBottomSheet
-import com.hoabui.virtualbody3d.ui.createbaseline.component.CreateBaselineViewfinderSection
-import com.hoabui.virtualbody3d.ui.createbaseline.viewmodel.CreateBaselineEvent
-import com.hoabui.virtualbody3d.ui.createbaseline.viewmodel.CreateBaselineUiState
-import com.hoabui.virtualbody3d.ui.createbaseline.viewmodel.CreateBaselineViewModel
+import com.hoabui.virtualbody3d.ui.camera.CameraCaptureScreenContent
+import com.hoabui.virtualbody3d.ui.camera.screens.createbaseline.component.ChatGPTThinkingCard
+import com.hoabui.virtualbody3d.ui.camera.screens.createbaseline.component.CreateBaselineReviewBottomSheet
+import com.hoabui.virtualbody3d.domain.model.AnalysisType
+import com.hoabui.virtualbody3d.ui.camera.viewmodel.CameraCaptureEvent
+import com.hoabui.virtualbody3d.ui.camera.viewmodel.CameraCaptureUiState
+import com.hoabui.virtualbody3d.ui.camera.viewmodel.CameraCaptureViewModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,10 +39,11 @@ import com.hoabui.virtualbody3d.ui.theme.GymTheme
 fun CreateBaselineScreen(
     modifier: Modifier = Modifier,
     onComplete: () -> Unit,
-    viewModel: CreateBaselineViewModel = hiltViewModel()
+    viewModel: CameraCaptureViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val reviewState by viewModel.reviewState.collectAsStateWithLifecycle()
+    val pendingReviewFile by viewModel.pendingReviewFile.collectAsStateWithLifecycle(initialValue = null)
     val captureTrigger by viewModel.captureTrigger.collectAsStateWithLifecycle(initialValue = 0)
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val token = GymTheme.token
@@ -65,69 +61,58 @@ fun CreateBaselineScreen(
     }
 
     DisposableEffect(Unit) {
-        permissionLauncher.launch(android.Manifest.permission.CAMERA)
+        permissionLauncher.launch(Manifest.permission.CAMERA)
         onDispose { }
     }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
-                is CreateBaselineEvent.NavigateHome -> onComplete()
+                is CameraCaptureEvent.NavigateHome -> onComplete()
             }
         }
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(colors.surface)
-                .padding(horizontal = spacing.xl)
-        ) {
-            CreateBaselineViewfinderSection(
-                modifier = Modifier.weight(1f),
-                colors = colors,
-                radius = token.radius,
-                createBaselineTokens = token.createBaseline,
-                showCamera = state !is CreateBaselineUiState.PreviewReady && state !is CreateBaselineUiState.ReviewExtracted && state !is CreateBaselineUiState.Error,
-                captureTrigger = captureTrigger,
-                onImageCaptured = viewModel::onImageCaptured,
-                onCaptureError = viewModel::onCaptureError
-            )
-            Spacer(modifier = Modifier.height(spacing.md))
-            CreateBaselineActionsSection(
-                colors = colors,
-                spacing = spacing,
-                radius = token.radius,
-                createBaselineTokens = token.createBaseline,
-                onboardingTokens = token.onboarding,
-                elevation = token.elevation,
-                typography = token.typography,
-                buttonsEnabled = state !is CreateBaselineUiState.Processing && state !is CreateBaselineUiState.Uploading,
-                onCapture = viewModel::requestCapture,
-                onUpload = {
-                    pickMedia.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                    )
-                }
-            )
-            Spacer(modifier = Modifier.height(spacing.xl))
-        }
+        CameraCaptureScreenContent(
+            modifier = Modifier.fillMaxSize(),
+            state = state,
+            showCamera = state is CameraCaptureUiState.CameraActive,
+            captureTrigger = captureTrigger,
+            onImageCaptured = { file ->
+                viewModel.onImageCaptured(file, alreadyProcessed = (file == pendingReviewFile))
+            },
+            onCaptureError = viewModel::onCaptureError,
+            buttonsEnabled = state is CameraCaptureUiState.CameraActive || state is CameraCaptureUiState.ConfirmPhoto,
+            onCapture = viewModel::requestCapture,
+            onUpload = {
+                pickMedia.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
+            },
+            reviewStateEnabled = true,
+            onCaptureCompletedForReview = { file -> viewModel.onPhotoCaptured(file) },
+            externalReviewFile = pendingReviewFile,
+            onClearReviewFile = viewModel::onClearReview
+        )
 
-        when (state) {
-            is CreateBaselineUiState.Processing -> CreateBaselineLoadingOverlay(message = stringResource(R.string.loading_processing))
-            is CreateBaselineUiState.Uploading -> CreateBaselineLoadingOverlay(message = stringResource(R.string.loading_uploading))
-            is CreateBaselineUiState.OcrLoading -> CreateBaselineLoadingOverlay(message = stringResource(R.string.loading_extracting))
-            else -> { }
-        }
+        ChatGPTThinkingCard(
+            visible = state is CameraCaptureUiState.PreProcessing ||
+                state is CameraCaptureUiState.Uploading ||
+                state is CameraCaptureUiState.Analyzing,
+            message = when (state) {
+                is CameraCaptureUiState.PreProcessing -> stringResource(R.string.loading_processing)
+                is CameraCaptureUiState.Uploading -> stringResource(R.string.loading_uploading)
+                is CameraCaptureUiState.Analyzing -> when ((state as CameraCaptureUiState.Analyzing).type) {
+                    AnalysisType.OCR -> stringResource(R.string.loading_extracting)
+                    AnalysisType.MEAL -> stringResource(R.string.loading_analyzing_meal)
+                }
+                else -> ""
+            }
+        )
 
         when (val s = state) {
-            is CreateBaselineUiState.PreviewReady -> CreateBaselinePreviewDialog(
-                file = s.file,
-                onCancel = viewModel::onPreviewCancel,
-                onUpload = { viewModel.onConfirmUpload(s.file) }
-            )
-            is CreateBaselineUiState.ReviewExtracted -> {
+            is CameraCaptureUiState.ReviewExtracted -> {
                 if (reviewState != null) {
                     ModalBottomSheet(
                         onDismissRequest = viewModel::onReviewDismiss,
@@ -143,7 +128,7 @@ fun CreateBaselineScreen(
                     }
                 }
             }
-            is CreateBaselineUiState.Error -> CreateBaselineErrorSnackbarOrDialog(
+            is CameraCaptureUiState.Error -> CreateBaselineErrorSnackbarOrDialog(
                 message = s.message,
                 onDismiss = viewModel::onErrorDismiss
             )

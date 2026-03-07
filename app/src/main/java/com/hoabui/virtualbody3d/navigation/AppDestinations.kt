@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.hoabui.virtualbody3d.R
 
@@ -17,6 +18,7 @@ object Routes {
     const val CREATE_BASELINE = "create_baseline"
     const val HOME = "home"
     const val ADD = "add"
+    const val MEAL_CAPTURE = "meal_capture"
     const val CALENDAR = "calendar"
 }
 
@@ -61,6 +63,12 @@ sealed class AppDestination(
         icon = Icons.Default.AddCircle
     )
 
+    data object MealCapture : AppDestination(
+        route = Routes.MEAL_CAPTURE,
+        labelResId = R.string.tab_meal_capture,
+        icon = Icons.Default.PhotoCamera
+    )
+
     data object Calendar : AppDestination(
         route = Routes.CALENDAR,
         labelResId = R.string.tab_calendar,
@@ -72,7 +80,7 @@ sealed class AppDestination(
 
         val bottomBarDestinations: List<AppDestination> = listOf(
             Home,
-            Add,
+            MealCapture,
             Calendar
         )
     }

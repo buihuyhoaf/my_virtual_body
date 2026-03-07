@@ -47,17 +47,17 @@ class MainActivity : ComponentActivity() {
                         showSplash = false
                         // Tạm thời luôn vào Home. Sau này bỏ comment và xóa dòng startDestination = Home.route
                         // để dùng lại logic: đã onboarding -> Login, chưa -> Onboarding.
-                        startDestination = AppDestination.Home.route
-//                        startDestination =
-//                            if (sharedPreferences.getBoolean(
-//                                    Constants.KEY_ONBOARDING_COMPLETED,
-//                                    false
-//                                )
-//                            ) {
-//                                AppDestination.Login.route
-//                            } else {
-//                                AppDestination.Onboarding.route
-//                            }
+//                        startDestination = AppDestination.Home.route
+                        startDestination =
+                            if (sharedPreferences.getBoolean(
+                                    Constants.KEY_ONBOARDING_COMPLETED,
+                                    false
+                                )
+                            ) {
+                                AppDestination.Login.route
+                            } else {
+                                AppDestination.Onboarding.route
+                            }
                     }
 
                     when {

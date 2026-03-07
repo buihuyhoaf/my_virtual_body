@@ -12,46 +12,36 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
 import javax.inject.Inject
-import kotlin.math.max
 
 /**
- * Unified image processing pipeline: decode safely with inSampleSize,
- * downscale to max long edge 1080px, JPEG 75%, strip EXIF (orientation applied to pixels).
- * Reusable for Create Baseline, Camera capture, and Food AI.
+ * Prepares an image for upload: rotate (EXIF), resize, compress, and write to cache.
+ * Converts Uri or File input into a processed File ready for upload.
  */
-class ImageProcessingUseCase @Inject constructor(
+class PrepareImageUseCase @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-
     companion object {
         private const val MAX_LONG_EDGE_PX = 1080
         private const val JPEG_QUALITY = 75
     }
 
     /**
-     * Processes the image at [uri] and saves an optimized copy to cache.
-     * Must be called from a background dispatcher (e.g. Dispatchers.IO).
-     * @return Optimized file in cacheDir, or null if uri is null
-     * @throws Exception on decode/io failure
+     * Prepares the image at [uri] (e.g. from gallery pick).
+     * @return Processed file in cache, ready for upload
+     * @throws Exception on decode/IO failure
      */
-    suspend fun process(uri: Uri?): File? {
-        if (uri == null) return null
+    suspend operator fun invoke(uri: Uri): File {
         val contentResolver = context.contentResolver
-
         val (w, h) = contentResolver.openInputStream(uri)?.use { decodeBounds(it) }
             ?: throw IllegalArgumentException("Cannot open stream for uri: $uri")
         if (w <= 0 || h <= 0) throw IllegalArgumentException("Invalid image dimensions")
-
         val inSampleSize = computeInSampleSize(w, h, MAX_LONG_EDGE_PX)
         val bitmap = contentResolver.openInputStream(uri)?.use { decodeWithSampleSize(it, inSampleSize) }
             ?: throw IllegalArgumentException("Failed to decode bitmap")
-
         val orientation = contentResolver.openInputStream(uri)?.use { readOrientation(it) } ?: 0
         var result = applyOrientation(bitmap, orientation)
         if (result != bitmap) bitmap.recycle()
-
         result = scaleDownIfNeeded(result, MAX_LONG_EDGE_PX)
-
         val outFile = File(context.cacheDir, "baseline_${System.currentTimeMillis()}.jpg")
         FileOutputStream(outFile).use { out ->
             result.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, out)
@@ -61,14 +51,12 @@ class ImageProcessingUseCase @Inject constructor(
     }
 
     /**
-     * Processes the image from [file] and saves an optimized copy to cache.
-     * Must be called from a background dispatcher (e.g. Dispatchers.IO).
-     * Use for camera capture; does not decode full bitmap before inSampleSize.
-     * @return Optimized file in cacheDir, or null if file is null or invalid
-     * @throws Exception on decode/io failure
+     * Prepares the image from [file] (e.g. from camera capture).
+     * @return Processed file in cache, ready for upload
+     * @throws Exception on decode/IO failure
      */
-    suspend fun process(file: File?): File? {
-        if (file == null || !file.exists()) return null
+    suspend operator fun invoke(file: File): File {
+        if (!file.exists()) throw IllegalArgumentException("File does not exist")
         val (w, h) = FileInputStream(file).use { decodeBounds(it) }
         if (w <= 0 || h <= 0) throw IllegalArgumentException("Invalid image dimensions")
         val inSampleSize = computeInSampleSize(w, h, MAX_LONG_EDGE_PX)
@@ -105,9 +93,7 @@ class ImageProcessingUseCase @Inject constructor(
         val longEdge = maxOf(width, height)
         if (longEdge > maxLongEdge) {
             val halfLong = longEdge / 2
-            while ((halfLong / inSampleSize) >= maxLongEdge) {
-                inSampleSize *= 2
-            }
+            while ((halfLong / inSampleSize) >= maxLongEdge) inSampleSize *= 2
         }
         return inSampleSize
     }
@@ -131,15 +117,7 @@ class ImageProcessingUseCase @Inject constructor(
     private fun applyOrientation(bitmap: Bitmap, degrees: Int): Bitmap {
         if (degrees == 0) return bitmap
         val matrix = Matrix().apply { postRotate(degrees.toFloat()) }
-        return Bitmap.createBitmap(
-            bitmap,
-            0,
-            0,
-            bitmap.width,
-            bitmap.height,
-            matrix,
-            true
-        )
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 
     private fun scaleDownIfNeeded(bitmap: Bitmap, maxLongEdge: Int): Bitmap {

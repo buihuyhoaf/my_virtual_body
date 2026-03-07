@@ -1,4 +1,4 @@
-package com.hoabui.virtualbody3d.ui.createbaseline.viewmodel
+package com.hoabui.virtualbody3d.ui.camera.viewmodel
 
 import com.hoabui.virtualbody3d.domain.model.ExtractedData
 

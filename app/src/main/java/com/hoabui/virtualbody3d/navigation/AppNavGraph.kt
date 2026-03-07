@@ -15,7 +15,8 @@ import androidx.navigation.compose.composable
 import com.hoabui.virtualbody3d.ui.body.screen.BodyAnalysisRoute
 import com.hoabui.virtualbody3d.ui.body.viewmodel.BodyViewModel
 import com.hoabui.virtualbody3d.ui.calendar.screen.CalendarScreen
-import com.hoabui.virtualbody3d.ui.createbaseline.CreateBaselineScreen
+import com.hoabui.virtualbody3d.ui.camera.screens.createbaseline.CreateBaselineScreen
+import com.hoabui.virtualbody3d.ui.camera.screens.mealcapture.MealCaptureScreen
 import com.hoabui.virtualbody3d.ui.initialsetup.InitialSetupScreen
 import com.hoabui.virtualbody3d.ui.login.LoginScreen
 import com.hoabui.virtualbody3d.ui.onboarding.OnboardingScreen
@@ -95,6 +96,9 @@ fun AppNavGraph(
         }
         composable(route = AppDestination.Add.route) {
             AppDestinationPlaceholder(labelResId = AppDestination.Add.labelResId)
+        }
+        composable(route = AppDestination.MealCapture.route) {
+            MealCaptureScreen()
         }
         composable(route = AppDestination.Calendar.route) {
             CalendarScreen(

@@ -102,6 +102,7 @@
     <!-- Body Tabs -->
     <string name="tab_home">Home</string>
     <string name="tab_add">Add</string>
+    <string name="tab_meal_capture">Meal Capture</string>
     <string name="tab_calendar">Calendar</string>
     <string name="tab_body">Body</string>
     <string name="tab_nutrition">Nutrition</string>
@@ -175,11 +176,13 @@
     <string name="review_edited">Edited</string>
     <string name="review_baseline_info_caption">This baseline will be used as your reference point for future progress tracking.</string>
     <string name="review_retake">Retake</string>
+    <string name="camera_use_photo">Use Photo</string>
     <string name="error_dialog_title">Error</string>
     <string name="error_ok">OK</string>
-    <string name="loading_processing">Processing…</string>
-    <string name="loading_uploading">Uploading…</string>
+    <string name="loading_processing">Preparing image…</string>
+    <string name="loading_uploading">Uploading photo…</string>
     <string name="loading_extracting">Extracting data…</string>
+    <string name="loading_analyzing_meal">Analyzing your meal…</string>
 
     <!-- Login -->
     <string name="login_welcome_back">Welcome back</string>

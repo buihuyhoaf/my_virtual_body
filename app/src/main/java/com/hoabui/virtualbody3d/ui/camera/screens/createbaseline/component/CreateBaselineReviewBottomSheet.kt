@@ -1,4 +1,4 @@
-package com.hoabui.virtualbody3d.ui.createbaseline.component
+package com.hoabui.virtualbody3d.ui.camera.screens.createbaseline.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -37,8 +37,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.hoabui.virtualbody3d.ui.createbaseline.viewmodel.ReviewMetric
-import com.hoabui.virtualbody3d.ui.createbaseline.viewmodel.ReviewState
+import com.hoabui.virtualbody3d.ui.camera.viewmodel.ReviewMetric
+import com.hoabui.virtualbody3d.ui.camera.viewmodel.ReviewState
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.R
 
