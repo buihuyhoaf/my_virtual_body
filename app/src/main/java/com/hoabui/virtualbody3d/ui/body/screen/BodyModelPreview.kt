@@ -94,7 +94,7 @@ fun BodyModelPreview(
         modifier = modifier.fillMaxSize()
     ) {
         AndroidView(
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier,
             factory = { ctx ->
                 SceneView(
                     context = ctx,

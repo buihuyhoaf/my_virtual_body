@@ -1,14 +1,11 @@
 package com.hoabui.virtualbody3d.ui.body.state
 
-import java.time.LocalDate
-import java.time.YearMonth
-import com.hoabui.virtualbody3d.ui.calendar.state.DailyItem
+import com.hoabui.virtualbody3d.domain.model.BodyScanResult
+import com.hoabui.virtualbody3d.domain.model.PromoBanner
 
 data class BodyScreenState(
-    val uiState: BodyUiState = BodyUiState(),
-    val dashboardUiState: BodyDashboardUiState = BodyDashboardUiState(),
-    val selectedDate: LocalDate? = null,
+    val scanResult: BodyScanResult? = null,
+    val caloriesToday: CaloriesTodayUiState = CaloriesTodayUiState(),
     val selectedRegion: BodyRegion? = null,
-    val calendarMonths: List<YearMonth> = emptyList(),
-    val dailyItemsByDate: Map<LocalDate, List<DailyItem>> = emptyMap()
+    val promoBanners: List<PromoBanner> = emptyList()
 )

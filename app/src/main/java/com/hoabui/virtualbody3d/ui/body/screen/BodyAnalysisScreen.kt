@@ -1,177 +1,172 @@
 package com.hoabui.virtualbody3d.ui.body.screen
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.ui.body.components.DashboardPanel
+import com.hoabui.virtualbody3d.core.utils.Constants.BODY_METRICS_PANEL_INDEX
+import com.hoabui.virtualbody3d.core.utils.Constants.CALORIES_TODAY_PANEL_INDEX
+import com.hoabui.virtualbody3d.core.utils.Constants.PANEL_PAGE_COUNT
+import com.hoabui.virtualbody3d.domain.model.BodyScanResult
+import com.hoabui.virtualbody3d.domain.model.PromoBanner
+import com.hoabui.virtualbody3d.ui.body.components.BodyRegionRow
+import com.hoabui.virtualbody3d.ui.body.components.CaloriesTodayPanel
 import com.hoabui.virtualbody3d.ui.body.components.HeroSection
-import com.hoabui.virtualbody3d.ui.body.state.BodyDashboardUiState
+import com.hoabui.virtualbody3d.ui.body.components.PromoBannerCarousel
+import com.hoabui.virtualbody3d.ui.body.mapper.toPromoBannerItem
 import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
 import com.hoabui.virtualbody3d.ui.body.state.BodyUiState
+import com.hoabui.virtualbody3d.ui.body.state.CaloriesTodayUiState
+import com.hoabui.virtualbody3d.ui.body.state.MealUiState
+import com.hoabui.virtualbody3d.ui.body.state.NutritionSummaryUiState
+import com.hoabui.virtualbody3d.ui.body.state.toUiState
 import com.hoabui.virtualbody3d.ui.body.viewmodel.BodyViewModel
+import com.hoabui.virtualbody3d.ui.scanresult.MetricsPanel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import java.time.LocalDate
 
 @Composable
-fun BodyAnalysisRoute(
+fun BodyAnalysisScreen(
     viewModel: BodyViewModel = hiltViewModel()
 ) {
-    val screenState by viewModel.screenState.collectAsStateWithLifecycle()
-    BodyAnalysisScreen(
+    val screenState by viewModel.state.collectAsStateWithLifecycle()
+    val scanResult = screenState.scanResult
+    BodyAnalysisContent(
         modifier = Modifier.fillMaxSize(),
-        uiState = screenState.uiState,
-        dashboardUiState = screenState.dashboardUiState,
-        selectedDate = screenState.selectedDate ?: LocalDate.now(),
+        scanResult = scanResult,
+        caloriesToday = screenState.caloriesToday,
         selectedRegion = screenState.selectedRegion,
-        onRegionSelected = viewModel::onRegionSelected
+        onRegionSelected = viewModel::onRegionSelected,
+        promoBanners = screenState.promoBanners
     )
 }
 
 @Composable
-fun BodyAnalysisScreen(
+fun BodyAnalysisContent(
     modifier: Modifier = Modifier,
-    uiState: BodyUiState,
-    dashboardUiState: BodyDashboardUiState,
-    selectedDate: LocalDate,
+    scanResult: BodyScanResult?,
+    caloriesToday: CaloriesTodayUiState,
     selectedRegion: BodyRegion?,
-    onRegionSelected: (BodyRegion) -> Unit
+    onRegionSelected: (BodyRegion) -> Unit,
+    promoBanners: List<PromoBanner> = emptyList()
 ) {
     val token = GymTheme.token
+    val uiState = scanResult?.toUiState() ?: BodyUiState()
     val bodyScore = ((uiState.bmiScalePosition ?: 0.76f) * 100f).toInt().coerceIn(0, 100)
+    val bannerItems = remember(promoBanners) { promoBanners.map { it.toPromoBannerItem() } }
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(token.spacing.md)
+            .padding(token.spacing.md),
+        verticalArrangement = Arrangement.spacedBy(token.spacing.md)
     ) {
+        PromoBannerCarousel(
+            banners = bannerItems,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp)
+        )
         HeroSection(
             modifier = Modifier.weight(0.5f),
             uiState = uiState,
-            bodyScore = bodyScore
+            bodyScore = bodyScore,
+            showRotateChip = true
         )
         BodyRegionRow(
             modifier = Modifier.weight(0.12f),
             selectedRegion = selectedRegion,
             onRegionSelected = onRegionSelected
         )
-        DashboardPanel(
+
+        PanelSlider(
             modifier = Modifier.weight(0.38f),
-            selectedDate = selectedDate,
-            nutritionSummary = dashboardUiState.nutrition,
-            meals = dashboardUiState.meals
+            nutritionSummary = caloriesToday.nutrition,
+            meals = caloriesToday.meals,
+            scanResult = scanResult
         )
     }
 }
 
+
 @Composable
-private fun BodyRegionRow(
+private fun PanelSlider(
     modifier: Modifier = Modifier,
-    selectedRegion: BodyRegion?,
-    onRegionSelected: (BodyRegion) -> Unit
+    nutritionSummary: NutritionSummaryUiState,
+    meals: List<MealUiState>,
+    scanResult: BodyScanResult?
 ) {
     val token = GymTheme.token
-    LazyRow(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(token.spacing.md),
-        contentPadding = PaddingValues(horizontal = token.spacing.xs)
-    ) {
-        items(
-            items = BodyRegion.entries,
-            key = { it.name }
-        ) { region ->
-            BodyRegionItem(
-                region = region,
-                isSelected = selectedRegion == region,
-                onClick = { onRegionSelected(region) }
-            )
+    val pagerState = rememberPagerState(pageCount = { PANEL_PAGE_COUNT }, initialPage = 0)
+
+    Box(modifier = modifier.fillMaxSize()) {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize(),
+            userScrollEnabled = true
+        ) { page ->
+            when (page) {
+                CALORIES_TODAY_PANEL_INDEX -> CaloriesTodayPanel(
+                    modifier = Modifier.fillMaxSize(),
+                    selectedDate = LocalDate.now(),
+                    nutritionSummary = nutritionSummary,
+                    meals = meals
+                )
+                BODY_METRICS_PANEL_INDEX -> MetricsPanel(
+                    modifier = Modifier.fillMaxSize(),
+                    scanResult = scanResult
+                )
+                else -> { }
+            }
         }
+        PanelPagerIndicator(
+            pagerState = pagerState,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = token.spacing.xs, end = token.spacing.md)
+        )
     }
 }
 
 @Composable
-private fun BodyRegionItem(
-    region: BodyRegion,
-    isSelected: Boolean,
-    onClick: () -> Unit
+private fun PanelPagerIndicator(
+    pagerState: PagerState,
+    modifier: Modifier = Modifier
 ) {
     val token = GymTheme.token
-    val bodyToken = token.bodyAnalysis
-    val surfaceColor = if (isSelected) token.colors.primarySoft else token.colors.surfaceOverlay
-    val borderColor = if (isSelected) token.colors.primary else token.colors.surfaceBorder
-
-    Surface(
-        modifier = Modifier
-            .width(bodyToken.bodyRegionItemWidth)
-            .height(bodyToken.bodyRegionItemHeight)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(token.radius.lg),
-        color = surfaceColor,
-        border = androidx.compose.foundation.BorderStroke(
-            width = token.bodyAnalysis.topBarBorderWidth,
-            color = borderColor
-        )
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(token.spacing.xxs),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(token.spacing.md),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
-        ) {
+        repeat(PANEL_PAGE_COUNT) { index ->
+            val isSelected = pagerState.currentPage == index
             Box(
                 modifier = Modifier
-                    .size(bodyToken.bodyRegionPlaceholderSize)
+                    .padding(horizontal = token.spacing.xxs)
+                    .size(if (isSelected) 8.dp else 6.dp)
                     .background(
-                        color = token.colors.dashboardMealImageBackground,
-                        shape = RoundedCornerShape(token.radius.md)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(token.radius.md)),
-                    painter = painterResource(id = R.drawable.muscles),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop
-                )
-            }
-            Text(
-                text = when (region) {
-                    BodyRegion.UpperBody -> stringResource(R.string.body_region_upper_body)
-                    BodyRegion.Core -> stringResource(R.string.body_region_core)
-                    BodyRegion.Glutes -> stringResource(R.string.body_region_glutes)
-                    BodyRegion.Thighs -> stringResource(R.string.body_region_thighs)
-                    BodyRegion.Arms -> stringResource(R.string.body_region_arms)
-                },
-                style = token.typography.labelMedium,
-                color = if (isSelected) token.colors.primary else token.colors.textSecondary
+                        color = if (isSelected) token.colors.primary else token.colors.textSecondary.copy(alpha = 0.4f),
+                        shape = CircleShape
+                    )
             )
         }
     }

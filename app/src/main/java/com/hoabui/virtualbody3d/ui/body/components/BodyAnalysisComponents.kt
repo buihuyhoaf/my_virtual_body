@@ -1,24 +1,29 @@
 package com.hoabui.virtualbody3d.ui.body.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.RotateRight
 import androidx.compose.material.icons.filled.LocalDining
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.Opacity
@@ -30,6 +35,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,15 +46,18 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.core.extensions.formatMeasurement
-import com.hoabui.virtualbody3d.core.extensions.formatPercent
+import com.hoabui.virtualbody3d.core.extensions.heroLayerAnimation
 import com.hoabui.virtualbody3d.core.utils.Constants
 import com.hoabui.virtualbody3d.ui.body.screen.BodyModelPreview
 import com.hoabui.virtualbody3d.ui.body.screen.BodyScoreChip
 import com.hoabui.virtualbody3d.ui.body.screen.FloatingMetricChip
+import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
 import com.hoabui.virtualbody3d.ui.body.state.BodyUiState
 import com.hoabui.virtualbody3d.ui.body.state.MealUiState
 import com.hoabui.virtualbody3d.ui.body.state.NutritionSummaryUiState
@@ -58,10 +70,14 @@ import java.util.Locale
 fun HeroSection(
     modifier: Modifier = Modifier,
     uiState: BodyUiState,
-    bodyScore: Int
+    bodyScore: Int,
+    showDetailedAnalysisCta: Boolean = true,
+    showRotateChip: Boolean = false
 ) {
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis
+    var showImageMode by remember { mutableStateOf(false) }
+
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(token.radius.lg))
@@ -76,67 +92,184 @@ fun HeroSection(
         BodyModelPreview(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = bodyToken.previewModelTopPadding)
+                .clip(RoundedCornerShape(token.radius.lg))
+                .heroLayerAnimation(showImageMode, forImageLayer = false)
         )
-        Box(
+        Image(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            token.colors.backgroundTransparent,
-                            token.colors.backgroundScrim
-                        )
-                    )
+                .clip(RoundedCornerShape(token.radius.lg))
+                .heroLayerAnimation(showImageMode, forImageLayer = true),
+            painter = painterResource(R.drawable.body_unsplash),
+            contentDescription = null,
+            contentScale = ContentScale.Crop
+        )
+
+        if (!showImageMode){
+            BodyScoreChip(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(
+                        top = bodyToken.scoreChipTopPadding,
+                        start = bodyToken.metricChipSidePadding
+                    ),
+                score = bodyScore,
+                prominent = true
+            )
+            Column(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(
+                        top = bodyToken.scoreChipTopPadding,
+                        end = bodyToken.metricChipSidePadding
+                    ),
+                verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
+            ) {
+                FloatingMetricChip(
+                    icon = Icons.Default.MonitorWeight,
+                    value = uiState.weight.formatMeasurement(Constants.KILOGRAM)
                 )
-        )
-        BodyScoreChip(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(
-                    top = bodyToken.scoreChipTopPadding,
-                    start = bodyToken.metricChipSidePadding
-                ),
-            score = bodyScore,
-            prominent = true
-        )
-        FloatingMetricChip(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(
-                    top = bodyToken.metricChipFirstRowTopPadding,
-                    start = bodyToken.metricChipSidePadding
-                ),
-            icon = Icons.Default.MonitorWeight,
-            value = uiState.weight.formatMeasurement(uiState.weightUnit)
-        )
-        FloatingMetricChip(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(
-                    top = bodyToken.scoreChipTopPadding,
-                    end = bodyToken.metricChipSidePadding
-                ),
-            icon = Icons.Default.Opacity,
-            value = uiState.bodyFat.formatPercent()
-        )
-        TextButton(
-            onClick = { },
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = bodyToken.previewTrackBottomPadding)
-        ) {
-            Text(
-                text = stringResource(R.string.analysis_view_detailed_analysis),
-                style = token.typography.labelMedium,
-                color = token.colors.primary
+                FloatingMetricChip(
+                    icon = Icons.Default.Opacity,
+                    value = uiState.height.formatMeasurement(Constants.CENTIMETER)
+                )
+            }
+            if (showDetailedAnalysisCta) {
+                TextButton(
+                    onClick = { },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = bodyToken.previewTrackBottomPadding)
+                ) {
+                    Text(
+                        text = stringResource(R.string.analysis_view_detailed_analysis),
+                        style = token.typography.labelMedium,
+                        color = token.colors.primary
+                    )
+                }
+            }
+        }
+        if (showRotateChip) {
+            Surface(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(
+                        bottom = bodyToken.previewTrackBottomPadding,
+                        end = bodyToken.metricChipSidePadding
+                    )
+                    .clickable { showImageMode = !showImageMode },
+                shape = RoundedCornerShape(token.radius.lg),
+                color = token.colors.surfaceOverlay,
+                border = BorderStroke(bodyToken.topBarBorderWidth, token.colors.surfaceBorder),
+                shadowElevation = token.card.elevation
+            ) {
+                Box(
+                    modifier = Modifier
+                        .padding(token.spacing.xs)
+                        .size(bodyToken.topBarIconSize),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.RotateRight,
+                        contentDescription = stringResource(R.string.analysis_rotate_to_image),
+                        tint = token.colors.primary
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BodyRegionRow(
+    modifier: Modifier = Modifier,
+    selectedRegion: BodyRegion?,
+    onRegionSelected: (BodyRegion) -> Unit
+) {
+    val token = GymTheme.token
+    LazyRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(token.spacing.md),
+        contentPadding = PaddingValues(horizontal = token.spacing.xs)
+    ) {
+        items(
+            items = BodyRegion.entries,
+            key = { it.name }
+        ) { region ->
+            BodyRegionItem(
+                region = region,
+                isSelected = selectedRegion == region,
+                onClick = { onRegionSelected(region) }
             )
         }
     }
 }
 
 @Composable
-fun DashboardPanel(
+fun BodyRegionItem(
+    region: BodyRegion,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val token = GymTheme.token
+    val bodyToken = token.bodyAnalysis
+    val surfaceColor = if (isSelected) token.colors.primarySoft else token.colors.surfaceOverlay
+    val borderColor = if (isSelected) token.colors.primary else token.colors.surfaceBorder
+
+    Surface(
+        modifier = Modifier
+            .width(bodyToken.bodyRegionItemWidth)
+            .height(bodyToken.bodyRegionItemHeight)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(token.radius.lg),
+        color = surfaceColor,
+        border = BorderStroke(
+            width = bodyToken.topBarBorderWidth,
+            color = borderColor
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(token.spacing.md),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(bodyToken.bodyRegionPlaceholderSize)
+                    .background(
+                        color = token.colors.dashboardMealImageBackground,
+                        shape = RoundedCornerShape(token.radius.md)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(token.radius.md)),
+                    painter = painterResource(id = R.drawable.muscles),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
+                )
+            }
+            Text(
+                text = when (region) {
+                    BodyRegion.UpperBody -> stringResource(R.string.body_region_upper_body)
+                    BodyRegion.Core -> stringResource(R.string.body_region_core)
+                    BodyRegion.Glutes -> stringResource(R.string.body_region_glutes)
+                    BodyRegion.Thighs -> stringResource(R.string.body_region_thighs)
+                    BodyRegion.Arms -> stringResource(R.string.body_region_arms)
+                },
+                style = token.typography.labelMedium,
+                color = if (isSelected) token.colors.primary else token.colors.textSecondary
+            )
+        }
+    }
+}
+
+@Composable
+fun CaloriesTodayPanel(
     modifier: Modifier = Modifier,
     selectedDate: LocalDate,
     nutritionSummary: NutritionSummaryUiState,
@@ -347,7 +480,10 @@ private fun CaloriesProgressRing(
             drawArc(
                 color = token.colors.primary,
                 startAngle = Constants.BODY_ANALYSIS_PROGRESS_RING_START_ANGLE,
-                sweepAngle = Constants.BODY_ANALYSIS_PROGRESS_RING_SWEEP_ANGLE * progress.coerceIn(0f, 1f),
+                sweepAngle = Constants.BODY_ANALYSIS_PROGRESS_RING_SWEEP_ANGLE * progress.coerceIn(
+                    0f,
+                    1f
+                ),
                 useCenter = false,
                 style = Stroke(
                     width = bodyToken.dashboardNutritionRingStrokeWidth.toPx(),

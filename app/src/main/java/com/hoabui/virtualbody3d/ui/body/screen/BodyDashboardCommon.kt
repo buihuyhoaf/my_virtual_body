@@ -28,7 +28,7 @@ import com.hoabui.virtualbody3d.ui.theme.GymTheme
 fun FloatingMetricChip(
     modifier: Modifier = Modifier,
     icon: ImageVector,
-    value: String
+    value: String? = null
 ) {
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis
@@ -71,11 +71,13 @@ fun FloatingMetricChip(
                     modifier = Modifier.size(bodyToken.metricChipIconSize)
                 )
             }
-            Text(
-                text = value,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold
-            )
+            if (!value.isNullOrEmpty()){
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }

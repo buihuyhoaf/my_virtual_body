@@ -13,7 +13,6 @@ import com.hoabui.virtualbody3d.ui.body.viewmodel.BodyViewModel
 fun AppScaffoldLayout(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    sharedViewModel: BodyViewModel,
     startDestination: String,
     onOnboardingCompleted: () -> Unit
 ) {
@@ -37,7 +36,6 @@ fun AppScaffoldLayout(
         AppNavGraph(
             modifier = Modifier.padding(innerPadding),
             navController = navController,
-            sharedViewModel = sharedViewModel,
             startDestination = startDestination,
             onOnboardingCompleted = onOnboardingCompleted
         )

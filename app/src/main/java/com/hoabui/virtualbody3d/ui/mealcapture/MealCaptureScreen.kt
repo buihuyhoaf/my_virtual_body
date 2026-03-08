@@ -1,4 +1,4 @@
-package com.hoabui.virtualbody3d.ui.camera.screens.createbaseline
+package com.hoabui.virtualbody3d.ui.mealcapture
 
 import android.Manifest
 import android.net.Uri
@@ -6,16 +6,12 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -26,29 +22,21 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.camera.CameraCaptureScreenContent
-import com.hoabui.virtualbody3d.ui.camera.screens.createbaseline.component.ChatGPTThinkingCard
-import com.hoabui.virtualbody3d.ui.camera.screens.createbaseline.component.CreateBaselineReviewBottomSheet
 import com.hoabui.virtualbody3d.domain.model.AnalysisType
-import com.hoabui.virtualbody3d.ui.camera.viewmodel.CameraCaptureEvent
 import com.hoabui.virtualbody3d.ui.camera.viewmodel.CameraCaptureUiState
 import com.hoabui.virtualbody3d.ui.camera.viewmodel.CameraCaptureViewModel
+import com.hoabui.virtualbody3d.ui.createbaseline.component.ChatGPTThinkingCard
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateBaselineScreen(
+fun MealCaptureScreen(
     modifier: Modifier = Modifier,
-    onComplete: () -> Unit,
     viewModel: CameraCaptureViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val reviewState by viewModel.reviewState.collectAsStateWithLifecycle()
     val pendingReviewFile by viewModel.pendingReviewFile.collectAsStateWithLifecycle(initialValue = null)
     val captureTrigger by viewModel.captureTrigger.collectAsStateWithLifecycle(initialValue = 0)
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val token = GymTheme.token
-    val colors = token.colors
-    val spacing = token.spacing
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -65,11 +53,9 @@ fun CreateBaselineScreen(
         onDispose { }
     }
 
-    LaunchedEffect(viewModel) {
-        viewModel.events.collect { event ->
-            when (event) {
-                is CameraCaptureEvent.NavigateHome -> onComplete()
-            }
+    LaunchedEffect(state) {
+        if (state is CameraCaptureUiState.ReviewExtracted) {
+            viewModel.onReviewDismiss()
         }
     }
 
@@ -112,69 +98,38 @@ fun CreateBaselineScreen(
         )
 
         when (val s = state) {
-            is CameraCaptureUiState.ReviewExtracted -> {
-                if (reviewState != null) {
-                    ModalBottomSheet(
-                        onDismissRequest = viewModel::onReviewDismiss,
-                        sheetState = sheetState
+            is CameraCaptureUiState.Error -> AlertDialog(
+                onDismissRequest = viewModel::onErrorDismiss,
+                title = {
+                    Text(
+                        text = stringResource(R.string.error_dialog_title),
+                        style = token.typography.titleLarge,
+                        color = token.colors.textPrimary
+                    )
+                },
+                text = {
+                    Text(
+                        text = s.message,
+                        style = token.typography.bodyMedium,
+                        color = token.colors.textPrimary
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = viewModel::onErrorDismiss,
+                        colors = ButtonDefaults.buttonColors(containerColor = token.colors.primary),
+                        shape = RoundedCornerShape(token.radius.lg),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = token.elevation.level0)
                     ) {
-                        CreateBaselineReviewBottomSheet(
-                            reviewState = reviewState!!,
-                            onUpdateField = viewModel::updateReviewField,
-                            onConfirm = viewModel::onConfirmBaseline,
-                            onRetake = viewModel::onReviewDismiss,
-                            modifier = Modifier.fillMaxHeight(0.9f)
+                        Text(
+                            text = stringResource(R.string.error_ok),
+                            style = token.typography.titleMedium
                         )
                     }
-                }
-            }
-            is CameraCaptureUiState.Error -> CreateBaselineErrorSnackbarOrDialog(
-                message = s.message,
-                onDismiss = viewModel::onErrorDismiss
+                },
+                shape = RoundedCornerShape(token.radius.lg)
             )
             else -> { }
         }
     }
 }
-
-@Composable
-private fun CreateBaselineErrorSnackbarOrDialog(
-    message: String,
-    onDismiss: () -> Unit
-) {
-    val token = GymTheme.token
-    val colors = token.colors
-    val typography = token.typography
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = stringResource(R.string.error_dialog_title),
-                style = typography.titleLarge,
-                color = colors.textPrimary
-            )
-        },
-        text = {
-            Text(
-                text = message,
-                style = typography.bodyMedium,
-                color = colors.textPrimary
-            )
-        },
-        confirmButton = {
-            Button(
-                onClick = onDismiss,
-                colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
-                shape = RoundedCornerShape(token.radius.lg),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = token.elevation.level0)
-            ) {
-                Text(
-                    text = stringResource(R.string.error_ok),
-                    style = typography.titleMedium
-                )
-            }
-        },
-        shape = RoundedCornerShape(token.radius.lg)
-    )
-}
-

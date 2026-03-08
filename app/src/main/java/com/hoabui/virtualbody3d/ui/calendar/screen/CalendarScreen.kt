@@ -57,16 +57,23 @@ import java.util.Locale
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 
+private const val CalendarMonthBatchSize = 3
+
 @Composable
 fun CalendarScreen(
-    modifier: Modifier = Modifier,
-    months: List<YearMonth>,
-    selectedDate: LocalDate?,
-    dailyItemsByDate: Map<LocalDate, List<DailyItem>>,
-    onDateSelected: (LocalDate) -> Unit,
-    onLoadMoreMonths: () -> Unit
+    modifier: Modifier = Modifier
 ) {
     val token = GymTheme.token
+    val today = remember { LocalDate.now() }
+    var months by remember {
+        mutableStateOf(
+            List(CalendarMonthBatchSize) { YearMonth.now().plusMonths(it.toLong()) }
+        )
+    }
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+    val dailyItemsByDate = remember(months) {
+        months.flatMap { month -> generateItemsForMonth(month).entries }.associate { it.toPair() }
+    }
     val listState = rememberLazyListState()
     var didInitialFocus by remember { mutableStateOf(false) }
     val monthGrids = remember(months) { months.map { month -> MonthGridUiModel(month, buildMonthCells(month)) } }
@@ -77,7 +84,11 @@ fun CalendarScreen(
                 ?: LocalDate.now().year
         }
     }
-    val today = remember { LocalDate.now() }
+
+    fun onLoadMoreMonths() {
+        val nextStart = months.lastOrNull()?.plusMonths(1) ?: YearMonth.now()
+        months = months + List(CalendarMonthBatchSize) { nextStart.plusMonths(it.toLong()) }
+    }
 
     LaunchedEffect(listState, months.size) {
         snapshotFlow {
@@ -97,7 +108,7 @@ fun CalendarScreen(
         if (todayMonthIndex >= 0) {
             listState.scrollToItem(todayMonthIndex)
             if (selectedDate == null) {
-                onDateSelected(today)
+                selectedDate = today
             }
             didInitialFocus = true
         }
@@ -155,7 +166,7 @@ fun CalendarScreen(
                                 selectedDate = selectedDate,
                                 today = today,
                                 dailyItemsByDate = dailyItemsByDate,
-                                onDateSelected = onDateSelected
+                                onDateSelected = { selectedDate = it }
                             )
                         }
                     }
@@ -447,4 +458,40 @@ private fun buildMonthCells(month: YearMonth): List<LocalDate?> {
     val all = leading + days
     val trailing = (7 - (all.size % 7)).let { if (it == 7) 0 else it }
     return all + List(trailing) { null }
+}
+
+private fun generateItemsForMonth(month: YearMonth): Map<LocalDate, List<DailyItem>> {
+    return (1..month.lengthOfMonth()).associate { day ->
+        val date = month.atDay(day)
+        date to createItemsForDate(date)
+    }
+}
+
+private fun createItemsForDate(date: LocalDate): List<DailyItem> {
+    val bucket = (date.dayOfMonth + date.monthValue) % 5
+    if (bucket == 0) return emptyList()
+    val items = mutableListOf<DailyItem>()
+    items += DailyItem(
+        id = "meal-${date}-0",
+        title = "Meal plan",
+        type = DailyItemType.Meal,
+        thumbnailResId = R.drawable.muscles
+    )
+    if (bucket % 2 == 0) {
+        items += DailyItem(
+            id = "activity-${date}-0",
+            title = "Cardio session",
+            type = DailyItemType.Activity,
+            thumbnailResId = R.drawable.muscles
+        )
+    }
+    if (bucket >= 3) {
+        items += DailyItem(
+            id = "meal-${date}-1",
+            title = "Snack log",
+            type = DailyItemType.Meal,
+            thumbnailResId = R.drawable.muscles
+        )
+    }
+    return items
 }

@@ -25,7 +25,6 @@ class CameraCaptureViewModel @Inject constructor(
     private val prepareImageUseCase: PrepareImageUseCase,
     private val uploadImageUseCase: UploadImageUseCase,
     private val analyzeImageUseCase: AnalyzeImageUseCase,
-    private val saveBaselineUseCase: SaveBaselineUseCase
 ) : BaseViewModel<CameraCaptureUiState, CameraCaptureEvent>(CameraCaptureUiState.CameraActive) {
 
     init {
@@ -58,6 +57,26 @@ class CameraCaptureViewModel @Inject constructor(
 
     private val _pendingReviewFile = MutableStateFlow<File?>(null)
     val pendingReviewFile: StateFlow<File?> = _pendingReviewFile.asStateFlow()
+
+    /** Survives recomposition so we only navigate to scan result once per ReviewExtracted. */
+    private val _hasNavigatedToScanResult = MutableStateFlow(false)
+    val hasNavigatedToScanResult: StateFlow<Boolean> = _hasNavigatedToScanResult.asStateFlow()
+
+    fun markHasNavigatedToScanResult() {
+        _hasNavigatedToScanResult.value = true
+    }
+
+    fun clearHasNavigatedToScanResult() {
+        _hasNavigatedToScanResult.value = false
+    }
+
+    /** Call when user returns from BodyScanResult so UI shows camera again (state was still ReviewExtracted). */
+    fun resetToCameraAfterReturnFromScanResult() {
+        Log.d(TAG, "[ACTION] resetToCameraAfterReturnFromScanResult")
+        _pendingReviewFile.value = null
+        logState(CameraCaptureUiState.CameraActive, "resetToCameraAfterReturnFromScanResult")
+        updateState { CameraCaptureUiState.CameraActive }
+    }
 
     /** User taps "Capture Photo" button → request a capture (camera content will take picture). */
     fun requestCapture() {
@@ -159,6 +178,7 @@ class CameraCaptureViewModel @Inject constructor(
         }.fold(
             onSuccess = { data ->
                 _pendingReviewFile.value = null
+                _hasNavigatedToScanResult.value = false
                 logState(CameraCaptureUiState.ReviewExtracted(data), "runUploadAndAnalyzePipeline")
                 updateState { CameraCaptureUiState.ReviewExtracted(data) }
                 _reviewState.value = ReviewState(
@@ -222,30 +242,6 @@ class CameraCaptureViewModel @Inject constructor(
         )
     }
 
-    /** User confirms baseline in review → save then navigate Home. */
-    fun onConfirmBaseline() {
-        val state = _reviewState.value ?: return
-        if (!state.isValid || state.isLoading) return
-        viewModelScope.launch {
-            _reviewState.value = state.copy(isLoading = true)
-            runCatching {
-                withContext(Dispatchers.IO) { saveBaselineUseCase(state.editableData) }
-            }.fold(
-                onSuccess = {
-                    _reviewState.value = null
-                    logState(CameraCaptureUiState.CameraActive, "onConfirmBaseline")
-                    updateState { CameraCaptureUiState.CameraActive }
-                    sendEvent(CameraCaptureEvent.NavigateHome)
-                },
-                onFailure = { e ->
-                    _reviewState.value = state.copy(isLoading = false)
-                    val err = CameraCaptureUiState.Error(e.message ?: "Save failed")
-                    logState(err, "onConfirmBaseline")
-                    updateState { err }
-                }
-            )
-        }
-    }
 
     /** User dismisses review without confirming → back to CameraActive. */
     fun onReviewDismiss() {

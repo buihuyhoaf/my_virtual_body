@@ -4,7 +4,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhotoCamera
@@ -19,7 +21,10 @@ object Routes {
     const val HOME = "home"
     const val ADD = "add"
     const val MEAL_CAPTURE = "meal_capture"
+    const val MESSAGES = "messages"
+    const val CENFIT_COACH = "cenfit_coach"
     const val CALENDAR = "calendar"
+    const val BODY_SCAN_RESULT = "body_scan_result"
 }
 
 sealed class AppDestination(
@@ -69,10 +74,28 @@ sealed class AppDestination(
         icon = Icons.Default.PhotoCamera
     )
 
+    data object Messages : AppDestination(
+        route = Routes.MESSAGES,
+        labelResId = R.string.tab_messages,
+        icon = Icons.Default.Message
+    )
+
+    data object CenfitCoach : AppDestination(
+        route = Routes.CENFIT_COACH,
+        labelResId = R.string.tab_cenfit_coach,
+        icon = Icons.Default.FitnessCenter
+    )
+
     data object Calendar : AppDestination(
         route = Routes.CALENDAR,
         labelResId = R.string.tab_calendar,
         icon = Icons.Default.CalendarMonth
+    )
+
+    data object BodyScanResult : AppDestination(
+        route = Routes.BODY_SCAN_RESULT,
+        labelResId = R.string.body_scan_result_title,
+        icon = Icons.Default.Person
     )
 
     companion object {
@@ -80,7 +103,9 @@ sealed class AppDestination(
 
         val bottomBarDestinations: List<AppDestination> = listOf(
             Home,
+            CenfitCoach,
             MealCapture,
+            Messages,
             Calendar
         )
     }

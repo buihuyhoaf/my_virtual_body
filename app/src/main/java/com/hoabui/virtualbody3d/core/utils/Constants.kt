@@ -20,4 +20,14 @@ object Constants {
     const val BODY_ANALYSIS_PROGRESS_RING_START_ANGLE: Float = -90f
     const val BODY_ANALYSIS_PROGRESS_RING_SWEEP_ANGLE: Float = 360f
     const val BODY_ANALYSIS_MEAL_NAME_MAX_LINES: Int = 2
+    const val PANEL_PAGE_COUNT = 2
+    const val CALORIES_TODAY_PANEL_INDEX: Int = 0
+    const val BODY_METRICS_PANEL_INDEX: Int = 1
+    const val CENTIMETER: String = "cm"
+    const val KILOGRAM: String = "kg"
+
+
+     const val HERO_TRANSITION_DURATION_MS = 240
+     const val HERO_MODEL_SCALE_HIDDEN = 0.96f
+     const val HERO_IMAGE_SCALE_HIDDEN = 1.04f
 }

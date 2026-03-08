@@ -91,6 +91,7 @@
     <string name="analysis_dashboard_sleep_value">7h 40m</string>
     <string name="analysis_dashboard_sleep_subtitle">Điểm phục hồi 84%%</string>
     <string name="analysis_view_detailed_analysis">Xem phân tích chi tiết</string>
+    <string name="analysis_rotate_to_image">Chuyển sang ảnh / mô hình 3D</string>
 
     <!-- Body regions (Home screen region row) -->
     <string name="body_region_upper_body">Thân trên</string>
@@ -102,8 +103,10 @@
     <!-- Body Tabs -->
     <string name="tab_home">Trang chủ</string>
     <string name="tab_add">Thêm</string>
-    <string name="tab_meal_capture">Chụp bữa ăn</string>
+    <string name="tab_meal_capture">Bữa ăn</string>
     <string name="tab_calendar">Lịch</string>
+    <string name="tab_messages">Tin nhắn</string>
+    <string name="tab_cenfit_coach">Cenfit</string>
     <string name="tab_body">Cơ thể</string>
     <string name="tab_nutrition">Dinh dưỡng</string>
     <string name="tab_workout">Tập luyện</string>
@@ -197,4 +200,33 @@
     <string name="login_continue_apple">Apple</string>
     <string name="login_no_account">Chưa có tài khoản?</string>
     <string name="login_sign_up">Đăng ký</string>
+
+    <!-- Body Scan Result Screen (InBody-style report) -->
+    <string name="body_scan_result_title">Phân tích cơ thể</string>
+    <string name="body_scan_result_back">Quay lại</string>
+    <string name="body_scan_result_3d_placeholder">Mô hình cơ thể 3D\n(xoay &amp; tương tác sắp ra mắt)</string>
+    <string name="body_scan_result_body_composition">Body Composition</string>
+    <string name="body_scan_result_weight">Cân nặng</string>
+    <string name="body_scan_result_total_body_water">Total Body Water</string>
+    <string name="body_scan_result_protein">Protein</string>
+    <string name="body_scan_result_mineral">Mineral</string>
+    <string name="body_scan_result_body_fat_mass">Body Fat Mass</string>
+    <string name="body_scan_result_fat_free_mass">Fat Free Mass</string>
+    <string name="body_scan_result_muscle_fat_analysis">Muscle–Fat Analysis</string>
+    <string name="body_scan_result_skeletal_muscle_mass">Skeletal Muscle Mass</string>
+    <string name="body_scan_result_obesity_analysis">Obesity Analysis</string>
+    <string name="body_scan_result_bmi">BMI</string>
+    <string name="body_scan_result_percent_body_fat">Percent Body Fat</string>
+    <string name="body_scan_result_segmental_lean">Segmental Lean Analysis</string>
+    <string name="body_scan_result_left_arm">Tay trái</string>
+    <string name="body_scan_result_right_arm">Tay phải</string>
+    <string name="body_scan_result_trunk">Thân mình</string>
+    <string name="body_scan_result_left_leg">Chân trái</string>
+    <string name="body_scan_result_right_leg">Chân phải</string>
+    <string name="body_scan_result_segmental_fat">Segmental Fat Analysis</string>
+    <string name="body_scan_result_metabolic">Chuyển hóa / Nghiên cứu</string>
+    <string name="body_scan_result_bmr">Basal Metabolic Rate</string>
+    <string name="body_scan_result_obesity_degree">Mức độ béo phì</string>
+    <string name="body_scan_result_recommended_calorie">Lượng Calories khuyến nghị</string>
+    <string name="metrics_panel_no_data">Chưa có dữ liệu phân tích. Thực hiện quét cơ thể để xem metrics.</string>
 </resources>

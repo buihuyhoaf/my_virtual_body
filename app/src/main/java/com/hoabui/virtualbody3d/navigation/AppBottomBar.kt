@@ -9,13 +9,15 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
@@ -52,7 +54,7 @@ fun AppBottomBar(
                     horizontal = bodyToken.dashboardFloatingNavHorizontalPadding,
                     vertical = bodyToken.dashboardFloatingNavVerticalPadding
                 ),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.spacedBy(0.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             AppDestination.bottomBarDestinations.forEach { destination ->
@@ -61,6 +63,8 @@ fun AppBottomBar(
                     ?.any { it.route == destination.route } == true
                 Column(
                     modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
                         .clickable {
                             navController.navigate(destination.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
@@ -82,7 +86,9 @@ fun AppBottomBar(
                     Text(
                         text = stringResource(destination.labelResId),
                         style = token.typography.labelMedium,
-                        color = if (selected) token.colors.primary else token.colors.textSecondary
+                        color = if (selected) token.colors.primary else token.colors.textSecondary,
+                        maxLines = 2,
+                        textAlign = TextAlign.Center
                     )
                 }
             }

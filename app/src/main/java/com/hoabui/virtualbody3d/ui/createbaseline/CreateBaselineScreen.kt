@@ -1,4 +1,4 @@
-package com.hoabui.virtualbody3d.ui.camera.screens.mealcapture
+package com.hoabui.virtualbody3d.ui.createbaseline
 
 import android.Manifest
 import android.net.Uri
@@ -11,32 +11,40 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.camera.CameraCaptureScreenContent
+import com.hoabui.virtualbody3d.ui.createbaseline.component.ChatGPTThinkingCard
 import com.hoabui.virtualbody3d.domain.model.AnalysisType
 import com.hoabui.virtualbody3d.ui.camera.viewmodel.CameraCaptureUiState
 import com.hoabui.virtualbody3d.ui.camera.viewmodel.CameraCaptureViewModel
-import com.hoabui.virtualbody3d.ui.camera.screens.createbaseline.component.ChatGPTThinkingCard
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MealCaptureScreen(
+fun CreateBaselineScreen(
     modifier: Modifier = Modifier,
+    onNavigateToScanResult: () -> Unit = {},
     viewModel: CameraCaptureViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val pendingReviewFile by viewModel.pendingReviewFile.collectAsStateWithLifecycle(initialValue = null)
     val captureTrigger by viewModel.captureTrigger.collectAsStateWithLifecycle(initialValue = 0)
+    // Nullable so we don't navigate on first frame when returning from BodyScanResult (initial would be false and trigger re-navigate).
+    val hasNavigatedToScanResult by viewModel.hasNavigatedToScanResult.collectAsStateWithLifecycle(initialValue = null)
     val token = GymTheme.token
+    val colors = token.colors
+    val spacing = token.spacing
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -53,9 +61,22 @@ fun MealCaptureScreen(
         onDispose { }
     }
 
-    LaunchedEffect(state) {
-        if (state is CameraCaptureUiState.ReviewExtracted) {
-            viewModel.onReviewDismiss()
+    LaunchedEffect(state, hasNavigatedToScanResult) {
+        when (state) {
+            is CameraCaptureUiState.ReviewExtracted -> {
+                when (hasNavigatedToScanResult) {
+                    false -> {
+                        viewModel.markHasNavigatedToScanResult()
+                        onNavigateToScanResult()
+                    }
+                    true -> {
+                        // User returned from BodyScanResult; state was still ReviewExtracted so camera was hidden. Reset to show CameraActive UI.
+                        viewModel.resetToCameraAfterReturnFromScanResult()
+                    }
+                    null -> { /* Waiting for first emission, do nothing */ }
+                }
+            }
+            else -> viewModel.clearHasNavigatedToScanResult()
         }
     }
 
@@ -98,38 +119,53 @@ fun MealCaptureScreen(
         )
 
         when (val s = state) {
-            is CameraCaptureUiState.Error -> AlertDialog(
-                onDismissRequest = viewModel::onErrorDismiss,
-                title = {
-                    Text(
-                        text = stringResource(R.string.error_dialog_title),
-                        style = token.typography.titleLarge,
-                        color = token.colors.textPrimary
-                    )
-                },
-                text = {
-                    Text(
-                        text = s.message,
-                        style = token.typography.bodyMedium,
-                        color = token.colors.textPrimary
-                    )
-                },
-                confirmButton = {
-                    Button(
-                        onClick = viewModel::onErrorDismiss,
-                        colors = ButtonDefaults.buttonColors(containerColor = token.colors.primary),
-                        shape = RoundedCornerShape(token.radius.lg),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = token.elevation.level0)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.error_ok),
-                            style = token.typography.titleMedium
-                        )
-                    }
-                },
-                shape = RoundedCornerShape(token.radius.lg)
+            is CameraCaptureUiState.Error -> CreateBaselineErrorSnackbarOrDialog(
+                message = s.message,
+                onDismiss = viewModel::onErrorDismiss
             )
             else -> { }
         }
     }
 }
+
+@Composable
+private fun CreateBaselineErrorSnackbarOrDialog(
+    message: String,
+    onDismiss: () -> Unit
+) {
+    val token = GymTheme.token
+    val colors = token.colors
+    val typography = token.typography
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = stringResource(R.string.error_dialog_title),
+                style = typography.titleLarge,
+                color = colors.textPrimary
+            )
+        },
+        text = {
+            Text(
+                text = message,
+                style = typography.bodyMedium,
+                color = colors.textPrimary
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
+                shape = RoundedCornerShape(token.radius.lg),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = token.elevation.level0)
+            ) {
+                Text(
+                    text = stringResource(R.string.error_ok),
+                    style = typography.titleMedium
+                )
+            }
+        },
+        shape = RoundedCornerShape(token.radius.lg)
+    )
+}
+

@@ -11,10 +11,8 @@ fun AppNavigationRoot(
     onOnboardingCompleted: () -> Unit
 ) {
     val navController = rememberNavController()
-    val sharedViewModel: BodyViewModel = hiltViewModel()
     AppScaffoldLayout(
         navController = navController,
-        sharedViewModel = sharedViewModel,
         startDestination = startDestination,
         onOnboardingCompleted = onOnboardingCompleted
     )
