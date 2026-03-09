@@ -14,12 +14,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
@@ -30,6 +29,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,112 +40,190 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.ui.body.components.HeroSection
+import com.hoabui.virtualbody3d.core.base.UiState
+import com.hoabui.virtualbody3d.domain.model.BodyScanResult
+import com.hoabui.virtualbody3d.ui.body.components.StaticHeroSection
 import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
+import com.hoabui.virtualbody3d.ui.body.state.BodyScreenState
 import com.hoabui.virtualbody3d.ui.body.state.BodyUiState
+import com.hoabui.virtualbody3d.ui.body.state.toUiState
+import com.hoabui.virtualbody3d.ui.body.viewmodel.BodyViewModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 @Composable
 fun BodyRegionDetailScreen(
     regionName: String,
     onBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: BodyViewModel = hiltViewModel()
 ) {
     val token = GymTheme.token
     val displayName = rememberRegionDisplayName(regionName)
-    val scrollState = rememberScrollState()
-    val defaultUiState = BodyUiState(
-        height = "170 cm",
-        weight = "68 kg"
-    )
+    val screenState by viewModel.state.collectAsStateWithLifecycle()
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
+    if (screenState is UiState.Loading) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(token.colors.background)
+        )
+    } else if (screenState is UiState.Error) {
+        val errorState = screenState as UiState.Error
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(token.colors.background),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = errorState.message,
+                color = token.colors.textSecondary
+            )
+        }
+    } else if (screenState is UiState.Success<*>) {
+        val successState = screenState as UiState.Success<BodyScreenState>
+        BodyRegionDetailScreenContent(
+            modifier = modifier,
+            scanResult = successState.data.scanResult,
+            displayName = displayName,
+            onBack = onBack
+        )
+    }
+}
+
+@Composable
+fun BodyRegionDetailScreenContent(
+    modifier: Modifier = Modifier,
+    scanResult: BodyScanResult,
+    displayName: String,
+    onBack: () -> Unit
+) {
+    val token = GymTheme.token
+    val uiState: BodyUiState = scanResult.toUiState()
+    val bodyScore = ((uiState.bmiScalePosition ?: 0.76f) * 100f).toInt().coerceIn(0, 100)
+
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(token.spacing.lg)
     ) {
         // 1. Top: Back button + Muscle name
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = token.spacing.xs, vertical = token.spacing.xs),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.body_region_detail_back),
-                    tint = token.colors.textPrimary
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = token.spacing.xs, vertical = token.spacing.xs),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.body_region_detail_back),
+                        tint = token.colors.textPrimary
+                    )
+                }
+                Spacer(modifier = Modifier.width(token.spacing.xs))
+                Text(
+                    text = displayName,
+                    style = token.typography.titleLarge,
+                    color = token.colors.textPrimary,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
-            Spacer(modifier = Modifier.width(token.spacing.xs))
-            Text(
-                text = displayName,
-                style = token.typography.titleLarge,
-                color = token.colors.textPrimary,
-                fontWeight = FontWeight.SemiBold
+        }
+
+        // 2. 3D Muscle Viewer: Static hero section (ảnh tĩnh/snapshot)
+        item {
+            StaticHeroSection(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp)
+                    .padding(horizontal = token.spacing.md),
+                uiState = uiState,
+                bodyScore = bodyScore
             )
         }
 
-        Column(
-            modifier = Modifier.padding(horizontal = token.spacing.md),
-            verticalArrangement = Arrangement.spacedBy(token.spacing.lg)
-        ) {
-            // 2. 3D Muscle Viewer: HeroSection
-            HeroSection(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(220.dp),
-                uiState = defaultUiState,
-                bodyScore = 72,
-                showRotateChip = true
-            )
-
-            // 3. Muscle Metrics Section
+        // 3. Muscle Metrics Section
+        item {
             Text(
+                modifier = Modifier.padding(horizontal = token.spacing.md),
                 text = stringResource(R.string.body_region_detail_muscle_metrics),
                 style = token.typography.titleMedium,
                 color = token.colors.textPrimary,
                 fontWeight = FontWeight.Medium
             )
+        }
+        item {
+            MuscleCompositionCard(
+                modifier = Modifier.padding(horizontal = token.spacing.md)
+            )
+        }
+        item {
+            PerformanceCard(
+                modifier = Modifier.padding(horizontal = token.spacing.md)
+            )
+        }
+        item {
+            BalanceCard(
+                modifier = Modifier.padding(horizontal = token.spacing.md)
+            )
+        }
+        item {
+            HealthIndicatorsCard(
+                modifier = Modifier.padding(horizontal = token.spacing.md)
+            )
+        }
 
-            MuscleCompositionCard()
-            PerformanceCard()
-            BalanceCard()
-            HealthIndicatorsCard()
-
-            // 4. Recommended Exercises Section
+        // 4. Recommended Exercises Section
+        item {
             Text(
+                modifier = Modifier.padding(horizontal = token.spacing.md),
                 text = stringResource(R.string.body_region_detail_recommended_exercises),
                 style = token.typography.titleMedium,
                 color = token.colors.textPrimary,
                 fontWeight = FontWeight.Medium
             )
+        }
+        item {
+            RecommendedExercisesSection(
+                regionDisplayName = displayName,
+                modifier = Modifier.padding(horizontal = token.spacing.md)
+            )
+        }
 
-            RecommendedExercisesSection(regionDisplayName = displayName)
-
-            // 5. Real-life Applications Section
+        // 5. Real-life Applications Section
+        item {
             Text(
+                modifier = Modifier.padding(horizontal = token.spacing.md),
                 text = stringResource(R.string.body_region_detail_real_life_applications),
                 style = token.typography.titleMedium,
                 color = token.colors.textPrimary,
                 fontWeight = FontWeight.Medium
             )
+        }
+        item {
+            RealLifeApplicationsCard(
+                modifier = Modifier.padding(horizontal = token.spacing.md)
+            )
+        }
 
-            RealLifeApplicationsCard()
-
+        item {
             Spacer(modifier = Modifier.height(token.spacing.xl))
         }
     }
 }
 
 @Composable
-private fun MuscleCompositionCard() {
+private fun MuscleCompositionCard(
+    modifier: Modifier = Modifier
+) {
     val token = GymTheme.token
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(token.radius.lg),
         colors = CardDefaults.cardColors(containerColor = token.colors.surfaceOverlay),
         elevation = CardDefaults.cardElevation(defaultElevation = token.card.elevation)
@@ -174,10 +252,12 @@ private fun MuscleCompositionCard() {
 }
 
 @Composable
-private fun PerformanceCard() {
+private fun PerformanceCard(
+    modifier: Modifier = Modifier
+) {
     val token = GymTheme.token
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(token.radius.lg),
         colors = CardDefaults.cardColors(containerColor = token.colors.surfaceOverlay),
         elevation = CardDefaults.cardElevation(defaultElevation = token.card.elevation)
@@ -211,10 +291,12 @@ private fun PerformanceCard() {
 }
 
 @Composable
-private fun BalanceCard() {
+private fun BalanceCard(
+    modifier: Modifier = Modifier
+) {
     val token = GymTheme.token
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(token.radius.lg),
         colors = CardDefaults.cardColors(containerColor = token.colors.surfaceOverlay),
         elevation = CardDefaults.cardElevation(defaultElevation = token.card.elevation)
@@ -238,10 +320,12 @@ private fun BalanceCard() {
 }
 
 @Composable
-private fun HealthIndicatorsCard() {
+private fun HealthIndicatorsCard(
+    modifier: Modifier = Modifier
+) {
     val token = GymTheme.token
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(token.radius.lg),
         colors = CardDefaults.cardColors(containerColor = token.colors.surfaceOverlay),
         elevation = CardDefaults.cardElevation(defaultElevation = token.card.elevation)

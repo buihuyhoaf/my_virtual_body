@@ -1,6 +1,6 @@
 package com.hoabui.virtualbody3d.ui.body.viewmodel
 
-import com.hoabui.virtualbody3d.core.base.BaseViewModel
+import com.hoabui.virtualbody3d.core.base.UiStateViewModel
 import com.hoabui.virtualbody3d.domain.usecase.GetBodyDataUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetCaloriesTodayUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetPromoBannersUseCase
@@ -16,7 +16,7 @@ class BodyViewModel @Inject constructor(
     private val getBodyDataUseCase: GetBodyDataUseCase,
     private val getCaloriesTodayUseCase: GetCaloriesTodayUseCase,
     private val getPromoBannersUseCase: GetPromoBannersUseCase
-) : BaseViewModel<BodyScreenState, BodyEvent>(BodyScreenState()) {
+) : UiStateViewModel<BodyScreenState, BodyEvent>() {
 
     init {
         launchSafely {
@@ -30,10 +30,13 @@ class BodyViewModel @Inject constructor(
                     caloriesToday = caloriesTodayData.toCaloriesTodayUiState(),
                     promoBanners = promoBanners
                 )
-            }.collect { state ->
-                updateState { state }
+            }.collect { bodyScreenState ->
+                setSuccess(bodyScreenState)
             }
         }
     }
 
+    override fun onError(throwable: Throwable) {
+        setError(throwable.message ?: "Unknown error")
+    }
 }

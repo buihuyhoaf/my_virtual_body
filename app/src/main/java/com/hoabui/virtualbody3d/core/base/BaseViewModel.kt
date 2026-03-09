@@ -11,18 +11,19 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 /**
- * Production-ready base ViewModel with typed state (S), one-off events (E),
- * safe coroutine launch, and overridable error handling.
+ * Generic base ViewModel with state (S) and one-off events (E).
  *
- * @param S UiState type (must be immutable; use data class + copy).
- * @param E One-off event type (e.g. navigation, snackbar, dialog).
- * @param initialState Initial value for [state].
+ * Subclasses provide an initial state via [initialState] and can use [updateState] or [setState]
+ * to mutate it in an immutable way (`copy(...)` for data classes).
  */
-abstract class BaseViewModel<S : Any, E : Any>(
-    initialState: S
-) : ViewModel() {
+abstract class BaseViewModel<S : Any, E : Any> : ViewModel() {
 
-    private val _state = MutableStateFlow(initialState)
+    /**
+     * Initial value for [state]. Each subclass must provide its own immutable initial state.
+     */
+    protected abstract fun initialState(): S
+
+    private val _state: MutableStateFlow<S> = MutableStateFlow(initialState())
     val state: StateFlow<S> = _state.asStateFlow()
 
     private val _events = Channel<E>(Channel.BUFFERED)
@@ -31,9 +32,20 @@ abstract class BaseViewModel<S : Any, E : Any>(
     /**
      * Updates state using [block]. Use `copy(...)` inside the block for immutable updates.
      * Example: `updateState { copy(isLoading = true) }`
+     *
+     * NOTE: For simple state replacement (no need for previous value), prefer [setState]
+     * to avoid relying on the current state's receiver.
      */
     protected fun updateState(block: S.() -> S) {
         _state.value = _state.value.block()
+    }
+
+    /**
+     * Directly replace the current state with [newState].
+     * Useful when your new state does not depend on the previous one.
+     */
+    protected fun setState(newState: S) {
+        _state.value = newState
     }
 
     /**

@@ -23,6 +23,7 @@ object Routes {
     const val ADD = "add"
     const val MEAL_CAPTURE = "meal_capture"
     const val MESSAGES = "messages"
+    const val MESSAGE_DETAIL = "message_detail"
     const val CENFIT_COACH = "cenfit_coach"
     const val CALENDAR = "calendar"
     const val BODY_SCAN_RESULT = "body_scan_result"
@@ -78,6 +79,12 @@ sealed class AppDestination(
 
     data object Messages : AppDestination(
         route = Routes.MESSAGES,
+        labelResId = R.string.tab_messages,
+        icon = Icons.Default.Message
+    )
+
+    data class MessageDetail(val messageId: String) : AppDestination(
+        route = "${Routes.MESSAGE_DETAIL}/$messageId",
         labelResId = R.string.tab_messages,
         icon = Icons.Default.Message
     )

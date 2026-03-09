@@ -9,7 +9,9 @@ import javax.inject.Inject
 @HiltViewModel
 class InitialSetupViewModel @Inject constructor(
     private val initialSetupRepository: InitialSetupRepository
-) : BaseViewModel<InitialSetupUiState, InitialSetupEvent>(InitialSetupUiState()) {
+) : BaseViewModel<InitialSetupUiState, InitialSetupEvent>() {
+
+    override fun initialState(): InitialSetupUiState = InitialSetupUiState()
 
     init {
         loadSteps()

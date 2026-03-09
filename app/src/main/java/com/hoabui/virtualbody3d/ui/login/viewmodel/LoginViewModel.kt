@@ -8,7 +8,9 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase
-) : BaseViewModel<LoginUiState, LoginEvent>(LoginUiState()) {
+) : BaseViewModel<LoginUiState, LoginEvent>() {
+
+    override fun initialState(): LoginUiState = LoginUiState()
 
     fun onEmailChanged(email: String) {
         updateState { copy(email = email) }

@@ -16,6 +16,7 @@ import com.hoabui.virtualbody3d.ui.body.screen.BodyRegionDetailScreen
 import com.hoabui.virtualbody3d.ui.calendar.screen.CalendarScreen
 import com.hoabui.virtualbody3d.ui.cenfitcoach.CenfitCoachScreen
 import com.hoabui.virtualbody3d.ui.createbaseline.CreateBaselineScreen
+import com.hoabui.virtualbody3d.ui.messages.MessageDetailScreen
 import com.hoabui.virtualbody3d.ui.messages.MessagesScreen
 import com.hoabui.virtualbody3d.ui.initialsetup.InitialSetupScreen
 import com.hoabui.virtualbody3d.ui.login.LoginScreen
@@ -112,7 +113,21 @@ fun AppNavGraph(
             MealCaptureScreen()
         }
         composable(route = AppDestination.Messages.route) {
-            MessagesScreen()
+            MessagesScreen(
+                onMessageClick = { message ->
+                    navController.navigate(AppDestination.MessageDetail(message.id).route)
+                }
+            )
+        }
+        composable(
+            route = "${Routes.MESSAGE_DETAIL}/{messageId}",
+            arguments = listOf(navArgument("messageId") { type = androidx.navigation.NavType.StringType })
+        ) { backStackEntry ->
+            val messageId = backStackEntry.arguments?.getString("messageId") ?: return@composable
+            MessageDetailScreen(
+                messageId = messageId,
+                onBack = { navController.popBackStack() }
+            )
         }
         composable(route = AppDestination.CenfitCoach.route) {
             CenfitCoachScreen()

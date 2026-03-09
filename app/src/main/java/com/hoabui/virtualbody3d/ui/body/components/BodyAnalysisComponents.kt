@@ -166,6 +166,66 @@ fun HeroSection(
 }
 
 @Composable
+fun StaticHeroSection(
+    modifier: Modifier = Modifier,
+    uiState: BodyUiState,
+    bodyScore: Int
+) {
+    val token = GymTheme.token
+    val bodyToken = token.bodyAnalysis
+
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(token.radius.lg))
+            .background(
+                brush = Brush.radialGradient(
+                    center = Offset(0.5f, 0.5f),
+                    radius = 1.2f,
+                    colors = listOf(token.colors.primarySoft, MaterialTheme.colorScheme.surface)
+                )
+            )
+    ) {
+        Image(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(token.radius.lg)),
+            painter = painterResource(R.drawable.body_unsplash),
+            contentDescription = null,
+            contentScale = ContentScale.Crop
+        )
+
+        BodyScoreChip(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(
+                    top = bodyToken.scoreChipTopPadding,
+                    start = bodyToken.metricChipSidePadding
+                ),
+            score = bodyScore,
+            prominent = true
+        )
+        Column(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(
+                    top = bodyToken.scoreChipTopPadding,
+                    end = bodyToken.metricChipSidePadding
+                ),
+            verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
+        ) {
+            FloatingMetricChip(
+                icon = Icons.Default.MonitorWeight,
+                value = uiState.weight.formatMeasurement(Constants.KILOGRAM)
+            )
+            FloatingMetricChip(
+                icon = Icons.Default.Opacity,
+                value = uiState.height.formatMeasurement(Constants.CENTIMETER)
+            )
+        }
+    }
+}
+
+@Composable
 fun BodyRegionRow(
     modifier: Modifier = Modifier,
     onRegionClick: (BodyRegion) -> Unit = {}

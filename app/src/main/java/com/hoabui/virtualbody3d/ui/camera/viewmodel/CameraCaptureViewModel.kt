@@ -25,7 +25,9 @@ class CameraCaptureViewModel @Inject constructor(
     private val prepareImageUseCase: PrepareImageUseCase,
     private val uploadImageUseCase: UploadImageUseCase,
     private val analyzeImageUseCase: AnalyzeImageUseCase,
-) : BaseViewModel<CameraCaptureUiState, CameraCaptureEvent>(CameraCaptureUiState.CameraActive) {
+) : BaseViewModel<CameraCaptureUiState, CameraCaptureEvent>() {
+
+    override fun initialState(): CameraCaptureUiState = CameraCaptureUiState.CameraActive
 
     init {
         logState(CameraCaptureUiState.CameraActive, "init")
