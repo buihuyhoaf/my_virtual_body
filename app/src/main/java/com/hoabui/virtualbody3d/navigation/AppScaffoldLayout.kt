@@ -7,7 +7,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.hoabui.virtualbody3d.ui.body.viewmodel.BodyViewModel
+
+private val fullScreenRoutes = setOf(
+    Routes.ONBOARDING,
+    Routes.INITIAL_SETUP,
+    Routes.CREATE_BASELINE,
+    Routes.BODY_SCAN_RESULT
+)
 
 @Composable
 fun AppScaffoldLayout(
@@ -18,7 +24,7 @@ fun AppScaffoldLayout(
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val showBars = currentRoute in AppDestination.bottomBarDestinations.map { it.route }
+    val showBars = currentRoute != null && currentRoute !in fullScreenRoutes
 
     Scaffold(
         modifier = modifier,

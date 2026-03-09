@@ -45,6 +45,7 @@ import java.time.LocalDate
 
 @Composable
 fun BodyAnalysisScreen(
+    onRegionClick: (BodyRegion) -> Unit = {},
     viewModel: BodyViewModel = hiltViewModel()
 ) {
     val screenState by viewModel.state.collectAsStateWithLifecycle()
@@ -53,8 +54,7 @@ fun BodyAnalysisScreen(
         modifier = Modifier.fillMaxSize(),
         scanResult = scanResult,
         caloriesToday = screenState.caloriesToday,
-        selectedRegion = screenState.selectedRegion,
-        onRegionSelected = viewModel::onRegionSelected,
+        onRegionClick = onRegionClick,
         promoBanners = screenState.promoBanners
     )
 }
@@ -64,8 +64,7 @@ fun BodyAnalysisContent(
     modifier: Modifier = Modifier,
     scanResult: BodyScanResult?,
     caloriesToday: CaloriesTodayUiState,
-    selectedRegion: BodyRegion?,
-    onRegionSelected: (BodyRegion) -> Unit,
+    onRegionClick: (BodyRegion) -> Unit = {},
     promoBanners: List<PromoBanner> = emptyList()
 ) {
     val token = GymTheme.token
@@ -93,8 +92,7 @@ fun BodyAnalysisContent(
         )
         BodyRegionRow(
             modifier = Modifier.weight(0.12f),
-            selectedRegion = selectedRegion,
-            onRegionSelected = onRegionSelected
+            onRegionClick = onRegionClick
         )
 
         PanelSlider(

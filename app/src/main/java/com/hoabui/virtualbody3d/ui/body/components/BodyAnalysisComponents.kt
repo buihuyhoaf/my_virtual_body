@@ -71,7 +71,6 @@ fun HeroSection(
     modifier: Modifier = Modifier,
     uiState: BodyUiState,
     bodyScore: Int,
-    showDetailedAnalysisCta: Boolean = true,
     showRotateChip: Boolean = false
 ) {
     val token = GymTheme.token
@@ -134,20 +133,6 @@ fun HeroSection(
                     value = uiState.height.formatMeasurement(Constants.CENTIMETER)
                 )
             }
-            if (showDetailedAnalysisCta) {
-                TextButton(
-                    onClick = { },
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = bodyToken.previewTrackBottomPadding)
-                ) {
-                    Text(
-                        text = stringResource(R.string.analysis_view_detailed_analysis),
-                        style = token.typography.labelMedium,
-                        color = token.colors.primary
-                    )
-                }
-            }
         }
         if (showRotateChip) {
             Surface(
@@ -183,8 +168,7 @@ fun HeroSection(
 @Composable
 fun BodyRegionRow(
     modifier: Modifier = Modifier,
-    selectedRegion: BodyRegion?,
-    onRegionSelected: (BodyRegion) -> Unit
+    onRegionClick: (BodyRegion) -> Unit = {}
 ) {
     val token = GymTheme.token
     LazyRow(
@@ -198,8 +182,9 @@ fun BodyRegionRow(
         ) { region ->
             BodyRegionItem(
                 region = region,
-                isSelected = selectedRegion == region,
-                onClick = { onRegionSelected(region) }
+                onClick = {
+                    onRegionClick(region)
+                }
             )
         }
     }
@@ -208,13 +193,12 @@ fun BodyRegionRow(
 @Composable
 fun BodyRegionItem(
     region: BodyRegion,
-    isSelected: Boolean,
     onClick: () -> Unit
 ) {
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis
-    val surfaceColor = if (isSelected) token.colors.primarySoft else token.colors.surfaceOverlay
-    val borderColor = if (isSelected) token.colors.primary else token.colors.surfaceBorder
+    val surfaceColor = token.colors.surfaceOverlay
+    val borderColor = token.colors.surfaceBorder
 
     Surface(
         modifier = Modifier
@@ -230,8 +214,7 @@ fun BodyRegionItem(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(token.spacing.md),
+                .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
         ) {
@@ -262,7 +245,7 @@ fun BodyRegionItem(
                     BodyRegion.Arms -> stringResource(R.string.body_region_arms)
                 },
                 style = token.typography.labelMedium,
-                color = if (isSelected) token.colors.primary else token.colors.textSecondary
+                color = token.colors.textSecondary
             )
         }
     }

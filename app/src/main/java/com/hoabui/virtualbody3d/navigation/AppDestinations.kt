@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
 
 object Routes {
     const val ONBOARDING = "onboarding"
@@ -25,6 +26,7 @@ object Routes {
     const val CENFIT_COACH = "cenfit_coach"
     const val CALENDAR = "calendar"
     const val BODY_SCAN_RESULT = "body_scan_result"
+    const val BODY_REGION_DETAIL = "body_region_detail"
 }
 
 sealed class AppDestination(
@@ -94,6 +96,12 @@ sealed class AppDestination(
 
     data object BodyScanResult : AppDestination(
         route = Routes.BODY_SCAN_RESULT,
+        labelResId = R.string.body_scan_result_title,
+        icon = Icons.Default.Person
+    )
+
+    data class BodyRegionDetail(private val bodyRegion: BodyRegion) : AppDestination(
+        route = "${Routes.BODY_REGION_DETAIL}/${bodyRegion.name}",
         labelResId = R.string.body_scan_result_title,
         icon = Icons.Default.Person
     )

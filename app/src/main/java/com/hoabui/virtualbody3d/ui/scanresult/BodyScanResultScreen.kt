@@ -58,7 +58,6 @@ fun BodyScanResultScreen(
             modifier = Modifier.weight(0.45f),
             uiState = uiState,
             bodyScore = bodyScore,
-            showDetailedAnalysisCta = false
         )
         MetricsPanel(
             modifier = Modifier.weight(0.45f),

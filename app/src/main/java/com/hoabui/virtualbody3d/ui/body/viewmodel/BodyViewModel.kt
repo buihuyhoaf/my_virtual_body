@@ -28,16 +28,12 @@ class BodyViewModel @Inject constructor(
                 BodyScreenState(
                     scanResult = bodyData,
                     caloriesToday = caloriesTodayData.toCaloriesTodayUiState(),
-                    selectedRegion = null,
                     promoBanners = promoBanners
                 )
-            }.collect { emitted ->
-                updateState { emitted.copy(selectedRegion = this.selectedRegion) }
+            }.collect { state ->
+                updateState { state }
             }
         }
     }
 
-    fun onRegionSelected(region: BodyRegion) {
-        updateState { copy(selectedRegion = region) }
-    }
 }

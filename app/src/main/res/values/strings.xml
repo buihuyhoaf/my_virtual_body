@@ -100,6 +100,39 @@
     <string name="body_region_thighs">Đùi</string>
     <string name="body_region_arms">Tay</string>
 
+    <!-- Body Region Detail Screen -->
+    <string name="body_region_detail_back">Quay lại</string>
+    <string name="body_region_detail_muscle_metrics">Chỉ số cơ</string>
+    <string name="body_region_detail_muscle_composition">Thành phần cơ</string>
+    <string name="body_region_detail_performance">Hiệu suất</string>
+    <string name="body_region_detail_balance">Cân bằng</string>
+    <string name="body_region_detail_health_indicators">Chỉ số sức khỏe</string>
+    <string name="body_region_detail_recommended_exercises">Bài tập gợi ý</string>
+    <string name="body_region_detail_real_life_applications">Ứng dụng trong đời sống</string>
+    <string name="body_region_detail_muscle_mass">Khối cơ</string>
+    <string name="body_region_detail_fat_percentage">Tỷ lệ mỡ</string>
+    <string name="body_region_detail_strength_score">Điểm sức mạnh</string>
+    <string name="body_region_detail_endurance">Sức bền</string>
+    <string name="body_region_detail_left_right_balance">Cân bằng trái – phải</string>
+    <string name="body_region_detail_flexibility">Độ linh hoạt</string>
+    <string name="body_region_detail_recovery">Phục hồi</string>
+    <string name="body_region_detail_difficulty_easy">Dễ</string>
+    <string name="body_region_detail_difficulty_medium">Trung bình</string>
+    <string name="body_region_detail_difficulty_hard">Khó</string>
+    <string name="body_region_detail_exercise_1_name">Bài tập 1</string>
+    <string name="body_region_detail_exercise_1_desc">Mô tả ngắn cho bài tập nhằm tăng cường vùng cơ này.</string>
+    <string name="body_region_detail_exercise_2_name">Bài tập 2</string>
+    <string name="body_region_detail_exercise_2_desc">Bài tập phụ trợ cải thiện sức mạnh và độ bền.</string>
+    <string name="body_region_detail_exercise_3_name">Bài tập 3</string>
+    <string name="body_region_detail_exercise_3_desc">Tập trung vào vận động chức năng và ổn định.</string>
+    <string name="body_region_detail_exercise_4_name">Bài tập 4</string>
+    <string name="body_region_detail_exercise_4_desc">Kéo giãn và phục hồi cho vùng cơ này.</string>
+    <string name="body_region_detail_real_life_walking">Đi bộ, di chuyển hằng ngày</string>
+    <string name="body_region_detail_real_life_posture">Duy trì tư thế đúng khi ngồi, đứng</string>
+    <string name="body_region_detail_real_life_lifting">Nâng, mang đồ vật an toàn</string>
+    <string name="body_region_detail_real_life_stability">Giữ thăng bằng và ổn định cơ thể</string>
+    <string name="body_region_detail_real_life_daily_tasks">Các hoạt động sinh hoạt thường ngày</string>
+
     <!-- Body Tabs -->
     <string name="tab_home">Trang chủ</string>
     <string name="tab_add">Thêm</string>
