@@ -1,12 +1,12 @@
 package com.hoabui.virtualbody3d.ui.body.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,8 +23,8 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,8 +51,6 @@ import kotlinx.coroutines.delay
  *   is used as a fallback for readability.
  */
 data class PromoBannerItem(
-    val title: String? = null,
-    val subtitle: String? = null,
     val onClick: (() -> Unit)? = null,
     val backgroundImageRes: Int? = null,
     val backgroundGradientColors: List<Color>? = null
@@ -119,9 +117,8 @@ fun PromoBannerCarousel(
         derivedStateOf { pagerState.currentPage }
     }
 
-    Column(
+    Box(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
     ) {
         HorizontalPager(
             state = pagerState,
@@ -143,9 +140,8 @@ fun PromoBannerCarousel(
             pageCount = banners.size,
             currentPage = currentPage,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = token.spacing.xxs),
-            token = token
+                .fillMaxWidth().align(Alignment.BottomCenter),
+            token = token,
         )
     }
 }
@@ -168,7 +164,7 @@ private fun PromoBannerCard(
                     Modifier.clickable(
                         interactionSource = interactionSource,
                         indication = null,
-                        onClick = item.onClick!!
+                        onClick = item.onClick
                     )
                 } else Modifier
             )
@@ -180,8 +176,8 @@ private fun PromoBannerCard(
         ) {
             when {
                 item.backgroundImageRes != null -> {
-                    androidx.compose.foundation.Image(
-                        painter = painterResource(item.backgroundImageRes!!),
+                    Image(
+                        painter = painterResource(item.backgroundImageRes),
                         contentDescription = null,
                         modifier = Modifier
                             .fillMaxSize()
@@ -194,7 +190,7 @@ private fun PromoBannerCard(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(
-                                brush = Brush.verticalGradient(item.backgroundGradientColors!!)
+                                brush = Brush.verticalGradient(item.backgroundGradientColors)
                             )
                     )
                 }
@@ -219,31 +215,6 @@ private fun PromoBannerCard(
                         )
                     )
             )
-
-            if (item.title != null || item.subtitle != null) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(token.spacing.md)
-                        .align(Alignment.BottomStart),
-                    verticalArrangement = Arrangement.spacedBy(token.spacing.xxs)
-                ) {
-                    item.title?.let { title ->
-                        androidx.compose.material3.Text(
-                            text = title,
-                            style = token.typography.titleMedium,
-                            color = Color.White
-                        )
-                    }
-                    item.subtitle?.let { subtitle ->
-                        androidx.compose.material3.Text(
-                            text = subtitle,
-                            style = token.typography.bodySmall,
-                            color = Color.White.copy(alpha = 0.9f)
-                        )
-                    }
-                }
-            }
         }
     }
 }
@@ -267,7 +238,7 @@ private fun PromoBannerPagerIndicator(
                     .padding(horizontal = token.spacing.xxs)
                     .size(if (isSelected) 8.dp else 6.dp)
                     .background(
-                        color = if (isSelected) token.colors.primary else token.colors.textSecondary.copy(alpha = 0.4f),
+                        color = Color.White,
                         shape = CircleShape
                     )
             )
