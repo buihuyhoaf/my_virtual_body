@@ -96,14 +96,12 @@ private fun MessageDetailContent(
 
     Column(
         modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = token.spacing.md),
+            .fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(0.dp)
     ) {
         // 1. Header with back button, avatar, sender name
         AppTopBarBack(onBack = onBack) {
             Row(
-                modifier = Modifier.padding(start = token.spacing.xxs),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(token.spacing.xs)
             ) {
@@ -134,7 +132,7 @@ private fun MessageDetailContent(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .padding(vertical = token.spacing.xs),
+                .padding(horizontal = token.spacing.md, vertical = token.spacing.xs),
             verticalArrangement = Arrangement.spacedBy(token.spacing.xs),
             reverseLayout = false
         ) {
