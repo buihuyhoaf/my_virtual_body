@@ -5,11 +5,14 @@ import com.hoabui.virtualbody3d.domain.repository.BodyDashboardRepository
 import com.hoabui.virtualbody3d.domain.repository.BodyScanResultRepository
 import com.hoabui.virtualbody3d.domain.repository.PromoBannerRepository
 import com.hoabui.virtualbody3d.domain.repository.MessageRepository
+import com.hoabui.virtualbody3d.domain.repository.UserInfoRepository
 import com.hoabui.virtualbody3d.domain.usecase.GetBodyDataUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetCaloriesTodayUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetPromoBannersUseCase
 import com.hoabui.virtualbody3d.domain.usecase.LoginUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetMessageThreadsUseCase
+import com.hoabui.virtualbody3d.domain.usecase.GetMessageDetailUseCase
+import com.hoabui.virtualbody3d.domain.usecase.GetUserInfoUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -52,5 +55,19 @@ object UseCaseModule {
         messageRepository: MessageRepository
     ): GetMessageThreadsUseCase {
         return GetMessageThreadsUseCase(messageRepository)
+    }
+
+    @Provides
+    fun provideGetMessageDetailUseCase(
+        messageRepository: MessageRepository
+    ): GetMessageDetailUseCase {
+        return GetMessageDetailUseCase(messageRepository)
+    }
+
+    @Provides
+    fun provideGetChatUserUseCase(
+        userInfoRepository: UserInfoRepository
+    ): GetUserInfoUseCase {
+        return GetUserInfoUseCase(userInfoRepository)
     }
 }

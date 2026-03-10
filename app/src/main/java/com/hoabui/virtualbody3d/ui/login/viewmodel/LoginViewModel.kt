@@ -1,6 +1,7 @@
 package com.hoabui.virtualbody3d.ui.login.viewmodel
 
-import com.hoabui.virtualbody3d.core.base.BaseViewModel
+import com.hoabui.virtualbody3d.core.base.UiState
+import com.hoabui.virtualbody3d.core.base.UiStateViewModel
 import com.hoabui.virtualbody3d.domain.usecase.LoginUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -8,35 +9,36 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase
-) : BaseViewModel<LoginUiState, LoginEvent>() {
+) : UiStateViewModel<LoginUiState, LoginEvent>() {
 
-    override fun initialState(): LoginUiState = LoginUiState()
+    init {
+        setSuccess(LoginUiState())
+    }
 
     fun onEmailChanged(email: String) {
-        updateState { copy(email = email) }
+        updateSuccess { copy(email = email) }
     }
 
     fun onPasswordChanged(password: String) {
-        updateState { copy(password = password) }
+        updateSuccess { copy(password = password) }
     }
 
     fun onTogglePasswordVisible() {
-        updateState { copy(passwordVisible = !passwordVisible) }
+        updateSuccess { copy(passwordVisible = !passwordVisible) }
     }
 
     fun login() {
-        val email = state.value.email
-        val password = state.value.password
+        val data = (state.value as? UiState.Success<LoginUiState>)?.data ?: return
         launchSafely {
-            updateState { copy(isLoading = true) }
-            loginUseCase(email, password)
+            updateSuccess { copy(isLoading = true) }
+            loginUseCase(data.email, data.password)
             sendEvent(LoginEvent.NavigateHome)
-            updateState { copy(isLoading = false) }
+            updateSuccess { copy(isLoading = false) }
         }
     }
 
-    override fun defaultError(throwable: Throwable) {
-        updateState { copy(isLoading = false) }
+    override fun onError(throwable: Throwable) {
+        updateSuccess { copy(isLoading = false) }
         sendEvent(LoginEvent.ShowError(throwable.message ?: "Unknown error"))
     }
 }

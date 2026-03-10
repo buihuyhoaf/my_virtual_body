@@ -137,8 +137,13 @@
     <string name="tab_home">Trang chủ</string>
     <string name="tab_add">Thêm</string>
     <string name="tab_meal_capture">Bữa ăn</string>
-    <string name="tab_calendar">Lịch</string>
+    <string name="tab_profile">Hồ sơ</string>
     <string name="tab_messages">Tin nhắn</string>
+    <string name="messages_screen_title">Tin nhắn</string>
+    <string name="messages_screen_subtitle">Giữ kết nối với huấn luyện viên của bạn</string>
+    <string name="messages_loading">Đang tải tin nhắn…</string>
+    <string name="messages_empty_title">Chưa có tin nhắn</string>
+    <string name="messages_empty_subtitle">Tin nhắn từ huấn luyện viên và trợ lý của bạn sẽ xuất hiện tại đây.</string>
     <string name="tab_cenfit_coach">Cenfit</string>
     <string name="tab_body">Cơ thể</string>
     <string name="tab_nutrition">Dinh dưỡng</string>
@@ -262,4 +267,31 @@
     <string name="body_scan_result_obesity_degree">Mức độ béo phì</string>
     <string name="body_scan_result_recommended_calorie">Lượng Calories khuyến nghị</string>
     <string name="metrics_panel_no_data">Chưa có dữ liệu phân tích. Thực hiện quét cơ thể để xem metrics.</string>
+
+    <!-- Profile Screen -->
+    <string name="profile_edit_profile">Chỉnh sửa hồ sơ</string>
+    <string name="profile_inbody_score">InBody Score</string>
+    <string name="profile_score_excellent">Excellent</string>
+    <string name="profile_score_good">Good</string>
+    <string name="profile_score_fair">Fair</string>
+    <string name="profile_score_attention">Needs attention</string>
+    <string name="profile_last_scan">Lần quét: %1$s</string>
+    <string name="profile_last_scan_unknown">Lần quét: --</string>
+    <string name="profile_view_body_analysis">Xem phân tích cơ thể →</string>
+    <string name="profile_no_body_scan_yet">Chưa có lần quét nào</string>
+    <string name="profile_no_scan_subtitle">Quét cơ thể để xem phân tích thành phần cơ thể.</string>
+    <string name="profile_scan_now">Quét ngay</string>
+    <string name="profile_section_account">Tài khoản</string>
+    <string name="profile_personal_info">Thông tin cá nhân</string>
+    <string name="profile_change_password">Đổi mật khẩu</string>
+    <string name="profile_section_app_settings">Cài đặt ứng dụng</string>
+    <string name="profile_notifications">Thông báo</string>
+    <string name="profile_privacy">Quyền riêng tư</string>
+    <string name="profile_language">Ngôn ngữ</string>
+    <string name="profile_section_support">Hỗ trợ</string>
+    <string name="profile_help_center">Trung tâm trợ giúp</string>
+    <string name="profile_about_app">Giới thiệu ứng dụng</string>
+    <string name="profile_logout">Đăng xuất</string>
+    <string name="profile_display_name_placeholder">Người dùng</string>
+    <string name="profile_email_placeholder">user@example.com</string>
 </resources>

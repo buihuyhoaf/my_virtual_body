@@ -19,12 +19,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -43,14 +39,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.core.base.UiState
 import com.hoabui.virtualbody3d.domain.model.BodyScanResult
+import com.hoabui.virtualbody3d.navigation.AppTopBarBack
 import com.hoabui.virtualbody3d.ui.body.components.StaticHeroSection
 import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
-import com.hoabui.virtualbody3d.ui.body.state.BodyScreenState
 import com.hoabui.virtualbody3d.ui.body.state.BodyUiState
 import com.hoabui.virtualbody3d.ui.body.state.toUiState
 import com.hoabui.virtualbody3d.ui.body.viewmodel.BodyViewModel
+import com.hoabui.virtualbody3d.ui.components.UiStateContent
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 @Composable
@@ -60,46 +56,43 @@ fun BodyRegionDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: BodyViewModel = hiltViewModel()
 ) {
-    val token = GymTheme.token
-    val displayName = rememberRegionDisplayName(regionName)
+    val displayNameRes = BodyRegion.valueOf(regionName).displayNameRes
     val screenState by viewModel.state.collectAsStateWithLifecycle()
 
-    if (screenState is UiState.Loading) {
-        Box(
-            modifier = modifier
-                .fillMaxSize()
-                .background(token.colors.background)
-        )
-    } else if (screenState is UiState.Error) {
-        val errorState = screenState as UiState.Error
-        Box(
-            modifier = modifier
-                .fillMaxSize()
-                .background(token.colors.background),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = errorState.message,
-                color = token.colors.textSecondary
-            )
+    UiStateContent(
+        state = screenState,
+        modifier = modifier,
+        successContent = { mod, data ->
+            val token = GymTheme.token
+            Column(
+                modifier = mod.fillMaxSize(),
+                verticalArrangement = Arrangement.Top
+            ) {
+                AppTopBarBack(
+                    onBack = onBack
+                ) {
+                    Text(
+                        text = stringResource(displayNameRes),
+                        style = token.typography.titleLarge,
+                        color = token.colors.textPrimary,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                BodyRegionDetailScreenContent(
+                    modifier = Modifier.weight(1f),
+                    scanResult = data.scanResult,
+                    displayName = stringResource(displayNameRes)
+                )
+            }
         }
-    } else if (screenState is UiState.Success<*>) {
-        val successState = screenState as UiState.Success<BodyScreenState>
-        BodyRegionDetailScreenContent(
-            modifier = modifier,
-            scanResult = successState.data.scanResult,
-            displayName = displayName,
-            onBack = onBack
-        )
-    }
+    )
 }
 
 @Composable
 fun BodyRegionDetailScreenContent(
     modifier: Modifier = Modifier,
     scanResult: BodyScanResult,
-    displayName: String,
-    onBack: () -> Unit
+    displayName: String
 ) {
     val token = GymTheme.token
     val uiState: BodyUiState = scanResult.toUiState()
@@ -109,33 +102,7 @@ fun BodyRegionDetailScreenContent(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(token.spacing.lg)
     ) {
-        // 1. Top: Back button + Muscle name
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = token.spacing.xs, vertical = token.spacing.xs),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
-            ) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.body_region_detail_back),
-                        tint = token.colors.textPrimary
-                    )
-                }
-                Spacer(modifier = Modifier.width(token.spacing.xs))
-                Text(
-                    text = displayName,
-                    style = token.typography.titleLarge,
-                    color = token.colors.textPrimary,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-        }
-
-        // 2. 3D Muscle Viewer: Static hero section (ảnh tĩnh/snapshot)
+        // 1. 3D Muscle Viewer: Static hero section (ảnh tĩnh/snapshot)
         item {
             StaticHeroSection(
                 modifier = Modifier
@@ -147,7 +114,7 @@ fun BodyRegionDetailScreenContent(
             )
         }
 
-        // 3. Muscle Metrics Section
+        // 2. Muscle Metrics Section
         item {
             Text(
                 modifier = Modifier.padding(horizontal = token.spacing.md),
@@ -178,7 +145,7 @@ fun BodyRegionDetailScreenContent(
             )
         }
 
-        // 4. Recommended Exercises Section
+        // 3. Recommended Exercises Section
         item {
             Text(
                 modifier = Modifier.padding(horizontal = token.spacing.md),
@@ -195,7 +162,7 @@ fun BodyRegionDetailScreenContent(
             )
         }
 
-        // 5. Real-life Applications Section
+        // 4. Real-life Applications Section
         item {
             Text(
                 modifier = Modifier.padding(horizontal = token.spacing.md),
@@ -652,14 +619,3 @@ private fun RealLifeApplicationsCard(modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
-private fun rememberRegionDisplayName(regionName: String): String {
-    return when (regionName) {
-        BodyRegion.UpperBody.name -> stringResource(R.string.body_region_upper_body)
-        BodyRegion.Core.name -> stringResource(R.string.body_region_core)
-        BodyRegion.Glutes.name -> stringResource(R.string.body_region_glutes)
-        BodyRegion.Thighs.name -> stringResource(R.string.body_region_thighs)
-        BodyRegion.Arms.name -> stringResource(R.string.body_region_arms)
-        else -> regionName
-    }
-}

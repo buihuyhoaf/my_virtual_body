@@ -14,7 +14,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -23,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.hoabui.virtualbody3d.core.base.UiState
 import com.hoabui.virtualbody3d.core.utils.Constants.BODY_METRICS_PANEL_INDEX
 import com.hoabui.virtualbody3d.core.utils.Constants.CALORIES_TODAY_PANEL_INDEX
 import com.hoabui.virtualbody3d.core.utils.Constants.PANEL_PAGE_COUNT
@@ -42,6 +40,7 @@ import com.hoabui.virtualbody3d.ui.body.state.MealUiState
 import com.hoabui.virtualbody3d.ui.body.state.NutritionSummaryUiState
 import com.hoabui.virtualbody3d.ui.body.state.toUiState
 import com.hoabui.virtualbody3d.ui.body.viewmodel.BodyViewModel
+import com.hoabui.virtualbody3d.ui.components.UiStateContent
 import com.hoabui.virtualbody3d.ui.scanresult.MetricsPanel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import java.time.LocalDate
@@ -52,38 +51,20 @@ fun BodyAnalysisScreen(
     viewModel: BodyViewModel = hiltViewModel()
 ) {
     val screenState by viewModel.state.collectAsStateWithLifecycle()
-    val token = GymTheme.token
 
-    if (screenState is UiState.Loading) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(token.colors.background)
-        )
-    } else if (screenState is UiState.Error) {
-        val errorState = screenState as UiState.Error
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(token.colors.background),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = errorState.message,
-                color = token.colors.textSecondary
+    UiStateContent(
+        state = screenState,
+        modifier = Modifier.fillMaxSize(),
+        successContent = { mod, data ->
+            BodyAnalysisContent(
+                modifier = mod,
+                scanResult = data.scanResult,
+                caloriesToday = data.caloriesToday,
+                onRegionClick = onRegionClick,
+                promoBanners = data.promoBanners
             )
         }
-    } else if (screenState is UiState.Success<*>) {
-        val successState = screenState as UiState.Success<BodyScreenState>
-        val data = successState.data
-        BodyAnalysisContent(
-            modifier = Modifier.fillMaxSize(),
-            scanResult = data.scanResult,
-            caloriesToday = data.caloriesToday,
-            onRegionClick = onRegionClick,
-            promoBanners = data.promoBanners
-        )
-    }
+    )
 }
 
 @Composable

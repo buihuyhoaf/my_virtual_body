@@ -34,6 +34,17 @@ abstract class UiStateViewModel<T, E : Any> : ViewModel() {
         _state.value = UiState.Error(message)
     }
 
+    /**
+     * Updates the Success data when current state is Success. No-op when Loading or Error.
+     * Use for form screens that mutate content (e.g. Login, InitialSetup).
+     */
+    protected fun updateSuccess(block: T.() -> T) {
+        when (val s = _state.value) {
+            is UiState.Success -> _state.value = UiState.Success(s.data.block())
+            else -> { }
+        }
+    }
+
     protected fun sendEvent(event: E) {
         _events.trySend(event)
     }

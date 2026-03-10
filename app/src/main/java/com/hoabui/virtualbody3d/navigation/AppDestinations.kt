@@ -1,8 +1,8 @@
 package com.hoabui.virtualbody3d.navigation
 
+import android.net.Uri
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Home
@@ -25,7 +25,7 @@ object Routes {
     const val MESSAGES = "messages"
     const val MESSAGE_DETAIL = "message_detail"
     const val CENFIT_COACH = "cenfit_coach"
-    const val CALENDAR = "calendar"
+    const val PROFILE = "profile"
     const val BODY_SCAN_RESULT = "body_scan_result"
     const val BODY_REGION_DETAIL = "body_region_detail"
 }
@@ -95,10 +95,10 @@ sealed class AppDestination(
         icon = Icons.Default.FitnessCenter
     )
 
-    data object Calendar : AppDestination(
-        route = Routes.CALENDAR,
-        labelResId = R.string.tab_calendar,
-        icon = Icons.Default.CalendarMonth
+    data object Profile : AppDestination(
+        route = Routes.PROFILE,
+        labelResId = R.string.tab_profile,
+        icon = Icons.Default.Person
     )
 
     data object BodyScanResult : AppDestination(
@@ -116,12 +116,12 @@ sealed class AppDestination(
     companion object {
         val startDestination: AppDestination = Home
 
-        val bottomBarDestinations: List<AppDestination> = listOf(
+        val         bottomBarDestinations: List<AppDestination> = listOf(
             Home,
             CenfitCoach,
             MealCapture,
             Messages,
-            Calendar
+            Profile
         )
     }
 }

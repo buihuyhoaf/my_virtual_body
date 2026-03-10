@@ -2,20 +2,17 @@ package com.hoabui.virtualbody3d.ui.camera.viewmodel
 
 import android.net.Uri
 import android.util.Log
-import androidx.lifecycle.viewModelScope
-import com.hoabui.virtualbody3d.core.base.BaseViewModel
+import com.hoabui.virtualbody3d.core.base.UiStateViewModel
 import com.hoabui.virtualbody3d.domain.model.AnalysisType
 import com.hoabui.virtualbody3d.domain.model.ExtractedData
 import com.hoabui.virtualbody3d.domain.usecase.AnalyzeImageUseCase
 import com.hoabui.virtualbody3d.domain.usecase.PrepareImageUseCase
-import com.hoabui.virtualbody3d.domain.usecase.SaveBaselineUseCase
 import com.hoabui.virtualbody3d.domain.usecase.UploadImageUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
@@ -25,11 +22,10 @@ class CameraCaptureViewModel @Inject constructor(
     private val prepareImageUseCase: PrepareImageUseCase,
     private val uploadImageUseCase: UploadImageUseCase,
     private val analyzeImageUseCase: AnalyzeImageUseCase,
-) : BaseViewModel<CameraCaptureUiState, CameraCaptureEvent>() {
-
-    override fun initialState(): CameraCaptureUiState = CameraCaptureUiState.CameraActive
+) : UiStateViewModel<CameraCaptureUiState, CameraCaptureEvent>() {
 
     init {
+        setSuccess(CameraCaptureUiState.CameraActive)
         logState(CameraCaptureUiState.CameraActive, "init")
     }
 
@@ -77,7 +73,7 @@ class CameraCaptureViewModel @Inject constructor(
         Log.d(TAG, "[ACTION] resetToCameraAfterReturnFromScanResult")
         _pendingReviewFile.value = null
         logState(CameraCaptureUiState.CameraActive, "resetToCameraAfterReturnFromScanResult")
-        updateState { CameraCaptureUiState.CameraActive }
+        setSuccess(CameraCaptureUiState.CameraActive)
     }
 
     /** User taps "Capture Photo" button → request a capture (camera content will take picture). */
@@ -97,12 +93,12 @@ class CameraCaptureViewModel @Inject constructor(
         _captureTrigger.value = 0
         val photoUri = Uri.fromFile(file)
         logState(CameraCaptureUiState.ConfirmPhoto(photoUri), "onImageCaptured(alreadyProcessed=$alreadyProcessed)")
-        updateState { CameraCaptureUiState.ConfirmPhoto(photoUri) }
+        setSuccess(CameraCaptureUiState.ConfirmPhoto(photoUri))
         if (alreadyProcessed) {
-            viewModelScope.launch { runUploadAndAnalyzePipeline(file, AnalysisType.OCR) }
+            launchSafely { runUploadAndAnalyzePipeline(file, AnalysisType.OCR) }
             return
         }
-        viewModelScope.launch { runFullPipeline(file, AnalysisType.OCR) }
+        launchSafely { runFullPipeline(file, AnalysisType.OCR) }
     }
 
     /**
@@ -112,21 +108,21 @@ class CameraCaptureViewModel @Inject constructor(
     fun onImagePicked(uri: Uri?) {
         if (uri == null) return
         Log.d(TAG, "[ACTION] onImagePicked(uri=${uri.lastPathSegment?.takeLast(30)})")
-        viewModelScope.launch {
+        launchSafely {
             logState(CameraCaptureUiState.PreProcessing, "onImagePicked")
-            updateState { CameraCaptureUiState.PreProcessing }
+            setSuccess(CameraCaptureUiState.PreProcessing)
             runCatching {
                 withContext(Dispatchers.IO) { prepareImageUseCase(uri) }
             }.fold(
                 onSuccess = { file ->
                     _pendingReviewFile.value = file
                     logState(CameraCaptureUiState.CameraActive, "onImagePicked")
-                    updateState { CameraCaptureUiState.CameraActive }
+                    setSuccess(CameraCaptureUiState.CameraActive)
                 },
                 onFailure = { e ->
-                    val err = CameraCaptureUiState.Error(e.message ?: "Processing failed")
-                    logState(err, "onImagePicked")
-                    updateState { err }
+                    val msg = e.message ?: "Processing failed"
+                    logState(CameraCaptureUiState.Error(msg), "onImagePicked")
+                    setError(msg)
                 }
             )
         }
@@ -138,15 +134,15 @@ class CameraCaptureViewModel @Inject constructor(
      */
     private suspend fun runFullPipeline(file: File, analysisType: AnalysisType) {
         logState(CameraCaptureUiState.PreProcessing, "runFullPipeline")
-        updateState { CameraCaptureUiState.PreProcessing }
+        setSuccess(CameraCaptureUiState.PreProcessing)
         val prepared = runCatching {
             withContext(Dispatchers.IO) { prepareImageUseCase(file) }
         }.fold(
             onSuccess = { it },
             onFailure = { e ->
-                val err = CameraCaptureUiState.Error(e.message ?: "Failed to process image")
-                logState(err, "runFullPipeline")
-                updateState { err }
+                val msg = e.message ?: "Failed to process image"
+                logState(CameraCaptureUiState.Error(msg), "runFullPipeline")
+                setError(msg)
                 return
             }
         )
@@ -158,21 +154,21 @@ class CameraCaptureViewModel @Inject constructor(
      */
     private suspend fun runUploadAndAnalyzePipeline(processedFile: File, analysisType: AnalysisType) {
         logState(CameraCaptureUiState.Uploading, "runUploadAndAnalyzePipeline")
-        updateState { CameraCaptureUiState.Uploading }
+        setSuccess(CameraCaptureUiState.Uploading)
         val uploaded = runCatching {
             withContext(Dispatchers.IO) { uploadImageUseCase(processedFile) }
         }.fold(
             onSuccess = { it },
             onFailure = { e ->
-                val err = CameraCaptureUiState.Error(e.message ?: "Upload failed")
-                logState(err, "runUploadAndAnalyzePipeline")
-                updateState { err }
+                val msg = e.message ?: "Upload failed"
+                logState(CameraCaptureUiState.Error(msg), "runUploadAndAnalyzePipeline")
+                setError(msg)
                 return
             }
         )
 
         logState(CameraCaptureUiState.Analyzing(analysisType), "runUploadAndAnalyzePipeline")
-        updateState { CameraCaptureUiState.Analyzing(analysisType) }
+        setSuccess(CameraCaptureUiState.Analyzing(analysisType))
         runCatching {
             withContext(Dispatchers.IO) {
                 analyzeImageUseCase(uploaded.imageUrl, analysisType)
@@ -182,7 +178,7 @@ class CameraCaptureViewModel @Inject constructor(
                 _pendingReviewFile.value = null
                 _hasNavigatedToScanResult.value = false
                 logState(CameraCaptureUiState.ReviewExtracted(data), "runUploadAndAnalyzePipeline")
-                updateState { CameraCaptureUiState.ReviewExtracted(data) }
+                setSuccess(CameraCaptureUiState.ReviewExtracted(data))
                 _reviewState.value = ReviewState(
                     originalData = data,
                     editableData = data,
@@ -192,9 +188,9 @@ class CameraCaptureViewModel @Inject constructor(
                 )
             },
             onFailure = { e ->
-                val err = CameraCaptureUiState.Error(e.message ?: "Analysis failed")
-                logState(err, "runUploadAndAnalyzePipeline")
-                updateState { err }
+                val msg = e.message ?: "Analysis failed"
+                logState(CameraCaptureUiState.Error(msg), "runUploadAndAnalyzePipeline")
+                setError(msg)
             }
         )
     }
@@ -208,7 +204,7 @@ class CameraCaptureViewModel @Inject constructor(
         val photoUri = Uri.fromFile(file)
         Log.d(TAG, "[ACTION] onPhotoCaptured(file=${file.name})")
         logState(CameraCaptureUiState.ConfirmPhoto(photoUri), "onPhotoCaptured")
-        updateState { CameraCaptureUiState.ConfirmPhoto(photoUri) }
+        setSuccess(CameraCaptureUiState.ConfirmPhoto(photoUri))
     }
 
     /** Called when capture completes and review is shown (so camera does not re-trigger). */
@@ -221,7 +217,7 @@ class CameraCaptureViewModel @Inject constructor(
         Log.d(TAG, "[ACTION] onClearReview")
         _pendingReviewFile.value = null
         logState(CameraCaptureUiState.CameraActive, "onClearReview")
-        updateState { CameraCaptureUiState.CameraActive }
+        setSuccess(CameraCaptureUiState.CameraActive)
     }
 
     /** Updates a single metric in the review sheet. */
@@ -244,13 +240,12 @@ class CameraCaptureViewModel @Inject constructor(
         )
     }
 
-
     /** User dismisses review without confirming → back to CameraActive. */
     fun onReviewDismiss() {
         Log.d(TAG, "[ACTION] onReviewDismiss")
         _reviewState.value = null
         logState(CameraCaptureUiState.CameraActive, "onReviewDismiss")
-        updateState { CameraCaptureUiState.CameraActive }
+        setSuccess(CameraCaptureUiState.CameraActive)
     }
 
     private fun isExtractedDataValid(data: ExtractedData): Boolean {
@@ -273,16 +268,15 @@ class CameraCaptureViewModel @Inject constructor(
     fun onErrorDismiss() {
         Log.d(TAG, "[ACTION] onErrorDismiss")
         logState(CameraCaptureUiState.CameraActive, "onErrorDismiss")
-        updateState { CameraCaptureUiState.CameraActive }
+        setSuccess(CameraCaptureUiState.CameraActive)
     }
 
     /** Called when camera capture fails (e.g. takePicture error). */
     fun onCaptureError(message: String) {
         _captureTrigger.value = 0
         Log.d(TAG, "[ACTION] onCaptureError(message=$message)")
-        val err = CameraCaptureUiState.Error(message)
-        logState(err, "onCaptureError")
-        updateState { err }
+        logState(CameraCaptureUiState.Error(message), "onCaptureError")
+        setError(message)
     }
 
     companion object {

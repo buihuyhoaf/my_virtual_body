@@ -8,12 +8,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.hoabui.virtualbody3d.ui.body.screen.BodyAnalysisScreen
 import com.hoabui.virtualbody3d.ui.body.screen.BodyRegionDetailScreen
-import com.hoabui.virtualbody3d.ui.calendar.screen.CalendarScreen
+import com.hoabui.virtualbody3d.ui.profile.ProfileScreen
 import com.hoabui.virtualbody3d.ui.cenfitcoach.CenfitCoachScreen
 import com.hoabui.virtualbody3d.ui.createbaseline.CreateBaselineScreen
 import com.hoabui.virtualbody3d.ui.messages.MessageDetailScreen
@@ -98,7 +99,7 @@ fun AppNavGraph(
         }
         composable(
             route = "${Routes.BODY_REGION_DETAIL}/{region}",
-            arguments = listOf(navArgument("region") { type = androidx.navigation.NavType.StringType })
+            arguments = listOf(navArgument("region") { type = NavType.StringType })
         ) { backStackEntry ->
             val regionName = backStackEntry.arguments?.getString("region") ?: return@composable
             BodyRegionDetailScreen(
@@ -120,20 +121,31 @@ fun AppNavGraph(
             )
         }
         composable(
-            route = "${Routes.MESSAGE_DETAIL}/{messageId}",
-            arguments = listOf(navArgument("messageId") { type = androidx.navigation.NavType.StringType })
-        ) { backStackEntry ->
-            val messageId = backStackEntry.arguments?.getString("messageId") ?: return@composable
+            route = "${Routes.MESSAGE_DETAIL}/{messageId}?senderName={senderName}",
+            arguments = listOf(
+                navArgument("messageId") { type = NavType.StringType },
+            )
+        ) {
             MessageDetailScreen(
-                messageId = messageId,
                 onBack = { navController.popBackStack() }
             )
         }
         composable(route = AppDestination.CenfitCoach.route) {
             CenfitCoachScreen()
         }
-        composable(route = AppDestination.Calendar.route) {
-            CalendarScreen()
+        composable(route = AppDestination.Profile.route) {
+            ProfileScreen(
+                onNavigateToBodyAnalysis = {
+                    navController.navigate(AppDestination.Home.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onLogout = {
+                    navController.navigate(AppDestination.Login.route) {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                    }
+                }
+            )
         }
         composable(route = AppDestination.BodyScanResult.route) {
             BodyScanResultScreen(

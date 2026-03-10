@@ -1,8 +1,8 @@
 package com.hoabui.virtualbody3d.ui.theme
 
-import android.util.Log
-import androidx.compose.runtime.Composable
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.hoabui.virtualbody3d.ui.theme.tokens.semantic.SemanticColorTokens
 
@@ -17,19 +17,18 @@ fun outlinedTextFieldColors(
     unfocusedLeadingIconColor: Color = colors.textSecondary,
     focusedTrailingIconColor: Color = colors.primary,
     unfocusedTrailingIconColor: Color = colors.textMuted
-): androidx.compose.material3.TextFieldColors {
-    Log.d("LoginPerf", "outlinedTextFieldColors() called at ${System.currentTimeMillis()}")
+): TextFieldColors {
     return OutlinedTextFieldDefaults.colors(
-    focusedBorderColor = colors.primary,
-    unfocusedBorderColor = colors.borderStrong,
-    focusedContainerColor = Color.Transparent,
-    unfocusedContainerColor = Color.Transparent,
-    cursorColor = colors.primary,
-    focusedTextColor = colors.textBlack,
-    unfocusedTextColor = colors.textBlack,
-    focusedLeadingIconColor = focusedLeadingIconColor,
-    unfocusedLeadingIconColor = unfocusedLeadingIconColor,
-    focusedTrailingIconColor = focusedTrailingIconColor,
-    unfocusedTrailingIconColor = unfocusedTrailingIconColor
+        focusedBorderColor = colors.primary,
+        unfocusedBorderColor = colors.borderStrong,
+        focusedContainerColor = Color.Transparent,
+        unfocusedContainerColor = Color.Transparent,
+        cursorColor = colors.primary,
+        focusedTextColor = colors.textBlack,
+        unfocusedTextColor = colors.textBlack,
+        focusedLeadingIconColor = focusedLeadingIconColor,
+        unfocusedLeadingIconColor = unfocusedLeadingIconColor,
+        focusedTrailingIconColor = focusedTrailingIconColor,
+        unfocusedTrailingIconColor = unfocusedTrailingIconColor
     )
 }

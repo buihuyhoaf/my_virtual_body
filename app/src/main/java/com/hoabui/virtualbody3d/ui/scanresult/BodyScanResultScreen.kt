@@ -1,9 +1,7 @@
 package com.hoabui.virtualbody3d.ui.scanresult
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,19 +15,18 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.core.base.UiState
 import com.hoabui.virtualbody3d.domain.model.BodyScanResult
 import com.hoabui.virtualbody3d.ui.body.state.BodyScreenState
 import com.hoabui.virtualbody3d.ui.body.components.HeroSection
 import com.hoabui.virtualbody3d.ui.body.state.toUiState
 import com.hoabui.virtualbody3d.ui.body.viewmodel.BodyViewModel
+import com.hoabui.virtualbody3d.ui.components.UiStateContent
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 /**
@@ -43,37 +40,20 @@ fun BodyScanResultScreen(
     onBeginClick: () -> Unit = {},
     onBackClick: () -> Unit = {}
 ) {
-    val token = GymTheme.token
     val screenState by viewModel.state.collectAsStateWithLifecycle()
 
-    if (screenState is UiState.Loading) {
-        Box(
-            modifier = modifier
-                .fillMaxSize()
-                .background(token.colors.background)
-        )
-    } else if (screenState is UiState.Error) {
-        val errorState = screenState as UiState.Error
-        Box(
-            modifier = modifier
-                .fillMaxSize()
-                .background(token.colors.background),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = errorState.message,
-                color = token.colors.textSecondary
+    UiStateContent(
+        state = screenState,
+        modifier = modifier,
+        successContent = { mod, data ->
+            BodyScanResultScreenContent(
+                modifier = mod,
+                scanResult = data.scanResult,
+                onBeginClick = onBeginClick,
+                onBackClick = onBackClick
             )
         }
-    } else if (screenState is UiState.Success<*>) {
-        val successState = screenState as UiState.Success<BodyScreenState>
-        BodyScanResultScreenContent(
-            modifier = modifier,
-            scanResult = successState.data.scanResult,
-            onBeginClick = onBeginClick,
-            onBackClick = onBackClick
-        )
-    }
+    )
 }
 
 @Composable

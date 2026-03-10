@@ -7,8 +7,9 @@ import com.hoabui.virtualbody3d.ui.theme.tokens.component.BodyAnalysisTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.ButtonTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.CalendarTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.CameraTokens
-import com.hoabui.virtualbody3d.ui.theme.tokens.component.CreateBaselineTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.CardTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.ChatTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.CreateBaselineTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.ControlPanelTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.LoginTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.OnboardingTokens
@@ -17,6 +18,7 @@ import com.hoabui.virtualbody3d.ui.theme.tokens.component.StatusPopupTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.ThinkingCardTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymCalendarTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymCameraTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymChatTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymCreateBaselineTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymLoginTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymOnboardingTokens
@@ -47,6 +49,7 @@ data class GymToken(
     val typography: Typography,
     val button: ButtonTokens,
     val card: CardTokens,
+    val chat: ChatTokens,
     val slider: SliderTokens,
     val controlPanel: ControlPanelTokens,
     val bodyAnalysis: BodyAnalysisTokens,
@@ -108,6 +111,7 @@ fun darkGymToken(
     typography = gymTypographyTokens().material,
     button = gymButtonTokens(primitiveSpacing, primitiveRadius),
     card = gymCardTokens(primitiveSpacing, primitiveRadius),
+    chat = gymChatTokens(primitiveSpacing),
     slider = gymSliderTokens(primitiveSpacing),
     controlPanel = gymControlPanelTokens(primitiveSpacing),
     bodyAnalysis = gymBodyAnalysisTokens(primitiveSpacing),
@@ -150,6 +154,7 @@ fun lightGymToken(
     typography = gymTypographyTokens().material,
     button = gymButtonTokens(primitiveSpacing, primitiveRadius),
     card = gymCardTokens(primitiveSpacing, primitiveRadius),
+    chat = gymChatTokens(primitiveSpacing),
     slider = gymSliderTokens(primitiveSpacing),
     controlPanel = gymControlPanelTokens(primitiveSpacing),
     bodyAnalysis = gymBodyAnalysisTokens(primitiveSpacing),

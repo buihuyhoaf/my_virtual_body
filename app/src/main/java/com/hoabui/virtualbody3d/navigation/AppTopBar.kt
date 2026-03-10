@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.NightsStay
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.WbSunny
@@ -24,7 +25,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.layout.RowScope
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import java.time.LocalDate
 import java.time.LocalTime
@@ -115,6 +119,35 @@ fun AppTopBar(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun AppTopBarBack(
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable RowScope.() -> Unit
+) {
+    val token = GymTheme.token
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(
+                start = token.spacing.xxs,
+                end = token.spacing.md,
+                bottom = token.spacing.md
+            ),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onBack) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(R.string.body_region_detail_back),
+                tint = token.colors.textPrimary
+            )
+        }
+        content()
     }
 }
 

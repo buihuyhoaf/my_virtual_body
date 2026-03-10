@@ -4,5 +4,6 @@ import com.hoabui.virtualbody3d.domain.model.MessageThread
 
 interface MessageRepository {
     fun getMessageThreads(): List<MessageThread>
+    fun getMessageById(messageId: String): MessageThread?
 }
 

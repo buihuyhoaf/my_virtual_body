@@ -1,6 +1,7 @@
 package com.hoabui.virtualbody3d.ui.initialsetup.viewmodel
 
-import com.hoabui.virtualbody3d.core.base.BaseViewModel
+import com.hoabui.virtualbody3d.core.base.UiState
+import com.hoabui.virtualbody3d.core.base.UiStateViewModel
 import com.hoabui.virtualbody3d.domain.repository.InitialSetupRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -9,9 +10,7 @@ import javax.inject.Inject
 @HiltViewModel
 class InitialSetupViewModel @Inject constructor(
     private val initialSetupRepository: InitialSetupRepository
-) : BaseViewModel<InitialSetupUiState, InitialSetupEvent>() {
-
-    override fun initialState(): InitialSetupUiState = InitialSetupUiState()
+) : UiStateViewModel<InitialSetupUiState, InitialSetupEvent>() {
 
     init {
         loadSteps()
@@ -19,57 +18,54 @@ class InitialSetupViewModel @Inject constructor(
 
     private fun loadSteps() {
         launchSafely {
-            updateState { copy(isLoading = true) }
+            setLoading()
             val steps = initialSetupRepository.getSteps()
-            updateState {
-                copy(
-                    steps = steps,
-                    isLoading = false
-                )
-            }
+            setSuccess(InitialSetupUiState(steps = steps))
         }
     }
 
     fun onStep0OptionSelected(index: Int) {
-        updateState { copy(selectedStep0Index = index) }
+        updateSuccess { copy(selectedStep0Index = index) }
     }
 
     fun onStep1ToggleOption(index: Int) {
-        updateState {
+        updateSuccess {
             val next = if (selectedStep1Indices.contains(index)) selectedStep1Indices - index else selectedStep1Indices + index
             copy(selectedStep1Indices = next)
         }
     }
 
     fun onStep2ToggleOption(index: Int) {
-        updateState {
+        updateSuccess {
             val next = if (selectedStep2Indices.contains(index)) selectedStep2Indices - index else selectedStep2Indices + index
             copy(selectedStep2Indices = next)
         }
     }
 
     fun onSkip() {
-        val step = state.value.currentStep
-        if (step < state.value.totalSteps - 1) {
-            updateState { copy(currentStep = step + 1) }
+        val data = (state.value as? UiState.Success<InitialSetupUiState>)?.data ?: return
+        val step = data.currentStep
+        if (step < data.totalSteps - 1) {
+            updateSuccess { copy(currentStep = step + 1) }
         }
     }
 
     fun onPrimaryClick() {
-        val step = state.value.currentStep
-        val total = state.value.totalSteps
+        val data = (state.value as? UiState.Success<InitialSetupUiState>)?.data ?: return
+        val step = data.currentStep
+        val total = data.totalSteps
         if (step == total - 1) {
             submitAndComplete()
         } else {
-            updateState { copy(currentStep = step + 1) }
+            updateSuccess { copy(currentStep = step + 1) }
         }
     }
 
     private fun submitAndComplete() {
         launchSafely {
-            val s = state.value
+            val s = (state.value as? UiState.Success<InitialSetupUiState>)?.data ?: return@launchSafely
             val steps = s.steps
-            updateState { copy(isLoading = true) }
+            updateSuccess { copy(isLoading = true) }
             if (steps.size >= 3) {
                 val reflectionIntentId = steps[0].options.getOrNull(s.selectedStep0Index)?.id ?: ""
                 val focusIds = s.selectedStep1Indices.mapNotNull { idx -> steps[1].options.getOrNull(idx)?.id }
@@ -81,12 +77,12 @@ class InitialSetupViewModel @Inject constructor(
                 }
             }
             delay(200)
-            updateState { copy(isLoading = false) }
+            updateSuccess { copy(isLoading = false) }
             sendEvent(InitialSetupEvent.Complete)
         }
     }
 
-    override fun defaultError(throwable: Throwable) {
-        updateState { copy(isLoading = false) }
+    override fun onError(throwable: Throwable) {
+        updateSuccess { copy(isLoading = false) }
     }
 }
