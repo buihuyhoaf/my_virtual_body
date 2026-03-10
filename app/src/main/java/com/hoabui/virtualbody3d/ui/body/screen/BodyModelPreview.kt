@@ -203,21 +203,21 @@ fun BodyModelPreview(
                 val frameSizeZ = (glbBounds?.depth ?: node.size.z).coerceIn(0.01f, 1e6f)
                 val halfHeight = (node.extents.y * 0.5f).coerceIn(0.01f, 1e6f)
                 val runtimeCenterY = node.center.y
+
                 val glbMinY = glbBounds?.let { it.centerY - (it.height * 0.5f) }
+
+                // Đặt chân model lên mặt phẳng Y = 0.
                 val nodePositionY = if (glbBounds != null && glbMinY != null) {
-                    // Đưa minY của model (phần chân) thẳng về mặt phẳng Y = 0.
                     (-glbMinY).coerceIn(-1e6f, 1e6f)
                 } else {
-                    // Fallback an toàn khi không có GLB bounds: ước lượng bằng runtime center.
                     (-runtimeCenterY + halfHeight).coerceIn(-1e6f, 1e6f)
                 }
 
-                // Lấy đúng tâm hình học của model: sau khi chân được đặt ở Y = 0,
-                // center sẽ nằm ở giữa chiều cao model. Khi đặt camera nhìn vào center
-                // và tính khoảng cách theo FOV, toàn bộ model sẽ vừa khít (từ chân tới đỉnh).
-                val modelCenterY = (nodePositionY + frameSizeY * 0.5f).coerceIn(0.0f, 1e6f)
-
+                // Căn model: chân ở Y = 0, giữ X/Z tại 0 (origin nằm trên trục thẳng đứng giữa scene).
                 node.position = Position(x = 0f, y = nodePositionY, z = 0f)
+
+                // Sau khi chân nằm ở Y = 0, tâm hình học nằm ở giữa chiều cao model.
+                val modelCenterY = (nodePositionY + frameSizeY * 0.5f).coerceIn(0.0f, 1e6f)
 
                 val diagonal = sqrt(
                     frameSizeX * frameSizeX +

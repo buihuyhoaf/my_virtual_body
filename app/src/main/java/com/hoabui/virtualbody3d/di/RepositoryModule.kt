@@ -5,6 +5,7 @@ import com.hoabui.virtualbody3d.data.repository.BaselineRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.BodyDashboardRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.BodyScanResultRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.InitialSetupRepositoryImpl
+import com.hoabui.virtualbody3d.data.repository.MealRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.MessageRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.PromoBannerRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.UserInfoRepositoryImpl
@@ -13,6 +14,7 @@ import com.hoabui.virtualbody3d.domain.repository.BaselineRepository
 import com.hoabui.virtualbody3d.domain.repository.BodyDashboardRepository
 import com.hoabui.virtualbody3d.domain.repository.BodyScanResultRepository
 import com.hoabui.virtualbody3d.domain.repository.InitialSetupRepository
+import com.hoabui.virtualbody3d.domain.repository.MealRepository
 import com.hoabui.virtualbody3d.domain.repository.MessageRepository
 import com.hoabui.virtualbody3d.domain.repository.PromoBannerRepository
 import com.hoabui.virtualbody3d.domain.repository.UserInfoRepository
@@ -73,4 +75,10 @@ abstract class RepositoryModule {
     abstract fun bindUserInfoRepository(
         userInfoRepositoryImpl: UserInfoRepositoryImpl
     ): UserInfoRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindMealRepository(
+        mealRepositoryImpl: MealRepositoryImpl
+    ): MealRepository
 }

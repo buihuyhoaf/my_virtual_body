@@ -26,30 +26,25 @@ class BaselineRepositoryImpl @Inject constructor() : BaselineRepository {
     override suspend fun analyzeImage(imageUrl: String, type: AnalysisType): ExtractedData =
         withContext(Dispatchers.IO) {
             delay(SIMULATED_ANALYSIS_MS)
-            when (type) {
-                AnalysisType.OCR -> ExtractedData(
-                    weight = "72.5",
-                    bodyFatPercent = "18.2",
-                    muscleMass = "32.1",
-                    bmi = "22.4",
-                    bodyFatMass = "13.2",
-                    fatFreeMass = "59.3",
-                    bmr = "1680",
-                    visceralFatLevel = "5",
-                    rawLines = listOf("Weight: 72.5 kg", "Body fat: 18.2%", "Muscle: 32.1 kg", "BMI: 22.4")
-                )
-                AnalysisType.MEAL -> ExtractedData(
-                    weight = "",
-                    bodyFatPercent = "",
-                    muscleMass = "",
-                    bmi = "",
-                    bodyFatMass = "",
-                    fatFreeMass = "",
-                    bmr = "",
-                    visceralFatLevel = "",
-                    rawLines = listOf("Meal recognized: placeholder")
-                )
+            check(type == AnalysisType.OCR) {
+                "BaselineRepositoryImpl only supports OCR analysis; meal analysis is handled by MealRepository."
             }
+            ExtractedData(
+                weight = "72.5",
+                bodyFatPercent = "18.2",
+                muscleMass = "32.1",
+                bmi = "22.4",
+                bodyFatMass = "13.2",
+                fatFreeMass = "59.3",
+                bmr = "1680",
+                visceralFatLevel = "5",
+                rawLines = listOf(
+                    "Weight: 72.5 kg",
+                    "Body fat: 18.2%",
+                    "Muscle: 32.1 kg",
+                    "BMI: 22.4"
+                )
+            )
         }
 
     override suspend fun saveBaseline(data: ExtractedData) = withContext(Dispatchers.IO) {

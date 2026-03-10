@@ -1,7 +1,7 @@
 package com.hoabui.virtualbody3d.ui.mealcapture
 
 import android.net.Uri
-import com.hoabui.virtualbody3d.domain.model.ExtractedData
+import com.hoabui.virtualbody3d.domain.model.MealAnalysis
 
 /**
  * UI model representing a single analyzed meal page in the vertical pager.
@@ -16,24 +16,18 @@ data class MealPageUiModel(
     val rawLines: List<String>
 )
 
-/**
- * Temporary mapper from [ExtractedData] MEAL results into [MealPageUiModel].
- *
- * For now, we derive simple display strings from [ExtractedData.rawLines] so the UI
- * has something meaningful to show while the real meal schema is not yet defined.
- */
-fun ExtractedData.toMealPageUiModel(
-    id: String,
+fun MealAnalysis.toMealPageUiModel(
     imageUri: Uri
 ): MealPageUiModel {
-    val safeLines = rawLines.ifEmpty { listOf("Meal recognized (placeholder)") }
+    val title = name.ifBlank { "Meal" }
 
-    val firstLine = safeLines.firstOrNull().orEmpty()
-    val remaining = if (safeLines.size > 1) safeLines.drop(1) else emptyList()
+    val caloriesText = caloriesKcal?.let { "$it kcal" } ?: "Calories: -"
 
-    val title = firstLine.ifBlank { "Recognized meal" }
-    val caloriesText = remaining.firstOrNull().orEmpty()
-    val macroSummaryText = remaining.drop(1).joinToString(separator = "\n")
+    val macroSummaryText = buildString {
+        appendLine("Protein: ${proteinGrams ?: 0f} g")
+        appendLine("Carbs: ${carbsGrams ?: 0f} g")
+        append("Fat: ${fatGrams ?: 0f} g")
+    }
 
     return MealPageUiModel(
         id = id,
@@ -41,7 +35,7 @@ fun ExtractedData.toMealPageUiModel(
         title = title,
         caloriesText = caloriesText,
         macroSummaryText = macroSummaryText,
-        rawLines = safeLines
+        rawLines = rawLines
     )
 }
 

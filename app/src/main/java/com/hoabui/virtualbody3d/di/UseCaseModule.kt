@@ -3,9 +3,11 @@ package com.hoabui.virtualbody3d.di
 import com.hoabui.virtualbody3d.domain.repository.AuthRepository
 import com.hoabui.virtualbody3d.domain.repository.BodyDashboardRepository
 import com.hoabui.virtualbody3d.domain.repository.BodyScanResultRepository
+import com.hoabui.virtualbody3d.domain.repository.MealRepository
 import com.hoabui.virtualbody3d.domain.repository.PromoBannerRepository
 import com.hoabui.virtualbody3d.domain.repository.MessageRepository
 import com.hoabui.virtualbody3d.domain.repository.UserInfoRepository
+import com.hoabui.virtualbody3d.domain.usecase.AnalyzeMealImageUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetBodyDataUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetCaloriesTodayUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetPromoBannersUseCase
@@ -69,5 +71,12 @@ object UseCaseModule {
         userInfoRepository: UserInfoRepository
     ): GetUserInfoUseCase {
         return GetUserInfoUseCase(userInfoRepository)
+    }
+
+    @Provides
+    fun provideAnalyzeMealImageUseCase(
+        mealRepository: MealRepository
+    ): AnalyzeMealImageUseCase {
+        return AnalyzeMealImageUseCase(mealRepository)
     }
 }

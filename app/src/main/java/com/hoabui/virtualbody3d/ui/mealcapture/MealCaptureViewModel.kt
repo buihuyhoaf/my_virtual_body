@@ -2,8 +2,7 @@ package com.hoabui.virtualbody3d.ui.mealcapture
 
 import android.net.Uri
 import com.hoabui.virtualbody3d.core.base.UiStateViewModel
-import com.hoabui.virtualbody3d.domain.model.AnalysisType
-import com.hoabui.virtualbody3d.domain.usecase.AnalyzeImageUseCase
+import com.hoabui.virtualbody3d.domain.usecase.AnalyzeMealImageUseCase
 import com.hoabui.virtualbody3d.domain.usecase.PrepareImageUseCase
 import com.hoabui.virtualbody3d.domain.usecase.UploadImageUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,7 +27,7 @@ import javax.inject.Inject
 class MealCaptureViewModel @Inject constructor(
     private val prepareImageUseCase: PrepareImageUseCase,
     private val uploadImageUseCase: UploadImageUseCase,
-    private val analyzeImageUseCase: AnalyzeImageUseCase
+    private val analyzeMealImageUseCase: AnalyzeMealImageUseCase
 ) : UiStateViewModel<Unit, Unit>() {
 
     private val _mealPages = MutableStateFlow<List<MealPageUiModel>>(emptyList())
@@ -64,19 +63,17 @@ class MealCaptureViewModel @Inject constructor(
                     return@launchSafely
                 }
 
-                val extracted = runCatching {
+                val mealAnalysis = runCatching {
                     withContext(Dispatchers.IO) {
-                        analyzeImageUseCase(uploaded.imageUrl, AnalysisType.MEAL)
+                        analyzeMealImageUseCase(uploaded.imageUrl)
                     }
                 }.getOrElse { e ->
                     _errorMessage.value = e.message ?: "Failed to analyze meal image"
                     return@launchSafely
                 }
 
-                val id = UUID.randomUUID().toString()
                 val imageUri = Uri.fromFile(prepared)
-                val page = extracted.toMealPageUiModel(
-                    id = id,
+                val page = mealAnalysis.toMealPageUiModel(
                     imageUri = imageUri
                 )
 
