@@ -6,15 +6,21 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,8 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -60,15 +66,20 @@ fun MealResultPage(
             }
         }
 
+        val scrollState = rememberScrollState()
+
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // 1. Meal image – main visual element (square)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(260.dp)
+                    .aspectRatio(1f)
                     .clip(RoundedCornerShape(token.radius.lg)),
                 contentAlignment = Alignment.Center
             ) {
@@ -85,11 +96,17 @@ fun MealResultPage(
                 }
             }
 
+            // 2. Reaction row (social-style)
+            Spacer(modifier = Modifier.height(spacing.xs))
+            ReactionSummaryRow()
+
             Spacer(modifier = Modifier.height(spacing.lg))
 
+            // 3. Nutrition summary card – key metrics in a horizontal layout
             Card(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
                 colors = CardDefaults.cardColors(
                     containerColor = colors.surface,
                     contentColor = colors.textPrimary
@@ -100,43 +117,186 @@ fun MealResultPage(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(spacing.lg)
+                        .padding(spacing.lg),
+                    verticalArrangement = Arrangement.spacedBy(spacing.md)
                 ) {
                     Text(
                         text = meal.title,
-                        style = token.typography.titleLarge,
+                        style = token.typography.titleMedium,
                         color = colors.textPrimary,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
 
-                    if (meal.caloriesText.isNotBlank()) {
-                        Spacer(modifier = Modifier.height(spacing.xs))
-                        Text(
-                            text = meal.caloriesText,
-                            style = token.typography.titleMedium,
-                            color = colors.textSecondary
-                        )
-                    }
+                    val summaryMetrics = buildNutritionSummaryMetrics(meal)
+                    NutritionSummaryGrid(metrics = summaryMetrics)
+                }
+            }
 
-                    if (meal.macroSummaryText.isNotBlank()) {
-                        Spacer(modifier = Modifier.height(spacing.md))
-                        Text(
-                            text = meal.macroSummaryText,
-                            style = token.typography.bodyMedium,
-                            color = colors.textPrimary
-                        )
-                    } else if (meal.rawLines.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(spacing.md))
-                        Text(
-                            text = meal.rawLines.joinToString(separator = "\n"),
-                            style = token.typography.bodySmall,
-                            color = colors.textSecondary
-                        )
+            Spacer(modifier = Modifier.height(spacing.md))
+
+        }
+    }
+}
+
+private data class NutritionSummaryMetric(
+    val label: String,
+    val value: String
+)
+
+@Composable
+private fun NutritionMetricColumn(
+    label: String,
+    value: String
+) {
+    val token = GymTheme.token
+    val colors = token.colors
+    val spacing = token.spacing
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(spacing.xxs),
+        horizontalAlignment = Alignment.Start
+    ) {
+        Text(
+            text = label,
+            style = token.typography.labelSmall,
+            color = colors.textSecondary
+        )
+        Text(
+            text = value,
+            style = token.typography.titleLarge,
+            color = colors.textPrimary,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+
+@Composable
+private fun NutritionSummaryGrid(
+    metrics: List<NutritionSummaryMetric>
+) {
+    val token = GymTheme.token
+    val colors = token.colors
+    val spacing = token.spacing
+
+    if (metrics.isEmpty()) return
+
+    val rows = metrics.chunked(2)
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(spacing.md)
+    ) {
+        rows.forEach { rowMetrics ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(spacing.md),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                rowMetrics.forEach { metric ->
+                    Surface(
+                        modifier = Modifier.weight(1f),
+                        color = colors.surfaceElevated,
+                        tonalElevation = token.elevation.level0,
+                        shadowElevation = token.elevation.level0,
+                        shape = RoundedCornerShape(token.radius.md)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(
+                                horizontal = spacing.md,
+                                vertical = spacing.md
+                            ),
+                            verticalArrangement = Arrangement.spacedBy(spacing.xxs)
+                        ) {
+                            NutritionMetricColumn(
+                                label = metric.label,
+                                value = metric.value
+                            )
+                        }
                     }
+                }
+                // If the last row has only one item, fill the remaining space to keep grid balance.
+                if (rowMetrics.size == 1) {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }
     }
+}
+
+@Composable
+private fun ReactionSummaryRow() {
+    val token = GymTheme.token
+    val colors = token.colors
+    val spacing = token.spacing
+
+    val emojis = listOf("👍", "😍", "😮", "😢")
+    // Placeholder reaction count – can be wired to real data later
+    val reactionCountLabel = "12 reactions"
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(spacing.xs),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            emojis.forEach { emoji ->
+                Text(
+                    text = emoji,
+                    style = token.typography.titleLarge
+                )
+            }
+        }
+        Text(
+            text = reactionCountLabel,
+            style = token.typography.labelSmall,
+            color = colors.textSecondary
+        )
+    }
+}
+
+private fun buildNutritionSummaryMetrics(
+    meal: MealPageUiModel
+): List<NutritionSummaryMetric> {
+    val caloriesValue = meal.caloriesText.ifBlank { "-" }
+
+    val macroLines = meal.macroSummaryText
+        .lineSequence()
+        .map { it.trim() }
+        .filter { it.isNotBlank() }
+        .toList()
+
+    val macroMap = macroLines
+        .mapNotNull { line ->
+            val parts = line.split(":", limit = 2)
+            val key = parts.getOrNull(0)?.trim().orEmpty()
+            val value = parts.getOrNull(1)?.trim().orEmpty()
+            if (key.isNotBlank()) key.lowercase() to value else null
+        }
+        .toMap()
+
+    fun valueFor(key: String): String {
+        val match = macroMap.entries.firstOrNull { entry ->
+            entry.key.contains(key, ignoreCase = true)
+        }?.value
+        return match?.takeIf { it.isNotBlank() } ?: "-"
+    }
+
+    val protein = valueFor("protein")
+    val carbs = valueFor("carb")
+    val fat = valueFor("fat")
+
+    return listOf(
+        NutritionSummaryMetric(label = "Calories", value = caloriesValue),
+        NutritionSummaryMetric(label = "Protein", value = protein),
+        NutritionSummaryMetric(label = "Carbs", value = carbs),
+        NutritionSummaryMetric(label = "Fat", value = fat)
+    )
 }
 
