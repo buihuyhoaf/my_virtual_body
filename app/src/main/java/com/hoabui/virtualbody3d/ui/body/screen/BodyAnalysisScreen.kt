@@ -30,6 +30,7 @@ import com.hoabui.virtualbody3d.domain.model.PromoBanner
 import com.hoabui.virtualbody3d.ui.body.components.BodyRegionRow
 import com.hoabui.virtualbody3d.ui.body.components.CaloriesTodayPanel
 import com.hoabui.virtualbody3d.ui.body.components.HeroSection
+import com.hoabui.virtualbody3d.ui.body.components.NutritionCard
 import com.hoabui.virtualbody3d.ui.body.components.PromoBannerCarousel
 import com.hoabui.virtualbody3d.ui.body.mapper.toPromoBannerItem
 import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
@@ -95,20 +96,22 @@ fun BodyAnalysisContent(
                 .fillMaxWidth()
                 .height(60.dp)
         )
+        NutritionCard(
+            selectedDate = LocalDate.now(),
+            summary = nutritionToday
+        )
         HeroSection(
-            modifier = Modifier.weight(0.5f),
+            modifier = Modifier,
             uiState = uiState,
             bodyScore = bodyScore,
             showRotateChip = true
         )
         BodyRegionRow(
-            modifier = Modifier.weight(0.12f),
+            modifier = Modifier,
             onRegionClick = onRegionClick
         )
-
         PanelSlider(
-            modifier = Modifier.weight(0.38f),
-            nutritionSummary = nutritionToday,
+            modifier = Modifier,
             meals = meals,
             scanResult = scanResult
         )
@@ -119,24 +122,20 @@ fun BodyAnalysisContent(
 @Composable
 private fun PanelSlider(
     modifier: Modifier = Modifier,
-    nutritionSummary: NutritionSummaryUiState,
     meals: List<MealPageUiModel>,
     scanResult: BodyScanResult?
 ) {
     val token = GymTheme.token
     val pagerState = rememberPagerState(pageCount = { PANEL_PAGE_COUNT }, initialPage = 0)
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(modifier = modifier) {
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.fillMaxSize(),
             userScrollEnabled = true
         ) { page ->
             when (page) {
                 CALORIES_TODAY_PANEL_INDEX -> CaloriesTodayPanel(
                     modifier = Modifier.fillMaxSize(),
-                    selectedDate = LocalDate.now(),
-                    nutritionSummary = nutritionSummary,
                     meals = meals
                 )
                 BODY_METRICS_PANEL_INDEX -> MetricsPanel(

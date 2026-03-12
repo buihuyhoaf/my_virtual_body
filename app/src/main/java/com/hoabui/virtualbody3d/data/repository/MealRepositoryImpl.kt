@@ -32,7 +32,9 @@ class MealRepositoryImpl @Inject constructor() : MealRepository {
             if (day == today) {
                 listOf(
                     createFakeMealAnalysis(),
-                    createFakeMealAnalysis(name = "Salad bowl").copy(id = UUID.randomUUID().toString())
+                    createFakeMealAnalysis(name = "Salad bowl").copy(id = UUID.randomUUID().toString()),
+                    createFakeMealAnalysis(name = "Salad bowl").copy(id = UUID.randomUUID().toString()),
+                    createFakeMealAnalysis(name = "Salad bowl").copy(id = UUID.randomUUID().toString()),
                 )
             } else {
                 listOf(createFakeMealAnalysis(name = "Past day meal").copy(id = UUID.randomUUID().toString()))

@@ -234,7 +234,7 @@ fun BodyRegionRow(
 ) {
     val token = GymTheme.token
     LazyRow(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(token.spacing.md),
         contentPadding = PaddingValues(horizontal = token.spacing.xs)
     ) {
@@ -316,8 +316,6 @@ fun BodyRegionItem(
 @Composable
 fun CaloriesTodayPanel(
     modifier: Modifier = Modifier,
-    selectedDate: LocalDate,
-    nutritionSummary: NutritionSummaryUiState,
     meals: List<MealPageUiModel>
 ) {
     val token = GymTheme.token
@@ -355,10 +353,6 @@ fun CaloriesTodayPanel(
                         shape = RoundedCornerShape(token.radius.lg)
                     )
             )
-            NutritionCard(
-                selectedDate = selectedDate,
-                summary = nutritionSummary
-            )
             Column(verticalArrangement = Arrangement.spacedBy(token.spacing.md)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -394,7 +388,7 @@ fun CaloriesTodayPanel(
 }
 
 @Composable
-private fun NutritionCard(
+fun NutritionCard(
     modifier: Modifier = Modifier,
     selectedDate: LocalDate,
     summary: NutritionSummaryUiState
@@ -405,7 +399,7 @@ private fun NutritionCard(
     val progress = (summary.intake.toFloat() / summary.goal.toFloat()).coerceIn(0f, 1f)
 
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier,
         shape = RoundedCornerShape(token.radius.lg),
         colors = CardDefaults.cardColors(containerColor = token.colors.dashboardNutritionCardBackground),
         border = BorderStroke(
@@ -484,10 +478,11 @@ private fun MealItem(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.LocalDining,
-                    contentDescription = item.title,
-                    tint = token.colors.primary
+                Image(
+                    painter = painterResource(R.drawable.body_unsplash),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
                 )
 
                 // Calories badge overlaid at bottom-end
