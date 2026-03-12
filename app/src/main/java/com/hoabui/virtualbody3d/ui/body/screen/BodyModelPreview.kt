@@ -249,10 +249,12 @@ fun BodyModelPreview(
                 val cameraDistance = (max(fitBySphere, fitByHeight) * 1.25f)
                     .coerceIn(2f, 300f)
 
-                val lookAt = Position(x = 0f, y = modelCenterY, z = 0f)
+                // Dịch trọng tâm nhìn lên một chút để phần chân nằm gần đáy viewport hơn.
+                val lookAtY = (modelCenterY + frameSizeY * 0.10f).coerceIn(-1e6f, 1e6f)
+                val lookAt = Position(x = 0f, y = lookAtY, z = 0f)
                 orbitTargetPosition = lookAt
-                // Camera phía trước (trục Z) + hơi chếch lên một chút để khung hình tự nhiên hơn.
-                val cameraY = (modelCenterY + frameSizeY * 0.05f).coerceIn(-1e6f, 1e6f)
+                // Camera phía trước (trục Z), cao hơn nhẹ so với điểm nhìn để khung hình tự nhiên.
+                val cameraY = (lookAtY + frameSizeY * 0.02f).coerceIn(-1e6f, 1e6f)
                 orbitHomePosition = Position(x = 0f, y = cameraY, z = cameraDistance)
                 cameraNode.position = orbitHomePosition
                 cameraNode.lookAt(orbitTargetPosition)

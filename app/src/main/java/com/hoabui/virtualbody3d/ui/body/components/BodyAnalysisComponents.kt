@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -50,6 +51,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.core.extensions.formatMeasurement
 import com.hoabui.virtualbody3d.core.extensions.heroLayerAnimation
@@ -406,7 +408,7 @@ private fun NutritionCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(token.radius.lg),
         colors = CardDefaults.cardColors(containerColor = token.colors.dashboardNutritionCardBackground),
-        border = androidx.compose.foundation.BorderStroke(
+        border = BorderStroke(
             width = bodyToken.topBarBorderWidth,
             color = token.colors.dashboardNutritionCardBorder
         )
@@ -465,12 +467,17 @@ private fun MealItem(
         colors = CardDefaults.cardColors(containerColor = token.colors.dashboardMealCardBackground)
     ) {
         Column(
-            modifier = Modifier.padding(bodyToken.dashboardNutritionCardPadding),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bodyToken.dashboardNutritionCardPadding),
             verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
         ) {
+            // Image box: full-width square with rounded corners
             Box(
                 modifier = Modifier
-                    .size(bodyToken.dashboardMealItemImageSize)
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .clip(RoundedCornerShape(token.radius.md))
                     .background(
                         color = token.colors.dashboardMealImageBackground,
                         shape = RoundedCornerShape(token.radius.md)
@@ -482,16 +489,37 @@ private fun MealItem(
                     contentDescription = item.title,
                     tint = token.colors.primary
                 )
+
+                // Calories badge overlaid at bottom-end
+                if (item.caloriesKcal > 0) {
+                    Surface(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(token.spacing.xs),
+                        shape = RoundedCornerShape(token.radius.sm),
+                        color = token.colors.surfaceElevated,
+                        shadowElevation = token.card.elevation
+                    ) {
+                        Text(
+                            text = "🔥 ${item.caloriesKcal} kcal",
+                            style = token.typography.labelSmall,
+                            color = token.colors.textPrimary,
+                            modifier = Modifier.padding(
+                                horizontal = token.spacing.xs,
+                                vertical = token.spacing.xxs
+                            )
+                        )
+                    }
+                }
             }
+
+            // Meal title below image
             Text(
                 text = item.title,
                 style = token.typography.bodyMedium,
-                maxLines = Constants.BODY_ANALYSIS_MEAL_NAME_MAX_LINES
-            )
-            Text(
-                text = stringResource(R.string.analysis_panel_kcal_value, item.caloriesKcal),
-                style = token.typography.labelMedium,
-                color = token.colors.textSecondary
+                color = token.colors.textPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
