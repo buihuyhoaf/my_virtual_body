@@ -12,6 +12,8 @@ data class MealAnalysis(
     val fatGrams: Float?,
     val servingSizeText: String? = null,
     val notes: String? = null,
-    val rawLines: List<String> = emptyList()
+    val rawLines: List<String> = emptyList(),
+    /** Optional image URL when meal is loaded from API (e.g. getMealsByDay). */
+    val imageUrl: String? = null
 )
 

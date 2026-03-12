@@ -33,14 +33,13 @@ import com.hoabui.virtualbody3d.ui.body.components.HeroSection
 import com.hoabui.virtualbody3d.ui.body.components.PromoBannerCarousel
 import com.hoabui.virtualbody3d.ui.body.mapper.toPromoBannerItem
 import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
-import com.hoabui.virtualbody3d.ui.body.state.BodyScreenState
 import com.hoabui.virtualbody3d.ui.body.state.BodyUiState
-import com.hoabui.virtualbody3d.ui.body.state.CaloriesTodayUiState
-import com.hoabui.virtualbody3d.ui.body.state.MealUiState
 import com.hoabui.virtualbody3d.ui.body.state.NutritionSummaryUiState
 import com.hoabui.virtualbody3d.ui.body.state.toUiState
 import com.hoabui.virtualbody3d.ui.body.viewmodel.BodyViewModel
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
+import com.hoabui.virtualbody3d.ui.mealcapture.MealPageUiModel
+import com.hoabui.virtualbody3d.ui.mealcapture.MealsViewModel
 import com.hoabui.virtualbody3d.ui.scanresult.MetricsPanel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import java.time.LocalDate
@@ -48,9 +47,11 @@ import java.time.LocalDate
 @Composable
 fun BodyAnalysisScreen(
     onRegionClick: (BodyRegion) -> Unit = {},
-    viewModel: BodyViewModel = hiltViewModel()
+    viewModel: BodyViewModel = hiltViewModel(),
+    mealsViewModel: MealsViewModel = hiltViewModel()
 ) {
     val screenState by viewModel.state.collectAsStateWithLifecycle()
+    val mealsForToday by mealsViewModel.mealsForToday.collectAsStateWithLifecycle()
 
     UiStateContent(
         state = screenState,
@@ -59,7 +60,8 @@ fun BodyAnalysisScreen(
             BodyAnalysisContent(
                 modifier = mod,
                 scanResult = data.scanResult,
-                caloriesToday = data.caloriesToday,
+                nutritionToday = data.nutritionToday,
+                meals = mealsForToday,
                 onRegionClick = onRegionClick,
                 promoBanners = data.promoBanners
             )
@@ -71,7 +73,8 @@ fun BodyAnalysisScreen(
 fun BodyAnalysisContent(
     modifier: Modifier = Modifier,
     scanResult: BodyScanResult?,
-    caloriesToday: CaloriesTodayUiState,
+    nutritionToday: NutritionSummaryUiState,
+    meals: List<MealPageUiModel>,
     onRegionClick: (BodyRegion) -> Unit = {},
     promoBanners: List<PromoBanner> = emptyList()
 ) {
@@ -105,8 +108,8 @@ fun BodyAnalysisContent(
 
         PanelSlider(
             modifier = Modifier.weight(0.38f),
-            nutritionSummary = caloriesToday.nutrition,
-            meals = caloriesToday.meals,
+            nutritionSummary = nutritionToday,
+            meals = meals,
             scanResult = scanResult
         )
     }
@@ -117,7 +120,7 @@ fun BodyAnalysisContent(
 private fun PanelSlider(
     modifier: Modifier = Modifier,
     nutritionSummary: NutritionSummaryUiState,
-    meals: List<MealUiState>,
+    meals: List<MealPageUiModel>,
     scanResult: BodyScanResult?
 ) {
     val token = GymTheme.token

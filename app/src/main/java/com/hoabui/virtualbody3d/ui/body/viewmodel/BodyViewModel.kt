@@ -6,7 +6,7 @@ import com.hoabui.virtualbody3d.domain.usecase.GetCaloriesTodayUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetPromoBannersUseCase
 import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
 import com.hoabui.virtualbody3d.ui.body.state.BodyScreenState
-import com.hoabui.virtualbody3d.ui.body.state.toCaloriesTodayUiState
+import com.hoabui.virtualbody3d.ui.body.state.toNutritionSummaryUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.combine
@@ -24,10 +24,10 @@ class BodyViewModel @Inject constructor(
                 getBodyDataUseCase(),
                 getCaloriesTodayUseCase(),
                 getPromoBannersUseCase()
-            ) { bodyData, caloriesTodayData, promoBanners ->
+            ) { bodyData, nutritionData, promoBanners ->
                 BodyScreenState(
                     scanResult = bodyData,
-                    caloriesToday = caloriesTodayData.toCaloriesTodayUiState(),
+                    nutritionToday = nutritionData.toNutritionSummaryUiState(),
                     promoBanners = promoBanners
                 )
             }.collect { bodyScreenState ->

@@ -8,6 +8,8 @@ import com.hoabui.virtualbody3d.domain.repository.PromoBannerRepository
 import com.hoabui.virtualbody3d.domain.repository.MessageRepository
 import com.hoabui.virtualbody3d.domain.repository.UserInfoRepository
 import com.hoabui.virtualbody3d.domain.usecase.AnalyzeMealImageUseCase
+import com.hoabui.virtualbody3d.domain.usecase.GetMealDaysUseCase
+import com.hoabui.virtualbody3d.domain.usecase.GetMealsByDayUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetBodyDataUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetCaloriesTodayUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetPromoBannersUseCase
@@ -78,5 +80,19 @@ object UseCaseModule {
         mealRepository: MealRepository
     ): AnalyzeMealImageUseCase {
         return AnalyzeMealImageUseCase(mealRepository)
+    }
+
+    @Provides
+    fun provideGetMealDaysUseCase(
+        mealRepository: MealRepository
+    ): GetMealDaysUseCase {
+        return GetMealDaysUseCase(mealRepository)
+    }
+
+    @Provides
+    fun provideGetMealsByDayUseCase(
+        mealRepository: MealRepository
+    ): GetMealsByDayUseCase {
+        return GetMealsByDayUseCase(mealRepository)
     }
 }

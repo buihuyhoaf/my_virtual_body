@@ -33,8 +33,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -92,7 +94,12 @@ fun MealResultPage(
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {
-                    CircularProgressIndicator(color = colors.primary)
+                    Image(
+                        painter = painterResource(R.drawable.body_unsplash),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
                 }
             }
 

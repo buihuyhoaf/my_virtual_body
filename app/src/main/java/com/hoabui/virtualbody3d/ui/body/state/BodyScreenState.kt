@@ -5,6 +5,6 @@ import com.hoabui.virtualbody3d.domain.model.PromoBanner
 
 data class BodyScreenState(
     val scanResult: BodyScanResult,
-    val caloriesToday: CaloriesTodayUiState,
+    val nutritionToday: NutritionSummaryUiState,
     val promoBanners: List<PromoBanner> = emptyList()
 )

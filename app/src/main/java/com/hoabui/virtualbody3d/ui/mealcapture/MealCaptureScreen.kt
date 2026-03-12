@@ -20,22 +20,29 @@ import java.io.File
 fun MealCaptureScreen(
     modifier: Modifier = Modifier,
     cameraViewModel: CameraCaptureViewModel = hiltViewModel(),
-    mealViewModel: MealCaptureViewModel = hiltViewModel()
+    mealsViewModel: MealsViewModel = hiltViewModel()
 ) {
-    val mealPages by mealViewModel.mealPages.collectAsStateWithLifecycle()
+    val mealPages by mealsViewModel.mealPages.collectAsStateWithLifecycle()
     val pagerState = rememberPagerState(
         initialPage = 0,
         pageCount = { 1 + mealPages.size }
     )
 
-    val token = GymTheme.token
-
     // When a new meal page is added, automatically scroll to page 1 (latest meal).
     LaunchedEffect(mealPages.size) {
         if (mealPages.isNotEmpty()) {
-            // Small delay to ensure pager is laid out before scroll
             awaitFrame()
             pagerState.animateScrollToPage(1)
+        }
+    }
+
+    // When user scrolls near the end of the list, load next day's meals.
+    LaunchedEffect(pagerState.currentPage, mealPages.size) {
+        val totalPages = 1 + mealPages.size
+        if (totalPages <= 1) return@LaunchedEffect
+        val threshold = (totalPages - 1).coerceAtLeast(0)
+        if (pagerState.currentPage >= threshold) {
+            mealsViewModel.loadNextDayIfNeeded()
         }
     }
 
@@ -48,7 +55,7 @@ fun MealCaptureScreen(
                 modifier = Modifier.fillMaxSize(),
                 viewModel = cameraViewModel,
                 onUsePhoto = { file: File ->
-                    mealViewModel.onMealImageConfirmed(file)
+                    mealsViewModel.onMealImageConfirmed(file)
                 }
             )
         } else {

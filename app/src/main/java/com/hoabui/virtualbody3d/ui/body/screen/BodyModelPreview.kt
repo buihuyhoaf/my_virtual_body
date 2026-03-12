@@ -58,7 +58,8 @@ fun BodyModelPreview(
     var modelNode by remember { mutableStateOf<ModelNode?>(null) }
     var sceneViewRef by remember { mutableStateOf<SceneView?>(null) }
     var modelYaw by remember { mutableFloatStateOf(180f) }
-    var orbitHomePosition by remember { mutableStateOf(Position(x = 4f, y = 0f, z = 0f)) }
+    // Default camera: đứng phía trước model theo trục Z.
+    var orbitHomePosition by remember { mutableStateOf(Position(x = 0f, y = 0f, z = 4f)) }
     var orbitTargetPosition by remember { mutableStateOf(Position(x = 0f, y = 0f, z = 0f)) }
 
     val localEngine = rememberEngine()
@@ -94,7 +95,7 @@ fun BodyModelPreview(
         modifier = modifier.fillMaxSize()
     ) {
         AndroidView(
-            modifier = modifier,
+            modifier = Modifier.fillMaxSize(),
             factory = { ctx ->
                 SceneView(
                     context = ctx,
@@ -192,11 +193,19 @@ fun BodyModelPreview(
 
         withContext(Dispatchers.Main.immediate) {
             if (instance != null) {
+                // Khi có glbBounds: đặt pivot tại tâm model (centerOrigin) để xoay quanh tâm và căn giữa scene.
+                val boundsCenter = glbBounds?.let {
+                    Position(
+                        x = (it.minX + it.maxX) * 0.5f,
+                        y = it.centerY,
+                        z = (it.minZ + it.maxZ) * 0.5f
+                    )
+                }
                 val node = ModelNode(
                     modelInstance = instance,
                     autoAnimate = false,
                     scaleToUnits = null,
-                    centerOrigin = null
+                    centerOrigin = boundsCenter
                 )
                 val frameSizeX = (glbBounds?.width ?: node.size.x).coerceIn(0.01f, 1e6f)
                 val frameSizeY = (glbBounds?.height ?: node.size.y).coerceIn(0.01f, 1e6f)
@@ -206,18 +215,24 @@ fun BodyModelPreview(
 
                 val glbMinY = glbBounds?.let { it.centerY - (it.height * 0.5f) }
 
-                // Đặt chân model lên mặt phẳng Y = 0.
-                val nodePositionY = if (glbBounds != null && glbMinY != null) {
-                    (-glbMinY).coerceIn(-1e6f, 1e6f)
+                if (boundsCenter != null) {
+                    // Pivot ở tâm model: đặt node tại (0, height/2, 0) → chân Y=0, tâm đúng giữa theo chiều dọc.
+                    val centerY = (frameSizeY * 0.5f).coerceIn(0.01f, 1e6f)
+                    node.position = Position(x = 0f, y = centerY, z = 0f)
                 } else {
-                    (-runtimeCenterY + halfHeight).coerceIn(-1e6f, 1e6f)
+                    // Fallback khi không có bounds: dùng offset từ node.center để căn X/Z, chân về Y=0.
+                    val centerX = node.center.x
+                    val centerZ = node.center.z
+                    val nodePositionY = (-runtimeCenterY + halfHeight).coerceIn(-1e6f, 1e6f)
+                    node.position = Position(
+                        x = (-centerX).coerceIn(-1e6f, 1e6f),
+                        y = nodePositionY,
+                        z = (-centerZ).coerceIn(-1e6f, 1e6f)
+                    )
                 }
 
-                // Căn model: chân ở Y = 0, giữ X/Z tại 0 (origin nằm trên trục thẳng đứng giữa scene).
-                node.position = Position(x = 0f, y = nodePositionY, z = 0f)
-
-                // Sau khi chân nằm ở Y = 0, tâm hình học nằm ở giữa chiều cao model.
-                val modelCenterY = (nodePositionY + frameSizeY * 0.5f).coerceIn(0.0f, 1e6f)
+                // Tâm theo chiều dọc: khi có centerOrigin thì node.position là tâm; khi không thì tâm = position + center.
+                val modelCenterY = if (boundsCenter != null) node.position.y else (node.position.y + runtimeCenterY)
 
                 val diagonal = sqrt(
                     frameSizeX * frameSizeX +
@@ -227,16 +242,18 @@ fun BodyModelPreview(
                 val sphereRadius = diagonal * 0.5f
                 val verticalFovDeg = 40f
                 val halfFovRad = Math.toRadians((verticalFovDeg / 2f).toDouble()).toFloat()
-                val fitDistance = sphereRadius / tan(halfFovRad)
-                // Không dùng bottomFactor nữa để tránh hiện tượng model nổi lên khỏi đáy.
-                // Dùng đúng khoảng cách “fit theo hình cầu” để bao trọn model.
-                val cameraDistance = fitDistance
+                val fitBySphere = sphereRadius / tan(halfFovRad)
+                val halfHeightForFov = (frameSizeY * 0.5f).coerceIn(0.01f, 1e6f)
+                val fitByHeight = halfHeightForFov / tan(halfFovRad)
+                // Fit theo hình cầu và theo chiều cao để toàn bộ model nằm trong khung, margin 25%.
+                val cameraDistance = (max(fitBySphere, fitByHeight) * 1.25f)
                     .coerceIn(2f, 300f)
 
                 val lookAt = Position(x = 0f, y = modelCenterY, z = 0f)
                 orbitTargetPosition = lookAt
-                // Force a 90-degree horizontal view: place camera on X axis, look at model center.
-                orbitHomePosition = Position(x = cameraDistance, y = modelCenterY, z = 0f)
+                // Camera phía trước (trục Z) + hơi chếch lên một chút để khung hình tự nhiên hơn.
+                val cameraY = (modelCenterY + frameSizeY * 0.05f).coerceIn(-1e6f, 1e6f)
+                orbitHomePosition = Position(x = 0f, y = cameraY, z = cameraDistance)
                 cameraNode.position = orbitHomePosition
                 cameraNode.lookAt(orbitTargetPosition)
 
@@ -247,7 +264,7 @@ fun BodyModelPreview(
                         "node.size=(${node.size.x}, ${node.size.y}, ${node.size.z}) " +
                         "node.extents=(${node.extents.x}, ${node.extents.y}, ${node.extents.z}) " +
                         "runtimeCenterY=$runtimeCenterY glbCenterY=${glbBounds?.centerY} glbMinY=$glbMinY " +
-                        "modelCenterY=$modelCenterY sphereRadius=$sphereRadius fitDistance=$fitDistance cameraDistance=$cameraDistance " +
+                        "modelCenterY=$modelCenterY sphereRadius=$sphereRadius fitBySphere=$fitBySphere fitByHeight=$fitByHeight cameraDistance=$cameraDistance " +
                         "cameraNode.position=(${cameraNode.position.x}, ${cameraNode.position.y}, ${cameraNode.position.z}) lookAt=(${lookAt.x}, ${lookAt.y}, ${lookAt.z})"
                 )
 
@@ -257,7 +274,7 @@ fun BodyModelPreview(
                     Log.d(
                         BODY_DEV_LOG_TAG,
                         "GLB bounds: w=${glbBounds.width} h=${glbBounds.height} d=${glbBounds.depth} centerY=${glbBounds.centerY}; " +
-                            "runtime size=${node.size.x}x${node.size.y}x${node.size.z} cameraX=$cameraDistance"
+                            "runtime size=${node.size.x}x${node.size.y}x${node.size.z} cameraDistance=$cameraDistance"
                     )
                 }
 

@@ -1,9 +1,10 @@
 package com.hoabui.virtualbody3d.domain.repository
 
 import com.hoabui.virtualbody3d.domain.model.MealAnalysis
+import java.time.LocalDate
 
 /**
- * Repository for meal analysis results given an uploaded image URL.
+ * Repository for meal analysis results and meal history by day.
  */
 interface MealRepository {
 
@@ -14,5 +15,15 @@ interface MealRepository {
      * @throws Exception on analysis failure
      */
     suspend fun analyzeMeal(imageUrl: String): MealAnalysis
+
+    /**
+     * Returns dates that have at least one meal for the current user, newest first.
+     */
+    suspend fun getDaysWithMeals(): List<LocalDate>
+
+    /**
+     * Returns all meals for the given day.
+     */
+    suspend fun getMealsByDay(day: LocalDate): List<MealAnalysis>
 }
 

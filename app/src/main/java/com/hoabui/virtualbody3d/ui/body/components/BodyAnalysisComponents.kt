@@ -59,8 +59,8 @@ import com.hoabui.virtualbody3d.ui.body.screen.BodyScoreChip
 import com.hoabui.virtualbody3d.ui.body.screen.FloatingMetricChip
 import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
 import com.hoabui.virtualbody3d.ui.body.state.BodyUiState
-import com.hoabui.virtualbody3d.ui.body.state.MealUiState
 import com.hoabui.virtualbody3d.ui.body.state.NutritionSummaryUiState
+import com.hoabui.virtualbody3d.ui.mealcapture.MealPageUiModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -316,7 +316,7 @@ fun CaloriesTodayPanel(
     modifier: Modifier = Modifier,
     selectedDate: LocalDate,
     nutritionSummary: NutritionSummaryUiState,
-    meals: List<MealUiState>
+    meals: List<MealPageUiModel>
 ) {
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis
@@ -380,7 +380,7 @@ fun CaloriesTodayPanel(
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(token.spacing.md)) {
                     items(
                         items = displayedMeals,
-                        key = { it.name }
+                        key = { it.title }
                     ) { item ->
                         MealItem(item = item)
                     }
@@ -455,7 +455,7 @@ private fun NutritionCard(
 @Composable
 private fun MealItem(
     modifier: Modifier = Modifier,
-    item: MealUiState
+    item: MealPageUiModel
 ) {
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis
@@ -479,17 +479,17 @@ private fun MealItem(
             ) {
                 Icon(
                     imageVector = Icons.Default.LocalDining,
-                    contentDescription = item.name,
+                    contentDescription = item.title,
                     tint = token.colors.primary
                 )
             }
             Text(
-                text = item.name,
+                text = item.title,
                 style = token.typography.bodyMedium,
                 maxLines = Constants.BODY_ANALYSIS_MEAL_NAME_MAX_LINES
             )
             Text(
-                text = stringResource(R.string.analysis_panel_kcal_value, item.calories),
+                text = stringResource(R.string.analysis_panel_kcal_value, item.caloriesKcal),
                 style = token.typography.labelMedium,
                 color = token.colors.textSecondary
             )

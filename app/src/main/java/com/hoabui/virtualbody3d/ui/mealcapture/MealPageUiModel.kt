@@ -11,6 +11,7 @@ data class MealPageUiModel(
     val id: String,
     val imageUri: Uri,
     val title: String,
+    val caloriesKcal: Int,
     val caloriesText: String,
     val macroSummaryText: String,
     val rawLines: List<String>
@@ -21,7 +22,8 @@ fun MealAnalysis.toMealPageUiModel(
 ): MealPageUiModel {
     val title = name.ifBlank { "Meal" }
 
-    val caloriesText = caloriesKcal?.let { "$it kcal" } ?: "Calories: -"
+    val kcal = caloriesKcal ?: 0
+    val caloriesText = if (caloriesKcal != null) "$caloriesKcal kcal" else "Calories: -"
 
     val macroSummaryText = buildString {
         appendLine("Protein: ${proteinGrams ?: 0f} g")
@@ -33,9 +35,18 @@ fun MealAnalysis.toMealPageUiModel(
         id = id,
         imageUri = imageUri,
         title = title,
+        caloriesKcal = kcal,
         caloriesText = caloriesText,
         macroSummaryText = macroSummaryText,
         rawLines = rawLines
     )
+}
+
+/**
+ * Maps [MealAnalysis] to [MealPageUiModel] when loaded from API (uses [MealAnalysis.imageUrl] or placeholder).
+ */
+fun MealAnalysis.toMealPageUiModelFromApi(): MealPageUiModel {
+    val imageUri = imageUrl?.let { Uri.parse(it) } ?: Uri.EMPTY
+    return toMealPageUiModel(imageUri)
 }
 
