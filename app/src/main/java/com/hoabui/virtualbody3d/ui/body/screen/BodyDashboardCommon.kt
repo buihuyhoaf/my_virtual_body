@@ -27,7 +27,7 @@ import com.hoabui.virtualbody3d.ui.theme.GymTheme
 @Composable
 fun FloatingMetricChip(
     modifier: Modifier = Modifier,
-    icon: ImageVector,
+    icon: ImageVector? = null,
     value: String? = null
 ) {
     val token = GymTheme.token
@@ -55,21 +55,23 @@ fun FloatingMetricChip(
             horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(bodyToken.metricChipIconContainerSize)
-                    .background(
-                        color = token.colors.primarySoft,
-                        shape = chipShape
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = token.colors.primary,
-                    modifier = Modifier.size(bodyToken.metricChipIconSize)
-                )
+            if (icon != null) {
+                Box(
+                    modifier = Modifier
+                        .size(bodyToken.metricChipIconContainerSize)
+                        .background(
+                            color = token.colors.primarySoft,
+                            shape = chipShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ){
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = token.colors.primary,
+                        modifier = Modifier.size(bodyToken.metricChipIconSize)
+                    )
+                }
             }
             if (!value.isNullOrEmpty()){
                 Text(

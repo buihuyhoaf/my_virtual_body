@@ -32,6 +32,18 @@ private val topBarConfigs: Map<String, TopBarConfig> = mapOf(
     Routes.ADD to TopBarConfig.Home
 )
 
+/**
+ * Exact routes where the bottom bar is visible (main tabs + depth-2 screens with no path args).
+ */
+private val bottomBarVisibleRoutes = setOf(
+    Routes.HOME,
+    Routes.MESSAGES,
+    Routes.CENFIT_COACH,
+    Routes.MEAL_CAPTURE,
+    Routes.PROFILE,
+    Routes.BODY_DETAIL_ANALYST
+)
+
 @Composable
 fun AppScaffoldLayout(
     modifier: Modifier = Modifier,
@@ -43,14 +55,7 @@ fun AppScaffoldLayout(
     val currentRoute = navBackStackEntry?.destination?.route
     val showBars = currentRoute != null && currentRoute !in fullScreenRoutes
 
-    val bottomBarRoutes = setOf(
-        Routes.HOME,
-        Routes.MESSAGES,
-        Routes.CENFIT_COACH,
-        Routes.MEAL_CAPTURE,
-        Routes.PROFILE
-    )
-    val showBottomBar = showBars && currentRoute != null && currentRoute in bottomBarRoutes
+    val showBottomBar = showBars && (currentRoute in bottomBarVisibleRoutes)
 
     val topBarConfig = when {
         !showBars -> TopBarConfig.None

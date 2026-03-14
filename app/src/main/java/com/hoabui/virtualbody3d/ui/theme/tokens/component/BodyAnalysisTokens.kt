@@ -63,7 +63,9 @@ data class BodyAnalysisTokens(
     val scoreChipProminentStrokeWidth: Dp,
     val bodyRegionItemWidth: Dp,
     val bodyRegionItemHeight: Dp,
-    val bodyRegionPlaceholderSize: Dp
+    val bodyRegionPlaceholderSize: Dp,
+    val supplementCardWidth: Dp,
+    val supplementCardHeight: Dp
 )
 
 fun gymBodyAnalysisTokens(spacing: PrimitiveSpacingTokens): BodyAnalysisTokens = BodyAnalysisTokens(
@@ -117,7 +119,9 @@ fun gymBodyAnalysisTokens(spacing: PrimitiveSpacingTokens): BodyAnalysisTokens =
     scoreChipProminentInnerSize = 14.dp,
     scoreChipStrokeWidth = 4.dp,
     scoreChipProminentStrokeWidth = 5.dp,
-    bodyRegionItemWidth = 80.dp,
-    bodyRegionItemHeight = 88.dp,
-    bodyRegionPlaceholderSize = 40.dp
+    bodyRegionItemWidth = 120.dp,
+    bodyRegionItemHeight = 120.dp, // 1.5 × width for fitness-style tile
+    bodyRegionPlaceholderSize = 40.dp,
+    supplementCardWidth = 80.dp,
+    supplementCardHeight = 100.dp
 )

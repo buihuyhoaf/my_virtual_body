@@ -1,10 +1,13 @@
 package com.hoabui.virtualbody3d.ui.body.components
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,15 +22,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.RotateRight
-import androidx.compose.material.icons.filled.LocalDining
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.Opacity
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -37,76 +41,67 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.core.extensions.formatMeasurement
-import com.hoabui.virtualbody3d.core.extensions.heroLayerAnimation
 import com.hoabui.virtualbody3d.core.utils.Constants
+import com.hoabui.virtualbody3d.ui.body.data.FavoriteExerciseUiItem
+import com.hoabui.virtualbody3d.ui.body.data.NutritionSummaryUiState
+import com.hoabui.virtualbody3d.ui.body.data.SupplementUiItem
 import com.hoabui.virtualbody3d.ui.body.screen.BodyModelPreview
 import com.hoabui.virtualbody3d.ui.body.screen.BodyScoreChip
 import com.hoabui.virtualbody3d.ui.body.screen.FloatingMetricChip
 import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
 import com.hoabui.virtualbody3d.ui.body.state.BodyUiState
-import com.hoabui.virtualbody3d.ui.body.state.NutritionSummaryUiState
+import com.hoabui.virtualbody3d.ui.components.SectionTitle
 import com.hoabui.virtualbody3d.ui.mealcapture.MealPageUiModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @Composable
 fun HeroSection(
     modifier: Modifier = Modifier,
     uiState: BodyUiState,
     bodyScore: Int,
-    showRotateChip: Boolean = false
+    onViewBodyDetailClick: () -> Unit = {},
 ) {
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis
-    var showImageMode by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(token.radius.lg))
-            .background(
-                brush = Brush.radialGradient(
-                    center = Offset(0.5f, 0.5f),
-                    radius = 1.2f,
-                    colors = listOf(token.colors.primarySoft, MaterialTheme.colorScheme.surface)
+    Column(verticalArrangement = Arrangement.spacedBy(token.spacing.xs)) {
+        SectionTitle(textResId = R.string.home_section_body, onSeeMoreClick = onViewBodyDetailClick)
+        Box(
+            modifier = modifier
+                .clip(RoundedCornerShape(token.radius.lg))
+                .background(
+                    brush = Brush.radialGradient(
+                        center = Offset(0.5f, 0.5f),
+                        radius = 1.2f,
+                        colors = listOf(token.colors.primarySoft, MaterialTheme.colorScheme.surface)
+                    )
                 )
+        ) {
+            BodyModelPreview(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(token.radius.lg))
             )
-    ) {
-        BodyModelPreview(
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(token.radius.lg))
-                .heroLayerAnimation(showImageMode, forImageLayer = false)
-        )
-        Image(
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(token.radius.lg))
-                .heroLayerAnimation(showImageMode, forImageLayer = true),
-            painter = painterResource(R.drawable.body_unsplash),
-            contentDescription = null,
-            contentScale = ContentScale.Crop
-        )
-
-        if (!showImageMode){
             BodyScoreChip(
                 modifier = Modifier
                     .align(Alignment.TopStart)
@@ -135,37 +130,355 @@ fun HeroSection(
                     value = uiState.height.formatMeasurement(Constants.CENTIMETER)
                 )
             }
-        }
-        if (showRotateChip) {
-            Surface(
+
+            Column(
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
+                    .align(Alignment.BottomStart)
                     .padding(
-                        bottom = bodyToken.previewTrackBottomPadding,
-                        end = bodyToken.metricChipSidePadding
-                    )
-                    .clickable { showImageMode = !showImageMode },
-                shape = RoundedCornerShape(token.radius.lg),
-                color = token.colors.surfaceOverlay,
-                border = BorderStroke(bodyToken.topBarBorderWidth, token.colors.surfaceBorder),
-                shadowElevation = token.card.elevation
+                        bottom = bodyToken.scoreChipTopPadding,
+                        start = bodyToken.metricChipSidePadding
+                    ),
+                verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
             ) {
-                Box(
-                    modifier = Modifier
-                        .padding(token.spacing.xs)
-                        .size(bodyToken.topBarIconSize),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.RotateRight,
-                        contentDescription = stringResource(R.string.analysis_rotate_to_image),
-                        tint = token.colors.primary
-                    )
-                }
+                FloatingMetricChip(
+                    icon = Icons.Default.Opacity,
+                    value = uiState.bodyFat.formatMeasurement(Constants.PERCENT)
+                )
+                FloatingMetricChip(
+                    icon = Icons.Default.Opacity,
+                    value = uiState.muscleMass.formatMeasurement(Constants.PERCENT)
+                )
             }
         }
     }
 }
+
+/**
+ * Compact dashboard card showing body progress: Muscle Mass, Body Fat, Weight.
+ * Each metric shows value, optional change indicator (+0.9 ↑ / -1.2 ↓), and label.
+ */
+@Composable
+fun MuscleProgressCard(
+    modifier: Modifier = Modifier,
+    uiState: BodyUiState
+) {
+    val token = GymTheme.token
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(token.radius.lg),
+        colors = CardDefaults.cardColors(containerColor = token.colors.dashboardSummaryCardBackground),
+        border = BorderStroke(
+            width = token.bodyAnalysis.topBarBorderWidth,
+            color = token.colors.dashboardNutritionCardBorder
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(token.card.padding),
+            verticalArrangement = Arrangement.spacedBy(token.spacing.md)
+        ) {
+            Text(
+                text = stringResource(R.string.analysis_body_progress),
+                style = token.typography.titleMedium,
+                color = token.colors.textPrimary
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                BodyProgressMetricItem(
+                    value = uiState.muscleMass.ifEmpty { stringResource(R.string.body_placeholder) },
+                    change = uiState.muscleMassProgress,
+                    label = stringResource(R.string.body_muscle_mass),
+                    unit = stringResource(R.string.body_unit_kg)
+                )
+                BodyProgressMetricItem(
+                    value = uiState.bodyFat.ifEmpty { stringResource(R.string.body_placeholder) },
+                    change = uiState.bodyFatProgress,
+                    label = stringResource(R.string.body_body_fat),
+                    unit = stringResource(R.string.body_unit_percent)
+                )
+                BodyProgressMetricItem(
+                    value = uiState.weight.ifEmpty { stringResource(R.string.body_placeholder) },
+                    change = uiState.weightProgress,
+                    label = stringResource(R.string.body_weight),
+                    unit = stringResource(R.string.body_unit_kg)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BodyProgressMetricItem(
+    modifier: Modifier = Modifier,
+    value: String,
+    change: Float?,
+    label: String,
+    unit: String
+) {
+    val token = GymTheme.token
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(token.spacing.xxs)
+    ) {
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = value,
+                style = token.typography.titleMedium,
+                color = token.colors.textPrimary
+            )
+            if (value != stringResource(R.string.body_placeholder)) {
+                Text(
+                    text = unit,
+                    style = token.typography.labelSmall,
+                    color = token.colors.textSecondary,
+                    modifier = Modifier.padding(start = token.spacing.xxs)
+                )
+            }
+        }
+        change?.let { delta ->
+            val isPositive = delta >= 0f
+            val sign = if (isPositive) "+" else ""
+            val arrow = if (isPositive) "↑" else "↓"
+            Text(
+                text = "$sign${"%.1f".format(delta)} $arrow",
+                style = token.typography.labelSmall,
+                color = if (isPositive) token.colors.primary else token.colors.error
+            )
+        }
+        Text(
+            text = label,
+            style = token.typography.labelSmall,
+            color = token.colors.textSecondary
+        )
+    }
+}
+
+/**
+ * Shared section with title and horizontal LazyRow. Use for FavoriteExercisesRow and SupplementsRow.
+ * Reduces spacing between section title and row content (xs) for a tighter block.
+ */
+@Composable
+fun SectionHorizontalRow(
+    @StringRes titleResId: Int,
+    modifier: Modifier = Modifier,
+    content: LazyListScope.() -> Unit
+) {
+    val token = GymTheme.token
+    Column(
+        verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
+    ) {
+        SectionTitle(textResId = titleResId)
+        LazyRow(
+            modifier = modifier,
+            horizontalArrangement = Arrangement.spacedBy(token.spacing.md),
+            contentPadding = PaddingValues(
+                horizontal = token.spacing.md,
+                vertical = token.spacing.md
+            ),
+            content = content
+        )
+    }
+}
+
+@Composable
+fun FavoriteExercisesRow(
+    modifier: Modifier = Modifier,
+    exercises: List<FavoriteExerciseUiItem>,
+    onAddExerciseClick: () -> Unit = {}
+) {
+    SectionHorizontalRow(
+        titleResId = R.string.home_section_favorite_exercises,
+        modifier = modifier
+    ) {
+        items(
+            items = exercises,
+            key = { it.name }
+        ) { item ->
+            CardImageWithText(
+                imageRes = item.imageResId,
+                firstLineText = item.name,
+                secondLineText = item.exerciseVolume,
+            ) {
+
+            }
+        }
+        item(key = "add_exercise") {
+            AddCard(onClick = onAddExerciseClick)
+        }
+    }
+}
+
+
+@Composable
+private fun CardImageWithText(
+    modifier: Modifier = Modifier,
+    imageRes: Int,
+    firstLineText: String,
+    secondLineText: String,
+    onClick: () -> Unit = {}
+) {
+    val token = GymTheme.token
+    val bodyToken = token.bodyAnalysis
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale = if (isPressed) 0.95f else 1f
+    Card(
+        modifier = modifier
+            .width(bodyToken.bodyRegionItemWidth)
+            .height(bodyToken.bodyRegionItemHeight)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+            .clip(RoundedCornerShape(token.spacing.md)),
+        shape = RoundedCornerShape(token.spacing.md),
+        colors = CardDefaults.cardColors(containerColor = token.colors.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = token.elevation.level1)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(0.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Phần trên: ảnh
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .background(token.colors.dashboardMealImageBackground)
+            ) {
+                Image(
+                    painter = painterResource(imageRes),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+            // Phần dưới: firstLineText + secondLineText
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(token.spacing.xs),
+                verticalArrangement = Arrangement.spacedBy(token.spacing.xxs),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = firstLineText,
+                    style = token.typography.labelMedium,
+                    color = token.colors.textPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = secondLineText,
+                    style = token.typography.bodySmall,
+                    color = token.colors.textSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AddCard(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
+    val token = GymTheme.token
+    val bodyToken = token.bodyAnalysis
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale = if (isPressed) 0.97f else 1f
+    Card(
+        modifier = modifier
+            .width(bodyToken.bodyRegionItemWidth)
+            .height(bodyToken.bodyRegionItemHeight)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            ),
+        shape = RoundedCornerShape(token.radius.md),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        elevation = CardDefaults.cardElevation(defaultElevation = token.elevation.level0),
+        border = BorderStroke(bodyToken.topBarBorderWidth, token.colors.borderSubtle)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Top area: full width, touches edges, clipped to card top corners
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = token.radius.md,
+                            topEnd = token.radius.md,
+                            bottomEnd = 0.dp,
+                            bottomStart = 0.dp
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    tint = token.colors.primary,
+                    modifier = Modifier.size(token.spacing.xl)
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Horizontal row of supplement cards for the home dashboard.
+ * Reuses [SectionHorizontalRow] so layout matches [FavoriteExercisesRow].
+ */
+@Composable
+fun SupplementsRow(
+    modifier: Modifier = Modifier,
+    supplements: List<SupplementUiItem>
+) {
+    SectionHorizontalRow(titleResId = R.string.home_section_supplements, modifier = modifier) {
+        items(
+            items = supplements,
+            key = { "${it.name}-${it.nutrient}" }
+        ) { item ->
+            CardImageWithText(
+                imageRes = item.imageResId,
+                firstLineText = item.name,
+                secondLineText = item.nutrient,
+            ) {
+
+            }
+        }
+        item(key = "add_supplements") {
+            AddCard(onClick = {})
+        }
+    }
+}
+
 
 @Composable
 fun StaticHeroSection(
@@ -397,7 +710,7 @@ fun NutritionCard(
     val bodyToken = token.bodyAnalysis
     val netCalories = summary.intake - summary.burned
     val progress = (summary.intake.toFloat() / summary.goal.toFloat()).coerceIn(0f, 1f)
-
+    SectionTitle(textResId = R.string.home_section_calories_today)
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(token.radius.lg),
@@ -418,13 +731,6 @@ fun NutritionCard(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
             ) {
-                Text(
-                    text = selectedDate.format(
-                        DateTimeFormatter.ofPattern("MMM dd • EEE", Locale.ENGLISH)
-                    ),
-                    style = token.typography.bodyMedium,
-                    color = token.colors.textSecondary
-                )
                 Text(
                     text = stringResource(R.string.analysis_dashboard_kcal_value, netCalories),
                     style = token.typography.titleLarge
@@ -496,7 +802,10 @@ private fun MealItem(
                         shadowElevation = token.card.elevation
                     ) {
                         Text(
-                            text = "🔥 ${item.caloriesKcal} kcal",
+                            text = stringResource(
+                                R.string.analysis_dashboard_meal_kcal_badge,
+                                item.caloriesKcal
+                            ),
                             style = token.typography.labelSmall,
                             color = token.colors.textPrimary,
                             modifier = Modifier.padding(

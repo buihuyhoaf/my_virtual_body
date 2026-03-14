@@ -245,17 +245,19 @@ fun BodyModelPreview(
                 val fitBySphere = sphereRadius / tan(halfFovRad)
                 val halfHeightForFov = (frameSizeY * 0.5f).coerceIn(0.01f, 1e6f)
                 val fitByHeight = halfHeightForFov / tan(halfFovRad)
-                // Fit theo hình cầu và theo chiều cao để toàn bộ model nằm trong khung, margin 25%.
-                val cameraDistance = (max(fitBySphere, fitByHeight) * 1.25f)
+                // Fit theo hình cầu và theo chiều cao; margin nhỏ hơn để zoom gần (0.95 ≈ gần hơn ~25% so với 1.25).
+                val cameraDistance = (max(fitBySphere, fitByHeight) * 0.95f)
                     .coerceIn(2f, 300f)
 
-                // Dịch trọng tâm nhìn lên một chút để phần chân nằm gần đáy viewport hơn.
-                val lookAtY = (modelCenterY + frameSizeY * 0.10f).coerceIn(-1e6f, 1e6f)
+                // Đặt điểm nhìn sao cho đáy frustum đi qua chân (Y=0) → chân sát đáy viewport, thấy đủ chân.
+                // halfHeightVisible = khoảng cách tới target × tan(halfFov); muốn lookAtY - halfHeightVisible ≈ 0.
+                val distToTarget = cameraDistance // xấp xỉ khi camera và target cùng trục Z
+                val halfHeightVisible = (distToTarget * tan(halfFovRad)).coerceIn(0.01f, 1e6f)
+                val lookAtY = (halfHeightVisible * 0.98f).coerceIn(-1e6f, 1e6f) // 98% để chân vừa sát đáy
                 val lookAt = Position(x = 0f, y = lookAtY, z = 0f)
                 orbitTargetPosition = lookAt
-                // Camera phía trước (trục Z), cao hơn nhẹ so với điểm nhìn để khung hình tự nhiên.
-                val cameraY = (lookAtY + frameSizeY * 0.02f).coerceIn(-1e6f, 1e6f)
-                orbitHomePosition = Position(x = 0f, y = cameraY, z = cameraDistance)
+                // z âm: đảo 180° theo chiều ngang so với hướng mặc định.
+                orbitHomePosition = Position(x = 0f, y = lookAtY, z = -cameraDistance)
                 cameraNode.position = orbitHomePosition
                 cameraNode.lookAt(orbitTargetPosition)
 

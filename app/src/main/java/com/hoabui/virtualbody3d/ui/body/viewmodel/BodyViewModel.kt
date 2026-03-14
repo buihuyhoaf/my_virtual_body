@@ -4,12 +4,11 @@ import com.hoabui.virtualbody3d.core.base.UiStateViewModel
 import com.hoabui.virtualbody3d.domain.usecase.GetBodyDataUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetCaloriesTodayUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetPromoBannersUseCase
-import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
+import com.hoabui.virtualbody3d.ui.body.data.toNutritionSummaryUiState
 import com.hoabui.virtualbody3d.ui.body.state.BodyScreenState
-import com.hoabui.virtualbody3d.ui.body.state.toNutritionSummaryUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.combine
+import javax.inject.Inject
 
 @HiltViewModel
 class BodyViewModel @Inject constructor(

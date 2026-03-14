@@ -27,6 +27,7 @@ object Routes {
     const val CENFIT_COACH = "cenfit_coach"
     const val PROFILE = "profile"
     const val BODY_SCAN_RESULT = "body_scan_result"
+    const val BODY_DETAIL_ANALYST = "body_detail_analyst"
     const val BODY_REGION_DETAIL = "body_region_detail"
 }
 
@@ -105,6 +106,12 @@ sealed class AppDestination(
         route = Routes.BODY_SCAN_RESULT,
         labelResId = R.string.body_scan_result_title,
         icon = Icons.Default.Person
+    )
+
+    data object BodyDetailAnalyst : AppDestination(
+        route = Routes.BODY_DETAIL_ANALYST,
+        labelResId = R.string.body_detail_analyst_title,
+        icon = Icons.Default.Info
     )
 
     data class BodyRegionDetail(private val bodyRegion: BodyRegion) : AppDestination(

@@ -13,6 +13,14 @@
     <string name="body_edit_profile">Chỉnh sửa hồ sơ</string>
     <string name="body_placeholder">--</string>
     <string name="body_unit_percent">%</string>
+    <string name="body_unit_kg">kg</string>
+
+    <!-- Home content section titles -->
+    <string name="home_section_calories_today">Calories hôm nay</string>
+    <string name="home_section_body">Cơ thể</string>
+    <string name="home_section_favorite_exercises">Bài tập sắp tới</string>
+    <string name="home_section_supplements">Thực phẩm bổ sung</string>
+    <string name="home_section_see_more">Xem thêm</string>
     <string name="analysis_basic_info">Thông tin cơ bản</string>
     <string name="analysis_body_score">Body Score</string>
     <string name="analysis_score_scale">/100</string>
@@ -83,6 +91,7 @@
     <string name="analysis_dashboard_greeting_day">Chào buổi sáng</string>
     <string name="analysis_dashboard_greeting_night">Chào buổi tối</string>
     <string name="analysis_dashboard_kcal_value">%1$,d kcal</string>
+    <string name="analysis_dashboard_meal_kcal_badge">🔥 %1$d kcal</string>
     <string name="analysis_dashboard_intake_burned">Nạp vào %1$,d • Đã đốt %2$,d</string>
     <string name="analysis_dashboard_goal_value">Mục tiêu %1$,d</string>
     <string name="analysis_dashboard_workout_value">45 min</string>
@@ -91,7 +100,12 @@
     <string name="analysis_dashboard_sleep_value">7h 40m</string>
     <string name="analysis_dashboard_sleep_subtitle">Điểm phục hồi 84%%</string>
     <string name="analysis_view_detailed_analysis">Xem phân tích chi tiết</string>
+    <string name="analysis_hero_view_detail">Chi tiết</string>
     <string name="analysis_rotate_to_image">Chuyển sang ảnh / mô hình 3D</string>
+    <string name="analysis_body_progress">Body Progress</string>
+    <string name="analysis_favorite_exercises">Favorite Exercises</string>
+    <string name="analysis_add_exercise">Add Exercise</string>
+    <string name="analysis_add">Add</string>
 
     <!-- Body regions (Home screen region row) -->
     <string name="body_region_upper_body">Thân trên</string>
@@ -241,6 +255,8 @@
 
     <!-- Body Scan Result Screen (InBody-style report) -->
     <string name="body_scan_result_title">Phân tích cơ thể</string>
+    <string name="body_detail_analyst_title">Chi tiết phân tích cơ thể</string>
+    <string name="body_detail_analyst_placeholder">Nội dung chi tiết phân tích cơ thể sẽ hiển thị tại đây.</string>
     <string name="body_scan_result_back">Quay lại</string>
     <string name="body_scan_result_3d_placeholder">Mô hình cơ thể 3D\n(xoay &amp; tương tác sắp ra mắt)</string>
     <string name="body_scan_result_body_composition">Body Composition</string>

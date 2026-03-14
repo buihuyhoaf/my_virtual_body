@@ -34,27 +34,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.hoabui.virtualbody3d.ui.body.data.PromoBannerItem
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.GymToken
 import kotlinx.coroutines.delay
 
-/**
- * Data for a single promotional or informational banner in [PromoBannerCarousel].
- *
- * @param title Optional overlay title text.
- * @param subtitle Optional overlay subtitle text.
- * @param onClick Optional action when the banner is tapped.
- * @param backgroundImageRes Optional drawable resource for the banner background image.
- * @param backgroundGradientColors Optional list of colors for a vertical gradient background.
- *   If both [backgroundImageRes] and [backgroundGradientColors] are null, the theme's
- *   [com.hoabui.virtualbody3d.ui.theme.tokens.semantic.SemanticColorTokens.primarySoft]
- *   is used as a fallback for readability.
- */
-data class PromoBannerItem(
-    val onClick: (() -> Unit)? = null,
-    val backgroundImageRes: Int? = null,
-    val backgroundGradientColors: List<Color>? = null
-)
 
 /**
  * Reusable horizontal carousel of promotional or informational banners.

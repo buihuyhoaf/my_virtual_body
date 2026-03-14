@@ -1,5 +1,7 @@
 package com.hoabui.virtualbody3d.data.repository
 
+import com.hoabui.virtualbody3d.data.local.BaselineLocalDataSource
+import com.hoabui.virtualbody3d.data.mapper.toDomain
 import com.hoabui.virtualbody3d.domain.model.AnalysisType
 import com.hoabui.virtualbody3d.domain.model.ExtractedData
 import com.hoabui.virtualbody3d.domain.model.UploadedImage
@@ -8,52 +10,22 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class BaselineRepositoryImpl @Inject constructor() : BaselineRepository {
+class BaselineRepositoryImpl @Inject constructor(
+    private val localDataSource: BaselineLocalDataSource
+) : BaselineRepository {
 
-    override suspend fun uploadImage(file: File): UploadedImage = withContext(Dispatchers.IO) {
-        delay(SIMULATED_UPLOAD_MS)
-        if (!file.exists()) throw IllegalStateException("File no longer exists")
-        val imageId = UUID.randomUUID().toString()
-        val imageUrl = "https://api.example.com/images/$imageId"
-        UploadedImage(imageId = imageId, imageUrl = imageUrl)
-    }
+    override suspend fun uploadImage(file: File): UploadedImage =
+        localDataSource.uploadImage(file).toDomain()
 
     override suspend fun analyzeImage(imageUrl: String, type: AnalysisType): ExtractedData =
-        withContext(Dispatchers.IO) {
-            delay(SIMULATED_ANALYSIS_MS)
-            check(type == AnalysisType.OCR) {
-                "BaselineRepositoryImpl only supports OCR analysis; meal analysis is handled by MealRepository."
-            }
-            ExtractedData(
-                weight = "72.5",
-                bodyFatPercent = "18.2",
-                muscleMass = "32.1",
-                bmi = "22.4",
-                bodyFatMass = "13.2",
-                fatFreeMass = "59.3",
-                bmr = "1680",
-                visceralFatLevel = "5",
-                rawLines = listOf(
-                    "Weight: 72.5 kg",
-                    "Body fat: 18.2%",
-                    "Muscle: 32.1 kg",
-                    "BMI: 22.4"
-                )
-            )
-        }
+        localDataSource.analyzeImage(imageUrl, type).toDomain()
 
     override suspend fun saveBaseline(data: ExtractedData) = withContext(Dispatchers.IO) {
         delay(500) // Simulate persist
         // TODO: persist to local DB or API
-    }
-
-    companion object {
-        private const val SIMULATED_UPLOAD_MS = 1500L
-        private const val SIMULATED_ANALYSIS_MS = 2000L
     }
 }

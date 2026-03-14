@@ -12,8 +12,9 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.hoabui.virtualbody3d.ui.body.screen.BodyAnalysisScreen
+import com.hoabui.virtualbody3d.ui.body.screen.BodyDetailAnalystScreen
 import com.hoabui.virtualbody3d.ui.body.screen.BodyRegionDetailScreen
+import com.hoabui.virtualbody3d.ui.body.screen.HomeScreen
 import com.hoabui.virtualbody3d.ui.profile.ProfileScreen
 import com.hoabui.virtualbody3d.ui.cenfitcoach.CenfitCoachScreen
 import com.hoabui.virtualbody3d.ui.createbaseline.CreateBaselineScreen
@@ -91,9 +92,9 @@ fun AppNavGraph(
             )
         }
         composable(route = AppDestination.Home.route) {
-            BodyAnalysisScreen(
-                onRegionClick = { region ->
-                    navController.navigate(AppDestination.BodyRegionDetail(region).route)
+            HomeScreen(
+                onViewBodyDetailClick = {
+                    navController.navigate(AppDestination.BodyDetailAnalyst.route)
                 }
             )
         }
@@ -104,6 +105,11 @@ fun AppNavGraph(
             val regionName = backStackEntry.arguments?.getString("region") ?: return@composable
             BodyRegionDetailScreen(
                 regionName = regionName,
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(route = AppDestination.BodyDetailAnalyst.route) {
+            BodyDetailAnalystScreen(
                 onBack = { navController.popBackStack() }
             )
         }

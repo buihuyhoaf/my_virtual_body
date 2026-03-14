@@ -25,6 +25,7 @@ object Constants {
     const val BODY_METRICS_PANEL_INDEX: Int = 1
     const val CENTIMETER: String = "cm"
     const val KILOGRAM: String = "kg"
+    const val PERCENT: String = "%"
 
 
      const val HERO_TRANSITION_DURATION_MS = 240

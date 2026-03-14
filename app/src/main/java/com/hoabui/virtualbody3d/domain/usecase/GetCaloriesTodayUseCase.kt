@@ -1,15 +1,15 @@
 package com.hoabui.virtualbody3d.domain.usecase
 
-import com.hoabui.virtualbody3d.domain.model.BodyDashboard
-import com.hoabui.virtualbody3d.domain.repository.BodyDashboardRepository
-import javax.inject.Inject
+import com.hoabui.virtualbody3d.domain.model.NutritionSummary
+import com.hoabui.virtualbody3d.domain.repository.BodyNutritionSummaryRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
 
 class GetCaloriesTodayUseCase @Inject constructor(
-    private val bodyDashboardRepository: BodyDashboardRepository
+    private val bodyNutritionSummaryRepository: BodyNutritionSummaryRepository
 ) {
-    operator fun invoke(): Flow<BodyDashboard> = flow {
-        emit(bodyDashboardRepository.getBodyDashboard())
+    operator fun invoke(): Flow<NutritionSummary> = flow {
+        emit(bodyNutritionSummaryRepository.getNutritionSummary())
     }
 }
