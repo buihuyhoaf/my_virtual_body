@@ -76,35 +76,25 @@ fun Modifier.selectedBorder(
 ): Modifier = if (selected) this.border(width, color, shape) else this
 
 /**
- * Applies a background color for a difficulty/level badge based on [level] enum name.
- * Uses GymTheme.token: beginner → difficultyBeginnerBg, intermediate → difficultyIntermediateBg,
- * advanced → difficultyAdvancedBg; fallback → difficultyBeginnerBg.
- * Chữ badge nên dùng màu trắng (chỉ background thay đổi theo level).
+ * Soft background for difficulty badge/chip (surfaceSubtle). Border and text use difficulty color for semantic meaning.
  */
 @Composable
 fun Modifier.badgeLevelBackground(level: Enum<*>?): Modifier {
     val token = GymTheme.token
-    val color = when (level?.name?.lowercase()) {
-        "beginner" -> token.colors.difficultyBeginnerBg
-        "intermediate" -> token.colors.difficultyIntermediateBg
-        "advanced" -> token.colors.difficultyAdvancedBg
-        else -> token.colors.difficultyBeginnerBg
-    }
-    return this.background(color, RoundedCornerShape(token.radius.sm))
+    return this.background(token.colors.surfaceSubtle, RoundedCornerShape(token.radius.sm))
 }
 
 /**
- * Applies a border color for a difficulty/level badge based on [level] enum name.
- * Same token mapping as [badgeLevelBackground]; border dùng cùng màu background.
+ * Viền theo level (cùng màu nền đậm).
  */
 @Composable
 fun Modifier.badgeLevelBorder(level: Enum<*>?): Modifier {
     val token = GymTheme.token
     val color = when (level?.name?.lowercase()) {
-        "beginner" -> token.colors.difficultyBeginnerBg
-        "intermediate" -> token.colors.difficultyIntermediateBg
-        "advanced" -> token.colors.difficultyAdvancedBg
-        else -> token.colors.difficultyBeginnerBg
+        "beginner" -> token.colors.difficultyBeginnerText
+        "intermediate" -> token.colors.difficultyIntermediateText
+        "advanced" -> token.colors.difficultyAdvancedText
+        else -> token.colors.difficultyBeginnerText
     }
     return this.border(token.spacing.xxs, color, RoundedCornerShape(token.radius.sm))
 }

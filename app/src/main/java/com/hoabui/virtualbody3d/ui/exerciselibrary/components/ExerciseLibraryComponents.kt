@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.domain.model.BodyRegion
 import com.hoabui.virtualbody3d.domain.model.Difficulty
@@ -88,8 +89,8 @@ fun ExerciseFilterChips(
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = token.colors.primarySoft,
                         selectedLabelColor = token.colors.primary,
-                        containerColor = token.colors.surface,
-                        labelColor = token.colors.textPrimary
+                        containerColor = token.colors.surfaceSubtle,
+                        labelColor = token.colors.textSecondary
                     )
                 )
             }
@@ -102,8 +103,8 @@ fun ExerciseFilterChips(
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = token.colors.primarySoft,
                         selectedLabelColor = token.colors.primary,
-                        containerColor = token.colors.surface,
-                        labelColor = token.colors.textPrimary
+                        containerColor = token.colors.surfaceSubtle,
+                        labelColor = token.colors.textSecondary
                     )
                 )
             }
@@ -125,29 +126,32 @@ fun ExerciseFilterChips(
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = token.colors.primarySoft,
                         selectedLabelColor = token.colors.primary,
-                        containerColor = token.colors.surface,
-                        labelColor = token.colors.textPrimary
+                        containerColor = token.colors.surfaceSubtle,
+                        labelColor = token.colors.textSecondary
                     )
                 )
             }
             items(Difficulty.entries, key = { it.name }) { difficulty ->
+                val difficultyLabelColor = when (difficulty) {
+                    Difficulty.Beginner -> token.colors.difficultyBeginnerText
+                    Difficulty.Intermediate -> token.colors.difficultyIntermediateText
+                    Difficulty.Advanced -> token.colors.difficultyAdvancedText
+                }
+                val isSelected = selectedDifficulty == difficulty
                 FilterChip(
-                    selected = selectedDifficulty == difficulty,
+                    selected = isSelected,
                     onClick = { onDifficultySelect(difficulty) },
                     label = {
                         Text(
-                            stringResource(
-                                ExerciseDisplayResources.difficultyResId(
-                                    difficulty
-                                )
-                            )
+                            stringResource(ExerciseDisplayResources.difficultyResId(difficulty)),
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                         )
                     },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = token.colors.primarySoft,
                         selectedLabelColor = token.colors.primary,
-                        containerColor = token.colors.surface,
-                        labelColor = token.colors.textPrimary
+                        containerColor = token.colors.surfaceSubtle,
+                        labelColor = difficultyLabelColor
                     )
                 )
             }

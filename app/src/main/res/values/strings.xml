@@ -364,4 +364,25 @@
     <string name="profile_logout">Đăng xuất</string>
     <string name="profile_display_name_placeholder">Người dùng</string>
     <string name="profile_email_placeholder">user@example.com</string>
+
+    <!-- Add Workout -->
+    <string name="add_workout_title">Thêm buổi tập</string>
+    <string name="add_workout_schedule">Lịch tập</string>
+    <string name="add_workout_date">Ngày</string>
+    <string name="add_workout_time">Giờ</string>
+    <string name="add_workout_workout_setup">Thiết lập</string>
+    <string name="add_workout_sets">Số hiệp</string>
+    <string name="add_workout_reps">Số lần lặp</string>
+    <string name="add_workout_weight_kg">Tạ (kg)</string>
+    <string name="add_workout_rest_seconds">Nghỉ (giây)</string>
+    <string name="add_workout_notes">Ghi chú</string>
+    <string name="add_workout_notes_hint">Ghi chú tùy chọn…</string>
+    <string name="add_workout_cancel">Hủy</string>
+    <string name="add_workout_add">Thêm buổi tập</string>
+    <string name="add_workout_decrease">Giảm</string>
+    <string name="add_workout_increase">Tăng</string>
+    <string name="add_workout_confirm_title">Xác nhận buổi tập</string>
+    <string name="add_workout_confirm_confirm">Xác nhận</string>
+    <string name="add_workout_success_title">Đã thêm buổi tập!</string>
+    <string name="add_workout_success_subtitle">Tiếp tục duy trì thói quen nhé.</string>
 </resources>

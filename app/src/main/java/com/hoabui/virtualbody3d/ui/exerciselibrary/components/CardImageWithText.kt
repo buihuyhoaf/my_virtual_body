@@ -1,5 +1,6 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.Image
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
@@ -23,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -34,8 +33,7 @@ import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 /**
  * Reusable card with image (optional badge overlay) and two lines of text.
- * Badge visibility: [badgeText]. Styling: [badgeLevel] via [Modifier.badgeLevelBackground] and
- * [Modifier.badgeLevelBorder] (trong ModifierExt.kt). Chữ badge luôn màu trắng.
+ * Badge: soft background (surfaceSubtle), difficulty-colored border and text for semantic meaning.
  */
 @Composable
 fun CardImageWithText(
@@ -81,7 +79,7 @@ fun CardImageWithText(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .background(token.colors.dashboardMealImageBackground)
+                    .background(token.colors.surfaceSubtle)
             ) {
                 Image(
                     painter = painterResource(imageRes),
@@ -90,6 +88,12 @@ fun CardImageWithText(
                     contentScale = ContentScale.Crop
                 )
                 if (badgeText != null) {
+                    val badgeTextColor = when (badgeLevel?.name?.lowercase()) {
+                        "beginner" -> token.colors.difficultyBeginnerText
+                        "intermediate" -> token.colors.difficultyIntermediateText
+                        "advanced" -> token.colors.difficultyAdvancedText
+                        else -> token.colors.textPrimary
+                    }
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
@@ -105,7 +109,7 @@ fun CardImageWithText(
                         Text(
                             text = badgeText,
                             style = token.typography.labelSmall,
-                            color = token.colors.textBlack
+                            color = badgeTextColor
                         )
                     }
                 }

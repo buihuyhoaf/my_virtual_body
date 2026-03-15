@@ -30,6 +30,7 @@ object Routes {
     const val BODY_DETAIL_ANALYST = "body_detail_analyst"
     const val BODY_REGION_DETAIL = "body_region_detail"
     const val EXERCISE_LIBRARY = "exercise_library"
+    const val ADD_WORKOUT = "add_workout"
 }
 
 sealed class AppDestination(
@@ -126,6 +127,16 @@ sealed class AppDestination(
         labelResId = R.string.body_scan_result_title,
         icon = Icons.Default.Person
     )
+
+    data class AddWorkout(val exerciseId: String) : AppDestination(
+        route = "${Routes.ADD_WORKOUT}/$exerciseId",
+        labelResId = R.string.add_workout_title,
+        icon = Icons.Default.FitnessCenter
+    ) {
+        companion object {
+            const val EXERCISE_ID_ARG = "exerciseId"
+        }
+    }
 
     companion object {
         val startDestination: AppDestination = Home

@@ -25,6 +25,7 @@ import com.hoabui.virtualbody3d.ui.initialsetup.InitialSetupScreen
 import com.hoabui.virtualbody3d.ui.login.LoginScreen
 import com.hoabui.virtualbody3d.ui.mealcapture.MealCaptureScreen
 import com.hoabui.virtualbody3d.ui.onboarding.OnboardingScreen
+import com.hoabui.virtualbody3d.ui.addworkout.AddWorkoutScreen
 import com.hoabui.virtualbody3d.ui.scanresult.BodyScanResultScreen
 
 @Composable
@@ -119,7 +120,19 @@ fun AppNavGraph(
         }
         composable(route = AppDestination.ExerciseLibrary.route) {
             ExerciseLibraryScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onAddToWorkout = { exerciseId ->
+                    navController.navigate("${Routes.ADD_WORKOUT}/$exerciseId")
+                }
+            )
+        }
+        composable(
+            route = "${Routes.ADD_WORKOUT}/{exerciseId}",
+            arguments = listOf(navArgument("exerciseId") { type = NavType.StringType })
+        ) {
+            AddWorkoutScreen(
+                onSaved = { navController.popBackStack() },
+                onCancel = { navController.popBackStack() }
             )
         }
         composable(route = AppDestination.Add.route) {

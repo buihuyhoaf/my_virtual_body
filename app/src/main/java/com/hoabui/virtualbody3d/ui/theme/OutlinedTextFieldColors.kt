@@ -21,8 +21,8 @@ fun outlinedTextFieldColors(
     return OutlinedTextFieldDefaults.colors(
         focusedBorderColor = colors.primary,
         unfocusedBorderColor = colors.borderStrong,
-        focusedContainerColor = Color.Transparent,
-        unfocusedContainerColor = Color.Transparent,
+        focusedContainerColor = colors.backgroundTransparent,
+        unfocusedContainerColor = colors.backgroundTransparent,
         cursorColor = colors.primary,
         focusedTextColor = colors.textBlack,
         unfocusedTextColor = colors.textBlack,

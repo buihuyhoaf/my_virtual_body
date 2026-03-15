@@ -34,6 +34,7 @@ import com.hoabui.virtualbody3d.ui.theme.GymTheme
 fun ExerciseLibraryScreen(
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
+    onAddToWorkout: (exerciseId: String) -> Unit = {},
     viewModel: ExerciseLibraryViewModel = hiltViewModel()
 ) {
     val screenState by viewModel.state.collectAsStateWithLifecycle()
@@ -68,7 +69,10 @@ fun ExerciseLibraryScreen(
                 data.selectedExerciseForDetail?.let { exercise ->
                     ExerciseDetailDialog(
                         exercise = exercise,
-                        onAddClick = { _ -> viewModel.clearExerciseDetail() },
+                        onAddClick = {
+                            viewModel.clearExerciseDetail()
+                            onAddToWorkout(exercise.id)
+                        },
                         onDismiss = viewModel::clearExerciseDetail
                     )
                 }

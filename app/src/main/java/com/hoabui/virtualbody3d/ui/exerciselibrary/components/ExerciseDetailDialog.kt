@@ -215,7 +215,7 @@ fun ExerciseDetailDialog(
                                 topEnd = token.radius.lg
                             )
                         )
-                        .background(token.colors.dashboardMealImageBackground)
+                        .background(token.colors.surfaceSubtle)
                 ) {
                     Image(
                         painter = painterResource(exercise.imageResId),
@@ -230,20 +230,17 @@ fun ExerciseDetailDialog(
                             .align(Alignment.TopEnd)
                             .padding(token.spacing.xs),
                         shape = RoundedCornerShape(token.radius.sm),
-                        color = when (exercise.difficulty) {
-                            Difficulty.Beginner -> token.colors.difficultyBeginnerBg
-                            Difficulty.Intermediate -> token.colors.difficultyIntermediateBg
-                            Difficulty.Advanced -> token.colors.difficultyAdvancedBg
-                        }
+                        color = token.colors.surfaceSubtle
                     ) {
+                        val difficultyTextColor = when (exercise.difficulty) {
+                            Difficulty.Beginner -> token.colors.difficultyBeginnerText
+                            Difficulty.Intermediate -> token.colors.difficultyIntermediateText
+                            Difficulty.Advanced -> token.colors.difficultyAdvancedText
+                        }
                         Text(
                             text = stringResource(ExerciseDisplayResources.difficultyResId(exercise.difficulty)),
                             style = token.typography.labelSmall,
-                            color = when (exercise.difficulty) {
-                                Difficulty.Beginner -> token.colors.difficultyBeginnerText
-                                Difficulty.Intermediate -> token.colors.difficultyIntermediateText
-                                Difficulty.Advanced -> token.colors.difficultyAdvancedText
-                            },
+                            color = difficultyTextColor,
                             modifier = Modifier.padding(
                                 horizontal = token.spacing.xs,
                                 vertical = token.spacing.xxs
