@@ -35,6 +35,7 @@ data class SupplementUiItem(
 data class PromoBannerItem(
     val onClick: (() -> Unit)? = null,
     val backgroundImageRes: Int? = null,
+    val backgroundImageResUrl : String? = null,
     val backgroundGradientColors: List<Color>? = null
 )
 

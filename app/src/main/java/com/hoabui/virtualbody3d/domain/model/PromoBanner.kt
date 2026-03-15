@@ -7,5 +7,6 @@ package com.hoabui.virtualbody3d.domain.model
 data class PromoBanner(
     val id: String,
     val backgroundImageResId: Int? = null,
+    val backgroundImageResUrl: String? = null,
     val gradientColorHexList: List<String>? = null
 )

@@ -9,6 +9,7 @@ import com.hoabui.virtualbody3d.data.repository.FavoriteExerciseRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.MealRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.MessageRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.PromoBannerRepositoryImpl
+import com.hoabui.virtualbody3d.data.repository.ExerciseRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.SupplementRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.UserInfoRepositoryImpl
 import com.hoabui.virtualbody3d.domain.repository.AuthRepository
@@ -20,6 +21,7 @@ import com.hoabui.virtualbody3d.domain.repository.FavoriteExerciseRepository
 import com.hoabui.virtualbody3d.domain.repository.MealRepository
 import com.hoabui.virtualbody3d.domain.repository.MessageRepository
 import com.hoabui.virtualbody3d.domain.repository.PromoBannerRepository
+import com.hoabui.virtualbody3d.domain.repository.ExerciseRepository
 import com.hoabui.virtualbody3d.domain.repository.SupplementRepository
 import com.hoabui.virtualbody3d.domain.repository.UserInfoRepository
 import dagger.Binds
@@ -97,4 +99,10 @@ abstract class RepositoryModule {
     abstract fun bindSupplementRepository(
         supplementRepositoryImpl: SupplementRepositoryImpl
     ): SupplementRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindExerciseRepository(
+        exerciseRepositoryImpl: ExerciseRepositoryImpl
+    ): ExerciseRepository
 }

@@ -116,7 +116,6 @@ fun PromoBannerCarousel(
             PromoBannerCard(
                 item = item,
                 modifier = Modifier.fillMaxSize(),
-                bannerHeight = bannerHeight
             )
         }
 
@@ -134,7 +133,6 @@ fun PromoBannerCarousel(
 private fun PromoBannerCard(
     item: PromoBannerItem,
     modifier: Modifier = Modifier,
-    bannerHeight: Dp
 ) {
     val token = GymTheme.token
     val shape = RoundedCornerShape(token.radius.md)

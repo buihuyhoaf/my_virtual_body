@@ -71,6 +71,7 @@ import com.hoabui.virtualbody3d.ui.body.screen.FloatingMetricChip
 import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
 import com.hoabui.virtualbody3d.ui.body.state.BodyUiState
 import com.hoabui.virtualbody3d.ui.components.SectionTitle
+import com.hoabui.virtualbody3d.ui.exerciselibrary.components.CardImageWithText
 import com.hoabui.virtualbody3d.ui.mealcapture.MealPageUiModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import java.time.LocalDate
@@ -268,13 +269,14 @@ private fun BodyProgressMetricItem(
 fun SectionHorizontalRow(
     @StringRes titleResId: Int,
     modifier: Modifier = Modifier,
+    onSeeMoreClick: (() -> Unit)? = null,
     content: LazyListScope.() -> Unit
 ) {
     val token = GymTheme.token
     Column(
         verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
     ) {
-        SectionTitle(textResId = titleResId)
+        SectionTitle(textResId = titleResId, onSeeMoreClick = onSeeMoreClick)
         LazyRow(
             modifier = modifier,
             horizontalArrangement = Arrangement.spacedBy(token.spacing.md),
@@ -291,11 +293,13 @@ fun SectionHorizontalRow(
 fun FavoriteExercisesRow(
     modifier: Modifier = Modifier,
     exercises: List<FavoriteExerciseUiItem>,
-    onAddExerciseClick: () -> Unit = {}
+    onAddExerciseClick: () -> Unit = {},
+    onSeeMoreClick: (() -> Unit)? = null
 ) {
     SectionHorizontalRow(
         titleResId = R.string.home_section_favorite_exercises,
-        modifier = modifier
+        modifier = modifier,
+        onSeeMoreClick = onSeeMoreClick
     ) {
         items(
             items = exercises,
@@ -315,83 +319,6 @@ fun FavoriteExercisesRow(
     }
 }
 
-
-@Composable
-private fun CardImageWithText(
-    modifier: Modifier = Modifier,
-    imageRes: Int,
-    firstLineText: String,
-    secondLineText: String,
-    onClick: () -> Unit = {}
-) {
-    val token = GymTheme.token
-    val bodyToken = token.bodyAnalysis
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale = if (isPressed) 0.95f else 1f
-    Card(
-        modifier = modifier
-            .width(bodyToken.bodyRegionItemWidth)
-            .height(bodyToken.bodyRegionItemHeight)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            )
-            .clip(RoundedCornerShape(token.spacing.md)),
-        shape = RoundedCornerShape(token.spacing.md),
-        colors = CardDefaults.cardColors(containerColor = token.colors.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = token.elevation.level1)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(0.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Phần trên: ảnh
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .background(token.colors.dashboardMealImageBackground)
-            ) {
-                Image(
-                    painter = painterResource(imageRes),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            }
-            // Phần dưới: firstLineText + secondLineText
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(token.spacing.xs),
-                verticalArrangement = Arrangement.spacedBy(token.spacing.xxs),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = firstLineText,
-                    style = token.typography.labelMedium,
-                    color = token.colors.textPrimary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = secondLineText,
-                    style = token.typography.bodySmall,
-                    color = token.colors.textSecondary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-    }
-}
 
 @Composable
 private fun AddCard(

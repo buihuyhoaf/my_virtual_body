@@ -55,7 +55,19 @@ data class SemanticColorTokens(
     val initialSetupStep4IconBg: Color,
     val initialSetupStep4IconBorder: Color,
     val initialSetupStep4DecorationBg: Color,
-    val initialSetupOptionUnselectedIcon: Color
+    val initialSetupOptionUnselectedIcon: Color,
+    /** Difficulty badge: Beginner – background #DCFCE7 */
+    val difficultyBeginnerBg: Color,
+    /** Difficulty badge: Beginner – text #16A34A */
+    val difficultyBeginnerText: Color,
+    /** Difficulty badge: Intermediate – background #FEF3C7 */
+    val difficultyIntermediateBg: Color,
+    /** Difficulty badge: Intermediate – text #D97706 */
+    val difficultyIntermediateText: Color,
+    /** Difficulty badge: Advanced – background #FEE2E2 */
+    val difficultyAdvancedBg: Color,
+    /** Difficulty badge: Advanced – text #DC2626 */
+    val difficultyAdvancedText: Color
 )
 
 fun lightSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens {
@@ -105,7 +117,13 @@ fun lightSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens {
         initialSetupStep4IconBg = primitive.surfaceVariantLight,
         initialSetupStep4IconBorder = primitive.outlineLight,
         initialSetupStep4DecorationBg = primitive.surfaceVariantLight,
-        initialSetupOptionUnselectedIcon = primitive.textSecondaryLight
+        initialSetupOptionUnselectedIcon = primitive.textSecondaryLight,
+        difficultyBeginnerBg = Color(0xFFDCFCE7),
+        difficultyBeginnerText = Color(0xFF16A34A),
+        difficultyIntermediateBg = Color(0xFFFEF3C7),
+        difficultyIntermediateText = Color(0xFFD97706),
+        difficultyAdvancedBg = Color(0xFFFEE2E2),
+        difficultyAdvancedText = Color(0xFFDC2626)
     )
 }
 
@@ -156,6 +174,12 @@ fun darkSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens {
         initialSetupStep4IconBg = primitive.surfaceVariantDark,
         initialSetupStep4IconBorder = primitive.outlineDark,
         initialSetupStep4DecorationBg = primitive.surfaceVariantDark,
-        initialSetupOptionUnselectedIcon = primitive.textSecondaryDark
+        initialSetupOptionUnselectedIcon = primitive.textSecondaryDark,
+        difficultyBeginnerBg = Color(0xFFDCFCE7),
+        difficultyBeginnerText = Color(0xFF16A34A),
+        difficultyIntermediateBg = Color(0xFFFEF3C7),
+        difficultyIntermediateText = Color(0xFFD97706),
+        difficultyAdvancedBg = Color(0xFFFEE2E2),
+        difficultyAdvancedText = Color(0xFFDC2626)
     )
 }

@@ -8,6 +8,7 @@ import com.hoabui.virtualbody3d.domain.model.PromoBanner
 fun PromoBanner.toPromoBannerItem(): PromoBannerItem = PromoBannerItem(
     onClick = null,
     backgroundImageRes = backgroundImageResId,
+    backgroundImageResUrl = backgroundImageResUrl,
     backgroundGradientColors = gradientColorHexList?.map { hex ->
         Color(hex.toColorInt())
     }

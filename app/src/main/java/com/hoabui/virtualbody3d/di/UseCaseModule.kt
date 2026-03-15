@@ -10,10 +10,12 @@ import com.hoabui.virtualbody3d.domain.repository.UserInfoRepository
 import com.hoabui.virtualbody3d.domain.usecase.AnalyzeMealImageUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetMealDaysUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetMealsByDayUseCase
+import com.hoabui.virtualbody3d.domain.repository.ExerciseRepository
 import com.hoabui.virtualbody3d.domain.repository.FavoriteExerciseRepository
 import com.hoabui.virtualbody3d.domain.repository.SupplementRepository
 import com.hoabui.virtualbody3d.domain.usecase.GetBodyDataUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetFavoriteExercisesUseCase
+import com.hoabui.virtualbody3d.domain.usecase.GetExercisesUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetSupplementsUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetCaloriesTodayUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetPromoBannersUseCase
@@ -112,5 +114,12 @@ object UseCaseModule {
         supplementRepository: SupplementRepository
     ): GetSupplementsUseCase {
         return GetSupplementsUseCase(supplementRepository)
+    }
+
+    @Provides
+    fun provideGetExercisesUseCase(
+        exerciseRepository: ExerciseRepository
+    ): GetExercisesUseCase {
+        return GetExercisesUseCase(exerciseRepository)
     }
 }

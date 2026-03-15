@@ -3,11 +3,19 @@ package com.hoabui.virtualbody3d.core.extensions
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.core.utils.Constants
+import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 /**
  * Hero section layer animation: alpha + scale for crossfade between 3D body and photo.
@@ -49,4 +57,54 @@ fun Modifier.heroLayerAnimation(
         scaleX = scale
         scaleY = scale
     }
+}
+
+/**
+ * Reusable modifier that shows a border when [selected] is true.
+ * Use with design tokens for [color], [width], and [shape] (e.g. from GymTheme.token).
+ *
+ * @param selected When true, the border is applied; when false, the modifier is unchanged.
+ * @param color Border color (e.g. token.colors.primary).
+ * @param width Border width; prefer token.spacing.xxs for design-system consistency.
+ * @param shape Shape for the border (e.g. RoundedCornerShape(token.radius.md)).
+ */
+fun Modifier.selectedBorder(
+    selected: Boolean,
+    color: Color,
+    width: Dp = 2.dp,
+    shape: Shape
+): Modifier = if (selected) this.border(width, color, shape) else this
+
+/**
+ * Applies a background color for a difficulty/level badge based on [level] enum name.
+ * Uses GymTheme.token: beginner → difficultyBeginnerBg, intermediate → difficultyIntermediateBg,
+ * advanced → difficultyAdvancedBg; fallback → difficultyBeginnerBg.
+ * Chữ badge nên dùng màu trắng (chỉ background thay đổi theo level).
+ */
+@Composable
+fun Modifier.badgeLevelBackground(level: Enum<*>?): Modifier {
+    val token = GymTheme.token
+    val color = when (level?.name?.lowercase()) {
+        "beginner" -> token.colors.difficultyBeginnerBg
+        "intermediate" -> token.colors.difficultyIntermediateBg
+        "advanced" -> token.colors.difficultyAdvancedBg
+        else -> token.colors.difficultyBeginnerBg
+    }
+    return this.background(color, RoundedCornerShape(token.radius.sm))
+}
+
+/**
+ * Applies a border color for a difficulty/level badge based on [level] enum name.
+ * Same token mapping as [badgeLevelBackground]; border dùng cùng màu background.
+ */
+@Composable
+fun Modifier.badgeLevelBorder(level: Enum<*>?): Modifier {
+    val token = GymTheme.token
+    val color = when (level?.name?.lowercase()) {
+        "beginner" -> token.colors.difficultyBeginnerBg
+        "intermediate" -> token.colors.difficultyIntermediateBg
+        "advanced" -> token.colors.difficultyAdvancedBg
+        else -> token.colors.difficultyBeginnerBg
+    }
+    return this.border(token.spacing.xxs, color, RoundedCornerShape(token.radius.sm))
 }

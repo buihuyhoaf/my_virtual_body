@@ -59,6 +59,7 @@ import java.time.LocalDate
 @Composable
 fun HomeScreen(
     onViewBodyDetailClick: () -> Unit = {},
+    onNavigateToExerciseLibrary: (() -> Unit)? = null,
     viewModel: BodyViewModel = hiltViewModel(),
     favoriteExercisesViewModel: FavoriteExercisesViewModel = hiltViewModel(),
     supplementsViewModel: SupplementsViewModel = hiltViewModel()
@@ -78,6 +79,7 @@ fun HomeScreen(
                 favoriteExercises = favoriteExercises,
                 supplements = supplements,
                 onViewBodyDetailClick = onViewBodyDetailClick,
+                onNavigateToExerciseLibrary = onNavigateToExerciseLibrary,
                 promoBanners = data.promoBanners
             )
         }
@@ -92,6 +94,7 @@ fun HomeContent(
     favoriteExercises: List<FavoriteExerciseUiItem>,
     supplements: List<SupplementUiItem>,
     onViewBodyDetailClick: () -> Unit = {},
+    onNavigateToExerciseLibrary: (() -> Unit)? = null,
     promoBanners: List<PromoBanner> = emptyList()
 ) {
     val token = GymTheme.token
@@ -134,7 +137,8 @@ fun HomeContent(
                 .fillMaxWidth()
                 .height(contentHeight * 0.17f),
             exercises = favoriteExercises,
-            onAddExerciseClick = { /* TODO: navigate or show add flow */ }
+            onAddExerciseClick = { /* TODO: navigate or show add flow */ },
+            onSeeMoreClick = onNavigateToExerciseLibrary
         )
         SupplementsRow(
             modifier = Modifier

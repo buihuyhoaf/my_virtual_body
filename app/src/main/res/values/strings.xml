@@ -147,6 +147,60 @@
     <string name="body_region_detail_real_life_stability">Giữ thăng bằng và ổn định cơ thể</string>
     <string name="body_region_detail_real_life_daily_tasks">Các hoạt động sinh hoạt thường ngày</string>
 
+    <!-- Exercise Library Screen -->
+    <string name="exercise_library_title">Tất cả bài tập</string>
+    <string name="exercise_library_search_hint">Tìm bài tập</string>
+    <string name="exercise_library_filter_all">Tất cả</string>
+    <string name="exercise_library_last_weight">%1$.0f kg</string>
+    <string name="exercise_library_filter_body_region">Nhóm cơ</string>
+    <string name="exercise_library_filter_difficulty">Độ khó</string>
+
+    <!-- Exercise domain: BodyRegion (for library/detail) -->
+    <string name="exercise_region_chest">Ngực</string>
+    <string name="exercise_region_back">Lưng</string>
+    <string name="exercise_region_shoulders">Vai</string>
+    <string name="exercise_region_arms">Tay</string>
+    <string name="exercise_region_core">Core</string>
+    <string name="exercise_region_legs">Chân</string>
+
+    <!-- Exercise domain: Difficulty -->
+    <string name="exercise_difficulty_beginner">Người mới</string>
+    <string name="exercise_difficulty_intermediate">Trung cấp</string>
+    <string name="exercise_difficulty_advanced">Nâng cao</string>
+
+    <!-- Exercise domain: MuscleGroup -->
+    <string name="exercise_muscle_pectoralis">Pectoralis</string>
+    <string name="exercise_muscle_latissimus_dorsi">Latissimus Dorsi</string>
+    <string name="exercise_muscle_triceps">Triceps</string>
+    <string name="exercise_muscle_biceps">Biceps</string>
+    <string name="exercise_muscle_deltoids">Deltoids</string>
+    <string name="exercise_muscle_quadriceps">Quadriceps</string>
+    <string name="exercise_muscle_hamstrings">Hamstrings</string>
+    <string name="exercise_muscle_glutes">Glutes</string>
+    <string name="exercise_muscle_abdominals">Abdominals</string>
+    <string name="exercise_muscle_calves">Calves</string>
+
+    <!-- Exercise domain: EquipmentType -->
+    <string name="exercise_equipment_barbell">Barbell</string>
+    <string name="exercise_equipment_dumbbell">Dumbbell</string>
+    <string name="exercise_equipment_machine">Machine</string>
+    <string name="exercise_equipment_cable">Cable</string>
+    <string name="exercise_equipment_bodyweight">Bodyweight</string>
+    <string name="exercise_equipment_kettlebell">Kettlebell</string>
+    <string name="exercise_equipment_resistance_band">Resistance Band</string>
+    <string name="exercise_equipment_none">—</string>
+
+    <!-- Exercise detail dialog -->
+    <string name="exercise_detail_how_to_perform">Cách thực hiện</string>
+    <string name="exercise_detail_safety_tips">Lưu ý an toàn</string>
+    <string name="exercise_detail_add_to_workout_plan">Thêm vào kế hoạch tập</string>
+    <string name="exercise_detail_last_weight">Trọng lượng gần nhất: %1$.0f kg</string>
+    <string name="exercise_detail_body_region">Vùng cơ</string>
+    <string name="exercise_detail_equipment">Thiết bị</string>
+    <string name="exercise_detail_primary_muscles">Cơ chính</string>
+    <string name="exercise_detail_secondary_muscles">Cơ phụ</string>
+    <string name="exercise_detail_add_exercise">Thêm bài tập</string>
+
     <!-- Body Tabs -->
     <string name="tab_home">Trang chủ</string>
     <string name="tab_add">Thêm</string>

@@ -15,6 +15,7 @@ import androidx.navigation.navArgument
 import com.hoabui.virtualbody3d.ui.body.screen.BodyDetailAnalystScreen
 import com.hoabui.virtualbody3d.ui.body.screen.BodyRegionDetailScreen
 import com.hoabui.virtualbody3d.ui.body.screen.HomeScreen
+import com.hoabui.virtualbody3d.ui.exerciselibrary.ExerciseLibraryScreen
 import com.hoabui.virtualbody3d.ui.profile.ProfileScreen
 import com.hoabui.virtualbody3d.ui.cenfitcoach.CenfitCoachScreen
 import com.hoabui.virtualbody3d.ui.createbaseline.CreateBaselineScreen
@@ -95,6 +96,9 @@ fun AppNavGraph(
             HomeScreen(
                 onViewBodyDetailClick = {
                     navController.navigate(AppDestination.BodyDetailAnalyst.route)
+                },
+                onNavigateToExerciseLibrary = {
+                    navController.navigate(AppDestination.ExerciseLibrary.route)
                 }
             )
         }
@@ -110,6 +114,11 @@ fun AppNavGraph(
         }
         composable(route = AppDestination.BodyDetailAnalyst.route) {
             BodyDetailAnalystScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(route = AppDestination.ExerciseLibrary.route) {
+            ExerciseLibraryScreen(
                 onBack = { navController.popBackStack() }
             )
         }

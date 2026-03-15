@@ -29,6 +29,7 @@ object Routes {
     const val BODY_SCAN_RESULT = "body_scan_result"
     const val BODY_DETAIL_ANALYST = "body_detail_analyst"
     const val BODY_REGION_DETAIL = "body_region_detail"
+    const val EXERCISE_LIBRARY = "exercise_library"
 }
 
 sealed class AppDestination(
@@ -112,6 +113,12 @@ sealed class AppDestination(
         route = Routes.BODY_DETAIL_ANALYST,
         labelResId = R.string.body_detail_analyst_title,
         icon = Icons.Default.Info
+    )
+
+    data object ExerciseLibrary : AppDestination(
+        route = Routes.EXERCISE_LIBRARY,
+        labelResId = R.string.exercise_library_title,
+        icon = Icons.Default.FitnessCenter
     )
 
     data class BodyRegionDetail(private val bodyRegion: BodyRegion) : AppDestination(
