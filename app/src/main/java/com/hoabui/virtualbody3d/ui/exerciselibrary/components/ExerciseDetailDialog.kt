@@ -38,6 +38,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.core.extensions.badgeLevelBackground
+import com.hoabui.virtualbody3d.core.extensions.badgeLevelBorder
 import com.hoabui.virtualbody3d.domain.model.Difficulty
 import com.hoabui.virtualbody3d.domain.model.Exercise
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
@@ -199,60 +201,41 @@ fun ExerciseDetailDialog(
             colors = CardDefaults.cardColors(containerColor = token.colors.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = token.elevation.level2)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(scrollState)
+            Box(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                // 1. Exercise hero: image (fixed height) + name below + difficulty badge top-right
-                Box(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(token.spacing.xxl * 4)
-                        .clip(
-                            RoundedCornerShape(
-                                topStart = token.radius.lg,
-                                topEnd = token.radius.lg
-                            )
-                        )
-                        .background(token.colors.surfaceSubtle)
+                        .verticalScroll(scrollState)
                 ) {
-                    Image(
-                        painter = painterResource(exercise.imageResId),
-                        contentDescription = null,
+                    // 1. Exercise hero: image (fixed height) + name below
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(token.spacing.xxl * 4),
-                        contentScale = ContentScale.Crop
-                    )
-                    Surface(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(token.spacing.xs),
-                        shape = RoundedCornerShape(token.radius.sm),
-                        color = token.colors.surfaceSubtle
-                    ) {
-                        val difficultyTextColor = when (exercise.difficulty) {
-                            Difficulty.Beginner -> token.colors.difficultyBeginnerText
-                            Difficulty.Intermediate -> token.colors.difficultyIntermediateText
-                            Difficulty.Advanced -> token.colors.difficultyAdvancedText
-                        }
-                        Text(
-                            text = stringResource(ExerciseDisplayResources.difficultyResId(exercise.difficulty)),
-                            style = token.typography.labelSmall,
-                            color = difficultyTextColor,
-                            modifier = Modifier.padding(
-                                horizontal = token.spacing.xs,
-                                vertical = token.spacing.xxs
+                            .height(token.spacing.xxl * 4)
+                            .clip(
+                                RoundedCornerShape(
+                                    topStart = token.radius.lg,
+                                    topEnd = token.radius.lg
+                                )
                             )
+                            .background(token.colors.surfaceSubtle)
+                    ) {
+                        Image(
+                            painter = painterResource(exercise.imageResId),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(token.spacing.xxl * 4),
+                            contentScale = ContentScale.Crop
                         )
                     }
-                }
 
-                Column(
-                    modifier = Modifier.padding(token.spacing.md),
-                    verticalArrangement = Arrangement.spacedBy(token.spacing.md)
-                ) {
+                    Column(
+                        modifier = Modifier.padding(token.spacing.md),
+                        verticalArrangement = Arrangement.spacedBy(token.spacing.md)
+                    ) {
                     // Exercise name below image
                     Text(
                         text = exercise.name,
@@ -356,6 +339,26 @@ fun ExerciseDetailDialog(
                             )
                         }
                     }
+                }
+                }
+                // Overlay badge on top of the card
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(token.spacing.md)
+                        .clip(RoundedCornerShape(token.radius.sm))
+                        .badgeLevelBackground(exercise.difficulty)
+                        .badgeLevelBorder(exercise.difficulty)
+                        .padding(
+                            horizontal = token.spacing.xs,
+                            vertical = token.spacing.xxs
+                        )
+                ) {
+                    Text(
+                        text = stringResource(ExerciseDisplayResources.difficultyResId(exercise.difficulty)),
+                        style = token.typography.labelSmall,
+                        color = token.colors.surface
+                    )
                 }
             }
         }

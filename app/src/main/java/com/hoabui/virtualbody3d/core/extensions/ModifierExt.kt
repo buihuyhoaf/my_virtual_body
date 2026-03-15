@@ -81,7 +81,13 @@ fun Modifier.selectedBorder(
 @Composable
 fun Modifier.badgeLevelBackground(level: Enum<*>?): Modifier {
     val token = GymTheme.token
-    return this.background(token.colors.surfaceSubtle, RoundedCornerShape(token.radius.sm))
+    val color = when (level?.name?.lowercase()) {
+        "beginner" -> token.colors.difficultyBeginnerText
+        "intermediate" -> token.colors.difficultyIntermediateText
+        "advanced" -> token.colors.difficultyAdvancedText
+        else -> token.colors.difficultyBeginnerText
+    }
+    return this.background(color,)
 }
 
 /**
@@ -96,5 +102,5 @@ fun Modifier.badgeLevelBorder(level: Enum<*>?): Modifier {
         "advanced" -> token.colors.difficultyAdvancedText
         else -> token.colors.difficultyBeginnerText
     }
-    return this.border(token.spacing.xxs, color, RoundedCornerShape(token.radius.sm))
+    return this.border(token.spacing.xxs, color)
 }

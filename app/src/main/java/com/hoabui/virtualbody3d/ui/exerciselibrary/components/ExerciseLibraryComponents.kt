@@ -2,6 +2,7 @@ package com.hoabui.virtualbody3d.ui.exerciselibrary.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -77,24 +78,23 @@ fun ExerciseFilterChips(
             style = token.typography.labelMedium,
             color = token.colors.textSecondary
         )
-        LazyRow(
+        FlowRow(
             horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
-            contentPadding = PaddingValues(vertical = token.spacing.xxs)
+            verticalArrangement = Arrangement.spacedBy(token.spacing.xxs)
         ) {
-            item(key = "body_all") {
-                FilterChip(
-                    selected = selectedBodyRegion == null,
-                    onClick = { onBodyRegionSelect(null) },
-                    label = { Text(stringResource(R.string.exercise_library_filter_all)) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = token.colors.primarySoft,
-                        selectedLabelColor = token.colors.primary,
-                        containerColor = token.colors.surfaceSubtle,
-                        labelColor = token.colors.textSecondary
-                    )
+            FilterChip(
+                selected = selectedBodyRegion == null,
+                onClick = { onBodyRegionSelect(null) },
+                label = { Text(stringResource(R.string.exercise_library_filter_all)) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = token.colors.primarySoft,
+                    selectedLabelColor = token.colors.primary,
+                    containerColor = token.colors.surfaceSubtle,
+                    labelColor = token.colors.textSecondary
                 )
-            }
-            items(BodyRegion.entries, key = { it.name }) { region ->
+            )
+
+            BodyRegion.entries.forEach { region ->
                 val label = stringResource(ExerciseDisplayResources.bodyRegionResId(region))
                 FilterChip(
                     selected = selectedBodyRegion == region,
@@ -114,24 +114,22 @@ fun ExerciseFilterChips(
             style = token.typography.labelMedium,
             color = token.colors.textSecondary
         )
-        LazyRow(
+        FlowRow(
             horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
-            contentPadding = PaddingValues(vertical = token.spacing.xxs)
-        ) {
-            item(key = "diff_all") {
-                FilterChip(
-                    selected = selectedDifficulty == null,
-                    onClick = { onDifficultySelect(null) },
-                    label = { Text(stringResource(R.string.exercise_library_filter_all)) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = token.colors.primarySoft,
-                        selectedLabelColor = token.colors.primary,
-                        containerColor = token.colors.surfaceSubtle,
-                        labelColor = token.colors.textSecondary
-                    )
+            verticalArrangement = Arrangement.spacedBy(token.spacing.xxs)
+        ){
+            FilterChip(
+                selected = selectedDifficulty == null,
+                onClick = { onDifficultySelect(null) },
+                label = { Text(stringResource(R.string.exercise_library_filter_all)) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = token.colors.primarySoft,
+                    selectedLabelColor = token.colors.primary,
+                    containerColor = token.colors.surfaceSubtle,
+                    labelColor = token.colors.textSecondary
                 )
-            }
-            items(Difficulty.entries, key = { it.name }) { difficulty ->
+            )
+            Difficulty.entries.forEach { difficulty ->
                 val difficultyLabelColor = when (difficulty) {
                     Difficulty.Beginner -> token.colors.difficultyBeginnerText
                     Difficulty.Intermediate -> token.colors.difficultyIntermediateText
@@ -156,6 +154,7 @@ fun ExerciseFilterChips(
                 )
             }
         }
+
     }
 }
 

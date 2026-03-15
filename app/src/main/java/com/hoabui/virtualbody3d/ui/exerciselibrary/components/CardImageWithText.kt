@@ -27,8 +27,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.core.extensions.badgeLevelBackground
 import com.hoabui.virtualbody3d.core.extensions.badgeLevelBorder
+import com.hoabui.virtualbody3d.domain.model.Difficulty
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 /**
@@ -69,74 +72,93 @@ fun CardImageWithText(
         colors = CardDefaults.cardColors(containerColor = token.colors.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = token.elevation.level1)
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(token.spacing.xxs),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Box(
+            modifier = Modifier.fillMaxSize()
         ) {
-            // Image section: Box with Image + optional badge overlay
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .background(token.colors.surfaceSubtle)
-            ) {
-                Image(
-                    painter = painterResource(imageRes),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-                if (badgeText != null) {
-                    val badgeTextColor = when (badgeLevel?.name?.lowercase()) {
-                        "beginner" -> token.colors.difficultyBeginnerText
-                        "intermediate" -> token.colors.difficultyIntermediateText
-                        "advanced" -> token.colors.difficultyAdvancedText
-                        else -> token.colors.textPrimary
-                    }
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(token.spacing.xxs)
-                            .badgeLevelBackground(badgeLevel)
-                            .badgeLevelBorder(badgeLevel)
-                            .clip(RoundedCornerShape(token.radius.sm))
-                            .padding(
-                                horizontal = token.spacing.xs,
-                                vertical = token.spacing.xxs
-                            )
-                    ) {
-                        Text(
-                            text = badgeText,
-                            style = token.typography.labelSmall,
-                            color = badgeTextColor
-                        )
-                    }
-                }
-            }
-            // Text section
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(token.spacing.xs),
+                modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(token.spacing.xxs),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = firstLineText,
-                    style = token.typography.labelMedium,
-                    color = token.colors.textPrimary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = secondLineText,
-                    style = token.typography.bodySmall,
-                    color = token.colors.textSecondary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                // Image section
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .background(token.colors.surfaceSubtle)
+                ) {
+                    Image(
+                        painter = painterResource(imageRes),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
+                // Text section
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(token.spacing.xs),
+                    verticalArrangement = Arrangement.spacedBy(token.spacing.xxs),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = firstLineText,
+                        style = token.typography.labelMedium,
+                        color = token.colors.textPrimary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = secondLineText,
+                        style = token.typography.bodySmall,
+                        color = token.colors.textSecondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+
+            if (badgeText != null) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(token.spacing.xxs)
+                        .clip(RoundedCornerShape(token.radius.sm))
+                        .badgeLevelBackground(badgeLevel)
+                        .badgeLevelBorder(badgeLevel)
+                        .padding(
+                            horizontal = token.spacing.xs,
+                            vertical = token.spacing.xxs
+                        )
+                ) {
+                    Text(
+                        text = badgeText,
+                        style = token.typography.labelSmall,
+                        color = token.colors.surface
+                    )
+                }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BadgePreview() {
+    val badgeText = "Beginner"
+    val token = GymTheme.token
+
+    Box(
+        modifier = Modifier
+            .badgeLevelBackground(Difficulty.Beginner)
+            .badgeLevelBorder(Difficulty.Beginner)
+    ) {
+        Text(
+            text = badgeText,
+            style = token.typography.labelSmall,
+            color = token.colors.surface
+        )
     }
 }
