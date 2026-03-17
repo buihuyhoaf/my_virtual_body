@@ -11,5 +11,7 @@ data class WorkoutFeedItem(
     val date: LocalDate,
     val workoutName: String,
     val exercises: List<FeedExercise>,
-    val feeling: String
+    val durationMinutes: Int,
+    val estimatedCalories: Int,
+    val muscleGroups: List<String>
 )

@@ -20,5 +20,7 @@ fun WorkoutFeedItemDto.toDomain(): WorkoutFeedItem = WorkoutFeedItem(
     date = LocalDate.parse(dateString),
     workoutName = workoutName,
     exercises = exercises.map { it.toFeedExercise() },
-    feeling = feeling
+    durationMinutes = durationMinutes,
+    estimatedCalories = estimatedCalories,
+    muscleGroups = muscleGroups
 )

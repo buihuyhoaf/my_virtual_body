@@ -73,7 +73,9 @@ class WorkoutFeedLocalDataSource @Inject constructor() {
                         reps = 15
                     )
                 ),
-                feeling = "💪 Strong"
+                durationMinutes = 45,
+                estimatedCalories = 320,
+                muscleGroups = listOf("Chest", "Shoulders", "Triceps")
             ),
             WorkoutFeedItemDto(
                 label = "Yesterday",
@@ -129,7 +131,9 @@ class WorkoutFeedLocalDataSource @Inject constructor() {
                         reps = 15
                     )
                 ),
-                feeling = "🔥 Great session"
+                durationMinutes = 55,
+                estimatedCalories = 410,
+                muscleGroups = listOf("Quads", "Glutes")
             ),
             WorkoutFeedItemDto(
                 label = "May 10",
@@ -201,7 +205,9 @@ class WorkoutFeedLocalDataSource @Inject constructor() {
                         reps = 15
                     )
                 ),
-                feeling = "🙂 Normal"
+                durationMinutes = 60,
+                estimatedCalories = 500,
+                muscleGroups = listOf("Chest", "Back", "Shoulders")
             ),
             WorkoutFeedItemDto(
                 label = "May 8",
@@ -257,7 +263,9 @@ class WorkoutFeedLocalDataSource @Inject constructor() {
                         reps = 12
                     )
                 ),
-                feeling = "😵 Tired"
+                durationMinutes = 50,
+                estimatedCalories = 430,
+                muscleGroups = listOf("Back", "Glutes", "Hamstrings", "Biceps")
             ),
             WorkoutFeedItemDto(
                 label = "May 6",
@@ -313,7 +321,9 @@ class WorkoutFeedLocalDataSource @Inject constructor() {
                         reps = 12
                     )
                 ),
-                feeling = "💪 Strong"
+                durationMinutes = 40,
+                estimatedCalories = 300,
+                muscleGroups = listOf("Chest", "Shoulders", "Triceps")
             )
         )
         return flowOf(items)

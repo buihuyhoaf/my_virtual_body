@@ -37,24 +37,9 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
-// ---------------------------------------------------------------------------
-// Date formatting (pure, no UI)
-// ---------------------------------------------------------------------------
-
-private fun formatHeaderDate(date: LocalDate): String {
-    val dayOfWeek = date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
-    val monthDay = date.format(DateTimeFormatter.ofPattern("MMM d", Locale.getDefault()))
-    return "$dayOfWeek, $monthDay"
-}
-
-// ---------------------------------------------------------------------------
-// Screen (stateless: collects state from ViewModel, passes to composables)
-// ---------------------------------------------------------------------------
-
 @Composable
 fun WorkoutFeedScreen(
     modifier: Modifier = Modifier,
-    onBack: () -> Unit = {},
     viewModel: WorkoutFeedViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -82,22 +67,36 @@ private fun WorkoutFeedContent(
     feedItems: List<WorkoutFeedItem>
 ) {
     val token = GymTheme.token
+    val today = LocalDate.now()
+
+    val todayItem = feedItems.firstOrNull { item ->
+        item.label.equals("Today", ignoreCase = true) || item.date == today
+    }
+    val pastItems = feedItems.filterNot { item ->
+        item.label.equals("Today", ignoreCase = true) || item.date == today
+    }
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = token.spacing.md)
     ) {
+        if (todayItem != null) {
+            TodayWorkoutCard(day = todayItem)
+        }
+        androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(bottom = token.spacing.xl))
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(token.spacing.md),
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(token.spacing.xs),
             contentPadding = PaddingValues(
-                top = token.spacing.md,
+                top = token.spacing.xs,
                 bottom = token.spacing.xl
             )
         ) {
             items(
-                items = feedItems,
+                items = pastItems,
                 key = { it.date.toString() + it.workoutName }
             ) { day ->
                 WorkoutDayCard(day = day)
@@ -111,29 +110,52 @@ private fun WorkoutFeedContent(
 // ---------------------------------------------------------------------------
 
 @Composable
-private fun WorkoutDayCard(
+private fun TodayWorkoutCard(
     day: WorkoutFeedItem
 ) {
+    WorkoutDayCard(
+        day = day,
+        isToday = true
+    )
+}
+
+@Composable
+private fun WorkoutDayCard(
+    day: WorkoutFeedItem,
+    isToday: Boolean = false
+) {
     val token = GymTheme.token
+    val containerColor = if (isToday) {
+        token.colors.surfaceSubtle
+    } else {
+        token.colors.surface
+    }
+    val contentPadding = if (isToday) {
+        token.spacing.lg
+    } else {
+        token.card.padding
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(token.card.cornerRadius),
         colors = CardDefaults.cardColors(
-            containerColor = token.colors.surface
+            containerColor = containerColor
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = token.card.elevation),
         content = {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(token.card.padding)
+                    .padding(contentPadding)
             ) {
                 WorkoutDayHeader(
                     label = day.label,
-                    date = day.date
+                    date = day.date,
+                    isToday = isToday
                 )
                 SectionHorizontalRow(
-                    modifier = Modifier.padding(top = token.spacing.md)
+                    modifier = Modifier.padding(top = token.spacing.xs)
                 ) {
                     items(
                         items = day.exercises,
@@ -148,7 +170,11 @@ private fun WorkoutDayCard(
                         }
                     }
                 }
-                FeelingSection(feeling = day.feeling)
+                WorkoutSummaryRow(
+                    durationMinutes = day.durationMinutes,
+                    estimatedCalories = day.estimatedCalories,
+                    muscleGroups = day.muscleGroups
+                )
             }
         }
     )
@@ -157,7 +183,8 @@ private fun WorkoutDayCard(
 @Composable
 private fun WorkoutDayHeader(
     label: String,
-    date: LocalDate
+    date: LocalDate,
+    isToday: Boolean = false
 ) {
     val token = GymTheme.token
     val dateStr = if (label.equals("Today", ignoreCase = true)) {
@@ -165,40 +192,16 @@ private fun WorkoutDayHeader(
     } else {
         date.toVietnameseTopBarDate()
     }
+    val textStyle = if (isToday) {
+        token.typography.titleLarge
+    } else {
+        token.typography.titleSmall
+    }
     Text(
         text = dateStr,
-        style = token.typography.titleSmall,
+        style = textStyle,
         color = token.colors.textSecondary
     )
-}
-
-// ---------------------------------------------------------------------------
-// ExerciseRow (stateless, receives primitive data)
-// ---------------------------------------------------------------------------
-
-@Composable
-private fun ExerciseRow(
-    name: String,
-    sets: Int,
-    reps: Int
-) {
-    val token = GymTheme.token
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = name,
-            style = token.typography.bodyMedium,
-            color = token.colors.textPrimary
-        )
-        Text(
-            text = "$sets × $reps",
-            style = token.typography.bodyMedium,
-            color = token.colors.textSecondary
-        )
-    }
 }
 
 // ---------------------------------------------------------------------------
@@ -224,5 +227,65 @@ private fun FeelingSection(
             color = token.colors.textPrimary,
             modifier = Modifier.padding(top = token.spacing.xxs)
         )
+    }
+}
+
+// ---------------------------------------------------------------------------
+// WorkoutSummaryRow – duration, calories, muscle groups
+// ---------------------------------------------------------------------------
+
+@Composable
+private fun WorkoutSummaryRow(
+    durationMinutes: Int,
+    estimatedCalories: Int,
+    muscleGroups: List<String>
+) {
+    val token = GymTheme.token
+
+    val durationText = "$durationMinutes min"
+    val caloriesText = "$estimatedCalories kcal"
+
+    val muscleLabel = when {
+        muscleGroups.isEmpty() -> null
+        muscleGroups.size <= 2 -> muscleGroups.joinToString(", ")
+        else -> {
+            val first = muscleGroups.first()
+            val remainingCount = muscleGroups.size - 1
+            "$first +$remainingCount"
+        }
+    }
+
+    Row(
+        modifier = Modifier.padding(top = token.spacing.xs),
+        horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = durationText,
+            style = token.typography.bodySmall,
+            color = token.colors.textSecondary
+        )
+        Text(
+            text = "·",
+            style = token.typography.bodySmall,
+            color = token.colors.textSecondary
+        )
+        Text(
+            text = caloriesText,
+            style = token.typography.bodySmall,
+            color = token.colors.textSecondary
+        )
+        if (muscleLabel != null) {
+            Text(
+                text = "·",
+                style = token.typography.bodySmall,
+                color = token.colors.textSecondary
+            )
+            Text(
+                text = muscleLabel,
+                style = token.typography.bodySmall,
+                color = token.colors.textPrimary
+            )
+        }
     }
 }

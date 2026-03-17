@@ -1,5 +1,6 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.components
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,6 +25,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -52,7 +56,12 @@ fun CardImageWithText(
     val bodyToken = token.bodyAnalysis
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-    val scale = if (isPressed) 0.95f else 1f
+    val targetScale = if (isPressed) 0.96f else 1f
+    val scale by animateFloatAsState(targetValue = targetScale, label = "card_image_scale")
+    val alpha by animateFloatAsState(
+        targetValue = if (isPressed) 0.96f else 1f,
+        label = "card_image_alpha"
+    )
 
     Card(
         modifier = modifier
@@ -61,83 +70,95 @@ fun CardImageWithText(
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
+                this.alpha = alpha
             }
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
                 onClick = onClick
             )
-            .clip(RoundedCornerShape(token.radius.md)),
-        shape = RoundedCornerShape(token.radius.md),
+            .clip(RoundedCornerShape(token.radius.lg)),
+        shape = RoundedCornerShape(token.radius.lg),
         colors = CardDefaults.cardColors(containerColor = token.colors.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = token.elevation.level1)
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = token.elevation.level2,
+            pressedElevation = token.elevation.level1
+        )
     ) {
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            Column(
+            // Background image filling the card
+            Image(
+                painter = painterResource(imageRes),
+                contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(token.spacing.xxs),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Image section
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .background(token.colors.surfaceSubtle)
-                ) {
-                    Image(
-                        painter = painterResource(imageRes),
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                }
+                contentScale = ContentScale.Crop
+            )
 
-                // Text section
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(token.spacing.xs),
-                    verticalArrangement = Arrangement.spacedBy(token.spacing.xxs),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = firstLineText,
-                        style = token.typography.labelMedium,
-                        color = token.colors.textPrimary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+            // Gradient overlay: transparent at top -> semi-dark at bottom
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                token.colors.backgroundScrim.copy(alpha = 0f),
+                                token.colors.backgroundScrim.copy(alpha = 0.8f)
+                            )
+                        )
                     )
-                    Text(
-                        text = secondLineText,
-                        style = token.typography.bodySmall,
-                        color = token.colors.textSecondary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+            )
+
+            // Text overlay at bottom on top of image
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .fillMaxWidth()
+                    .padding(token.spacing.xs),
+                verticalArrangement = Arrangement.spacedBy(token.spacing.xxs),
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(
+                    text = firstLineText,
+                    style = token.typography.titleSmall,
+                    color = token.colors.onPrimary,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = secondLineText,
+                    style = token.typography.labelSmall,
+                    color = token.colors.onPrimary.copy(alpha = 0.8f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
 
             if (badgeText != null) {
-                Box(
+                Surface(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(token.spacing.xxs)
-                        .clip(RoundedCornerShape(token.radius.sm))
-                        .badgeLevelBackground(badgeLevel)
-                        .badgeLevelBorder(badgeLevel)
-                        .padding(
-                            horizontal = token.spacing.xs,
-                            vertical = token.spacing.xxs
-                        )
+                        .padding(token.spacing.xs),
+                    shape = RoundedCornerShape(token.radius.sm),
+                    color = Color.Transparent,
+                    shadowElevation = token.card.elevation
                 ) {
-                    Text(
-                        text = badgeText,
-                        style = token.typography.labelSmall,
-                        color = token.colors.surface
-                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(token.radius.sm))
+                            .badgeLevelBackground(badgeLevel)
+                            .padding(
+                                horizontal = token.spacing.xs,
+                                vertical = token.spacing.xxs
+                            )
+                    ) {
+                        Text(
+                            text = badgeText,
+                            style = token.typography.labelSmall,
+                            color = token.colors.onPrimary
+                        )
+                    }
                 }
             }
         }

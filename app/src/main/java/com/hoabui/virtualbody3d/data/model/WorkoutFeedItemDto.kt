@@ -9,5 +9,7 @@ data class WorkoutFeedItemDto(
     val dateString: String,
     val workoutName: String,
     val exercises: List<ExerciseDto>,
-    val feeling: String
+    val durationMinutes: Int,
+    val estimatedCalories: Int,
+    val muscleGroups: List<String>
 )
