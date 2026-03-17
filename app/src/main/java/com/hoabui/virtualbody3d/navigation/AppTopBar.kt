@@ -30,10 +30,9 @@ import androidx.compose.foundation.layout.RowScope
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
+import com.hoabui.virtualbody3d.core.extensions.toVietnameseTopBarDate
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @Composable
 fun AppTopBar(
@@ -42,9 +41,7 @@ fun AppTopBar(
 ) {
     val token = GymTheme.token
     val now = LocalTime.now()
-    val dateText = LocalDate.now().format(
-        DateTimeFormatter.ofPattern("yyyy EEE MMM dd", Locale.ENGLISH)
-    )
+    val dateText = LocalDate.now().toVietnameseTopBarDate()
     val isDayTime = now.hour in AppTopBarDefaults.dayStartHour until AppTopBarDefaults.dayEndHour
     val greeting = if (isDayTime) {
         stringResource(R.string.analysis_dashboard_greeting_day)

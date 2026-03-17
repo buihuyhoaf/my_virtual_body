@@ -9,100 +9,37 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.core.extensions.toVietnameseTopBarDate
+import com.hoabui.virtualbody3d.domain.model.WorkoutFeedItem
+import com.hoabui.virtualbody3d.navigation.AppTopBarBack
+import com.hoabui.virtualbody3d.ui.body.components.SectionHorizontalRow
+import com.hoabui.virtualbody3d.ui.components.UiStateContent
+import com.hoabui.virtualbody3d.ui.exerciselibrary.components.CardImageWithText
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
+import com.hoabui.virtualbody3d.ui.workoutfeed.state.WorkoutFeedUiState
+import com.hoabui.virtualbody3d.ui.workoutfeed.viewmodel.WorkoutFeedViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
 // ---------------------------------------------------------------------------
-// Fake data models (UI only, no domain/DB)
+// Date formatting (pure, no UI)
 // ---------------------------------------------------------------------------
-
-private data class WorkoutDayUi(
-    val label: String,
-    val date: LocalDate,
-    val workoutName: String,
-    val exercises: List<ExerciseUi>,
-    val feeling: String
-)
-
-private data class ExerciseUi(
-    val name: String,
-    val sets: Int,
-    val reps: Int
-)
-
-private fun fakeWorkoutFeedItems(): List<WorkoutDayUi> {
-    val today = LocalDate.now()
-    return listOf(
-        WorkoutDayUi(
-            label = "Today",
-            date = today,
-            workoutName = "Chest Workout",
-            exercises = listOf(
-                ExerciseUi("Bench Press", 4, 10),
-                ExerciseUi("Incline DB Press", 3, 12),
-                ExerciseUi("Cable Fly", 3, 15)
-            ),
-            feeling = "💪 Strong"
-        ),
-        WorkoutDayUi(
-            label = "Yesterday",
-            date = today.minusDays(1),
-            workoutName = "Leg Day",
-            exercises = listOf(
-                ExerciseUi("Squat", 4, 8),
-                ExerciseUi("Hip Thrust", 3, 12),
-                ExerciseUi("Leg Press", 3, 15)
-            ),
-            feeling = "🔥 Great session"
-        ),
-        WorkoutDayUi(
-            label = "May 10",
-            date = today.minusDays(2),
-            workoutName = "Upper Body",
-            exercises = listOf(
-                ExerciseUi("Bench Press", 4, 10),
-                ExerciseUi("Lat Pulldown", 3, 12),
-                ExerciseUi("Shoulder Press", 3, 10),
-                ExerciseUi("Cable Fly", 3, 15)
-            ),
-            feeling = "🙂 Normal"
-        ),
-        WorkoutDayUi(
-            label = "May 8",
-            date = today.minusDays(4),
-            workoutName = "Back & Biceps",
-            exercises = listOf(
-                ExerciseUi("Deadlift", 3, 8),
-                ExerciseUi("Lat Pulldown", 4, 10),
-                ExerciseUi("Barbell Row", 3, 12)
-            ),
-            feeling = "😵 Tired"
-        ),
-        WorkoutDayUi(
-            label = "May 6",
-            date = today.minusDays(6),
-            workoutName = "Push Day",
-            exercises = listOf(
-                ExerciseUi("Bench Press", 4, 8),
-                ExerciseUi("Incline DB Press", 3, 10),
-                ExerciseUi("Shoulder Press", 3, 12)
-            ),
-            feeling = "💪 Strong"
-        )
-    )
-}
 
 private fun formatHeaderDate(date: LocalDate): String {
     val dayOfWeek = date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
@@ -111,23 +48,46 @@ private fun formatHeaderDate(date: LocalDate): String {
 }
 
 // ---------------------------------------------------------------------------
-// Screen
+// Screen (stateless: collects state from ViewModel, passes to composables)
 // ---------------------------------------------------------------------------
 
 @Composable
 fun WorkoutFeedScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit = {},
+    viewModel: WorkoutFeedViewModel = hiltViewModel()
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    UiStateContent(
+        state = state,
+        modifier = modifier,
+        successContent = { mod: Modifier, uiState: WorkoutFeedUiState ->
+            Column(
+                modifier = mod.fillMaxSize(),
+                verticalArrangement = Arrangement.Top
+            ) {
+                WorkoutFeedContent(
+                    modifier = Modifier.weight(1f),
+                    feedItems = uiState.feedItems
+                )
+            }
+        }
+    )
+}
+
+@Composable
+private fun WorkoutFeedContent(
+    modifier: Modifier,
+    feedItems: List<WorkoutFeedItem>
 ) {
     val token = GymTheme.token
-    val feedItems = remember { fakeWorkoutFeedItems() }
-    val todayItem = feedItems.firstOrNull { it.label == "Today" }
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = token.spacing.md)
     ) {
-        TopDateHeader(todayWorkout = todayItem)
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(token.spacing.md),
@@ -147,56 +107,17 @@ fun WorkoutFeedScreen(
 }
 
 // ---------------------------------------------------------------------------
-// TopDateHeader
-// ---------------------------------------------------------------------------
-
-@Composable
-private fun TopDateHeader(
-    todayWorkout: WorkoutDayUi?
-) {
-    val token = GymTheme.token
-    val today = LocalDate.now()
-    val dateStr = formatHeaderDate(today)
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = token.spacing.md, bottom = token.spacing.xs)
-    ) {
-        Text(
-            text = "Today • $dateStr",
-            style = token.typography.titleLarge,
-            color = token.colors.textPrimary
-        )
-        Text(
-            text = when {
-                todayWorkout != null -> "${todayWorkout.workoutName} • ${todayWorkout.exercises.size} exercises"
-                else -> "No workout today"
-            },
-            style = token.typography.bodyMedium,
-            color = token.colors.textSecondary,
-            modifier = Modifier.padding(top = token.spacing.xxs)
-        )
-        HorizontalDivider(
-            modifier = Modifier.padding(top = token.spacing.md),
-            color = token.colors.borderSubtle,
-            thickness = 1.dp
-        )
-    }
-}
-
-// ---------------------------------------------------------------------------
-// WorkoutDayCard
+// WorkoutDayCard (stateless, receives domain model)
 // ---------------------------------------------------------------------------
 
 @Composable
 private fun WorkoutDayCard(
-    day: WorkoutDayUi
+    day: WorkoutFeedItem
 ) {
     val token = GymTheme.token
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(token.card.cornerRadius),
+        shape = RoundedCornerShape(token.card.cornerRadius),
         colors = CardDefaults.cardColors(
             containerColor = token.colors.surface
         ),
@@ -211,16 +132,20 @@ private fun WorkoutDayCard(
                     label = day.label,
                     date = day.date
                 )
-                Column(
-                    modifier = Modifier.padding(top = token.spacing.md),
-                    verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
+                SectionHorizontalRow(
+                    modifier = Modifier.padding(top = token.spacing.md)
                 ) {
-                    day.exercises.forEach { exercise ->
-                        ExerciseRow(
-                            name = exercise.name,
-                            sets = exercise.sets,
-                            reps = exercise.reps
-                        )
+                    items(
+                        items = day.exercises,
+                        key = { "${it.name}-${it.sets}x${it.reps}" }
+                    ) { exercise ->
+                        CardImageWithText(
+                            imageRes = exercise.imageResId,
+                            firstLineText = exercise.name,
+                            secondLineText = "${exercise.sets}x${exercise.reps}",
+                        ) {
+
+                        }
                     }
                 }
                 FeelingSection(feeling = day.feeling)
@@ -235,19 +160,20 @@ private fun WorkoutDayHeader(
     date: LocalDate
 ) {
     val token = GymTheme.token
-    val dateStr = when (label) {
-        "Today", "Yesterday" -> label
-        else -> formatHeaderDate(date)
+    val dateStr = if (label.equals("Today", ignoreCase = true)) {
+        "Hôm nay"
+    } else {
+        date.toVietnameseTopBarDate()
     }
     Text(
-        text = "Workout • $dateStr",
+        text = dateStr,
         style = token.typography.titleSmall,
         color = token.colors.textSecondary
     )
 }
 
 // ---------------------------------------------------------------------------
-// ExerciseRow
+// ExerciseRow (stateless, receives primitive data)
 // ---------------------------------------------------------------------------
 
 @Composable
@@ -276,7 +202,7 @@ private fun ExerciseRow(
 }
 
 // ---------------------------------------------------------------------------
-// FeelingSection
+// FeelingSection (stateless)
 // ---------------------------------------------------------------------------
 
 @Composable

@@ -9,13 +9,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -23,8 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
-import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.ui.components.SectionTitle
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.core.utils.Constants.BODY_METRICS_PANEL_INDEX
@@ -33,16 +31,15 @@ import com.hoabui.virtualbody3d.core.utils.Constants.PANEL_PAGE_COUNT
 import com.hoabui.virtualbody3d.domain.model.BodyScanResult
 import com.hoabui.virtualbody3d.domain.model.PromoBanner
 import com.hoabui.virtualbody3d.ui.body.components.CaloriesTodayPanel
-import com.hoabui.virtualbody3d.ui.body.components.FavoriteExercisesRow
-import com.hoabui.virtualbody3d.ui.body.components.SupplementsRow
 import com.hoabui.virtualbody3d.ui.body.components.HeroSection
+import com.hoabui.virtualbody3d.ui.body.components.IncommingExercisesRow
 import com.hoabui.virtualbody3d.ui.body.components.NutritionCard
 import com.hoabui.virtualbody3d.ui.body.components.PromoBannerCarousel
+import com.hoabui.virtualbody3d.ui.body.components.SupplementsRow
 import com.hoabui.virtualbody3d.ui.body.data.FavoriteExerciseUiItem
 import com.hoabui.virtualbody3d.ui.body.data.NutritionSummaryUiState
 import com.hoabui.virtualbody3d.ui.body.data.SupplementUiItem
 import com.hoabui.virtualbody3d.ui.body.data.toPromoBannerItem
-import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
 import com.hoabui.virtualbody3d.ui.body.state.BodyUiState
 import com.hoabui.virtualbody3d.ui.body.state.toUiState
 import com.hoabui.virtualbody3d.ui.body.viewmodel.BodyViewModel
@@ -50,10 +47,8 @@ import com.hoabui.virtualbody3d.ui.body.viewmodel.FavoriteExercisesViewModel
 import com.hoabui.virtualbody3d.ui.body.viewmodel.SupplementsViewModel
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
 import com.hoabui.virtualbody3d.ui.mealcapture.MealPageUiModel
-import com.hoabui.virtualbody3d.ui.mealcapture.MealsViewModel
 import com.hoabui.virtualbody3d.ui.scanresult.MetricsPanel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
-import java.time.LocalDate
 
 
 @Composable
@@ -121,7 +116,6 @@ fun HomeContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(contentHeight * 0.1f),
-            selectedDate = LocalDate.now(),
             summary = nutritionToday
         )
         HeroSection(
@@ -132,7 +126,7 @@ fun HomeContent(
             bodyScore = bodyScore,
             onViewBodyDetailClick = onViewBodyDetailClick,
         )
-        FavoriteExercisesRow(
+        IncommingExercisesRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(contentHeight * 0.17f),

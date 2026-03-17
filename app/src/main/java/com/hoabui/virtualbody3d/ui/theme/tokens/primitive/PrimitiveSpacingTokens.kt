@@ -18,7 +18,8 @@ data class PrimitiveSpacingTokens(
     val xxl: Dp,
     val xxxl: Dp,
     val iconMedium: Dp,
-    val buttonPrimary: Dp
+    val buttonPrimary: Dp,
+    val dividerThickness: Dp
 ) {
     companion object {
         fun default(): PrimitiveSpacingTokens = PrimitiveSpacingTokens(
@@ -30,7 +31,8 @@ data class PrimitiveSpacingTokens(
             xxl = 48.dp,
             xxxl = 56.dp,
             iconMedium = 28.dp,
-            buttonPrimary = 72.dp
+            buttonPrimary = 72.dp,
+            dividerThickness = 1.dp
         )
     }
 }

@@ -21,8 +21,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,7 +31,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.Opacity
-import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -46,6 +45,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -54,11 +55,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.core.extensions.formatMeasurement
 import com.hoabui.virtualbody3d.core.utils.Constants
@@ -74,7 +73,6 @@ import com.hoabui.virtualbody3d.ui.components.SectionTitle
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.CardImageWithText
 import com.hoabui.virtualbody3d.ui.mealcapture.MealPageUiModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
-import java.time.LocalDate
 
 @Composable
 fun HeroSection(
@@ -267,8 +265,8 @@ private fun BodyProgressMetricItem(
  */
 @Composable
 fun SectionHorizontalRow(
-    @StringRes titleResId: Int,
     modifier: Modifier = Modifier,
+    @StringRes titleResId: Int? = null,
     onSeeMoreClick: (() -> Unit)? = null,
     content: LazyListScope.() -> Unit
 ) {
@@ -276,7 +274,9 @@ fun SectionHorizontalRow(
     Column(
         verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
     ) {
-        SectionTitle(textResId = titleResId, onSeeMoreClick = onSeeMoreClick)
+        if (titleResId != null){
+            SectionTitle(textResId = titleResId, onSeeMoreClick = onSeeMoreClick)
+        }
         LazyRow(
             modifier = modifier,
             horizontalArrangement = Arrangement.spacedBy(token.spacing.md),
@@ -290,7 +290,7 @@ fun SectionHorizontalRow(
 }
 
 @Composable
-fun FavoriteExercisesRow(
+fun IncommingExercisesRow(
     modifier: Modifier = Modifier,
     exercises: List<FavoriteExerciseUiItem>,
     onAddExerciseClick: () -> Unit = {},
@@ -308,7 +308,7 @@ fun FavoriteExercisesRow(
             CardImageWithText(
                 imageRes = item.imageResId,
                 firstLineText = item.name,
-                secondLineText = item.exerciseVolume,
+                secondLineText = "${item.reps}x${item.sets}",
             ) {
 
             }
@@ -630,7 +630,6 @@ fun CaloriesTodayPanel(
 @Composable
 fun NutritionCard(
     modifier: Modifier = Modifier,
-    selectedDate: LocalDate,
     summary: NutritionSummaryUiState
 ) {
     val token = GymTheme.token
@@ -768,29 +767,39 @@ private fun CaloriesProgressRing(
         modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(token.spacing.xs)
+        ) {
+            val strokeWidthPx = bodyToken.dashboardNutritionRingStrokeWidth.toPx()
+            val halfStroke = strokeWidthPx / 2f
+            val side = minOf(size.width, size.height)
+            val left = (size.width - side) / 2f
+            val top = (size.height - side) / 2f
+            val rect = Rect(
+                left = left + halfStroke,
+                top = top + halfStroke,
+                right = left + side - halfStroke,
+                bottom = top + side - halfStroke
+            )
             drawArc(
                 color = token.colors.dashboardRingTrack,
                 startAngle = Constants.BODY_ANALYSIS_PROGRESS_RING_START_ANGLE,
                 sweepAngle = Constants.BODY_ANALYSIS_PROGRESS_RING_SWEEP_ANGLE,
                 useCenter = false,
-                style = Stroke(
-                    width = bodyToken.dashboardNutritionRingStrokeWidth.toPx(),
-                    cap = StrokeCap.Round
-                )
+                topLeft = Offset(rect.left, rect.top),
+                size = Size(rect.width, rect.height),
+                style = Stroke(width = strokeWidthPx, cap = StrokeCap.Round)
             )
             drawArc(
                 color = token.colors.primary,
                 startAngle = Constants.BODY_ANALYSIS_PROGRESS_RING_START_ANGLE,
-                sweepAngle = Constants.BODY_ANALYSIS_PROGRESS_RING_SWEEP_ANGLE * progress.coerceIn(
-                    0f,
-                    1f
-                ),
+                sweepAngle = Constants.BODY_ANALYSIS_PROGRESS_RING_SWEEP_ANGLE * progress.coerceIn(0f, 1f),
                 useCenter = false,
-                style = Stroke(
-                    width = bodyToken.dashboardNutritionRingStrokeWidth.toPx(),
-                    cap = StrokeCap.Round
-                )
+                topLeft = Offset(rect.left, rect.top),
+                size = Size(rect.width, rect.height),
+                style = Stroke(width = strokeWidthPx, cap = StrokeCap.Round)
             )
         }
         Text(

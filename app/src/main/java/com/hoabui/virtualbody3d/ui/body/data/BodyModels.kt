@@ -8,7 +8,8 @@ import com.hoabui.virtualbody3d.ui.body.components.PromoBannerCarousel
 /** UI model for a favorite exercise card (name, last lifted weight, optional image, optional trend e.g. "+2.5kg"). */
 data class FavoriteExerciseUiItem(
     val name: String,
-    val exerciseVolume: String,
+    val reps: Int,
+    val sets: Int,
     val imageResId: Int = R.drawable.body_unsplash,
     val trendText: String? = null
 )

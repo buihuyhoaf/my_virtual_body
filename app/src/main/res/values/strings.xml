@@ -155,6 +155,9 @@
     <string name="exercise_library_filter_body_region">Nhóm cơ</string>
     <string name="exercise_library_filter_difficulty">Độ khó</string>
 
+    <!-- Workout Feed Screen -->
+    <string name="workout_feed_title">Workout feed</string>
+
     <!-- Exercise domain: BodyRegion (for library/detail) -->
     <string name="exercise_region_chest">Ngực</string>
     <string name="exercise_region_back">Lưng</string>

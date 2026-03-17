@@ -32,7 +32,8 @@ class FavoriteExercisesViewModel @Inject constructor(
     private fun toUiItem(domain: FavoriteExercise): FavoriteExerciseUiItem =
         FavoriteExerciseUiItem(
             name = domain.name,
-            exerciseVolume = domain.exerciseVolume,
+            reps = domain.reps,
+            sets = domain.sets,
             imageResId = domain.imageResId
         )
 }

@@ -70,7 +70,8 @@ data class SpacingTokens(
     val lg: Dp,
     val xl: Dp,
     val xxl: Dp,
-    val xxxl: Dp
+    val xxxl: Dp,
+    val dividerThickness: Dp
 )
 
 @Immutable
@@ -98,7 +99,8 @@ fun darkGymToken(
         lg = primitiveSpacing.lg,
         xl = primitiveSpacing.xl,
         xxl = primitiveSpacing.xxl,
-        xxxl = primitiveSpacing.xxxl
+        xxxl = primitiveSpacing.xxxl,
+        dividerThickness = primitiveSpacing.dividerThickness
     ),
     radius = RadiusTokens(
         sm = primitiveRadius.sm,
@@ -141,7 +143,8 @@ fun lightGymToken(
         lg = primitiveSpacing.lg,
         xl = primitiveSpacing.xl,
         xxl = primitiveSpacing.xxl,
-        xxxl = primitiveSpacing.xxxl
+        xxxl = primitiveSpacing.xxxl,
+        dividerThickness = primitiveSpacing.dividerThickness
     ),
     radius = RadiusTokens(
         sm = primitiveRadius.sm,

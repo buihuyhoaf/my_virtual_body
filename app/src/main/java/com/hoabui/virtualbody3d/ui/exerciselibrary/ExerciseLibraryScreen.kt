@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,12 +16,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.data.mapper.toDto
 import com.hoabui.virtualbody3d.domain.model.BodyRegion
 import com.hoabui.virtualbody3d.domain.model.Difficulty
-import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseDetailDialog
 import com.hoabui.virtualbody3d.navigation.AppTopBarBack
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
+import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseDetailDialog
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseFilterChips
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseSearchBar
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseSection

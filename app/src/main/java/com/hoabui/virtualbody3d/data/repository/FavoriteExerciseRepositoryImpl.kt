@@ -2,6 +2,7 @@ package com.hoabui.virtualbody3d.data.repository
 
 import com.hoabui.virtualbody3d.data.local.FavoriteExerciseLocalDataSource
 import com.hoabui.virtualbody3d.data.mapper.toDomain
+import com.hoabui.virtualbody3d.data.mapper.toFavoriteDomain
 import com.hoabui.virtualbody3d.domain.model.FavoriteExercise
 import com.hoabui.virtualbody3d.domain.repository.FavoriteExerciseRepository
 import kotlinx.coroutines.flow.Flow
@@ -15,5 +16,5 @@ class FavoriteExerciseRepositoryImpl @Inject constructor(
 ) : FavoriteExerciseRepository {
 
     override fun getFavoriteExercises(): Flow<List<FavoriteExercise>> =
-        localDataSource.getFavoriteExercises().map { list -> list.map { it.toDomain() } }
+        localDataSource.getFavoriteExercises().map { list -> list.map { it.toFavoriteDomain() } }
 }

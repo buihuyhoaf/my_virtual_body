@@ -5,6 +5,8 @@ import com.hoabui.virtualbody3d.domain.model.BodyRegion
 import com.hoabui.virtualbody3d.domain.model.Difficulty
 import com.hoabui.virtualbody3d.domain.model.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.Exercise
+import com.hoabui.virtualbody3d.domain.model.FavoriteExercise
+import com.hoabui.virtualbody3d.domain.model.FeedExercise
 import com.hoabui.virtualbody3d.domain.model.MuscleGroup
 
 fun ExerciseDto.toDomain(): Exercise = Exercise(
@@ -15,25 +17,28 @@ fun ExerciseDto.toDomain(): Exercise = Exercise(
     difficulty = difficulty.toDifficulty(),
     description = description,
     primaryMuscles = primaryMuscles.mapNotNull { it.toMuscleGroupOrNull() },
-    secondaryMuscles = secondaryMuscles.mapNotNull { it.toMuscleGroupOrNull() },
-    equipment = equipment?.toEquipmentTypeOrNull(),
+    secondaryMuscles = secondaryMuscles?.mapNotNull { it.toMuscleGroupOrNull() } ?: emptyList(),
+    equipment = equipment.toEquipmentTypeOrNull(),
     safetyNotes = safetyNotes,
     lastWeightKg = lastWeightKg
 )
 
-/** Converts domain Exercise to DTO for detail dialog and persistence. */
-fun Exercise.toDto(): ExerciseDto = ExerciseDto(
+fun ExerciseDto.toFavoriteDomain(): FavoriteExercise = FavoriteExercise(
     id = id,
     name = name,
     imageResId = imageResId,
-    bodyRegion = bodyRegion.name,
-    difficulty = difficulty.name,
-    description = description,
-    primaryMuscles = primaryMuscles.map { it.name },
-    secondaryMuscles = secondaryMuscles.map { it.name },
-    equipment = equipment?.name,
-    safetyNotes = safetyNotes,
-    lastWeightKg = lastWeightKg
+    imageResUrl = imageResUrl,
+    sets = sets,
+    reps = reps
+)
+
+fun ExerciseDto.toFeedDomain(): FeedExercise = FeedExercise(
+    id = id,
+    name = name,
+    imageResId = imageResId,
+    imageResUrl = imageResUrl,
+    sets = sets,
+    reps = reps
 )
 
 private fun String.toBodyRegion(): BodyRegion = when (this) {
