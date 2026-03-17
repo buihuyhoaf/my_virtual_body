@@ -17,7 +17,7 @@ import com.hoabui.virtualbody3d.ui.body.screen.BodyRegionDetailScreen
 import com.hoabui.virtualbody3d.ui.body.screen.HomeScreen
 import com.hoabui.virtualbody3d.ui.exerciselibrary.ExerciseLibraryScreen
 import com.hoabui.virtualbody3d.ui.profile.ProfileScreen
-import com.hoabui.virtualbody3d.ui.cenfitcoach.CenfitCoachScreen
+import com.hoabui.virtualbody3d.ui.workoutfeed.WorkoutFeedScreen
 import com.hoabui.virtualbody3d.ui.createbaseline.CreateBaselineScreen
 import com.hoabui.virtualbody3d.ui.messages.MessageDetailScreen
 import com.hoabui.virtualbody3d.ui.messages.MessagesScreen
@@ -159,7 +159,7 @@ fun AppNavGraph(
             )
         }
         composable(route = AppDestination.CenfitCoach.route) {
-            CenfitCoachScreen()
+            WorkoutFeedScreen()
         }
         composable(route = AppDestination.Profile.route) {
             ProfileScreen(
