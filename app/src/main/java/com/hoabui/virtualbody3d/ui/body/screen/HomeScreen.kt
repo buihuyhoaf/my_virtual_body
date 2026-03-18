@@ -106,11 +106,19 @@ fun HomeContent(
             .padding(token.spacing.md),
         verticalArrangement = Arrangement.spacedBy(token.spacing.md)
     ) {
-        PromoBannerCarousel(
-            banners = bannerItems,
+//        PromoBannerCarousel(
+//            banners = bannerItems,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .height(contentHeight * 0.1f)
+//        )
+        IncommingExercisesRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(contentHeight * 0.1f)
+                .height(contentHeight * 0.17f),
+            exercises = favoriteExercises,
+            onAddExerciseClick = { /* TODO: navigate or show add flow */ },
+            onSeeMoreClick = onNavigateToExerciseLibrary
         )
         NutritionCard(
             modifier = Modifier
@@ -126,20 +134,13 @@ fun HomeContent(
             bodyScore = bodyScore,
             onViewBodyDetailClick = onViewBodyDetailClick,
         )
-        IncommingExercisesRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(contentHeight * 0.17f),
-            exercises = favoriteExercises,
-            onAddExerciseClick = { /* TODO: navigate or show add flow */ },
-            onSeeMoreClick = onNavigateToExerciseLibrary
-        )
-        SupplementsRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(contentHeight * 0.17f),
-            supplements = supplements
-        )
+
+//        SupplementsRow(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .height(contentHeight * 0.17f),
+//            supplements = supplements
+//        )
     }
 }
 

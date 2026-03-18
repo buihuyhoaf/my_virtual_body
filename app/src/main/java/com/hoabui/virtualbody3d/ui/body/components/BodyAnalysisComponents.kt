@@ -55,6 +55,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -674,7 +675,7 @@ fun NutritionCard(
             CaloriesProgressRing(
                 modifier = Modifier.size(bodyToken.dashboardNutritionRingSize),
                 progress = progress,
-                centerLabel = stringResource(R.string.analysis_dashboard_goal_value, summary.goal)
+                centerLabel = "${summary.goal}"
             )
         }
     }
@@ -770,7 +771,6 @@ private fun CaloriesProgressRing(
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(token.spacing.xs)
         ) {
             val strokeWidthPx = bodyToken.dashboardNutritionRingStrokeWidth.toPx()
             val halfStroke = strokeWidthPx / 2f
@@ -804,7 +804,8 @@ private fun CaloriesProgressRing(
         }
         Text(
             text = centerLabel,
-            style = token.typography.labelMedium,
+            style = token.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
     }
