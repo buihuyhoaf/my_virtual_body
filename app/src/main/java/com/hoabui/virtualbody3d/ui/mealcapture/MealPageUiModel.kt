@@ -2,6 +2,7 @@ package com.hoabui.virtualbody3d.ui.mealcapture
 
 import android.net.Uri
 import com.hoabui.virtualbody3d.domain.model.MealAnalysis
+import androidx.core.net.toUri
 
 /**
  * UI model representing a single analyzed meal page in the vertical pager.
@@ -46,7 +47,7 @@ fun MealAnalysis.toMealPageUiModel(
  * Maps [MealAnalysis] to [MealPageUiModel] when loaded from API (uses [MealAnalysis.imageUrl] or placeholder).
  */
 fun MealAnalysis.toMealPageUiModelFromApi(): MealPageUiModel {
-    val imageUri = imageUrl?.let { Uri.parse(it) } ?: Uri.EMPTY
+    val imageUri = imageUrl?.toUri() ?: Uri.EMPTY
     return toMealPageUiModel(imageUri)
 }
 

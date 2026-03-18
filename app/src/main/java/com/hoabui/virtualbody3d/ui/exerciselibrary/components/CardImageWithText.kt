@@ -123,7 +123,7 @@ fun CardImageWithText(
                     text = firstLineText,
                     style = token.typography.titleSmall,
                     color = token.colors.onPrimary,
-                    maxLines = 2,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(

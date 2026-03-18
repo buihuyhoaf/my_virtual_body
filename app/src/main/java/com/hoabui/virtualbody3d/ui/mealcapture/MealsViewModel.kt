@@ -54,6 +54,13 @@ class MealsViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
+    /**
+     * One-shot flag to indicate that UI should scroll to the latest meal page
+     * after a successful capture → analysis → result pipeline.
+     */
+    private val _scrollToLatestMealEvent = MutableStateFlow(false)
+    val scrollToLatestMealEvent: StateFlow<Boolean> = _scrollToLatestMealEvent.asStateFlow()
+
     init {
         loadOnEnter()
     }
@@ -132,10 +139,20 @@ class MealsViewModel @Inject constructor(
 
                 // Ensure today is in days list (for edge case: first meal of the day)
                 refreshDaysWithMeals()
+
+                // Notify UI to scroll to the new meal result page.
+                _scrollToLatestMealEvent.value = true
             } finally {
                 _isLoading.value = false
             }
         }
+    }
+
+    /**
+     * Call from UI after handling [scrollToLatestMealEvent] to reset the flag.
+     */
+    fun onScrollToLatestMealHandled() {
+        _scrollToLatestMealEvent.value = false
     }
 
     private fun refreshTodayMeals() {

@@ -23,16 +23,18 @@ fun MealCaptureScreen(
     mealsViewModel: MealsViewModel = hiltViewModel()
 ) {
     val mealPages by mealsViewModel.mealPages.collectAsStateWithLifecycle()
+    val scrollToLatestMealEvent by mealsViewModel.scrollToLatestMealEvent.collectAsStateWithLifecycle()
     val pagerState = rememberPagerState(
         initialPage = 0,
         pageCount = { 1 + mealPages.size }
     )
 
-    // When a new meal page is added, automatically scroll to page 1 (latest meal).
-    LaunchedEffect(mealPages.size) {
-        if (mealPages.isNotEmpty()) {
+    // After capture → analyze → result completes, scroll to page 1 (latest meal).
+    LaunchedEffect(scrollToLatestMealEvent, mealPages.size) {
+        if (scrollToLatestMealEvent && mealPages.isNotEmpty()) {
             awaitFrame()
             pagerState.animateScrollToPage(1)
+            mealsViewModel.onScrollToLatestMealHandled()
         }
     }
 
