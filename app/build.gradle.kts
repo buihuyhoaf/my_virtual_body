@@ -74,6 +74,7 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.exifinterface)
     implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.compose.foundation)
     ksp(libs.hilt.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

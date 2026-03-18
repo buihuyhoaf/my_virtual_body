@@ -1,10 +1,13 @@
 package com.hoabui.virtualbody3d.core.extensions
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,7 +18,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.core.utils.Constants
+import com.hoabui.virtualbody3d.navigation.BottomBarItemState
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
+import com.hoabui.virtualbody3d.ui.theme.tokens.GymToken
 
 /**
  * Hero section layer animation: alpha + scale for crossfade between 3D body and photo.
@@ -103,4 +108,48 @@ fun Modifier.badgeLevelBorder(level: Enum<*>?): Modifier {
         else -> token.colors.difficultyBeginnerText
     }
     return this.border(token.spacing.xxs, color)
+}
+
+@Composable
+fun rememberBottomBarItemState(
+    selected: Boolean,
+    interactionSource: MutableInteractionSource,
+    token: GymToken,
+): BottomBarItemState {
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    val targetBackgroundColor = if (selected) {
+        token.colors.primarySelected
+    } else {
+        token.colors.backgroundTransparent
+    }
+    val backgroundColor by animateColorAsState(
+        targetValue = targetBackgroundColor,
+        label = "bottomBarItemBackground"
+    )
+
+    val targetContentColor = if (selected) {
+        token.colors.primary
+    } else {
+        token.colors.textSecondary
+    }
+    val contentColor by animateColorAsState(
+        targetValue = targetContentColor,
+        label = "bottomBarItemContent"
+    )
+
+    val selectedScale by animateFloatAsState(
+        targetValue = if (selected) 1.1f else 1f,
+        label = "bottomBarItemSelectedScale"
+    )
+    val pressedScale by animateFloatAsState(
+        targetValue = if (isPressed) 0.96f else 1f,
+        label = "bottomBarItemPressedScale"
+    )
+
+    return BottomBarItemState(
+        backgroundColor = backgroundColor,
+        contentColor = contentColor,
+        scale = selectedScale * pressedScale
+    )
 }

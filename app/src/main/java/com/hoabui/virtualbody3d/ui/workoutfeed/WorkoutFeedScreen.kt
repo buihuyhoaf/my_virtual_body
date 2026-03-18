@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -30,6 +31,8 @@ import com.hoabui.virtualbody3d.ui.body.components.SectionHorizontalRow
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.CardImageWithText
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
+import com.hoabui.virtualbody3d.ui.workoutfeed.components.TodayWorkoutCard
+import com.hoabui.virtualbody3d.ui.workoutfeed.components.WorkoutDayCard
 import com.hoabui.virtualbody3d.ui.workoutfeed.state.WorkoutFeedUiState
 import com.hoabui.virtualbody3d.ui.workoutfeed.viewmodel.WorkoutFeedViewModel
 import java.time.LocalDate
@@ -84,7 +87,7 @@ private fun WorkoutFeedContent(
         if (todayItem != null) {
             TodayWorkoutCard(day = todayItem)
         }
-        androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(bottom = token.spacing.xl))
+        Spacer(modifier = Modifier.padding(bottom = token.spacing.xl))
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
@@ -101,191 +104,6 @@ private fun WorkoutFeedContent(
             ) { day ->
                 WorkoutDayCard(day = day)
             }
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------
-// WorkoutDayCard (stateless, receives domain model)
-// ---------------------------------------------------------------------------
-
-@Composable
-private fun TodayWorkoutCard(
-    day: WorkoutFeedItem
-) {
-    WorkoutDayCard(
-        day = day,
-        isToday = true
-    )
-}
-
-@Composable
-private fun WorkoutDayCard(
-    day: WorkoutFeedItem,
-    isToday: Boolean = false
-) {
-    val token = GymTheme.token
-    val containerColor = if (isToday) {
-        token.colors.surfaceSubtle
-    } else {
-        token.colors.surface
-    }
-    val contentPadding = if (isToday) {
-        token.spacing.lg
-    } else {
-        token.card.padding
-    }
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(token.card.cornerRadius),
-        colors = CardDefaults.cardColors(
-            containerColor = containerColor
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = token.card.elevation),
-        content = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(contentPadding)
-            ) {
-                WorkoutDayHeader(
-                    label = day.label,
-                    date = day.date,
-                    isToday = isToday
-                )
-                SectionHorizontalRow(
-                    modifier = Modifier.padding(top = token.spacing.xs)
-                ) {
-                    items(
-                        items = day.exercises,
-                        key = { "${it.name}-${it.sets}x${it.reps}" }
-                    ) { exercise ->
-                        CardImageWithText(
-                            imageRes = exercise.imageResId,
-                            firstLineText = exercise.name,
-                            secondLineText = "${exercise.sets}x${exercise.reps}",
-                        ) {
-
-                        }
-                    }
-                }
-                WorkoutSummaryRow(
-                    durationMinutes = day.durationMinutes,
-                    estimatedCalories = day.estimatedCalories,
-                    muscleGroups = day.muscleGroups
-                )
-            }
-        }
-    )
-}
-
-@Composable
-private fun WorkoutDayHeader(
-    label: String,
-    date: LocalDate,
-    isToday: Boolean = false
-) {
-    val token = GymTheme.token
-    val dateStr = if (label.equals("Today", ignoreCase = true)) {
-        "Hôm nay"
-    } else {
-        date.toVietnameseTopBarDate()
-    }
-    val textStyle = if (isToday) {
-        token.typography.titleLarge
-    } else {
-        token.typography.titleSmall
-    }
-    Text(
-        text = dateStr,
-        style = textStyle,
-        color = token.colors.textSecondary
-    )
-}
-
-// ---------------------------------------------------------------------------
-// FeelingSection (stateless)
-// ---------------------------------------------------------------------------
-
-@Composable
-private fun FeelingSection(
-    feeling: String
-) {
-    val token = GymTheme.token
-    Column(
-        modifier = Modifier.padding(top = token.spacing.lg)
-    ) {
-        Text(
-            text = "Feeling",
-            style = token.typography.labelMedium,
-            color = token.colors.textSecondary
-        )
-        Text(
-            text = feeling,
-            style = token.typography.bodyMedium,
-            color = token.colors.textPrimary,
-            modifier = Modifier.padding(top = token.spacing.xxs)
-        )
-    }
-}
-
-// ---------------------------------------------------------------------------
-// WorkoutSummaryRow – duration, calories, muscle groups
-// ---------------------------------------------------------------------------
-
-@Composable
-private fun WorkoutSummaryRow(
-    durationMinutes: Int,
-    estimatedCalories: Int,
-    muscleGroups: List<String>
-) {
-    val token = GymTheme.token
-
-    val durationText = "$durationMinutes min"
-    val caloriesText = "$estimatedCalories kcal"
-
-    val muscleLabel = when {
-        muscleGroups.isEmpty() -> null
-        muscleGroups.size <= 2 -> muscleGroups.joinToString(", ")
-        else -> {
-            val first = muscleGroups.first()
-            val remainingCount = muscleGroups.size - 1
-            "$first +$remainingCount"
-        }
-    }
-
-    Row(
-        modifier = Modifier.padding(top = token.spacing.xs),
-        horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = durationText,
-            style = token.typography.bodySmall,
-            color = token.colors.textSecondary
-        )
-        Text(
-            text = "·",
-            style = token.typography.bodySmall,
-            color = token.colors.textSecondary
-        )
-        Text(
-            text = caloriesText,
-            style = token.typography.bodySmall,
-            color = token.colors.textSecondary
-        )
-        if (muscleLabel != null) {
-            Text(
-                text = "·",
-                style = token.typography.bodySmall,
-                color = token.colors.textSecondary
-            )
-            Text(
-                text = muscleLabel,
-                style = token.typography.bodySmall,
-                color = token.colors.textPrimary
-            )
         }
     }
 }

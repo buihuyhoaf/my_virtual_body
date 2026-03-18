@@ -30,6 +30,8 @@ data class BodyAnalysisTokens(
     val bottomBarSelectedHorizontalPadding: Dp,
     val bottomBarSelectedVerticalPadding: Dp,
     val bottomBarLabelTopSpacing: Dp,
+    val bottomBarIconContainerSize: Dp,
+    val bottomBarIconSize: Dp,
     val dashboardPanelTopRadius: Dp,
     val dashboardPanelHorizontalPadding: Dp,
     val dashboardPanelTopPadding: Dp,
@@ -88,6 +90,10 @@ fun gymBodyAnalysisTokens(spacing: PrimitiveSpacingTokens): BodyAnalysisTokens =
     bottomBarSelectedHorizontalPadding = spacing.xs,
     bottomBarSelectedVerticalPadding = spacing.xxs,
     bottomBarLabelTopSpacing = spacing.xxs,
+    // Keep consistent with the existing bottom bar icon container sizing.
+    bottomBarIconContainerSize = 36.dp,
+    // Match Material3 Icon default size (previously Icon had no explicit size modifier).
+    bottomBarIconSize = 24.dp,
     dashboardPanelTopRadius = spacing.xl,
     dashboardPanelHorizontalPadding = spacing.md,
     dashboardPanelTopPadding = spacing.lg,
