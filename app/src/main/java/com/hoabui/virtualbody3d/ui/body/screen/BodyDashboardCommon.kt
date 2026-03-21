@@ -21,13 +21,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 @Composable
 fun FloatingMetricChip(
     modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
+    iconResId: Int? = null,
     value: String? = null
 ) {
     val token = GymTheme.token
@@ -55,7 +56,7 @@ fun FloatingMetricChip(
             horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (icon != null) {
+            if (iconResId != null) {
                 Box(
                     modifier = Modifier
                         .size(bodyToken.metricChipIconContainerSize)
@@ -66,7 +67,7 @@ fun FloatingMetricChip(
                     contentAlignment = Alignment.Center
                 ){
                     Icon(
-                        imageVector = icon,
+                        painter = painterResource(id = iconResId),
                         contentDescription = null,
                         tint = token.colors.primary,
                         modifier = Modifier.size(bodyToken.metricChipIconSize)

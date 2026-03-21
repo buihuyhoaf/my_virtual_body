@@ -1,7 +1,6 @@
 package com.hoabui.virtualbody3d.ui.camera.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -9,9 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PhotoLibrary
-import androidx.compose.material.icons.outlined.SwitchCamera
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -19,7 +15,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.theme.tokens.GymToken
 
 /**
@@ -52,7 +49,7 @@ fun CaptureControlsRow(
                     .background(colors.surfaceOverlay)
             ) {
                 Icon(
-                    imageVector = Icons.Default.PhotoLibrary,
+                    painter = painterResource(id = R.drawable.mode_landscape),
                     contentDescription = null,
                     modifier = Modifier.size(cameraToken.secondaryIconSize),
                     tint = colors.primary
@@ -64,19 +61,26 @@ fun CaptureControlsRow(
             modifier = Modifier,
             contentAlignment = Alignment.Center
         ) {
-            Box(
+            IconButton(
+                onClick = onCapture,
+                enabled = buttonsEnabled,
                 modifier = Modifier
                     .size(cameraToken.primaryButtonSize)
                     .clip(CircleShape)
-                    .border(cameraToken.primaryButtonBorderWidth, colors.primary, CircleShape)
-                    .background(Color.White)
                     .clickable(
                         enabled = buttonsEnabled,
                         onClick = onCapture,
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() }
                     )
-            )
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.aperture),
+                    contentDescription = null,
+                    modifier = Modifier.size(cameraToken.primaryButtonSize),
+                    tint = colors.primary
+                )
+            }
         }
 
         Box(
@@ -92,7 +96,7 @@ fun CaptureControlsRow(
                     .background(colors.surfaceOverlay)
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.SwitchCamera,
+                    painter = painterResource(id = R.drawable.camera_rotate),
                     contentDescription = null,
                     modifier = Modifier.size(cameraToken.secondaryIconSize),
                     tint = colors.primary

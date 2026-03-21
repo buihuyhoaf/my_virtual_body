@@ -42,8 +42,21 @@ data class PromoBannerItem(
 
 
 @Immutable
-data class NutritionSummaryUiState(
+data class CalorieGoalUiModel(
     val intake: Int = 0,
     val burned: Int = 0,
-    val goal: Int = 1
-)
+    val intakeGoal: Int = 0,
+    val burnGoal: Int = 0
+) {
+    val intakeProgress: Float
+        get() = if (intakeGoal == 0) 0f else (intake.toFloat() / intakeGoal).coerceAtLeast(0f)
+
+    val burnedProgress: Float
+        get() = if (burnGoal == 0) 0f else (burned.toFloat() / burnGoal).coerceAtLeast(0f)
+
+    val net: Int
+        get() = intake - burned
+
+    val deficit: Int
+        get() = intakeGoal - net
+}

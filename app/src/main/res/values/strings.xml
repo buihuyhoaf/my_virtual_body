@@ -107,6 +107,13 @@
     <string name="analysis_add_exercise">Add Exercise</string>
     <string name="analysis_add">Add</string>
 
+    <!-- Premium calorie card -->
+    <string name="calorie_premium_deficit_label">Calorie Deficit</string>
+    <string name="calorie_premium_intake">Intake</string>
+    <string name="calorie_premium_burned">Burned</string>
+    <string name="calorie_premium_kcal">kcal</string>
+    <string name="calorie_premium_view_daily_log">View Daily Log</string>
+
     <!-- Body regions (Home screen region row) -->
     <string name="body_region_upper_body">Thân trên</string>
     <string name="body_region_core">Vùng lõi</string>

@@ -86,6 +86,7 @@ sealed class AppDestination(
     data object Profile : AppDestination(
         route = Routes.PROFILE,
         labelResId = R.string.tab_profile,
+        iconResId = R.drawable.user
     )
 
     data object BodyScanResult : AppDestination(

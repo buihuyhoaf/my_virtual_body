@@ -64,6 +64,7 @@ data class GymToken(
 
 @Immutable
 data class SpacingTokens(
+    val xxxs: Dp,
     val xxs: Dp,
     val xs: Dp,
     val md: Dp,
@@ -93,6 +94,7 @@ fun darkGymToken(
     return GymToken(
     colors = colors,
     spacing = SpacingTokens(
+        xxxs = primitiveSpacing.xxxs,
         xxs = primitiveSpacing.xxs,
         xs = primitiveSpacing.xs,
         md = primitiveSpacing.md,
@@ -137,6 +139,7 @@ fun lightGymToken(
     return GymToken(
     colors = colors,
     spacing = SpacingTokens(
+        xxxs = primitiveSpacing.xxxs,
         xxs = primitiveSpacing.xxs,
         xs = primitiveSpacing.xs,
         md = primitiveSpacing.md,

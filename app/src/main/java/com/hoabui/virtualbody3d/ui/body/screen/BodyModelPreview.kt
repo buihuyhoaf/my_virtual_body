@@ -48,7 +48,8 @@ import kotlin.math.tan
 
 @Composable
 fun BodyModelPreview(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onInteractionChanged: (Boolean) -> Unit = {}
 ) {
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -121,6 +122,7 @@ fun BodyModelPreview(
                             when (event.actionMasked) {
                                 MotionEvent.ACTION_DOWN -> {
                                     lastX = event.x
+                                    onInteractionChanged(true)
                                     return true
                                 }
 
@@ -134,8 +136,10 @@ fun BodyModelPreview(
                                     return true
                                 }
 
-                                MotionEvent.ACTION_UP -> {
+                                MotionEvent.ACTION_UP,
+                                MotionEvent.ACTION_CANCEL -> {
                                     v?.performClick()
+                                    onInteractionChanged(false)
                                     return true
                                 }
 

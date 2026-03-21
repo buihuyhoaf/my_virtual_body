@@ -3,6 +3,7 @@ package com.hoabui.virtualbody3d.navigation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.NightsStay
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -24,13 +24,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.layout.RowScope
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
-import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.core.extensions.toVietnameseTopBarDate
+import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -86,10 +84,6 @@ fun AppTopBar(
         Surface(
             shape = RoundedCornerShape(token.radius.md),
             color = token.colors.surfaceOverlay,
-            border = androidx.compose.foundation.BorderStroke(
-                width = token.bodyAnalysis.topBarBorderWidth,
-                color = token.colors.surfaceBorder
-            )
         ) {
             IconButton(
                 onClick = onNotificationClick,
@@ -109,7 +103,8 @@ fun AppTopBar(
                     }
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Notifications,
+                        modifier = Modifier.size(token.bodyAnalysis.bottomBarIconSize),
+                        painter = painterResource(id = R.drawable.bells),
                         contentDescription = stringResource(R.string.analysis_dashboard_notifications),
                         tint = token.colors.textPrimary
                     )

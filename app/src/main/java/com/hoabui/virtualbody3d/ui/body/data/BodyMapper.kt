@@ -14,10 +14,11 @@ fun PromoBanner.toPromoBannerItem(): PromoBannerItem = PromoBannerItem(
     }
 )
 
-fun NutritionSummary.toNutritionSummaryUiState(): NutritionSummaryUiState {
-    return NutritionSummaryUiState(
+fun NutritionSummary.toCalorieGoalUiModel(): CalorieGoalUiModel {
+    return CalorieGoalUiModel(
         intake = intake,
         burned = burned,
-        goal = goal
+        intakeGoal = goal,
+        burnGoal = goal
     )
 }

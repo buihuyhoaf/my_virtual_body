@@ -59,6 +59,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.coil.compose)
     implementation(libs.sceneview)
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)

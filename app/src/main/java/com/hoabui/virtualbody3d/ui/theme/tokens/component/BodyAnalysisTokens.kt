@@ -41,9 +41,11 @@ data class BodyAnalysisTokens(
     val dashboardHandleHeight: Dp,
     val dashboardGreetingIconSize: Dp,
     val dashboardGreetingIconContainerSize: Dp,
-    val dashboardNutritionCardPadding: Dp,
-    val dashboardNutritionRingSize: Dp,
-    val dashboardNutritionRingStrokeWidth: Dp,
+    val dashboardCalorieCardPadding: Dp,
+    val dashboardCalorieRingSize: Dp,
+    val dashboardCalorieRingOuterStrokeWidth: Dp,
+    val dashboardCalorieRingInnerStrokeWidth: Dp,
+    val dashboardCalorieRingGap: Dp,
     val dashboardMealItemWidth: Dp,
     val dashboardMealItemImageSize: Dp,
     val dashboardSummaryCardPadding: Dp,
@@ -67,7 +69,20 @@ data class BodyAnalysisTokens(
     val bodyRegionItemHeight: Dp,
     val bodyRegionPlaceholderSize: Dp,
     val supplementCardWidth: Dp,
-    val supplementCardHeight: Dp
+    val supplementCardHeight: Dp,
+    val dashboardCaloriePremiumRingSize: Dp,
+    val dashboardCaloriePremiumRingStrokeWidth: Dp,
+    val timelineItemWidth: Dp,
+    val timelineItemSpacing: Dp,
+    val timelineAvatarSize: Dp,
+    val timelinePlaceholderIconSize: Dp,
+    val timelineDotSize: Dp,
+    val timelineLineThickness: Dp,
+    val timelineLineOffsetY: Dp,
+    val timelineDateSlotHeight: Dp,
+    val timelineDateToAvatarGap: Dp,
+    val timelineAvatarToDotGap: Dp,
+    val timelineDotToMetricGap: Dp
 )
 
 fun gymBodyAnalysisTokens(spacing: PrimitiveSpacingTokens): BodyAnalysisTokens = BodyAnalysisTokens(
@@ -103,9 +118,11 @@ fun gymBodyAnalysisTokens(spacing: PrimitiveSpacingTokens): BodyAnalysisTokens =
     dashboardHandleHeight = 6.dp,
     dashboardGreetingIconSize = 20.dp,
     dashboardGreetingIconContainerSize = 40.dp,
-    dashboardNutritionCardPadding = spacing.md,
-    dashboardNutritionRingSize = 80.dp,
-    dashboardNutritionRingStrokeWidth = spacing.xs,
+    dashboardCalorieCardPadding = spacing.xs,
+    dashboardCalorieRingSize = 80.dp,
+    dashboardCalorieRingOuterStrokeWidth = spacing.xs,
+    dashboardCalorieRingInnerStrokeWidth = spacing.xxxs,
+    dashboardCalorieRingGap = spacing.xxs,
     dashboardMealItemWidth = 160.dp,
     dashboardMealItemImageSize = 64.dp,
     dashboardSummaryCardPadding = spacing.md,
@@ -129,5 +146,20 @@ fun gymBodyAnalysisTokens(spacing: PrimitiveSpacingTokens): BodyAnalysisTokens =
     bodyRegionItemHeight = 120.dp, // 1.5 × width for fitness-style tile
     bodyRegionPlaceholderSize = 40.dp,
     supplementCardWidth = 80.dp,
-    supplementCardHeight = 100.dp
+    supplementCardHeight = 100.dp,
+    dashboardCaloriePremiumRingSize = 120.dp,
+    dashboardCaloriePremiumRingStrokeWidth = spacing.md,
+    // Home reference: meal item is 160dp and body-region item is 120dp.
+    // Timeline is intentionally smaller for quick scan density.
+    timelineItemWidth = 88.dp,
+    timelineItemSpacing = spacing.md,
+    timelineAvatarSize = 52.dp,
+    timelinePlaceholderIconSize = 20.dp,
+    timelineDotSize = 8.dp,
+    timelineLineThickness = spacing.dividerThickness,
+    timelineLineOffsetY = 84.dp,
+    timelineDateSlotHeight = 16.dp,
+    timelineDateToAvatarGap = spacing.xs,
+    timelineAvatarToDotGap = spacing.xs,
+    timelineDotToMetricGap = spacing.xs
 )

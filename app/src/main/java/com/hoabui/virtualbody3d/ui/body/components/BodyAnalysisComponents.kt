@@ -55,7 +55,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -63,7 +62,7 @@ import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.core.extensions.formatMeasurement
 import com.hoabui.virtualbody3d.core.utils.Constants
 import com.hoabui.virtualbody3d.ui.body.data.FavoriteExerciseUiItem
-import com.hoabui.virtualbody3d.ui.body.data.NutritionSummaryUiState
+import com.hoabui.virtualbody3d.ui.body.data.CalorieGoalUiModel
 import com.hoabui.virtualbody3d.ui.body.data.SupplementUiItem
 import com.hoabui.virtualbody3d.ui.body.screen.BodyModelPreview
 import com.hoabui.virtualbody3d.ui.body.screen.BodyScoreChip
@@ -81,6 +80,7 @@ fun HeroSection(
     uiState: BodyUiState,
     bodyScore: Int,
     onViewBodyDetailClick: () -> Unit = {},
+    onModelInteractionChanged: (Boolean) -> Unit = {},
 ) {
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis
@@ -100,7 +100,8 @@ fun HeroSection(
             BodyModelPreview(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(token.radius.lg))
+                    .clip(RoundedCornerShape(token.radius.lg)),
+                onInteractionChanged = onModelInteractionChanged
             )
             BodyScoreChip(
                 modifier = Modifier
@@ -122,11 +123,11 @@ fun HeroSection(
                 verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
             ) {
                 FloatingMetricChip(
-                    icon = Icons.Default.MonitorWeight,
+                    iconResId = R.drawable.scale,
                     value = uiState.weight.formatMeasurement(Constants.KILOGRAM)
                 )
                 FloatingMetricChip(
-                    icon = Icons.Default.Opacity,
+                    iconResId = R.drawable.ruler_vertical,
                     value = uiState.height.formatMeasurement(Constants.CENTIMETER)
                 )
             }
@@ -141,11 +142,11 @@ fun HeroSection(
                 verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
             ) {
                 FloatingMetricChip(
-                    icon = Icons.Default.Opacity,
+                    iconResId = R.drawable.scale,
                     value = uiState.bodyFat.formatMeasurement(Constants.PERCENT)
                 )
                 FloatingMetricChip(
-                    icon = Icons.Default.Opacity,
+                    iconResId = R.drawable.scale,
                     value = uiState.muscleMass.formatMeasurement(Constants.PERCENT)
                 )
             }
@@ -169,7 +170,7 @@ fun MuscleProgressCard(
         colors = CardDefaults.cardColors(containerColor = token.colors.dashboardSummaryCardBackground),
         border = BorderStroke(
             width = token.bodyAnalysis.topBarBorderWidth,
-            color = token.colors.dashboardNutritionCardBorder
+            color = token.colors.borderSubtle
         )
     ) {
         Column(
@@ -457,11 +458,11 @@ fun StaticHeroSection(
             verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
         ) {
             FloatingMetricChip(
-                icon = Icons.Default.MonitorWeight,
+                iconResId = R.drawable.scale,
                 value = uiState.weight.formatMeasurement(Constants.KILOGRAM)
             )
             FloatingMetricChip(
-                icon = Icons.Default.Opacity,
+                iconResId = R.drawable.scale,
                 value = uiState.height.formatMeasurement(Constants.CENTIMETER)
             )
         }
@@ -554,132 +555,6 @@ fun BodyRegionItem(
     }
 }
 
-@Composable
-fun CaloriesTodayPanel(
-    modifier: Modifier = Modifier,
-    meals: List<MealPageUiModel>
-) {
-    val token = GymTheme.token
-    val bodyToken = token.bodyAnalysis
-    val displayedMeals = meals.take(Constants.BODY_ANALYSIS_MAX_MEALS_DISPLAYED)
-    val showViewAll = meals.size > Constants.BODY_ANALYSIS_MAX_MEALS_DISPLAYED
-
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = token.colors.dashboardPanelBackground,
-        shape = RoundedCornerShape(
-            topStart = bodyToken.dashboardPanelTopRadius,
-            topEnd = bodyToken.dashboardPanelTopRadius
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(
-                    start = bodyToken.dashboardPanelHorizontalPadding,
-                    end = bodyToken.dashboardPanelHorizontalPadding,
-                    top = bodyToken.dashboardPanelTopPadding,
-                    bottom = bodyToken.dashboardPanelBottomPadding
-                ),
-            verticalArrangement = Arrangement.spacedBy(bodyToken.dashboardPanelSectionSpacing)
-        ) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .width(bodyToken.dashboardHandleWidth)
-                    .height(bodyToken.dashboardHandleHeight)
-                    .background(
-                        color = token.colors.dashboardHandle,
-                        shape = RoundedCornerShape(token.radius.lg)
-                    )
-            )
-            Column(verticalArrangement = Arrangement.spacedBy(token.spacing.md)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(R.string.analysis_panel_meals_today),
-                        style = token.typography.titleMedium
-                    )
-                    if (showViewAll) {
-                        TextButton(onClick = {}) {
-                            Text(
-                                text = stringResource(R.string.analysis_panel_see_all),
-                                style = token.typography.labelMedium,
-                                color = token.colors.primary
-                            )
-                        }
-                    }
-                }
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(token.spacing.md)) {
-                    items(
-                        items = displayedMeals,
-                        key = { it.title }
-                    ) { item ->
-                        MealItem(item = item)
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(bodyToken.dashboardScrollContentBottomSpacing))
-        }
-    }
-}
-
-@Composable
-fun NutritionCard(
-    modifier: Modifier = Modifier,
-    summary: NutritionSummaryUiState
-) {
-    val token = GymTheme.token
-    val bodyToken = token.bodyAnalysis
-    val netCalories = summary.intake - summary.burned
-    val progress = (summary.intake.toFloat() / summary.goal.toFloat()).coerceIn(0f, 1f)
-    SectionTitle(textResId = R.string.home_section_calories_today)
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(token.radius.lg),
-        colors = CardDefaults.cardColors(containerColor = token.colors.dashboardNutritionCardBackground),
-        border = BorderStroke(
-            width = bodyToken.topBarBorderWidth,
-            color = token.colors.dashboardNutritionCardBorder
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bodyToken.dashboardNutritionCardPadding),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
-            ) {
-                Text(
-                    text = stringResource(R.string.analysis_dashboard_kcal_value, netCalories),
-                    style = token.typography.titleLarge
-                )
-                Text(
-                    text = stringResource(
-                        R.string.analysis_dashboard_intake_burned,
-                        summary.intake,
-                        summary.burned
-                    ),
-                    style = token.typography.bodyMedium,
-                    color = token.colors.textSecondary
-                )
-            }
-            CaloriesProgressRing(
-                modifier = Modifier.size(bodyToken.dashboardNutritionRingSize),
-                progress = progress,
-                centerLabel = "${summary.goal}"
-            )
-        }
-    }
-}
 
 @Composable
 private fun MealItem(
@@ -696,7 +571,7 @@ private fun MealItem(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bodyToken.dashboardNutritionCardPadding),
+                .padding(bodyToken.dashboardCalorieCardPadding),
             verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
         ) {
             // Image box: full-width square with rounded corners
@@ -753,60 +628,5 @@ private fun MealItem(
                 overflow = TextOverflow.Ellipsis
             )
         }
-    }
-}
-
-@Composable
-private fun CaloriesProgressRing(
-    modifier: Modifier = Modifier,
-    progress: Float,
-    centerLabel: String
-) {
-    val token = GymTheme.token
-    val bodyToken = token.bodyAnalysis
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
-        Canvas(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            val strokeWidthPx = bodyToken.dashboardNutritionRingStrokeWidth.toPx()
-            val halfStroke = strokeWidthPx / 2f
-            val side = minOf(size.width, size.height)
-            val left = (size.width - side) / 2f
-            val top = (size.height - side) / 2f
-            val rect = Rect(
-                left = left + halfStroke,
-                top = top + halfStroke,
-                right = left + side - halfStroke,
-                bottom = top + side - halfStroke
-            )
-            drawArc(
-                color = token.colors.dashboardRingTrack,
-                startAngle = Constants.BODY_ANALYSIS_PROGRESS_RING_START_ANGLE,
-                sweepAngle = Constants.BODY_ANALYSIS_PROGRESS_RING_SWEEP_ANGLE,
-                useCenter = false,
-                topLeft = Offset(rect.left, rect.top),
-                size = Size(rect.width, rect.height),
-                style = Stroke(width = strokeWidthPx, cap = StrokeCap.Round)
-            )
-            drawArc(
-                color = token.colors.primary,
-                startAngle = Constants.BODY_ANALYSIS_PROGRESS_RING_START_ANGLE,
-                sweepAngle = Constants.BODY_ANALYSIS_PROGRESS_RING_SWEEP_ANGLE * progress.coerceIn(0f, 1f),
-                useCenter = false,
-                topLeft = Offset(rect.left, rect.top),
-                size = Size(rect.width, rect.height),
-                style = Stroke(width = strokeWidthPx, cap = StrokeCap.Round)
-            )
-        }
-        Text(
-            text = centerLabel,
-            style = token.typography.labelLarge,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
     }
 }

@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
  */
 @Immutable
 data class PrimitiveSpacingTokens(
+    val xxxs: Dp,
     val xxs: Dp,
     val xs: Dp,
     val md: Dp,
@@ -23,6 +24,7 @@ data class PrimitiveSpacingTokens(
 ) {
     companion object {
         fun default(): PrimitiveSpacingTokens = PrimitiveSpacingTokens(
+            xxxs = 2.dp,
             xxs = 4.dp,
             xs = 8.dp,
             md = 16.dp,
