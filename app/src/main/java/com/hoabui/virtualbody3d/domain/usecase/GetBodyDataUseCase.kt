@@ -1,6 +1,6 @@
 package com.hoabui.virtualbody3d.domain.usecase
 
-import com.hoabui.virtualbody3d.domain.model.BodyScanResult
+import com.hoabui.virtualbody3d.domain.model.body.BodyScanResult
 import com.hoabui.virtualbody3d.domain.repository.BodyScanResultRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow

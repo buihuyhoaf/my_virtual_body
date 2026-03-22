@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.domain.model.BodyScanResult
+import com.hoabui.virtualbody3d.domain.model.body.BodyScanResult
 import com.hoabui.virtualbody3d.ui.body.state.BodyScreenState
 import com.hoabui.virtualbody3d.ui.body.components.HeroSection
 import com.hoabui.virtualbody3d.ui.body.state.toUiState

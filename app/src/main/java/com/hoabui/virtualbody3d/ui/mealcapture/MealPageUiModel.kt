@@ -1,8 +1,17 @@
 package com.hoabui.virtualbody3d.ui.mealcapture
 
 import android.net.Uri
-import com.hoabui.virtualbody3d.domain.model.MealAnalysis
+import com.hoabui.virtualbody3d.domain.model.nutrition.MealAnalysis
 import androidx.core.net.toUri
+
+/**
+ * Dominant macro for UI accents (e.g. meal cards), derived from gram totals.
+ */
+enum class MealMacroGroup {
+    Protein,
+    Carb,
+    Fat,
+}
 
 /**
  * UI model representing a single analyzed meal page in the vertical pager.
@@ -15,7 +24,8 @@ data class MealPageUiModel(
     val caloriesKcal: Int,
     val caloriesText: String,
     val macroSummaryText: String,
-    val rawLines: List<String>
+    val rawLines: List<String>,
+    val dominantMacro: MealMacroGroup,
 )
 
 fun MealAnalysis.toMealPageUiModel(
@@ -39,8 +49,24 @@ fun MealAnalysis.toMealPageUiModel(
         caloriesKcal = kcal,
         caloriesText = caloriesText,
         macroSummaryText = macroSummaryText,
-        rawLines = rawLines
+        rawLines = rawLines,
+        dominantMacro = dominantMacroFromGrams(proteinGrams, carbsGrams, fatGrams),
     )
+}
+
+private fun dominantMacroFromGrams(
+    proteinGrams: Float?,
+    carbsGrams: Float?,
+    fatGrams: Float?,
+): MealMacroGroup {
+    val p = proteinGrams ?: 0f
+    val c = carbsGrams ?: 0f
+    val f = fatGrams ?: 0f
+    return when {
+        p >= c && p >= f -> MealMacroGroup.Protein
+        c >= p && c >= f -> MealMacroGroup.Carb
+        else -> MealMacroGroup.Fat
+    }
 }
 
 /**

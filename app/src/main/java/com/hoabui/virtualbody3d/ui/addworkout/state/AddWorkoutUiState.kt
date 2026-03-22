@@ -1,7 +1,7 @@
 package com.hoabui.virtualbody3d.ui.addworkout.state
 
 import androidx.compose.runtime.Immutable
-import com.hoabui.virtualbody3d.domain.model.Exercise
+import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import java.time.LocalDate
 import java.time.LocalTime
 

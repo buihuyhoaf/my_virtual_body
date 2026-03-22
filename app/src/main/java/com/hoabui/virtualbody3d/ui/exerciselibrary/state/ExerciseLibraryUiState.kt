@@ -1,9 +1,9 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.state
 
 import androidx.compose.runtime.Immutable
-import com.hoabui.virtualbody3d.domain.model.BodyRegion
-import com.hoabui.virtualbody3d.domain.model.Difficulty
-import com.hoabui.virtualbody3d.domain.model.Exercise
+import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
+import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
+import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 
 /**
  * UI state for the Exercise Library screen.

@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,8 +20,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.domain.model.BodyRegion
-import com.hoabui.virtualbody3d.domain.model.Difficulty
+import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
+import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
+import com.hoabui.virtualbody3d.ui.common_ui.CardImageWithText
+import com.hoabui.virtualbody3d.ui.common_ui.CardSize
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseSectionUiItem
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseUiModel
@@ -201,6 +202,7 @@ fun ExerciseRow(
                 secondLineText = stringResource(ExerciseDisplayResources.bodyRegionResId(item.bodyRegion)),
                 badgeText = stringResource(ExerciseDisplayResources.difficultyResId(item.difficulty)),
                 badgeLevel = item.difficulty,
+                cardSize = CardSize.Large,
                 onClick = { onExerciseClick(item) }
             )
         }

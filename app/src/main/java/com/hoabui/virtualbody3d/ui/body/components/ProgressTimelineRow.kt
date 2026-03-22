@@ -1,84 +1,75 @@
 package com.hoabui.virtualbody3d.ui.body.components
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.FlingBehavior
-import androidx.compose.foundation.gestures.ScrollScope
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
-import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
-import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.LazyListItemInfo
-import androidx.compose.foundation.lazy.LazyListLayoutInfo
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.core.extensions.drawAvatarBackdrop
+import com.hoabui.virtualbody3d.core.extensions.timelineAvatarLayer
+import com.hoabui.virtualbody3d.core.extensions.timelineItemLayer
+import com.hoabui.virtualbody3d.ui.body.data.ProgressSnapshotUiModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
+import com.hoabui.virtualbody3d.ui.theme.font.InterFontFamily
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
-@Immutable
-data class ProgressSnapshotUiModel(
-    val date: String,
-    val imageUrl: String?,
-    val weight: Float?,
-    val bodyFat: Float?,
-    val muscleMass: Float?,
-    val delta: Float?
-)
-
-enum class MetricType {
-    WEIGHT,
-    BODY_FAT
-}
 
 @Composable
 fun ProgressTimelineRow(
     items: List<ProgressSnapshotUiModel>,
     selectedIndex: Int,
-    metricType: MetricType,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
     onItemClick: (Int) -> Unit = {}
@@ -87,144 +78,102 @@ fun ProgressTimelineRow(
 
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis
-    val listState = rememberLazyListState()
     val safeIndex = selectedIndex.coerceIn(0, items.lastIndex)
-    val density = LocalDensity.current
     val topPadding = contentPadding.calculateTopPadding()
     val bottomPadding = contentPadding.calculateBottomPadding()
     val verticalPadding = if (topPadding == 0.dp && bottomPadding == 0.dp) token.spacing.md else topPadding
-    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
-        val viewportWidthPx = listState.layoutInfo.viewportSize.width
-        val itemWidthPx = with(density) { bodyToken.timelineItemWidth.roundToPx() }
-        val centerContentPadding = remember(maxWidth, bodyToken.timelineItemWidth, verticalPadding) {
-            PaddingValues(
-                start = ((maxWidth - bodyToken.timelineItemWidth) / 2f).coerceAtLeast(token.spacing.md),
-                end = ((maxWidth - bodyToken.timelineItemWidth) / 2f).coerceAtLeast(token.spacing.md),
-                top = verticalPadding,
-                bottom = verticalPadding
-            )
-        }
 
-        val snapLayoutInfoProvider = remember(listState) {
-            SnapLayoutInfoProvider(
-                lazyListState = listState,
-                snapPosition = SnapPosition.Center
-            )
-        }
-        val snapFlingBehavior = rememberSnapFlingBehavior(snapLayoutInfoProvider)
-        val flingBehavior = remember(
-            listState,
-            snapFlingBehavior,
-            bodyToken.timelineItemWidth,
-            bodyToken.timelineItemSpacing,
-            items.size
-        ) {
-            PagerLikeFlingBehavior(
-                lazyListState = listState,
-                delegate = snapFlingBehavior,
-                itemExtentPx = with(density) { (bodyToken.timelineItemWidth + bodyToken.timelineItemSpacing).toPx() },
-                maxItemsPerFling = 2,
-                itemCount = items.size
-            )
-        }
+    val pagerState = rememberPagerState(
+        initialPage = safeIndex,
+        pageCount = { items.size }
+    )
 
-        LaunchedEffect(safeIndex, bodyToken.timelineItemWidth, density, viewportWidthPx) {
-            val centerOffset = ((viewportWidthPx - itemWidthPx) / 2f).roundToInt()
-            listState.animateScrollToItem(
-                index = safeIndex,
-                scrollOffset = -centerOffset
-            )
+    LaunchedEffect(safeIndex, items.size) {
+        val target = safeIndex.coerceIn(0, items.lastIndex)
+        if (pagerState.currentPage != target) {
+            pagerState.animateScrollToPage(target)
         }
+    }
 
-        TimelineLine(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(bodyToken.timelineLineThickness)
-                .offset(y = bodyToken.timelineLineOffsetY + centerContentPadding.calculateTopPadding()),
-            color = token.colors.borderSubtle,
-            thickness = bodyToken.timelineLineThickness
+    LaunchedEffect(pagerState, items.size) {
+        if (items.isEmpty()) return@LaunchedEffect
+        snapshotFlow { pagerState.settledPage }
+            .distinctUntilChanged()
+            .collect { page ->
+                val p = page.coerceIn(0, items.lastIndex)
+                onItemClick(p)
+            }
+    }
+
+    Box(modifier = modifier.fillMaxWidth()) {
+        TimelineRowAmbientBackground(
+            cornerRadius = token.radius.lg,
+            modifier = Modifier.fillMaxSize()
         )
 
-        LazyRow(
-            state = listState,
-            flingBehavior = flingBehavior,
-            horizontalArrangement = Arrangement.spacedBy(bodyToken.timelineItemSpacing),
-            contentPadding = centerContentPadding
-        ) {
-            itemsIndexed(
-                items = items,
-                key = { index, item -> "${item.date}-${item.imageUrl}-${index}" },
-                contentType = { _, _ -> "progress_timeline_item" }
-            ) { index, item ->
-                val distanceFraction by rememberItemDistanceFromCenter(listState = listState, index = index)
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val horizontalPad =
+                ((maxWidth - bodyToken.timelineItemWidth) / 2f).coerceAtLeast(0.dp)
+            val centerContentPadding = PaddingValues(
+                start = horizontalPad,
+                end = horizontalPad,
+                top = verticalPadding,
+                bottom = bottomPadding
+            )
+
+            TimelineSegmentedLine(
+                pagerState = pagerState,
+                itemCount = items.size,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(bodyToken.timelineLineThickness)
+                    .offset(y = bodyToken.timelineLineOffsetY + centerContentPadding.calculateTopPadding()),
+                primaryColor = token.colors.primary,
+                dashedColor = token.colors.borderSubtle,
+                thickness = bodyToken.timelineLineThickness
+            )
+
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = centerContentPadding,
+                pageSize = PageSize.Fixed(bodyToken.timelineItemWidth),
+                pageSpacing = bodyToken.timelineItemSpacing,
+                verticalAlignment = Alignment.Top,
+                key = { index -> "${items[index].date}-${items[index].imageUrl}-$index" },
+            ) { page ->
                 TimelineItem(
-                    item = item,
-                    metricType = metricType,
-                    isSelected = index == safeIndex,
-                    distanceFraction = distanceFraction,
-                    onClick = { onItemClick(index) }
+                    item = items[page],
+                    pageIndex = page,
+                    pagerState = pagerState,
                 )
             }
         }
     }
 }
 
-@Composable
-fun TimelineLine(
-    modifier: Modifier = Modifier,
-    color: Color,
-    thickness: Dp
-) {
-    Canvas(modifier = modifier) {
-        val y = size.height / 2f
-        drawLine(
-            color = color,
-            start = androidx.compose.ui.geometry.Offset(0f, y),
-            end = androidx.compose.ui.geometry.Offset(size.width, y),
-            strokeWidth = thickness.toPx()
-        )
-    }
-}
+
 
 @Composable
-fun TimelineItem(
+private fun TimelineItem(
     item: ProgressSnapshotUiModel,
-    metricType: MetricType,
-    isSelected: Boolean,
-    distanceFraction: Float,
+    pageIndex: Int,
+    pagerState: PagerState,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {}
 ) {
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis
-    val gradientScale = lerp(0.86f, 1f, 1f - distanceFraction)
-    val gradientAlpha = lerp(0.45f, 1f, 1f - distanceFraction)
-    val itemScale by animateFloatAsState(
-        targetValue = if (isSelected) 1f else gradientScale,
-        animationSpec = spring(),
-        label = "timeline-item-scale"
-    )
-    val itemAlpha by animateFloatAsState(
-        targetValue = if (isSelected) 1f else gradientAlpha,
-        animationSpec = spring(),
-        label = "timeline-item-alpha"
-    )
-    val avatarScale by animateFloatAsState(
-        targetValue = if (isSelected) 1.14f else 1f,
-        animationSpec = spring(),
-        label = "timeline-avatar-scale"
-    )
-    val trendColor = trendColor(delta = item.delta, colors = token.colors)
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = modifier
             .width(bodyToken.timelineItemWidth)
-            .graphicsLayer {
-                scaleX = itemScale
-                scaleY = itemScale
-                alpha = itemAlpha
-            }
-            .clickable(onClick = onClick),
+            .timelineItemLayer(pagerState = pagerState, pageIndex = pageIndex)
+            .clickable(
+                onClick = {
+                    scope.launch { pagerState.animateScrollToPage(pageIndex) }
+                }
+            ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
@@ -242,210 +191,324 @@ fun TimelineItem(
 
         Box(modifier = Modifier.height(bodyToken.timelineDateToAvatarGap))
 
-        AvatarNode(
-            imageUrl = item.imageUrl,
-            isSelected = isSelected,
-            scale = avatarScale,
-            avatarSize = bodyToken.timelineAvatarSize,
-            placeholderIconSize = bodyToken.timelinePlaceholderIconSize
-        )
+        Box(
+            modifier = Modifier.timelineAvatarLayer(pagerState = pagerState, pageIndex = pageIndex)
+        ) {
+            AvatarNode(
+                imageUrl = item.imageUrl,
+                imageRes = R.drawable.body_unsplash,
+                weight = item.weight,
+                bodyFat = item.bodyFat,
+                muscleMass = item.muscleMass,
+                scale = 1f,
+                avatarSize = bodyToken.timelineAvatarSquareSize,
+                cornerRadius = bodyToken.timelineAvatarCornerRadius,
+                pagerState = pagerState,
+                pageIndex = pageIndex,
+            )
+        }
 
         Box(modifier = Modifier.height(bodyToken.timelineAvatarToDotGap))
 
+        TimelineDot(
+            pagerState = pagerState,
+            pageIndex = pageIndex,
+            modifier = Modifier.size(bodyToken.timelineDotSize)
+        )
+    }
+}
+
+@Composable
+private fun TimelineDot(
+    pagerState: PagerState,
+    pageIndex: Int,
+    modifier: Modifier = Modifier
+) {
+    val token = GymTheme.token
+    Box(
+        modifier = modifier.drawBehind {
+            val distanceFraction = abs(pagerState.getOffsetDistanceInPages(pageIndex)).coerceIn(0f, 1f)
+            val isNearCenter = distanceFraction < 0.5f
+            val color = if (isNearCenter) token.colors.primary else token.colors.borderStrong
+            val r = size.minDimension / 2f
+            drawCircle(color = color, radius = r, center = Offset(size.width / 2f, size.height / 2f))
+        }
+    )
+}
+
+@Composable
+private fun TimelineRowAmbientBackground(
+    cornerRadius: Dp,
+    modifier: Modifier = Modifier
+) {
+    val token = GymTheme.token
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(cornerRadius))
+            .background(token.colors.surfaceSubtle.copy(alpha = 0.35f))
+    ) {
         Box(
             modifier = Modifier
-                .size(bodyToken.timelineDotSize)
+                .fillMaxSize()
+                .blur(token.spacing.lg)
                 .background(
-                    color = trendColor,
-                    shape = CircleShape
+                    Brush.linearGradient(
+                        colors = listOf(
+                            token.colors.primary.copy(alpha = 0.12f),
+                            token.colors.surface.copy(alpha = 0.02f),
+                            token.colors.primarySoft.copy(alpha = 0.1f)
+                        )
+                    )
                 )
         )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            token.colors.primary.copy(alpha = 0.06f),
+                            Color.Transparent
+                        ),
+                        center = Offset(0.3f, 0.2f),
+                        radius = 800f
+                    )
+                )
+        )
+    }
+}
 
-        Box(modifier = Modifier.height(bodyToken.timelineDotToMetricGap))
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(token.spacing.xxs),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = formatPrimaryMetric(item = item, metricType = metricType),
-                style = token.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                color = token.colors.textPrimary,
-                textAlign = TextAlign.Center
-            )
-
-            DeltaChip(delta = item.delta, color = trendColor)
+@Composable
+private fun TimelineSegmentedLine(
+    pagerState: PagerState,
+    itemCount: Int,
+    primaryColor: Color,
+    dashedColor: Color,
+    thickness: Dp,
+    modifier: Modifier = Modifier
+) {
+    val density = LocalDensity.current
+    val strokePx = with(density) { thickness.toPx() }
+    Canvas(modifier = modifier) {
+        val splitFraction = if (itemCount <= 1) {
+            0.5f
+        } else {
+            (pagerState.currentPage + pagerState.currentPageOffsetFraction) / (itemCount - 1).coerceAtLeast(1)
         }
+        val splitX = splitFraction.coerceIn(0f, 1f) * size.width
+        val y = size.height / 2f
+        val w = size.width
+
+        drawLine(
+            color = primaryColor,
+            start = Offset(0f, y),
+            end = Offset(splitX, y),
+            strokeWidth = strokePx
+        )
+        drawLine(
+            color = dashedColor,
+            start = Offset(splitX, y),
+            end = Offset(w, y),
+            strokeWidth = strokePx,
+            pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 8f), 0f)
+        )
     }
 }
 
 @Composable
 private fun AvatarNode(
     imageUrl: String?,
-    isSelected: Boolean,
+    imageRes: Int?,
+    weight: Float?,
+    bodyFat: Float?,
+    muscleMass: Float?,
     scale: Float,
     avatarSize: Dp,
-    placeholderIconSize: Dp
+    cornerRadius: Dp,
+    pagerState: PagerState,
+    pageIndex: Int,
 ) {
     val token = GymTheme.token
-    val glowColor = token.colors.primary.copy(alpha = 0.22f)
+    val density = LocalDensity.current
+    val primary = token.colors.primary
+    val primarySoft = token.colors.primarySoft
+    val glowPadding = token.spacing.xs
+    val glowOuterSize = avatarSize + glowPadding * 2
+    val borderWidth = token.spacing.xxxs
+    val avatarShape = RoundedCornerShape(cornerRadius)
+    val frameSize = avatarSize + borderWidth * 2
 
-    Surface(
-        modifier = Modifier
-            .size(avatarSize)
-            .scale(scale)
-            .graphicsLayer {
-                shadowElevation = if (isSelected) {
-                    (token.elevation.level2 * 6f).toPx()
-                } else {
-                    token.elevation.level1.toPx()
-                }
-                shape = CircleShape
-                clip = false
-            },
-        shape = CircleShape,
-        color = token.colors.surfaceElevated,
-        border = if (isSelected) {
-            BorderStroke(width = token.spacing.xxxs, color = token.colors.primary)
-        } else {
-            null
-        }
+    val kg = stringResource(R.string.body_unit_kg)
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(token.spacing.xxxs)
     ) {
         Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
-                .clip(CircleShape)
-                .background(if (isSelected) glowColor else token.colors.surfaceSubtle),
-            contentAlignment = Alignment.Center
+                .size(glowOuterSize)
+                .drawBehind {
+                    val isNearCenter = abs(pagerState.getOffsetDistanceInPages(pageIndex)) < 0.5f
+                    drawAvatarBackdrop(
+                        isSelected = isNearCenter,
+                        glowOuterSize = Size(size.width, size.height),
+                        frameSidePx = with(density) { frameSize.toPx() },
+                        borderWidthPx = with(density) { borderWidth.toPx() },
+                        cornerRadiusPx = with(density) { cornerRadius.toPx() },
+                        primary = primary,
+                        primarySoft = primarySoft,
+                        surfaceElevated = token.colors.surfaceElevated,
+                    )
+                }
         ) {
-            if (!imageUrl.isNullOrBlank()) {
-                AsyncImage(
-                    model = imageUrl,
-                    contentDescription = "Progress snapshot image",
+            Box(
+                modifier = Modifier
+                    .size(frameSize)
+                    .graphicsLayer {
+                        val isNearCenter = abs(pagerState.getOffsetDistanceInPages(pageIndex)) < 0.5f
+                        val shadowElevationPx = with(density) {
+                            if (isNearCenter) (token.elevation.level2 * 8f).toPx() else token.elevation.level1.toPx()
+                        }
+                        scaleX = scale
+                        scaleY = scale
+                        shadowElevation = shadowElevationPx
+                        shape = avatarShape
+                        clip = false
+                    }
+            ) {
+                Box(
                     modifier = Modifier
-                        .size(avatarSize)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
+                        .fillMaxSize()
+                        .padding(borderWidth)
+                        .clip(avatarShape)
+                        .drawBehind {
+                            val isNearCenter = abs(pagerState.getOffsetDistanceInPages(pageIndex)) < 0.5f
+                            val rPx = cornerRadius.toPx()
+                            drawRoundRect(
+                                color = if (isNearCenter) primary.copy(alpha = 0.1f) else token.colors.surfaceSubtle,
+                                topLeft = Offset.Zero,
+                                size = size,
+                                cornerRadius = CornerRadius(rPx, rPx)
+                            )
+                        }
+                ) {
+                    if (!imageUrl.isNullOrBlank()) {
+                        AsyncImage(
+                            model = imageUrl,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(avatarShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(imageRes ?: R.drawable.body_unsplash),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(avatarShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+                AvatarTopLeftFloatingMetricChips(
+                    bodyFat = bodyFat,
+                    muscleMass = muscleMass,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .offset(x = -(token.spacing.xxxs + token.spacing.xs / 2), y = -token.spacing.xxxs)
                 )
-            } else {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "No snapshot image",
-                    tint = token.colors.textMuted,
-                    modifier = Modifier.size(placeholderIconSize)
+            }
+        }
+        AvatarFloatingMetricChip(
+            value = weight,
+            unit = kg,
+            isPercentSuffix = false
+        )
+    }
+}
+
+
+
+@Composable
+private fun AvatarTopLeftFloatingMetricChips(
+    bodyFat: Float?,
+    muscleMass: Float?,
+    modifier: Modifier = Modifier
+) {
+    val token = GymTheme.token
+    val pct = stringResource(R.string.body_unit_percent)
+    val kg = stringResource(R.string.body_unit_kg)
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(token.spacing.xxxs)
+    ) {
+        AvatarFloatingMetricChip(
+            value = bodyFat,
+            unit = pct,
+            isPercentSuffix = true
+        )
+        AvatarFloatingMetricChip(
+            value = muscleMass,
+            unit = kg,
+            isPercentSuffix = false
+        )
+    }
+}
+
+@Composable
+private fun AvatarFloatingMetricChip(
+    value: Float?,
+    unit: String,
+    isPercentSuffix: Boolean
+) {
+    val token = GymTheme.token
+    val numberPart = value?.let { "%.1f".format(it) } ?: "—"
+    val unitMuted = token.colors.textPrimary.copy(alpha = 0.5f)
+
+    Surface(
+        shape = RoundedCornerShape(token.radius.sm),
+        color = token.colors.surfaceElevated.copy(alpha = 0.94f),
+        shadowElevation = token.card.elevation,
+        border = BorderStroke(
+            width = token.spacing.xxxs,
+            color = token.colors.borderSubtle.copy(alpha = 0.45f)
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(
+                horizontal = token.spacing.xs,
+                vertical = token.spacing.xxxs
+            ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Text(
+                text = numberPart,
+                style = token.typography.labelMedium.copy(
+                    fontFamily = InterFontFamily,
+                    fontWeight = FontWeight.Bold
+                ),
+                color = token.colors.textPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (value != null) {
+                Text(
+                    text = if (isPercentSuffix) unit else " $unit",
+                    style = token.typography.labelSmall,
+                    color = unitMuted,
+                    fontFamily = InterFontFamily,
+                    maxLines = 1
                 )
             }
         }
     }
 }
 
-@Composable
-private fun DeltaChip(
-    delta: Float?,
-    color: Color
-) {
-    val token = GymTheme.token
-    Surface(
-        shape = CircleShape,
-        color = color.copy(alpha = 0.18f)
-    ) {
-        Text(
-            text = formatDelta(delta),
-            style = token.typography.labelSmall,
-            color = color,
-            modifier = Modifier.padding(
-                horizontal = token.spacing.xs,
-                vertical = token.spacing.xxxs
-            )
-        )
-    }
-}
 
-private fun formatPrimaryMetric(item: ProgressSnapshotUiModel, metricType: MetricType): String {
-    return when (metricType) {
-        MetricType.WEIGHT -> item.weight?.let { "${"%.1f".format(it)} kg" } ?: "--"
-        MetricType.BODY_FAT -> item.bodyFat?.let { "${"%.1f".format(it)}%" } ?: "--"
-    }
-}
-
-private fun formatDelta(delta: Float?): String {
-    if (delta == null) return "--"
-    if (delta == 0f) return "0.0"
-    val arrow = if (delta > 0f) "↑" else "↓"
-    val sign = if (delta > 0f) "+" else "-"
-    return "$sign${"%.1f".format(abs(delta))} $arrow"
-}
-
-private fun trendColor(
-    delta: Float?,
-    colors: com.hoabui.virtualbody3d.ui.theme.tokens.semantic.SemanticColorTokens
-): Color {
-    return when {
-        delta == null || delta == 0f -> colors.textMuted
-        // For quick scan body-progress snapshots, decrease is treated as improvement.
-        delta < 0f -> colors.calorieDeficitPositive
-        else -> colors.error
-    }
-}
-
-@Composable
-private fun rememberItemDistanceFromCenter(
-    listState: LazyListState,
-    index: Int
-) = remember(listState, index) {
-    derivedStateOf {
-        val layoutInfo = listState.layoutInfo
-        val item = layoutInfo.visibleItemsInfo.firstOrNull { it.index == index } ?: return@derivedStateOf 1f
-        distanceFraction(layoutInfo = layoutInfo, itemInfo = item)
-    }
-}
-
-private fun distanceFraction(
-    layoutInfo: LazyListLayoutInfo,
-    itemInfo: LazyListItemInfo
-): Float {
-    val viewportCenter = (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2f
-    val itemCenter = itemInfo.offset + (itemInfo.size / 2f)
-    val distance = abs(itemCenter - viewportCenter)
-    val maxDistance = (layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset) / 2f
-    if (maxDistance <= 0f) return 1f
-    return (distance / maxDistance).coerceIn(0f, 1f)
-}
-
-private fun lerp(start: Float, end: Float, fraction: Float): Float {
-    return start + (end - start) * fraction
-}
-
-private class PagerLikeFlingBehavior(
-    private val lazyListState: LazyListState,
-    private val delegate: FlingBehavior,
-    private val itemExtentPx: Float,
-    private val maxItemsPerFling: Int,
-    private val itemCount: Int
-) : FlingBehavior {
-    override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
-        val currentCenteredIndex = lazyListState.layoutInfo.visibleItemsInfo.minByOrNull {
-            abs((it.offset + it.size / 2f) - (lazyListState.layoutInfo.viewportEndOffset / 2f))
-        }?.index ?: lazyListState.firstVisibleItemIndex
-
-        val itemJump = when {
-            initialVelocity > itemExtentPx * 8f -> maxItemsPerFling
-            initialVelocity < -itemExtentPx * 8f -> -maxItemsPerFling
-            initialVelocity > 0f -> 1
-            initialVelocity < 0f -> -1
-            else -> 0
-        }
-
-        if (itemJump == 0) {
-            return delegate.run { performFling(initialVelocity = initialVelocity) }
-        }
-
-        val targetIndex = (currentCenteredIndex + itemJump).coerceIn(0, itemCount - 1)
-        lazyListState.animateScrollToItem(targetIndex)
-        return 0f
-    }
-}
 
 @Preview(showBackground = true)
 @Composable
@@ -459,15 +522,44 @@ private fun ProgressTimelineRowPreview() {
             ProgressTimelineRow(
                 items = remember {
                     listOf(
-                        ProgressSnapshotUiModel("Mar 1", null, 75.0f, 20.0f, 32.4f, null),
-                        ProgressSnapshotUiModel("Mar 5", null, 74.2f, 19.5f, 32.7f, -0.8f),
-                        ProgressSnapshotUiModel("Mar 10", null, 73.5f, 19.0f, 33.0f, -0.7f),
-                        ProgressSnapshotUiModel("Mar 15", null, 72.8f, 18.6f, 33.2f, -0.7f),
-                        ProgressSnapshotUiModel("Mar 20", null, 72.0f, 18.2f, 33.6f, -0.8f)
+                        ProgressSnapshotUiModel(
+                            date = "Mar 1",
+                            imageUrl = null,
+                            weight = 75.0f,
+                            bodyFat = 20.0f,
+                            muscleMass = 32.4f
+                        ),
+                        ProgressSnapshotUiModel(
+                            date = "Mar 5",
+                            imageUrl = null,
+                            weight = 74.2f,
+                            bodyFat = 19.5f,
+                            muscleMass = 32.7f
+                        ),
+                        ProgressSnapshotUiModel(
+                            date = "Mar 10",
+                            imageUrl = null,
+                            weight = 73.5f,
+                            bodyFat = 19.0f,
+                            muscleMass = 33.0f
+                        ),
+                        ProgressSnapshotUiModel(
+                            date = "Mar 15",
+                            imageUrl = null,
+                            weight = 72.8f,
+                            bodyFat = 18.6f,
+                            muscleMass = 33.2f
+                        ),
+                        ProgressSnapshotUiModel(
+                            date = "Mar 20",
+                            imageUrl = null,
+                            weight = 72.0f,
+                            bodyFat = 18.2f,
+                            muscleMass = 33.6f
+                        )
                     )
                 },
-                selectedIndex = 3,
-                metricType = MetricType.WEIGHT
+                selectedIndex = 3
             )
         }
     }

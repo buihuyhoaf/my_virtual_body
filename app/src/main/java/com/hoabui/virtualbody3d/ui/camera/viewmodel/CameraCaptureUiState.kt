@@ -1,8 +1,8 @@
 package com.hoabui.virtualbody3d.ui.camera.viewmodel
 
 import android.net.Uri
-import com.hoabui.virtualbody3d.domain.model.AnalysisType
-import com.hoabui.virtualbody3d.domain.model.ExtractedData
+import com.hoabui.virtualbody3d.domain.model.baseline.AnalysisType
+import com.hoabui.virtualbody3d.domain.model.baseline.ExtractedData
 
 /**
  * UI state pipeline for camera capture, upload, and AI analysis:

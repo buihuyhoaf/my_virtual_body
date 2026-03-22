@@ -4,7 +4,7 @@ import com.hoabui.virtualbody3d.data.local.InitialSetupLocalDataSource
 import com.hoabui.virtualbody3d.data.mapper.toDomain
 import com.hoabui.virtualbody3d.data.remote.ApiService
 import com.hoabui.virtualbody3d.data.remote.InitialSetupRequestDto
-import com.hoabui.virtualbody3d.domain.model.InitialSetupStep
+import com.hoabui.virtualbody3d.domain.model.onboarding.InitialSetupStep
 import com.hoabui.virtualbody3d.domain.repository.InitialSetupRepository
 import javax.inject.Inject
 import javax.inject.Singleton

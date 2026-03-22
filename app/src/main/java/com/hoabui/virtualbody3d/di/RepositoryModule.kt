@@ -5,9 +5,10 @@ import com.hoabui.virtualbody3d.data.repository.BaselineRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.BodyNutritionSummaryRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.BodyScanResultRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.InitialSetupRepositoryImpl
-import com.hoabui.virtualbody3d.data.repository.FavoriteExerciseRepositoryImpl
+import com.hoabui.virtualbody3d.data.repository.ExercisesRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.MealRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.MessageRepositoryImpl
+import com.hoabui.virtualbody3d.data.repository.ProgressTimelineRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.PromoBannerRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.ExerciseRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.SupplementRepositoryImpl
@@ -19,9 +20,10 @@ import com.hoabui.virtualbody3d.domain.repository.BaselineRepository
 import com.hoabui.virtualbody3d.domain.repository.BodyNutritionSummaryRepository
 import com.hoabui.virtualbody3d.domain.repository.BodyScanResultRepository
 import com.hoabui.virtualbody3d.domain.repository.InitialSetupRepository
-import com.hoabui.virtualbody3d.domain.repository.FavoriteExerciseRepository
+import com.hoabui.virtualbody3d.domain.repository.ExercisesRepository
 import com.hoabui.virtualbody3d.domain.repository.MealRepository
 import com.hoabui.virtualbody3d.domain.repository.MessageRepository
+import com.hoabui.virtualbody3d.domain.repository.ProgressTimelineRepository
 import com.hoabui.virtualbody3d.domain.repository.PromoBannerRepository
 import com.hoabui.virtualbody3d.domain.repository.ExerciseRepository
 import com.hoabui.virtualbody3d.domain.repository.SupplementRepository
@@ -70,6 +72,12 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    abstract fun bindProgressTimelineRepository(
+        progressTimelineRepositoryImpl: ProgressTimelineRepositoryImpl
+    ): ProgressTimelineRepository
+
+    @Binds
+    @Singleton
     abstract fun bindPromoBannerRepository(
         promoBannerRepositoryImpl: PromoBannerRepositoryImpl
     ): PromoBannerRepository
@@ -94,9 +102,9 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindFavoriteExerciseRepository(
-        favoriteExerciseRepositoryImpl: FavoriteExerciseRepositoryImpl
-    ): FavoriteExerciseRepository
+    abstract fun bindExercisesRepository(
+        exercisesRepositoryImpl: ExercisesRepositoryImpl
+    ): ExercisesRepository
 
     @Binds
     @Singleton

@@ -1,6 +1,6 @@
 package com.hoabui.virtualbody3d.domain.repository
 
-import com.hoabui.virtualbody3d.domain.model.InitialSetupStep
+import com.hoabui.virtualbody3d.domain.model.onboarding.InitialSetupStep
 
 interface InitialSetupRepository {
     suspend fun getSteps(): List<InitialSetupStep>

@@ -1,6 +1,6 @@
 package com.hoabui.virtualbody3d.domain.usecase
 
-import com.hoabui.virtualbody3d.domain.model.UploadedImage
+import com.hoabui.virtualbody3d.domain.model.baseline.UploadedImage
 import com.hoabui.virtualbody3d.domain.repository.BaselineRepository
 import java.io.File
 import javax.inject.Inject

@@ -2,10 +2,10 @@ package com.hoabui.virtualbody3d.ui.exerciselibrary.data
 
 import androidx.annotation.StringRes
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.domain.model.BodyRegion
-import com.hoabui.virtualbody3d.domain.model.Difficulty
-import com.hoabui.virtualbody3d.domain.model.EquipmentType
-import com.hoabui.virtualbody3d.domain.model.MuscleGroup
+import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
+import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
+import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
+import com.hoabui.virtualbody3d.domain.model.exercise.MuscleGroup
 
 /**
  * Maps domain enums to string resource IDs for display in Exercise Library and Detail screens.

@@ -8,19 +8,21 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.core.utils.Constants
 import com.hoabui.virtualbody3d.navigation.BottomBarItemState
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.GymToken
+import kotlin.math.abs
 
 /**
  * Hero section layer animation: alpha + scale for crossfade between 3D body and photo.
@@ -73,6 +75,22 @@ fun Modifier.heroLayerAnimation(
  * @param width Border width; prefer token.spacing.xxs for design-system consistency.
  * @param shape Shape for the border (e.g. RoundedCornerShape(token.radius.md)).
  */
+/**
+ * Applies [alpha] and horizontal translation in **pixels** derived from [translationX] via current density.
+ * Use this instead of assigning [Dp.value] to [androidx.compose.ui.graphics.graphicsLayer] (which expects px).
+ */
+@Composable
+fun Modifier.graphicsLayerAlphaTranslationX(
+    alpha: Float,
+    translationX: Dp,
+): Modifier {
+    val translationPx = with(LocalDensity.current) { translationX.toPx() }
+    return graphicsLayer {
+        this.alpha = alpha
+        this.translationX = translationPx
+    }
+}
+
 fun Modifier.selectedBorder(
     selected: Boolean,
     color: Color,
@@ -152,4 +170,28 @@ fun rememberBottomBarItemState(
         contentColor = contentColor,
         scale = selectedScale * pressedScale
     )
+}
+
+fun Modifier.timelineItemLayer(
+    pagerState: PagerState,
+    pageIndex: Int
+): Modifier = this.graphicsLayer {
+    val distanceFraction = abs(pagerState.getOffsetDistanceInPages(pageIndex)).coerceIn(0f, 1f)
+
+    val itemScale = 0.7f.lerpTo( 1f, 1f - distanceFraction)
+    val itemAlpha = 0.3f.lerpTo(1f, 1f - distanceFraction)
+    scaleX = itemScale
+    scaleY = itemScale
+    alpha = itemAlpha
+}
+
+
+fun Modifier.timelineAvatarLayer(
+    pagerState: PagerState,
+    pageIndex: Int
+): Modifier = this.graphicsLayer {
+    val distanceFraction = abs(pagerState.getOffsetDistanceInPages(pageIndex)).coerceIn(0f, 1f)
+    val avatarScale = if (distanceFraction < 0.5f) 1.12f else 1f
+    scaleX = avatarScale
+    scaleY = avatarScale
 }

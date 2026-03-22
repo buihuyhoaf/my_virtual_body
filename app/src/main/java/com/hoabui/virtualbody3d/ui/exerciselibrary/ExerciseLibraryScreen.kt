@@ -16,8 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.domain.model.BodyRegion
-import com.hoabui.virtualbody3d.domain.model.Difficulty
+import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
+import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
 import com.hoabui.virtualbody3d.navigation.AppTopBarBack
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseDetailDialog

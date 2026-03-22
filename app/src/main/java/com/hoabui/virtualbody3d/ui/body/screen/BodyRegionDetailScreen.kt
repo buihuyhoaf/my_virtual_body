@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.domain.model.BodyScanResult
+import com.hoabui.virtualbody3d.domain.model.body.BodyScanResult
 import com.hoabui.virtualbody3d.navigation.AppTopBarBack
 import com.hoabui.virtualbody3d.ui.body.components.StaticHeroSection
 import com.hoabui.virtualbody3d.ui.body.state.BodyRegion

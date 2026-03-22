@@ -5,6 +5,17 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveSpacingTokens
 
+/** Explicit width/height per card size for image+text tiles (no formula — token-only). */
+@Immutable
+data class CardImageWithTextSizeTokens(
+    val smallWidth: Dp,
+    val smallHeight: Dp,
+    val mediumWidth: Dp,
+    val mediumHeight: Dp,
+    val largeWidth: Dp,
+    val largeHeight: Dp
+)
+
 /**
  * Component tokens dedicated to BodyAnalysis screen layout.
  * Keep all screen-specific dimensions centralized here.
@@ -67,14 +78,20 @@ data class BodyAnalysisTokens(
     val scoreChipProminentStrokeWidth: Dp,
     val bodyRegionItemWidth: Dp,
     val bodyRegionItemHeight: Dp,
+    /** Sizes for image cards (e.g. exercise tiles); use instead of scaling [bodyRegionItemWidth]/[bodyRegionItemHeight]. */
+    val cardImageWithText: CardImageWithTextSizeTokens,
     val bodyRegionPlaceholderSize: Dp,
     val supplementCardWidth: Dp,
     val supplementCardHeight: Dp,
     val dashboardCaloriePremiumRingSize: Dp,
     val dashboardCaloriePremiumRingStrokeWidth: Dp,
+    /** Min width for left/right columns flanking the home calorie ring (metrics + deficit). */
+    val dashboardCaloriePremiumSideColumnWidth: Dp,
     val timelineItemWidth: Dp,
     val timelineItemSpacing: Dp,
-    val timelineAvatarSize: Dp,
+    /** Square avatar edge length (e.g. xxl + md = 64dp). */
+    val timelineAvatarSquareSize: Dp,
+    val timelineAvatarCornerRadius: Dp,
     val timelinePlaceholderIconSize: Dp,
     val timelineDotSize: Dp,
     val timelineLineThickness: Dp,
@@ -144,21 +161,34 @@ fun gymBodyAnalysisTokens(spacing: PrimitiveSpacingTokens): BodyAnalysisTokens =
     scoreChipProminentStrokeWidth = 5.dp,
     bodyRegionItemWidth = 120.dp,
     bodyRegionItemHeight = 120.dp, // 1.5 × width for fitness-style tile
+    cardImageWithText = CardImageWithTextSizeTokens(
+        smallWidth = 72.dp,
+        smallHeight = 72.dp,
+        mediumWidth = 96.dp,
+        mediumHeight = 96.dp,
+        largeWidth = 120.dp,
+        largeHeight = 120.dp
+    ),
     bodyRegionPlaceholderSize = 40.dp,
     supplementCardWidth = 80.dp,
     supplementCardHeight = 100.dp,
     dashboardCaloriePremiumRingSize = 120.dp,
     dashboardCaloriePremiumRingStrokeWidth = spacing.md,
+    // Slightly wider than [dashboardCalorieRingSize] so metric/deficit text aligns without clipping.
+    dashboardCaloriePremiumSideColumnWidth = 88.dp,
     // Home reference: meal item is 160dp and body-region item is 120dp.
     // Timeline is intentionally smaller for quick scan density.
-    timelineItemWidth = 88.dp,
+    // Wide enough for weight + delta chip and two secondary metric lines.
+    timelineItemWidth = 104.dp,
     timelineItemSpacing = spacing.md,
-    timelineAvatarSize = 52.dp,
-    timelinePlaceholderIconSize = 20.dp,
-    timelineDotSize = 8.dp,
+    timelineAvatarSquareSize = 80.dp,
+    timelineAvatarCornerRadius = spacing.md,
+    timelinePlaceholderIconSize = spacing.xl,
+    timelineDotSize = spacing.xs,
     timelineLineThickness = spacing.dividerThickness,
-    timelineLineOffsetY = 84.dp,
-    timelineDateSlotHeight = 16.dp,
+    // Align line with dot center: date + gap + square avatar + gap + half dot.
+    timelineLineOffsetY = spacing.md + spacing.xs + spacing.xxl + spacing.md + spacing.xs + spacing.xs / 2f,
+    timelineDateSlotHeight = spacing.md,
     timelineDateToAvatarGap = spacing.xs,
     timelineAvatarToDotGap = spacing.xs,
     timelineDotToMetricGap = spacing.xs

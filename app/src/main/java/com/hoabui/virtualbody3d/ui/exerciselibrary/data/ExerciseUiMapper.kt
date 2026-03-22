@@ -1,6 +1,6 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.data
 
-import com.hoabui.virtualbody3d.domain.model.Exercise
+import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseUiModel
 
 /**

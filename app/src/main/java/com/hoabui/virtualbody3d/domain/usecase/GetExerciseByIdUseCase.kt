@@ -1,6 +1,6 @@
 package com.hoabui.virtualbody3d.domain.usecase
 
-import com.hoabui.virtualbody3d.domain.model.Exercise
+import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.repository.ExerciseRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

@@ -2,7 +2,7 @@ package com.hoabui.virtualbody3d.ui.messages.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
 import com.hoabui.virtualbody3d.core.base.UiStateViewModel
-import com.hoabui.virtualbody3d.domain.model.MessageThread
+import com.hoabui.virtualbody3d.domain.model.chat.MessageThread
 import com.hoabui.virtualbody3d.domain.usecase.GetMessageDetailUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

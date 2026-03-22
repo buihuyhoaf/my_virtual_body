@@ -1,0 +1,12 @@
+package com.hoabui.virtualbody3d.domain.model.content
+
+/**
+ * Domain model for a promotional or informational banner.
+ * UI layer maps to [com.hoabui.virtualbody3d.ui.body.components.PromoBannerItem] (e.g. parse hex to Color).
+ */
+data class PromoBanner(
+    val id: String,
+    val backgroundImageResId: Int? = null,
+    val backgroundImageResUrl: String? = null,
+    val gradientColorHexList: List<String>? = null
+)

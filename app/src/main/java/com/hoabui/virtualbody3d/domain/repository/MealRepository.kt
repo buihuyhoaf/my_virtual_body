@@ -1,6 +1,6 @@
 package com.hoabui.virtualbody3d.domain.repository
 
-import com.hoabui.virtualbody3d.domain.model.MealAnalysis
+import com.hoabui.virtualbody3d.domain.model.nutrition.MealAnalysis
 import java.time.LocalDate
 
 /**

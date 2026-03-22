@@ -2,10 +2,10 @@ package com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel
 
 import androidx.lifecycle.viewModelScope
 import com.hoabui.virtualbody3d.core.base.UiStateViewModel
-import com.hoabui.virtualbody3d.domain.model.BodyRegion
-import com.hoabui.virtualbody3d.domain.model.Difficulty
-import com.hoabui.virtualbody3d.domain.model.Exercise
-import com.hoabui.virtualbody3d.domain.usecase.GetExercisesUseCase
+import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
+import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
+import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
+import com.hoabui.virtualbody3d.domain.usecase.GetExerciseLibraryUseCase
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toExerciseUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseSectionUiItem
@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ExerciseLibraryViewModel @Inject constructor(
-    private val getExercisesUseCase: GetExercisesUseCase
+    private val getExerciseLibraryUseCase: GetExerciseLibraryUseCase
 ) : UiStateViewModel<ExerciseLibraryUiState, Unit>() {
 
     private val groupedExercises = MutableStateFlow<Map<BodyRegion, List<Exercise>>>(emptyMap())
@@ -28,7 +28,7 @@ class ExerciseLibraryViewModel @Inject constructor(
     private val selectedExerciseId = MutableStateFlow<String?>(null)
 
     init {
-        getExercisesUseCase()
+        getExerciseLibraryUseCase()
             .onEach { groupedExercises.value = it }
             .catch { setError(it.message ?: "Unknown error") }
             .launchIn(viewModelScope)

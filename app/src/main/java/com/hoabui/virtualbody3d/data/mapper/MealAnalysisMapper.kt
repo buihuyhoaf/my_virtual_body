@@ -1,7 +1,7 @@
 package com.hoabui.virtualbody3d.data.mapper
 
 import com.hoabui.virtualbody3d.data.model.MealAnalysisDto
-import com.hoabui.virtualbody3d.domain.model.MealAnalysis
+import com.hoabui.virtualbody3d.domain.model.nutrition.MealAnalysis
 
 fun MealAnalysisDto.toDomain(): MealAnalysis = MealAnalysis(
     id = id,

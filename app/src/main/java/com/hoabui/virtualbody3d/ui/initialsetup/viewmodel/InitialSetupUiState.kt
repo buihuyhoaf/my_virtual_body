@@ -1,6 +1,6 @@
 package com.hoabui.virtualbody3d.ui.initialsetup.viewmodel
 
-import com.hoabui.virtualbody3d.domain.model.InitialSetupStep
+import com.hoabui.virtualbody3d.domain.model.onboarding.InitialSetupStep
 
 data class InitialSetupUiState(
     val steps: List<InitialSetupStep> = emptyList(),

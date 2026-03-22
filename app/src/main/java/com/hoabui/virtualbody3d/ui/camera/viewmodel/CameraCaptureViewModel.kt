@@ -3,8 +3,8 @@ package com.hoabui.virtualbody3d.ui.camera.viewmodel
 import android.net.Uri
 import android.util.Log
 import com.hoabui.virtualbody3d.core.base.UiStateViewModel
-import com.hoabui.virtualbody3d.domain.model.AnalysisType
-import com.hoabui.virtualbody3d.domain.model.ExtractedData
+import com.hoabui.virtualbody3d.domain.model.baseline.AnalysisType
+import com.hoabui.virtualbody3d.domain.model.baseline.ExtractedData
 import com.hoabui.virtualbody3d.domain.usecase.AnalyzeImageUseCase
 import com.hoabui.virtualbody3d.domain.usecase.PrepareImageUseCase
 import com.hoabui.virtualbody3d.domain.usecase.UploadImageUseCase

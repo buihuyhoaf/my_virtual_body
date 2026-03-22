@@ -1,6 +1,6 @@
 package com.hoabui.virtualbody3d.ui.camera.viewmodel
 
-import com.hoabui.virtualbody3d.domain.model.ExtractedData
+import com.hoabui.virtualbody3d.domain.model.baseline.ExtractedData
 
 /**
  * State for the review baseline bottom sheet: editable copy, modification and validity flags.

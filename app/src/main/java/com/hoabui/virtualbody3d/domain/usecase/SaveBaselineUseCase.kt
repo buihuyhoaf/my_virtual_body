@@ -1,6 +1,6 @@
 package com.hoabui.virtualbody3d.domain.usecase
 
-import com.hoabui.virtualbody3d.domain.model.ExtractedData
+import com.hoabui.virtualbody3d.domain.model.baseline.ExtractedData
 import com.hoabui.virtualbody3d.domain.repository.BaselineRepository
 import javax.inject.Inject
 

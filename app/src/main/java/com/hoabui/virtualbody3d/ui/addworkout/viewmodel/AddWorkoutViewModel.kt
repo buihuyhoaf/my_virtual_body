@@ -3,7 +3,7 @@ package com.hoabui.virtualbody3d.ui.addworkout.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import com.hoabui.virtualbody3d.core.base.UiState
 import com.hoabui.virtualbody3d.core.base.UiStateViewModel
-import com.hoabui.virtualbody3d.domain.model.WorkoutSchedule
+import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
 import com.hoabui.virtualbody3d.ui.addworkout.AddWorkoutEvent
 import com.hoabui.virtualbody3d.ui.addworkout.state.AddWorkoutUiState
 import com.hoabui.virtualbody3d.domain.usecase.AddWorkoutUseCase

@@ -1,6 +1,6 @@
 package com.hoabui.virtualbody3d.domain.repository
 
-import com.hoabui.virtualbody3d.domain.model.Supplement
+import com.hoabui.virtualbody3d.domain.model.content.Supplement
 import kotlinx.coroutines.flow.Flow
 
 interface SupplementRepository {

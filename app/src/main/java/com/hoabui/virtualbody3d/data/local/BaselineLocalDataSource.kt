@@ -2,7 +2,7 @@ package com.hoabui.virtualbody3d.data.local
 
 import com.hoabui.virtualbody3d.data.model.ExtractedDataDto
 import com.hoabui.virtualbody3d.data.model.UploadedImageDto
-import com.hoabui.virtualbody3d.domain.model.AnalysisType
+import com.hoabui.virtualbody3d.domain.model.baseline.AnalysisType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext

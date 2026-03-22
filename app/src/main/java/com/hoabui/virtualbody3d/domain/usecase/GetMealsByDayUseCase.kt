@@ -1,6 +1,6 @@
 package com.hoabui.virtualbody3d.domain.usecase
 
-import com.hoabui.virtualbody3d.domain.model.MealAnalysis
+import com.hoabui.virtualbody3d.domain.model.nutrition.MealAnalysis
 import com.hoabui.virtualbody3d.domain.repository.MealRepository
 import java.time.LocalDate
 import javax.inject.Inject

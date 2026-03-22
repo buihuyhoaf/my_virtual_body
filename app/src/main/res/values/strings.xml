@@ -18,7 +18,7 @@
     <!-- Home content section titles -->
     <string name="home_section_calories_today">Calories hôm nay</string>
     <string name="home_section_body">Cơ thể</string>
-    <string name="home_section_favorite_exercises">Bài tập sắp tới</string>
+    <string name="home_section_incomming_exercises">Bài tập sắp tới</string>
     <string name="home_section_supplements">Thực phẩm bổ sung</string>
     <string name="home_section_see_more">Xem thêm</string>
     <string name="analysis_basic_info">Thông tin cơ bản</string>
@@ -112,6 +112,9 @@
     <string name="calorie_premium_intake">Intake</string>
     <string name="calorie_premium_burned">Burned</string>
     <string name="calorie_premium_kcal">kcal</string>
+    <string name="calorie_premium_deficit_minus_format">-%1$d %2$s</string>
+    <string name="calorie_premium_deficit_plus_format">+%1$d %2$s</string>
+    <string name="calorie_premium_ring_content_description">Calorie intake and burned progress rings</string>
     <string name="calorie_premium_view_daily_log">View Daily Log</string>
 
     <!-- Body regions (Home screen region row) -->

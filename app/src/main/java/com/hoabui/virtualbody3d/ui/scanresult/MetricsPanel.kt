@@ -31,12 +31,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.domain.model.BodyCompositionSection
-import com.hoabui.virtualbody3d.domain.model.BodyScanResult
-import com.hoabui.virtualbody3d.domain.model.MetabolicSection
-import com.hoabui.virtualbody3d.domain.model.MuscleFatAnalysisSection
-import com.hoabui.virtualbody3d.domain.model.ObesityAnalysisSection
-import com.hoabui.virtualbody3d.domain.model.SegmentalAnalysisSection
+import com.hoabui.virtualbody3d.domain.model.body.BodyCompositionSection
+import com.hoabui.virtualbody3d.domain.model.body.BodyScanResult
+import com.hoabui.virtualbody3d.domain.model.body.MetabolicSection
+import com.hoabui.virtualbody3d.domain.model.body.MuscleFatAnalysisSection
+import com.hoabui.virtualbody3d.domain.model.body.ObesityAnalysisSection
+import com.hoabui.virtualbody3d.domain.model.body.SegmentalAnalysisSection
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 /**

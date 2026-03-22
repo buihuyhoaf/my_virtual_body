@@ -1,6 +1,6 @@
 package com.hoabui.virtualbody3d.domain.usecase
 
-import com.hoabui.virtualbody3d.domain.model.PromoBanner
+import com.hoabui.virtualbody3d.domain.model.content.PromoBanner
 import com.hoabui.virtualbody3d.domain.repository.PromoBannerRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow

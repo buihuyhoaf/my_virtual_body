@@ -22,7 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.core.base.UiState
-import com.hoabui.virtualbody3d.domain.model.AnalysisType
+import com.hoabui.virtualbody3d.domain.model.baseline.AnalysisType
 import com.hoabui.virtualbody3d.ui.camera.CameraCaptureScreenContent
 import com.hoabui.virtualbody3d.ui.camera.viewmodel.CameraCaptureUiState
 import com.hoabui.virtualbody3d.ui.camera.viewmodel.CameraCaptureViewModel

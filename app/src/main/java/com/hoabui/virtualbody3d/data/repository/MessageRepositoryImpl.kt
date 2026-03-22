@@ -2,7 +2,7 @@ package com.hoabui.virtualbody3d.data.repository
 
 import com.hoabui.virtualbody3d.data.local.MessageLocalDataSource
 import com.hoabui.virtualbody3d.data.mapper.toDomain
-import com.hoabui.virtualbody3d.domain.model.MessageThread
+import com.hoabui.virtualbody3d.domain.model.chat.MessageThread
 import com.hoabui.virtualbody3d.domain.repository.MessageRepository
 import javax.inject.Inject
 import javax.inject.Singleton

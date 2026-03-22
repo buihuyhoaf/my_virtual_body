@@ -2,8 +2,8 @@ package com.hoabui.virtualbody3d.data.mapper
 
 import com.hoabui.virtualbody3d.data.model.InitialSetupOptionDto
 import com.hoabui.virtualbody3d.data.model.InitialSetupStepDto
-import com.hoabui.virtualbody3d.domain.model.InitialSetupOption
-import com.hoabui.virtualbody3d.domain.model.InitialSetupStep
+import com.hoabui.virtualbody3d.domain.model.onboarding.InitialSetupOption
+import com.hoabui.virtualbody3d.domain.model.onboarding.InitialSetupStep
 
 fun InitialSetupOptionDto.toDomain(): InitialSetupOption = InitialSetupOption(
     id = id,

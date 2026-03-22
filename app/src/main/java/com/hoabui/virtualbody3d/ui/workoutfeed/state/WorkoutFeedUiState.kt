@@ -1,6 +1,6 @@
 package com.hoabui.virtualbody3d.ui.workoutfeed.state
 
-import com.hoabui.virtualbody3d.domain.model.WorkoutFeedItem
+import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutFeedItem
 
 /**
  * UI state for the workout feed screen.

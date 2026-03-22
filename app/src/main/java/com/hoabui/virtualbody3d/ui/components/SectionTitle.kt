@@ -17,7 +17,7 @@ import com.hoabui.virtualbody3d.ui.theme.GymTheme
 /**
  * Common section title (H1 style): bold, large typography for screen sections,
  * with optional "Xem thêm" text button on the right.
- * Use above CalorieDualRingCard, HeroSection, FavoriteExercisesRow, etc.
+ * Use above CalorieDualRingCard, HeroSection, IncommingExercisesRow, etc.
  *
  * @param textResId String resource for the section title
  * @param onSeeMoreClick When non-null, shows "Xem thêm" button on the right and invokes this on click

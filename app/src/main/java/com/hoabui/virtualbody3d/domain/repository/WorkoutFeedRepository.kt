@@ -1,6 +1,6 @@
 package com.hoabui.virtualbody3d.domain.repository
 
-import com.hoabui.virtualbody3d.domain.model.WorkoutFeedItem
+import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutFeedItem
 import kotlinx.coroutines.flow.Flow
 
 /**

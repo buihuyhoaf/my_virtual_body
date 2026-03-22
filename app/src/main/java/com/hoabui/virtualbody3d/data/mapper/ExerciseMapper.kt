@@ -1,13 +1,12 @@
 package com.hoabui.virtualbody3d.data.mapper
 
 import com.hoabui.virtualbody3d.data.model.ExerciseDto
-import com.hoabui.virtualbody3d.domain.model.BodyRegion
-import com.hoabui.virtualbody3d.domain.model.Difficulty
-import com.hoabui.virtualbody3d.domain.model.EquipmentType
-import com.hoabui.virtualbody3d.domain.model.Exercise
-import com.hoabui.virtualbody3d.domain.model.FavoriteExercise
-import com.hoabui.virtualbody3d.domain.model.FeedExercise
-import com.hoabui.virtualbody3d.domain.model.MuscleGroup
+import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
+import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
+import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
+import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
+import com.hoabui.virtualbody3d.domain.model.exercise.FeedExercise
+import com.hoabui.virtualbody3d.domain.model.exercise.MuscleGroup
 
 fun ExerciseDto.toDomain(): Exercise = Exercise(
     id = id,
@@ -23,16 +22,7 @@ fun ExerciseDto.toDomain(): Exercise = Exercise(
     lastWeightKg = lastWeightKg
 )
 
-fun ExerciseDto.toFavoriteDomain(): FavoriteExercise = FavoriteExercise(
-    id = id,
-    name = name,
-    imageResId = imageResId,
-    imageResUrl = imageResUrl,
-    sets = sets,
-    reps = reps
-)
-
-fun ExerciseDto.toFeedDomain(): FeedExercise = FeedExercise(
+fun ExerciseDto.toFeedExercise(): FeedExercise = FeedExercise(
     id = id,
     name = name,
     imageResId = imageResId,

@@ -2,7 +2,7 @@ package com.hoabui.virtualbody3d.data.repository
 
 import com.hoabui.virtualbody3d.data.local.WorkoutFeedLocalDataSource
 import com.hoabui.virtualbody3d.data.mapper.toDomain
-import com.hoabui.virtualbody3d.domain.model.WorkoutFeedItem
+import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutFeedItem
 import com.hoabui.virtualbody3d.domain.repository.WorkoutFeedRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

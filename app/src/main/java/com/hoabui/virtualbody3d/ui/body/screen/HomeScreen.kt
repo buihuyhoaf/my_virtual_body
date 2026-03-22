@@ -3,6 +3,8 @@ package com.hoabui.virtualbody3d.ui.body.screen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,20 +22,21 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.hoabui.virtualbody3d.domain.model.BodyScanResult
-import com.hoabui.virtualbody3d.ui.body.components.CaloriePremiumCard
+import com.hoabui.virtualbody3d.domain.model.body.BodyScanResult
+import com.hoabui.virtualbody3d.ui.body.components.DailyMealsAutoRow
 import com.hoabui.virtualbody3d.ui.body.components.HeroSection
-import com.hoabui.virtualbody3d.ui.body.components.MetricType
-import com.hoabui.virtualbody3d.ui.body.components.ProgressSnapshotUiModel
 import com.hoabui.virtualbody3d.ui.body.components.ProgressTimelineRow
+import com.hoabui.virtualbody3d.ui.body.components.UpcomingExercisesRow
 import com.hoabui.virtualbody3d.ui.body.data.CalorieGoalUiModel
-import com.hoabui.virtualbody3d.ui.body.data.CalorieUiModel
-import com.hoabui.virtualbody3d.ui.body.data.FavoriteExerciseUiItem
+import com.hoabui.virtualbody3d.ui.body.data.ProgressSnapshotUiModel
+import com.hoabui.virtualbody3d.ui.body.data.UpcomingWorkoutUiItem
 import com.hoabui.virtualbody3d.ui.body.state.BodyUiState
 import com.hoabui.virtualbody3d.ui.body.state.toUiState
 import com.hoabui.virtualbody3d.ui.body.viewmodel.BodyViewModel
-import com.hoabui.virtualbody3d.ui.body.viewmodel.FavoriteExercisesViewModel
+import com.hoabui.virtualbody3d.ui.body.viewmodel.ExercisesViewModel
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
+import com.hoabui.virtualbody3d.ui.mealcapture.MealPageUiModel
+import com.hoabui.virtualbody3d.ui.mealcapture.MealsViewModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 @Composable
@@ -41,10 +44,12 @@ fun HomeScreen(
     onViewBodyDetailClick: () -> Unit = {},
     onNavigateToExerciseLibrary: () -> Unit = {},
     viewModel: BodyViewModel = hiltViewModel(),
-    favoriteExercisesViewModel: FavoriteExercisesViewModel = hiltViewModel(),
+    exercisesViewModel: ExercisesViewModel = hiltViewModel(),
+    mealsViewModel: MealsViewModel = hiltViewModel(),
 ) {
     val screenState by viewModel.state.collectAsStateWithLifecycle()
-    val favoriteExercises by favoriteExercisesViewModel.exercises.collectAsStateWithLifecycle()
+    val upcomingWorkouts by exercisesViewModel.upcomingWorkouts.collectAsStateWithLifecycle()
+    val mealsForToday by mealsViewModel.mealsForToday.collectAsStateWithLifecycle()
 
     UiStateContent(
         state = screenState,
@@ -54,7 +59,11 @@ fun HomeScreen(
                 modifier = mod,
                 scanResult = data.scanResult,
                 nutritionToday = data.nutritionToday,
-                favoriteExercises = favoriteExercises,
+                upcomingWorkouts = upcomingWorkouts,
+                mealsForToday = mealsForToday,
+                progressSnapshots = data.progressSnapshots,
+                selectedProgressIndex = data.selectedProgressIndex,
+                onProgressTimelineIndexSelected = viewModel::onProgressTimelineIndexSelected,
                 onViewBodyDetailClick = onViewBodyDetailClick,
                 onNavigateToExerciseLibrary = onNavigateToExerciseLibrary,
             )
@@ -67,7 +76,11 @@ fun HomeContent(
     modifier: Modifier = Modifier,
     scanResult: BodyScanResult?,
     nutritionToday: CalorieGoalUiModel,
-    favoriteExercises: List<FavoriteExerciseUiItem>,
+    upcomingWorkouts: List<UpcomingWorkoutUiItem>,
+    mealsForToday: List<MealPageUiModel>,
+    progressSnapshots: List<ProgressSnapshotUiModel>,
+    selectedProgressIndex: Int,
+    onProgressTimelineIndexSelected: (Int) -> Unit = {},
     onViewBodyDetailClick: () -> Unit = {},
     onNavigateToExerciseLibrary: () -> Unit,
 ) {
@@ -91,16 +104,10 @@ fun HomeContent(
                 .padding(token.spacing.md),
             verticalArrangement = Arrangement.spacedBy(token.spacing.md)
         ) {
-
-            CaloriePremiumCard(
+            UpcomingExercisesRow(
                 modifier = Modifier
-                    .wrapContentHeight(),
-                data = CalorieUiModel(
-                    intake = nutritionToday.intake,
-                    burned = nutritionToday.burned,
-                    intakeGoal = nutritionToday.intakeGoal,
-                    burnGoal = nutritionToday.burnGoal
-                ),
+                    .fillMaxWidth(),
+                exercises = upcomingWorkouts,
             )
 
             HeroSection(
@@ -116,17 +123,9 @@ fun HomeContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight(),
-                items = remember {
-                    listOf(
-                        ProgressSnapshotUiModel("Mar 1", null, 75.0f, 20.0f, 32.4f, null),
-                        ProgressSnapshotUiModel("Mar 5", null, 74.2f, 19.5f, 32.7f, -0.8f),
-                        ProgressSnapshotUiModel("Mar 10", null, 73.5f, 19.0f, 33.0f, -0.7f),
-                        ProgressSnapshotUiModel("Mar 15", null, 72.8f, 18.6f, 33.2f, -0.7f),
-                        ProgressSnapshotUiModel("Mar 20", null, 72.0f, 18.2f, 33.6f, -0.8f)
-                    )
-                },
-                selectedIndex = 3,
-                metricType = MetricType.WEIGHT
+                items = progressSnapshots,
+                selectedIndex = selectedProgressIndex,
+                onItemClick = onProgressTimelineIndexSelected,
             )
         }
     }

@@ -25,8 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.domain.model.MessageThread
-import com.hoabui.virtualbody3d.domain.model.UserInfo
+import com.hoabui.virtualbody3d.domain.model.chat.MessageThread
+import com.hoabui.virtualbody3d.domain.model.chat.UserInfo
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 @Composable

@@ -52,8 +52,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.domain.model.InitialSetupOption
-import com.hoabui.virtualbody3d.domain.model.InitialSetupStep
+import com.hoabui.virtualbody3d.domain.model.onboarding.InitialSetupOption
+import com.hoabui.virtualbody3d.domain.model.onboarding.InitialSetupStep
 import com.hoabui.virtualbody3d.ui.theme.tokens.RadiusTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.SpacingTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.semantic.SemanticColorTokens

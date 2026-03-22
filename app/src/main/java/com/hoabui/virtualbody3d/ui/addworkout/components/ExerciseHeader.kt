@@ -20,8 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import com.hoabui.virtualbody3d.domain.model.Difficulty
-import com.hoabui.virtualbody3d.domain.model.Exercise
+import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
+import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 

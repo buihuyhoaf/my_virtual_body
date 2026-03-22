@@ -1,7 +1,7 @@
 package com.hoabui.virtualbody3d.data.mapper
 
 import com.hoabui.virtualbody3d.data.model.WorkoutScheduleDto
-import com.hoabui.virtualbody3d.domain.model.WorkoutSchedule
+import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId

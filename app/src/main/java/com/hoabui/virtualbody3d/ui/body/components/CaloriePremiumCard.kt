@@ -1,5 +1,8 @@
 package com.hoabui.virtualbody3d.ui.body.components
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
@@ -17,9 +20,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,52 +31,65 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.core.extensions.graphicsLayerAlphaTranslationX
 import com.hoabui.virtualbody3d.ui.body.data.CalorieUiModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
+import kotlin.math.abs
+
+private const val IntroMetricDurationMs = 260
+private const val IntroRingDurationMs = 280
+private const val IntroDeficitDurationMs = 280
+private const val IntroRingInitialScale = 0.96f
 
 @Composable
 fun CaloriePremiumCard(
+    modifier: Modifier = Modifier,
     data: CalorieUiModel,
-    modifier: Modifier = Modifier
 ) {
     val token = GymTheme.token
-    val ringSize = token.bodyAnalysis.dashboardCalorieRingSize
-    val sideSlotWidth = ringSize * 1.1f
-    var animateIn by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { animateIn = true }
+    val body = token.bodyAnalysis
+    val ringSize = body.dashboardCalorieRingSize
+    val sideColumnWidth = body.dashboardCaloriePremiumSideColumnWidth
+
+    var introVisible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { introVisible = true }
 
     val metricAlpha by animateFloatAsState(
-        targetValue = if (animateIn) 1f else 0f,
-        animationSpec = tween(durationMillis = 260),
-        label = "metric-alpha"
+        targetValue = if (introVisible) 1f else 0f,
+        animationSpec = tween(durationMillis = IntroMetricDurationMs),
+        label = "calorie-premium-metric-alpha"
     )
-    val metricTranslateX by animateDpAsState(
-        targetValue = if (animateIn) 0.dp else -token.spacing.xs,
-        animationSpec = tween(durationMillis = 260),
-        label = "metric-translate-x"
+    val metricOffset by animateDpAsState(
+        targetValue = if (introVisible) 0.dp else -token.spacing.xs,
+        animationSpec = tween(durationMillis = IntroMetricDurationMs),
+        label = "calorie-premium-metric-offset"
     )
     val ringScale by animateFloatAsState(
-        targetValue = if (animateIn) 1f else 0.96f,
-        animationSpec = tween(durationMillis = 280),
-        label = "ring-scale"
+        targetValue = if (introVisible) 1f else IntroRingInitialScale,
+        animationSpec = tween(durationMillis = IntroRingDurationMs),
+        label = "calorie-premium-ring-scale"
     )
     val deficitAlpha by animateFloatAsState(
-        targetValue = if (animateIn) 1f else 0f,
-        animationSpec = tween(durationMillis = 280),
-        label = "deficit-alpha"
+        targetValue = if (introVisible) 1f else 0f,
+        animationSpec = tween(durationMillis = IntroDeficitDurationMs),
+        label = "calorie-premium-deficit-alpha"
     )
-    val deficitTranslateX by animateDpAsState(
-        targetValue = if (animateIn) 0.dp else token.spacing.xs,
-        animationSpec = tween(durationMillis = 280),
-        label = "deficit-translate-x"
+    val deficitOffset by animateDpAsState(
+        targetValue = if (introVisible) 0.dp else token.spacing.xs,
+        animationSpec = tween(durationMillis = IntroDeficitDurationMs),
+        label = "calorie-premium-deficit-offset"
     )
 
+    val ringDescription = stringResource(R.string.calorie_premium_ring_content_description)
+
     Card(
-        modifier = modifier.wrapContentWidth(), // Chỉ nở vừa đủ nội dung
+        modifier = modifier.wrapContentWidth(),
         shape = RoundedCornerShape(token.radius.xl),
         colors = CardDefaults.cardColors(containerColor = token.colors.surface),
         border = BorderStroke(token.spacing.dividerThickness, token.colors.calorieRingTrack),
@@ -89,50 +102,47 @@ fun CaloriePremiumCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(token.spacing.md)
         ) {
-            // 1. Metric Section - Căn trái (Slot 1)
             Box(
-                modifier = Modifier.width(sideSlotWidth),
+                modifier = Modifier.width(sideColumnWidth),
                 contentAlignment = Alignment.CenterStart
             ) {
                 MetricSection(
                     data = data,
-                    modifier = Modifier.graphicsLayer(
+                    modifier = Modifier.graphicsLayerAlphaTranslationX(
                         alpha = metricAlpha,
-                        translationX = metricTranslateX.value
+                        translationX = metricOffset
                     )
                 )
             }
 
-            // 2. CalorieDualRingChart - Căn giữa (Slot 2)
             CalorieDualRingChart(
+                intakeProgress = data.intakeProgress,
+                burnedProgress = data.burnedProgress,
                 modifier = Modifier
                     .size(ringSize)
-                    .graphicsLayer(
-                        scaleX = ringScale,
+                    .semantics { contentDescription = ringDescription }
+                    .graphicsLayer {
+                        scaleX = ringScale
                         scaleY = ringScale
-                    ),
-                intakeProgress = data.intakeProgress,
-                burnedProgress = data.burnedProgress
+                    }
             )
 
-            // 3. Deficit Text - Căn phải (Slot 3)
             Box(
-                modifier = Modifier.width(sideSlotWidth),
+                modifier = Modifier.width(sideColumnWidth),
                 contentAlignment = Alignment.CenterEnd
             ) {
                 DeficitText(
                     deficit = data.deficit,
                     textAlign = TextAlign.End,
-                    modifier = Modifier.graphicsLayer(
+                    modifier = Modifier.graphicsLayerAlphaTranslationX(
                         alpha = deficitAlpha,
-                        translationX = deficitTranslateX.value
+                        translationX = deficitOffset
                     )
                 )
             }
         }
     }
 }
-
 
 @Composable
 private fun MetricSection(
@@ -161,14 +171,20 @@ private fun MetricSection(
 @Composable
 private fun DeficitText(
     deficit: Int,
+    textAlign: TextAlign,
     modifier: Modifier = Modifier,
-    textAlign: TextAlign
 ) {
     val token = GymTheme.token
+    val kcalUnit = stringResource(R.string.calorie_premium_kcal)
+    val text = if (deficit >= 0) {
+        stringResource(R.string.calorie_premium_deficit_minus_format, deficit, kcalUnit)
+    } else {
+        stringResource(R.string.calorie_premium_deficit_plus_format, abs(deficit), kcalUnit)
+    }
     val deficitColor =
         if (deficit >= 0) token.colors.calorieDeficitPositive else token.colors.calorieDeficitNegative
     Text(
-        text = if (deficit >= 0) "-${deficit} kcal" else "+${kotlin.math.abs(deficit)} kcal",
+        text = text,
         style = token.typography.headlineSmall,
         color = deficitColor,
         textAlign = textAlign,
@@ -176,13 +192,12 @@ private fun DeficitText(
     )
 }
 
-
 @Composable
-fun MetricHorizontalLineCell(
-    modifier: Modifier = Modifier,
+private fun MetricHorizontalLineCell(
     value: Int,
     label: String,
-    color: Color
+    color: Color,
+    modifier: Modifier = Modifier,
 ) {
     val token = GymTheme.token
     Row(
@@ -210,5 +225,20 @@ fun MetricHorizontalLineCell(
             Text(text = "$value", style = token.typography.bodyMedium, color = color)
             Text(text = label, style = token.typography.labelSmall, color = token.colors.textSecondary)
         }
+    }
+}
+
+@Preview(showBackground = true, name = "Calorie premium — light")
+@Composable
+private fun CaloriePremiumCardPreviewLight() {
+    GymTheme {
+        CaloriePremiumCard(
+            data = CalorieUiModel(
+                intake = 1850,
+                burned = 420,
+                intakeGoal = 2200,
+                burnGoal = 500
+            )
+        )
     }
 }

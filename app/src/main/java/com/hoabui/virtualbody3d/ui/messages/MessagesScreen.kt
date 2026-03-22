@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.domain.model.MessageThread
+import com.hoabui.virtualbody3d.domain.model.chat.MessageThread
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
 import com.hoabui.virtualbody3d.ui.messages.components.MessageListItem
 import com.hoabui.virtualbody3d.ui.messages.components.MessagesEmptyState

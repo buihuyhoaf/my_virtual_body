@@ -1,7 +1,7 @@
 package com.hoabui.virtualbody3d.ui.body.state
 
-import com.hoabui.virtualbody3d.domain.model.BodyScanResult
-import com.hoabui.virtualbody3d.domain.model.MetricWithRange
+import com.hoabui.virtualbody3d.domain.model.body.BodyScanResult
+import com.hoabui.virtualbody3d.domain.model.body.MetricWithRange
 
 fun BodyScanResult.toUiState(): BodyUiState {
     val comp = bodyComposition

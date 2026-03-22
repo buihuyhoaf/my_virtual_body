@@ -2,7 +2,7 @@ package com.hoabui.virtualbody3d.data.repository
 
 import com.hoabui.virtualbody3d.data.local.MealLocalDataSource
 import com.hoabui.virtualbody3d.data.mapper.toDomain
-import com.hoabui.virtualbody3d.domain.model.MealAnalysis
+import com.hoabui.virtualbody3d.domain.model.nutrition.MealAnalysis
 import com.hoabui.virtualbody3d.domain.repository.MealRepository
 import java.time.LocalDate
 import javax.inject.Inject

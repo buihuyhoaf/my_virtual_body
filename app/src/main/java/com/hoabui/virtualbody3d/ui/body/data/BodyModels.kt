@@ -5,8 +5,8 @@ import androidx.compose.ui.graphics.Color
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.body.components.PromoBannerCarousel
 
-/** UI model for a favorite exercise card (name, last lifted weight, optional image, optional trend e.g. "+2.5kg"). */
-data class FavoriteExerciseUiItem(
+/** UI model for an exercise card on the body home row (name, reps/sets, optional image, optional trend e.g. "+2.5kg"). */
+data class ExerciseUiItem(
     val name: String,
     val reps: Int,
     val sets: Int,

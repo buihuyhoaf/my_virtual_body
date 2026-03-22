@@ -14,9 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.hoabui.virtualbody3d.core.extensions.toVietnameseTopBarDate
-import com.hoabui.virtualbody3d.domain.model.WorkoutFeedItem
+import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutFeedItem
 import com.hoabui.virtualbody3d.ui.body.components.SectionHorizontalRow
-import com.hoabui.virtualbody3d.ui.exerciselibrary.components.CardImageWithText
+import com.hoabui.virtualbody3d.ui.common_ui.CardImageWithText
+import com.hoabui.virtualbody3d.ui.common_ui.CardSize
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import java.time.LocalDate
 
@@ -81,6 +82,7 @@ fun WorkoutDayCard(
                             imageRes = exercise.imageResId,
                             firstLineText = exercise.name,
                             secondLineText = "${exercise.sets}x${exercise.reps}",
+                            cardSize = CardSize.Large
                         ) {
 
                         }

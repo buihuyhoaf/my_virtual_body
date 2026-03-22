@@ -2,7 +2,6 @@ package com.hoabui.virtualbody3d.ui.body.components
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,20 +22,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.MonitorWeight
-import androidx.compose.material.icons.filled.Opacity
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -45,32 +38,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.core.extensions.formatMeasurement
 import com.hoabui.virtualbody3d.core.utils.Constants
-import com.hoabui.virtualbody3d.ui.body.data.FavoriteExerciseUiItem
-import com.hoabui.virtualbody3d.ui.body.data.CalorieGoalUiModel
 import com.hoabui.virtualbody3d.ui.body.data.SupplementUiItem
+import com.hoabui.virtualbody3d.ui.body.data.UpcomingWorkoutUiItem
 import com.hoabui.virtualbody3d.ui.body.screen.BodyModelPreview
 import com.hoabui.virtualbody3d.ui.body.screen.BodyScoreChip
 import com.hoabui.virtualbody3d.ui.body.screen.FloatingMetricChip
 import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
 import com.hoabui.virtualbody3d.ui.body.state.BodyUiState
 import com.hoabui.virtualbody3d.ui.components.SectionTitle
-import com.hoabui.virtualbody3d.ui.exerciselibrary.components.CardImageWithText
+import com.hoabui.virtualbody3d.ui.common_ui.CardImageWithText
+import com.hoabui.virtualbody3d.ui.common_ui.CardSize
+import com.hoabui.virtualbody3d.ui.common_ui.cardDimensions
 import com.hoabui.virtualbody3d.ui.mealcapture.MealPageUiModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
@@ -262,7 +251,7 @@ private fun BodyProgressMetricItem(
 }
 
 /**
- * Shared section with title and horizontal LazyRow. Use for FavoriteExercisesRow and SupplementsRow.
+ * Shared section with title and horizontal LazyRow. Use for IncommingExercisesRow and SupplementsRow.
  * Reduces spacing between section title and row content (xs) for a tighter block.
  */
 @Composable
@@ -292,14 +281,14 @@ fun SectionHorizontalRow(
 }
 
 @Composable
-fun IncommingExercisesRow(
+fun UpcomingExercisesRow(
     modifier: Modifier = Modifier,
-    exercises: List<FavoriteExerciseUiItem>,
+    exercises: List<UpcomingWorkoutUiItem>,
     onAddExerciseClick: () -> Unit = {},
     onSeeMoreClick: (() -> Unit)? = null
 ) {
     SectionHorizontalRow(
-        titleResId = R.string.home_section_favorite_exercises,
+        titleResId = R.string.home_section_incomming_exercises,
         modifier = modifier,
         onSeeMoreClick = onSeeMoreClick
     ) {
@@ -311,12 +300,13 @@ fun IncommingExercisesRow(
                 imageRes = item.imageResId,
                 firstLineText = item.name,
                 secondLineText = "${item.reps}x${item.sets}",
+                cardSize = CardSize.Small
             ) {
 
             }
         }
         item(key = "add_exercise") {
-            AddCard(onClick = onAddExerciseClick)
+            AddCard(cardSize = CardSize.Small, onClick = onAddExerciseClick)
         }
     }
 }
@@ -325,17 +315,19 @@ fun IncommingExercisesRow(
 @Composable
 private fun AddCard(
     modifier: Modifier = Modifier,
+    cardSize: CardSize = CardSize.Medium,
     onClick: () -> Unit = {}
 ) {
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis
+    val (cardWidth, cardHeight) = bodyToken.cardImageWithText.cardDimensions(cardSize)
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale = if (isPressed) 0.97f else 1f
     Card(
         modifier = modifier
-            .width(bodyToken.bodyRegionItemWidth)
-            .height(bodyToken.bodyRegionItemHeight)
+            .width(cardWidth)
+            .height(cardHeight)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -382,7 +374,7 @@ private fun AddCard(
 
 /**
  * Horizontal row of supplement cards for the home dashboard.
- * Reuses [SectionHorizontalRow] so layout matches [FavoriteExercisesRow].
+ * Reuses [SectionHorizontalRow] so layout matches [IncommingExercisesRow].
  */
 @Composable
 fun SupplementsRow(
@@ -398,12 +390,13 @@ fun SupplementsRow(
                 imageRes = item.imageResId,
                 firstLineText = item.name,
                 secondLineText = item.nutrient,
+                cardSize = CardSize.Large
             ) {
 
             }
         }
         item(key = "add_supplements") {
-            AddCard(onClick = {})
+            AddCard(cardSize = CardSize.Large, onClick = {})
         }
     }
 }

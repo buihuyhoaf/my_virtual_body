@@ -1,7 +1,7 @@
 package com.hoabui.virtualbody3d.ui.messages.viewmodel
 
 import com.hoabui.virtualbody3d.core.base.UiStateViewModel
-import com.hoabui.virtualbody3d.domain.model.UserInfo
+import com.hoabui.virtualbody3d.domain.model.chat.UserInfo
 import com.hoabui.virtualbody3d.domain.usecase.GetMessageThreadsUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetUserInfoUseCase
 import com.hoabui.virtualbody3d.ui.messages.state.MessagesUiState

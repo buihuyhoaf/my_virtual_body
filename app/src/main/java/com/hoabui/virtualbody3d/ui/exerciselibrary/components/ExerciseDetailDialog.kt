@@ -40,8 +40,8 @@ import androidx.compose.ui.window.DialogProperties
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.core.extensions.badgeLevelBackground
 import com.hoabui.virtualbody3d.core.extensions.badgeLevelBorder
-import com.hoabui.virtualbody3d.domain.model.Difficulty
-import com.hoabui.virtualbody3d.domain.model.Exercise
+import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
+import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
