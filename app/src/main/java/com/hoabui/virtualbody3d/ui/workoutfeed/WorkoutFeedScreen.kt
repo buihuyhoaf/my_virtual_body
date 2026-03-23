@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutFeedItem
+import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.workoutfeed.components.TodayWorkoutCard
@@ -34,12 +35,11 @@ fun WorkoutFeedScreen(
         state = state,
         modifier = modifier,
         successContent = { mod: Modifier, uiState: WorkoutFeedUiState ->
-            Column(
-                modifier = mod.fillMaxSize(),
-                verticalArrangement = Arrangement.Top
-            ) {
+            GScaffold(modifier = mod) { padding ->
                 WorkoutFeedContent(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(padding),
                     feedItems = uiState.feedItems
                 )
             }

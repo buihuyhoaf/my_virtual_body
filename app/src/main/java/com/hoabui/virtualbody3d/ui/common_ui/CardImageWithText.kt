@@ -62,7 +62,24 @@ fun CardImageWithTextSizeTokens.cardDimensions(cardSize: CardSize): Pair<Dp, Dp>
 /**
  * Reusable card with image (optional badge overlay) and two lines of text.
  * Badge: soft background (surfaceSubtle), difficulty-colored border and text for semantic meaning.
+ *
+ * @deprecated Migrate to [com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCard].
+ * Key improvements in [GImageCard]:
+ * - `model: Any?` supports remote URLs, not just `@DrawableRes`
+ * - `badge` is a composable slot — decoupled from the [Difficulty] domain model
+ * - Single shape application (no double `.clip()` + `shape` bug)
+ * - Uses [GText] internally for token-consistent typography
  */
+@Deprecated(
+    message = "Use GImageCard from ui.common_ui.molecule.card instead. " +
+        "GImageCard supports remote image URLs (model: Any?), uses a composable badge slot, " +
+        "and fixes the double clip/shape bug.",
+    replaceWith = ReplaceWith(
+        expression = "GImageCard(model = imageRes, contentDescription = null, firstLineText = firstLineText, secondLineText = secondLineText, cardSize = cardSize, onClick = onClick)",
+        imports = ["com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCard"],
+    ),
+    level = DeprecationLevel.WARNING,
+)
 @Composable
 fun CardImageWithText(
     modifier: Modifier = Modifier,

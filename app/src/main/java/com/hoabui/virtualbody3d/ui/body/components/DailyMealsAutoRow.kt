@@ -310,16 +310,14 @@ private fun Modifier.graphicsLayerDaily(scale: Float): Modifier =
     }
 
 private fun Modifier.pointerInputFingerPauseDaily(onFingerDown: (Boolean) -> Unit): Modifier =
-    this.then(
-        pointerInput(Unit) {
-            awaitEachGesture {
-                awaitFirstDown()
-                onFingerDown(true)
-                waitForUpOrCancellation()
-                onFingerDown(false)
-            }
-        },
-    )
+    this.pointerInput(Unit) {
+        awaitEachGesture {
+            awaitFirstDown()
+            onFingerDown(true)
+            waitForUpOrCancellation()
+            onFingerDown(false)
+        }
+    }
 
 @Preview(showBackground = true)
 @Composable

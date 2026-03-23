@@ -6,11 +6,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +28,9 @@ import com.hoabui.virtualbody3d.ui.createbaseline.component.ChatGPTThinkingCard
 import com.hoabui.virtualbody3d.domain.model.baseline.AnalysisType
 import com.hoabui.virtualbody3d.ui.camera.viewmodel.CameraCaptureUiState
 import com.hoabui.virtualbody3d.ui.camera.viewmodel.CameraCaptureViewModel
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBar
+import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
@@ -119,42 +121,54 @@ fun CreateBaselineScreen(
             }
         },
         successContent = { mod, data ->
-            Box(modifier = mod.fillMaxSize()) {
-                CameraCaptureScreenContent(
-                    modifier = Modifier.fillMaxSize(),
-                    state = data,
-                    showCamera = data is CameraCaptureUiState.CameraActive,
-                    captureTrigger = captureTrigger,
-                    onImageCaptured = { file ->
-                        viewModel.onImageCaptured(file, alreadyProcessed = (file == pendingReviewFile))
-                    },
-                    onCaptureError = viewModel::onCaptureError,
-                    buttonsEnabled = data is CameraCaptureUiState.CameraActive || data is CameraCaptureUiState.ConfirmPhoto,
-                    onCapture = viewModel::requestCapture,
-                    onUpload = {
-                        pickMedia.launch(
-                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                        )
-                    },
-                    reviewStateEnabled = true,
-                    onCaptureCompletedForReview = { file -> viewModel.onPhotoCaptured(file) },
-                    externalReviewFile = pendingReviewFile,
-                    onClearReviewFile = viewModel::onClearReview
-                )
-                ChatGPTThinkingCard(
-                    visible = data is CameraCaptureUiState.PreProcessing ||
-                        data is CameraCaptureUiState.Uploading ||
-                        data is CameraCaptureUiState.Analyzing,
-                    message = when (data) {
-                        is CameraCaptureUiState.PreProcessing -> stringResource(R.string.loading_processing)
-                        is CameraCaptureUiState.Uploading -> stringResource(R.string.loading_uploading)
-                        is CameraCaptureUiState.Analyzing -> when (data.type) {
-                            AnalysisType.OCR -> stringResource(R.string.loading_extracting)
-                            AnalysisType.MEAL -> stringResource(R.string.loading_analyzing_meal)
+            GScaffold(
+                modifier = mod,
+                contentWindowInsets = WindowInsets(0),
+                topBar = {
+                    GTopBar(
+                        title = "",
+                        variant = com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBarVariant.Transparent,
+                        windowInsets = WindowInsets(0)
+                    )
+                }
+            ) { _ ->
+                Box(modifier = Modifier.fillMaxSize()) {
+                    CameraCaptureScreenContent(
+                        modifier = Modifier.fillMaxSize(),
+                        state = data,
+                        showCamera = data is CameraCaptureUiState.CameraActive,
+                        captureTrigger = captureTrigger,
+                        onImageCaptured = { file ->
+                            viewModel.onImageCaptured(file, alreadyProcessed = (file == pendingReviewFile))
+                        },
+                        onCaptureError = viewModel::onCaptureError,
+                        buttonsEnabled = data is CameraCaptureUiState.CameraActive || data is CameraCaptureUiState.ConfirmPhoto,
+                        onCapture = viewModel::requestCapture,
+                        onUpload = {
+                            pickMedia.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        },
+                        reviewStateEnabled = true,
+                        onCaptureCompletedForReview = { file -> viewModel.onPhotoCaptured(file) },
+                        externalReviewFile = pendingReviewFile,
+                        onClearReviewFile = viewModel::onClearReview
+                    )
+                    ChatGPTThinkingCard(
+                        visible = data is CameraCaptureUiState.PreProcessing ||
+                            data is CameraCaptureUiState.Uploading ||
+                            data is CameraCaptureUiState.Analyzing,
+                        message = when (data) {
+                            is CameraCaptureUiState.PreProcessing -> stringResource(R.string.loading_processing)
+                            is CameraCaptureUiState.Uploading -> stringResource(R.string.loading_uploading)
+                            is CameraCaptureUiState.Analyzing -> when (data.type) {
+                                AnalysisType.OCR -> stringResource(R.string.loading_extracting)
+                                AnalysisType.MEAL -> stringResource(R.string.loading_analyzing_meal)
+                            }
+                            else -> ""
                         }
-                        else -> ""
-                    }
-                )
+                    )
+                }
             }
         }
     )
@@ -185,17 +199,7 @@ private fun CreateBaselineErrorSnackbarOrDialog(
             )
         },
         confirmButton = {
-            Button(
-                onClick = onDismiss,
-                colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
-                shape = RoundedCornerShape(token.radius.lg),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = token.elevation.level0)
-            ) {
-                Text(
-                    text = stringResource(R.string.error_ok),
-                    style = typography.titleMedium
-                )
-            }
+            GButton(text = stringResource(R.string.error_ok), onClick = onDismiss)
         },
         shape = RoundedCornerShape(token.radius.lg)
     )

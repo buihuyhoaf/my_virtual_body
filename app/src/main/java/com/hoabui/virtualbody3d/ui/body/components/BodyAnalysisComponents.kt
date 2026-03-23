@@ -28,7 +28,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -82,7 +81,7 @@ fun HeroSection(
                     brush = Brush.radialGradient(
                         center = Offset(0.5f, 0.5f),
                         radius = 1.2f,
-                        colors = listOf(token.colors.primarySoft, MaterialTheme.colorScheme.surface)
+                        colors = listOf(token.colors.primarySoft, token.colors.surface)
                     )
                 )
         ) {
@@ -418,7 +417,7 @@ fun StaticHeroSection(
                 brush = Brush.radialGradient(
                     center = Offset(0.5f, 0.5f),
                     radius = 1.2f,
-                    colors = listOf(token.colors.primarySoft, MaterialTheme.colorScheme.surface)
+                    colors = listOf(token.colors.primarySoft, token.colors.surface)
                 )
             )
     ) {

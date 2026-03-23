@@ -1,8 +1,7 @@
 package com.hoabui.virtualbody3d.ui.body.screen
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
@@ -16,7 +15,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.navigation.AppTopBarBack
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBar
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBarBackIcon
+import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
 import com.hoabui.virtualbody3d.ui.body.viewmodel.BodyViewModel
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
@@ -38,22 +39,20 @@ fun BodyDetailAnalystScreen(
         modifier = modifier,
         successContent = { mod, data ->
             val token = GymTheme.token
-            Column(
-                modifier = mod.fillMaxSize(),
-                verticalArrangement = Arrangement.Top
-            ) {
-                AppTopBarBack(
-                    onBack = onBack
-                ) {
-                    Text(
-                        text = stringResource(R.string.body_detail_analyst_title),
-                        style = token.typography.titleLarge,
-                        color = token.colors.textPrimary
+            GScaffold(
+                modifier = mod,
+                topBar = {
+                    GTopBar(
+                        title = stringResource(R.string.body_detail_analyst_title),
+                        windowInsets = WindowInsets(0),
+                        navigationIcon = { GTopBarBackIcon(onBack = onBack) }
                     )
                 }
+            ) { padding ->
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .padding(padding)
                         .padding(token.spacing.md),
                     contentAlignment = Alignment.Center
                 ) {

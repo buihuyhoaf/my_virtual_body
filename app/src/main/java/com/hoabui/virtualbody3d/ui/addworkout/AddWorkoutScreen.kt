@@ -3,11 +3,11 @@ package com.hoabui.virtualbody3d.ui.addworkout
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,8 +25,10 @@ import com.hoabui.virtualbody3d.ui.addworkout.components.SuccessOverlay
 import com.hoabui.virtualbody3d.ui.addworkout.components.WorkoutSetupSection
 import com.hoabui.virtualbody3d.ui.addworkout.state.AddWorkoutUiState
 import com.hoabui.virtualbody3d.ui.addworkout.viewmodel.AddWorkoutViewModel
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBar
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBarBackIcon
+import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
-import com.hoabui.virtualbody3d.navigation.AppTopBarBack
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import kotlinx.coroutines.delay
 
@@ -55,6 +57,7 @@ fun AddWorkoutScreen(
         successContent = { mod, data ->
             Box(modifier = mod.fillMaxSize()) {
                 AddWorkoutContent(
+                    modifier = Modifier.fillMaxSize(),
                     data = data,
                     onCancel = viewModel::onCancel,
                     onAddWorkout = viewModel::onAddWorkout,
@@ -89,6 +92,7 @@ fun AddWorkoutScreen(
 
 @Composable
 private fun AddWorkoutContent(
+    modifier: Modifier = Modifier,
     data: AddWorkoutUiState,
     onCancel: () -> Unit,
     onAddWorkout: () -> Unit,
@@ -100,48 +104,52 @@ private fun AddWorkoutContent(
     onRestChange: (Int) -> Unit,
     onNotesChange: (String) -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        AppTopBarBack(onBack = onCancel) {
-            Text(
-                text = stringResource(R.string.add_workout_title),
-                style = GymTheme.token.typography.titleLarge,
-                color = GymTheme.token.colors.textPrimary
+    GScaffold(
+        modifier = modifier,
+        topBar = {
+            GTopBar(
+                title = stringResource(R.string.add_workout_title),
+                windowInsets = WindowInsets(0),
+                navigationIcon = { GTopBarBackIcon(onBack = onCancel) }
             )
         }
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-                .padding(GymTheme.token.spacing.md),
-            verticalArrangement = Arrangement.spacedBy(GymTheme.token.spacing.lg)
-        ) {
-            data.exercise?.let { exercise ->
-                ExerciseHeader(exercise = exercise)
-                ScheduleSection(
-                    selectedDate = data.selectedDate,
-                    selectedTime = data.selectedTime,
-                    onDateChange = onDateChange,
-                    onTimeChange = onTimeChange
-                )
-                WorkoutSetupSection(
-                    sets = data.sets,
-                    reps = data.reps,
-                    weightKg = data.weightKg,
-                    restSeconds = data.restSeconds,
-                    onSetsChange = onSetsChange,
-                    onRepsChange = onRepsChange,
-                    onWeightChange = onWeightChange,
-                    onRestChange = onRestChange
-                )
-                NotesField(
-                    notes = data.notes,
-                    onNotesChange = onNotesChange
-                )
+    ) { padding ->
+        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(GymTheme.token.spacing.md),
+                verticalArrangement = Arrangement.spacedBy(GymTheme.token.spacing.lg)
+            ) {
+                data.exercise?.let { exercise ->
+                    ExerciseHeader(exercise = exercise)
+                    ScheduleSection(
+                        selectedDate = data.selectedDate,
+                        selectedTime = data.selectedTime,
+                        onDateChange = onDateChange,
+                        onTimeChange = onTimeChange
+                    )
+                    WorkoutSetupSection(
+                        sets = data.sets,
+                        reps = data.reps,
+                        weightKg = data.weightKg,
+                        restSeconds = data.restSeconds,
+                        onSetsChange = onSetsChange,
+                        onRepsChange = onRepsChange,
+                        onWeightChange = onWeightChange,
+                        onRestChange = onRestChange
+                    )
+                    NotesField(
+                        notes = data.notes,
+                        onNotesChange = onNotesChange
+                    )
+                }
             }
+            BottomActionButtons(
+                onCancel = onCancel,
+                onPrimaryAction = onAddWorkout
+            )
         }
-        BottomActionButtons(
-            onCancel = onCancel,
-            onPrimaryAction = onAddWorkout
-        )
     }
 }

@@ -8,11 +8,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,6 +32,7 @@ import com.hoabui.virtualbody3d.ui.login.component.LoginSocialSection
 import com.hoabui.virtualbody3d.ui.login.viewmodel.LoginEvent
 import com.hoabui.virtualbody3d.ui.login.viewmodel.LoginUiState
 import com.hoabui.virtualbody3d.ui.login.viewmodel.LoginViewModel
+import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 @Composable
@@ -90,40 +90,45 @@ fun LoginScreen(
             }
         },
         successContent = { mod, data ->
-            Column(
-                modifier = mod
-                    .fillMaxSize()
-                    .background(colors.surface)
-                    .windowInsetsPadding(WindowInsets.safeDrawing)
-                    .windowInsetsPadding(WindowInsets.ime)
-                    .padding(horizontal = spacing.xl, vertical = spacing.lg)
-            ) {
-                LoginLogo(token = token)
-                Spacer(modifier = Modifier.height(spacing.xl))
-                LoginForm(
-                    token = token,
-                    state = data,
-                    onEmailChanged = viewModel::onEmailChanged,
-                    onPasswordChanged = viewModel::onPasswordChanged,
-                    onTogglePasswordVisible = viewModel::onTogglePasswordVisible,
-                    onForgotPassword = onForgotPassword
-                )
-                Spacer(modifier = Modifier.height(spacing.lg))
-                LoginSignInButton(
-                    token = token,
-                    onClick = {
-                        focusManager.clearFocus()
-                        viewModel.login()
-                    }
-                )
-                Spacer(modifier = Modifier.height(spacing.xl))
-                LoginSocialSection(
-                    token = token,
-                    onSignInWithGoogle = onSignInWithGoogle,
-                    onSignInWithApple = onSignInWithApple
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                LoginFooter(token = token, onSignUp = onSignUp)
+            GScaffold(
+                modifier = mod,
+                contentWindowInsets = WindowInsets.safeDrawing,
+                containerColor = colors.surface
+            ) { padding ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .imePadding()
+                        .padding(horizontal = spacing.xl, vertical = spacing.lg)
+                ) {
+                    LoginLogo(token = token)
+                    Spacer(modifier = Modifier.height(spacing.xl))
+                    LoginForm(
+                        token = token,
+                        state = data,
+                        onEmailChanged = viewModel::onEmailChanged,
+                        onPasswordChanged = viewModel::onPasswordChanged,
+                        onTogglePasswordVisible = viewModel::onTogglePasswordVisible,
+                        onForgotPassword = onForgotPassword
+                    )
+                    Spacer(modifier = Modifier.height(spacing.lg))
+                    LoginSignInButton(
+                        token = token,
+                        onClick = {
+                            focusManager.clearFocus()
+                            viewModel.login()
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(spacing.xl))
+                    LoginSocialSection(
+                        token = token,
+                        onSignInWithGoogle = onSignInWithGoogle,
+                        onSignInWithApple = onSignInWithApple
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    LoginFooter(token = token, onSignUp = onSignUp)
+                }
             }
         }
     )

@@ -7,14 +7,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -27,8 +25,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.PaddingValues
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.ui.common_ui.atom.field.GTextField
 import com.hoabui.virtualbody3d.ui.login.viewmodel.LoginUiState
-import com.hoabui.virtualbody3d.ui.theme.outlinedTextFieldColors
 import com.hoabui.virtualbody3d.ui.theme.tokens.GymToken
 
 /**
@@ -64,23 +62,15 @@ fun LoginForm(
             color = colors.textBlack
         )
         Spacer(modifier = Modifier.height(spacing.xs))
-        OutlinedTextField(
+        GTextField(
             value = state.email,
             onValueChange = onEmailChanged,
             modifier = Modifier
                 .fillMaxWidth()
                 .onFocusChanged { if (it.isFocused) Log.d("LoginPerf", "Email field FOCUSED at ${System.currentTimeMillis()}") },
-            placeholder = {
-                Text(
-                    stringResource(R.string.login_email_placeholder),
-                    style = typography.bodyLarge,
-                    color = colors.textPlaceholder
-                )
-            },
+            placeholder = stringResource(R.string.login_email_placeholder),
             singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            shape = RoundedCornerShape(loginTokens.inputCornerRadius),
-            colors = outlinedTextFieldColors(colors)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
         )
         Spacer(modifier = Modifier.height(spacing.lg))
 
@@ -90,19 +80,13 @@ fun LoginForm(
             color = colors.textBlack
         )
         Spacer(modifier = Modifier.height(spacing.xs))
-        OutlinedTextField(
+        GTextField(
             value = state.password,
             onValueChange = onPasswordChanged,
             modifier = Modifier
                 .fillMaxWidth()
                 .onFocusChanged { if (it.isFocused) Log.d("LoginPerf", "Password field FOCUSED at ${System.currentTimeMillis()}") },
-            placeholder = {
-                Text(
-                    stringResource(R.string.login_password_placeholder),
-                    style = typography.bodyLarge,
-                    color = colors.textPlaceholder
-                )
-            },
+            placeholder = stringResource(R.string.login_password_placeholder),
             singleLine = true,
             visualTransformation = if (state.passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -114,9 +98,7 @@ fun LoginForm(
                         tint = colors.textPlaceholder
                     )
                 }
-            },
-            shape = RoundedCornerShape(loginTokens.inputCornerRadius),
-            colors = outlinedTextFieldColors(colors)
+            }
         )
         Row(
             modifier = Modifier.fillMaxWidth(),

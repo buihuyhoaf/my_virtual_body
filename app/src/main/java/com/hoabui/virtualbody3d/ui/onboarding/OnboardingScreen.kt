@@ -18,14 +18,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,10 +35,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.OnboardingTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.semantic.SemanticColorTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.SpacingTokens
+import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
 import kotlinx.coroutines.launch
 
 @Composable
@@ -62,75 +60,71 @@ fun OnboardingScreen(
         initialPage = OnboardingPage.Slide1.pageIndex
     )
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-            .windowInsetsPadding(WindowInsets.safeDrawing)
-            .padding(horizontal = spacing.xl, vertical = spacing.lg)
-    ) {
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.weight(1f),
-            userScrollEnabled = true
-        ) { page ->
-            when (OnboardingPage.fromIndex(page)) {
-                OnboardingPage.Slide1 -> OnboardingSlide1(
-                    colors = colors,
-                    spacing = spacing,
-                    typography = typography,
-                    onboardingTokens = onboardingTokens
-                )
-                OnboardingPage.Slide2 -> OnboardingSlide2(
-                    colors = colors,
-                    spacing = spacing,
-                    typography = typography,
-                    onboardingTokens = onboardingTokens
-                )
-                OnboardingPage.Slide3 -> OnboardingSlide3(
-                    colors = colors,
-                    spacing = spacing,
-                    typography = typography,
-                    onboardingTokens = onboardingTokens
-                )
-                null -> { /* fallback */ }
-            }
-        }
-
-        OnboardingPagerIndicator(
-            pagerState = pagerState,
+    GScaffold(
+        modifier = modifier,
+        contentWindowInsets = WindowInsets.safeDrawing,
+        containerColor = colors.surface
+    ) { padding ->
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = spacing.md),
-            tokens = onboardingTokens,
-            selectedColor = colors.primary,
-            unselectedColor = colors.borderStrong.copy(alpha = 0.5f)
-        )
-
-        val isLastPage = pagerState.currentPage == OnboardingPage.Slide3.pageIndex
-        Button(
-            onClick = {
-                if (isLastPage) {
-                    onComplete()
-                } else {
-                    scope.launch {
-                        pagerState.animateScrollToPage(
-                            page = pagerState.currentPage + 1,
-                            animationSpec = tween(durationMillis = 300, easing = LinearEasing)
-                        )
-                    }
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(onboardingTokens.primaryButtonHeight),
-            colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
-            shape = MaterialTheme.shapes.large,
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = token.elevation.level0)
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = spacing.xl, vertical = spacing.lg)
         ) {
-            Text(
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.weight(1f),
+                userScrollEnabled = true
+            ) { page ->
+                when (OnboardingPage.fromIndex(page)) {
+                    OnboardingPage.Slide1 -> OnboardingSlide1(
+                        colors = colors,
+                        spacing = spacing,
+                        typography = typography,
+                        onboardingTokens = onboardingTokens
+                    )
+                    OnboardingPage.Slide2 -> OnboardingSlide2(
+                        colors = colors,
+                        spacing = spacing,
+                        typography = typography,
+                        onboardingTokens = onboardingTokens
+                    )
+                    OnboardingPage.Slide3 -> OnboardingSlide3(
+                        colors = colors,
+                        spacing = spacing,
+                        typography = typography,
+                        onboardingTokens = onboardingTokens
+                    )
+                    null -> { /* fallback */ }
+                }
+            }
+
+            OnboardingPagerIndicator(
+                pagerState = pagerState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = spacing.md),
+                tokens = onboardingTokens,
+                selectedColor = colors.primary,
+                unselectedColor = colors.borderStrong.copy(alpha = 0.5f)
+            )
+
+            val isLastPage = pagerState.currentPage == OnboardingPage.Slide3.pageIndex
+            GButton(
                 text = if (isLastPage) stringResource(R.string.onboarding_start) else stringResource(R.string.onboarding_next),
-                style = typography.titleMedium
+                onClick = {
+                    if (isLastPage) {
+                        onComplete()
+                    } else {
+                        scope.launch {
+                            pagerState.animateScrollToPage(
+                                page = pagerState.currentPage + 1,
+                                animationSpec = tween(durationMillis = 300, easing = LinearEasing)
+                            )
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }

@@ -1,4 +1,4 @@
-package com.hoabui.virtualbody3d.ui.common_ui.text
+package com.hoabui.virtualbody3d.ui.common_ui.atom.text
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.ui.common_ui.image.GRoundedImage
+import com.hoabui.virtualbody3d.ui.common_ui.atom.image.GRoundedImage
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 /**
