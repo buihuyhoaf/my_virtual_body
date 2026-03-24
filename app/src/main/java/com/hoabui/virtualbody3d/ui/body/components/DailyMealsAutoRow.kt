@@ -26,8 +26,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
+import com.hoabui.virtualbody3d.ui.common_ui.atom.progress.GProgressBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -45,7 +45,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -280,15 +279,12 @@ private fun DailyMealCard(
                     )
                 }
             }
-            LinearProgressIndicator(
-                progress = { 1f },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(3.dp),
-                color = macroColor,
+            GProgressBar(
+                progress = 1f,
+                modifier = Modifier.fillMaxWidth(),
+                indicatorColor = macroColor,
                 trackColor = token.colors.borderSubtle.copy(alpha = 0.35f),
-                strokeCap = StrokeCap.Round,
-                gapSize = 0.dp,
+                height = 3.dp,
             )
         }
     }

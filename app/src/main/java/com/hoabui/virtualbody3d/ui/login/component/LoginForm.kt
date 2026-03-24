@@ -12,9 +12,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GIconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
@@ -22,8 +23,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.PaddingValues
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.common_ui.atom.field.GTextField
 import com.hoabui.virtualbody3d.ui.login.viewmodel.LoginUiState
@@ -91,7 +90,7 @@ fun LoginForm(
             visualTransformation = if (state.passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             trailingIcon = {
-                IconButton(onClick = onTogglePasswordVisible) {
+                GIconButton(onClick = onTogglePasswordVisible) {
                     Icon(
                         imageVector = if (state.passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                         contentDescription = if (state.passwordVisible) "Hide password" else "Show password",
@@ -104,16 +103,11 @@ fun LoginForm(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End
         ) {
-            TextButton(
+            GButton(
+                text = stringResource(R.string.login_forgot_password),
                 onClick = onForgotPassword,
-                contentPadding = PaddingValues(0.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.login_forgot_password),
-                    style = typography.labelLarge,
-                    color = colors.textBlack
-                )
-            }
+                variant = GButtonVariant.Ghost,
+            )
         }
     }
 }

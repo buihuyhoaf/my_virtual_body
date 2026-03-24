@@ -17,10 +17,8 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
+import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -110,16 +108,11 @@ fun MealResultPage(
             Spacer(modifier = Modifier.height(spacing.lg))
 
             // 3. Nutrition summary card – key metrics in a horizontal layout
-            Card(
+            GCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight(),
-                colors = CardDefaults.cardColors(
-                    containerColor = colors.surface,
-                    contentColor = colors.textPrimary
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = token.elevation.level1),
-                shape = RoundedCornerShape(token.radius.lg)
+                elevation = token.elevation.level1,
             ) {
                 Column(
                     modifier = Modifier

@@ -3,8 +3,8 @@ package com.hoabui.virtualbody3d.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.progress.GCircularProgress
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,7 +45,7 @@ private fun DefaultLoading(modifier: Modifier) {
             .background(token.colors.background),
         contentAlignment = Alignment.Center
     ) {
-        CircularProgressIndicator(color = token.colors.primary)
+        GCircularProgress()
     }
 }
 

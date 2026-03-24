@@ -7,12 +7,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import com.hoabui.virtualbody3d.ui.common_ui.atom.progress.GProgressBar
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 /**
@@ -108,13 +108,11 @@ fun ProgressMetricRow(
                 color = token.colors.textPrimary
             )
         }
-        LinearProgressIndicator(
-            progress = { progress },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(token.radius.sm)),
-            color = token.colors.primary,
-            trackColor = token.colors.surfaceOverlay
+        GProgressBar(
+            progress = progress,
+            modifier = Modifier.fillMaxWidth(),
+            indicatorColor = token.colors.primary,
+            trackColor = token.colors.surfaceOverlay,
         )
     }
 }

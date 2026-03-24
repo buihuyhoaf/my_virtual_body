@@ -5,7 +5,7 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
+import com.hoabui.virtualbody3d.ui.common_ui.atom.progress.GCircularProgress
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -162,9 +162,7 @@ fun BodyModelPreview(
         )
 
         if (isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center)
-            )
+            GCircularProgress(modifier = Modifier.align(Alignment.Center))
         }
     }
 

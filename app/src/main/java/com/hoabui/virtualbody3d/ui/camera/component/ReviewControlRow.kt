@@ -13,7 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GIconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -42,7 +42,7 @@ fun ReviewControlRow(
             modifier = Modifier.weight(1f),
             contentAlignment = Alignment.CenterStart
         ) {
-            IconButton(
+            GIconButton(
                 onClick = onBackToCapture,
                 enabled = buttonsEnabled,
                 modifier = Modifier

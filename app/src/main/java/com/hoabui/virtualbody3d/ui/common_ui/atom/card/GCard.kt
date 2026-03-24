@@ -1,6 +1,7 @@
 package com.hoabui.virtualbody3d.ui.common_ui.atom.card
 
 import android.content.res.Configuration
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -46,6 +47,7 @@ fun GCard(
     onClick: (() -> Unit)? = null,
     elevation: Dp = GymTheme.token.card.elevation,
     containerColor: Color = GymTheme.token.colors.surface,
+    border: BorderStroke? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val token = GymTheme.token
@@ -60,6 +62,7 @@ fun GCard(
             shape = shape,
             colors = colors,
             elevation = cardElevation,
+            border = border,
             content = content,
         )
     } else {
@@ -68,6 +71,7 @@ fun GCard(
             shape = shape,
             colors = colors,
             elevation = cardElevation,
+            border = border,
             content = content,
         )
     }

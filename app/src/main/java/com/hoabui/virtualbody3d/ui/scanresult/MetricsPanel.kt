@@ -18,10 +18,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
+import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
+import com.hoabui.virtualbody3d.ui.common_ui.atom.progress.GProgressBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -135,11 +134,9 @@ private fun BodyCompositionCard(
 ) {
     val token = GymTheme.token
     val colors = token.colors
-    Card(
+    GCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(token.radius.lg),
-        colors = CardDefaults.cardColors(containerColor = colors.surfaceOverlay),
-        elevation = CardDefaults.cardElevation(defaultElevation = token.elevation.level0)
+        containerColor = colors.surfaceOverlay,
     ) {
         Column(
             modifier = Modifier.padding(token.spacing.md),
@@ -232,11 +229,9 @@ private fun MuscleFatChartCard(
 ) {
     val token = GymTheme.token
     val colors = token.colors
-    Card(
+    GCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(token.radius.lg),
-        colors = CardDefaults.cardColors(containerColor = colors.surfaceOverlay),
-        elevation = CardDefaults.cardElevation(defaultElevation = token.elevation.level0)
+        containerColor = colors.surfaceOverlay,
     ) {
         Column(
             modifier = Modifier.padding(token.spacing.md),
@@ -305,14 +300,12 @@ private fun ChartBarRow(
                 color = token.colors.textPrimary
             )
         }
-        LinearProgressIndicator(
-            progress = { progress },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(6.dp)
-                .clip(RoundedCornerShape(token.radius.sm)),
-            color = token.colors.primary,
-            trackColor = token.colors.surfaceSubtle
+        GProgressBar(
+            progress = progress,
+            modifier = Modifier.fillMaxWidth(),
+            indicatorColor = token.colors.primary,
+            trackColor = token.colors.surfaceSubtle,
+            height = 6.dp,
         )
     }
 }
@@ -323,11 +316,9 @@ private fun ObesityAnalysisCard(
 ) {
     val token = GymTheme.token
     val colors = token.colors
-    Card(
+    GCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(token.radius.lg),
-        colors = CardDefaults.cardColors(containerColor = colors.surfaceOverlay),
-        elevation = CardDefaults.cardElevation(defaultElevation = token.elevation.level0)
+        containerColor = colors.surfaceOverlay,
     ) {
         Column(
             modifier = Modifier.padding(token.spacing.md),
@@ -422,11 +413,9 @@ private fun SegmentalAnalysisCard(
 ) {
     val token = GymTheme.token
     val colors = token.colors
-    Card(
+    GCard(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(token.radius.lg),
-        colors = CardDefaults.cardColors(containerColor = colors.surfaceOverlay),
-        elevation = CardDefaults.cardElevation(defaultElevation = token.elevation.level0)
+        containerColor = colors.surfaceOverlay,
     ) {
         Column(
             modifier = Modifier.padding(token.spacing.md),
@@ -506,14 +495,12 @@ private fun SegmentalCell(
             style = token.typography.bodyMedium,
             color = token.colors.textPrimary
         )
-        LinearProgressIndicator(
-            progress = { 1f },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(4.dp)
-                .clip(RoundedCornerShape(token.radius.sm)),
-            color = token.colors.primary.copy(alpha = 0.5f),
-            trackColor = token.colors.surfaceOverlay
+        GProgressBar(
+            progress = 1f,
+            modifier = Modifier.fillMaxWidth(),
+            indicatorColor = token.colors.primary.copy(alpha = 0.5f),
+            trackColor = token.colors.surfaceOverlay,
+            height = 4.dp,
         )
     }
 }
@@ -524,11 +511,9 @@ private fun MetabolicCard(
 ) {
     val token = GymTheme.token
     val colors = token.colors
-    Card(
+    GCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(token.radius.lg),
-        colors = CardDefaults.cardColors(containerColor = colors.surfaceOverlay),
-        elevation = CardDefaults.cardElevation(defaultElevation = token.elevation.level0)
+        containerColor = colors.surfaceOverlay,
     ) {
         Column(
             modifier = Modifier.padding(token.spacing.md),

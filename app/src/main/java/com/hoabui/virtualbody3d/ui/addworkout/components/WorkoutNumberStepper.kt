@@ -7,9 +7,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GIconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,12 +48,9 @@ fun WorkoutNumberStepper(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(token.spacing.xxs)
         ) {
-            IconButton(
+            GIconButton(
                 onClick = { if (value > minValue) onValueChange(value - 1) },
                 enabled = value > minValue,
-                colors = IconButtonDefaults.iconButtonColors(
-                    contentColor = token.colors.textPrimary
-                )
             ) {
                 Icon(
                     imageVector = Icons.Default.Remove,
@@ -67,12 +63,9 @@ fun WorkoutNumberStepper(
                 color = token.colors.textPrimary,
                 modifier = Modifier.width(token.spacing.xxl)
             )
-            IconButton(
+            GIconButton(
                 onClick = { if (value < effectiveMax) onValueChange(value + 1) },
                 enabled = value < effectiveMax,
-                colors = IconButtonDefaults.iconButtonColors(
-                    contentColor = token.colors.textPrimary
-                )
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -111,15 +104,12 @@ fun WorkoutWeightStepper(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(token.spacing.xxs)
         ) {
-            IconButton(
+            GIconButton(
                 onClick = {
                     val next = (valueKg - step).coerceIn(minValue, maxValue)
                     if (next != valueKg) onValueChange(next)
                 },
                 enabled = valueKg > minValue,
-                colors = IconButtonDefaults.iconButtonColors(
-                    contentColor = token.colors.textPrimary
-                )
             ) {
                 Icon(
                     imageVector = Icons.Default.Remove,
@@ -132,15 +122,12 @@ fun WorkoutWeightStepper(
                 color = token.colors.textPrimary,
                 modifier = Modifier.width(token.spacing.xxl)
             )
-            IconButton(
+            GIconButton(
                 onClick = {
                     val next = (valueKg + step).coerceIn(minValue, maxValue)
                     if (next != valueKg) onValueChange(next)
                 },
                 enabled = valueKg < maxValue,
-                colors = IconButtonDefaults.iconButtonColors(
-                    contentColor = token.colors.textPrimary
-                )
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,

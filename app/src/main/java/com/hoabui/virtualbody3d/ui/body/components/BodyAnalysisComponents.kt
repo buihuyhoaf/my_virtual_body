@@ -55,10 +55,10 @@ import com.hoabui.virtualbody3d.ui.body.screen.BodyScoreChip
 import com.hoabui.virtualbody3d.ui.body.screen.FloatingMetricChip
 import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
 import com.hoabui.virtualbody3d.ui.body.state.BodyUiState
-import com.hoabui.virtualbody3d.ui.components.SectionTitle
-import com.hoabui.virtualbody3d.ui.common_ui.CardImageWithText
-import com.hoabui.virtualbody3d.ui.common_ui.CardSize
-import com.hoabui.virtualbody3d.ui.common_ui.cardDimensions
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.CardSize
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCard
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.cardDimensions
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
 import com.hoabui.virtualbody3d.ui.mealcapture.MealPageUiModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
@@ -73,7 +73,11 @@ fun HeroSection(
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis
     Column(verticalArrangement = Arrangement.spacedBy(token.spacing.xs)) {
-        SectionTitle(textResId = R.string.home_section_body, onSeeMoreClick = onViewBodyDetailClick)
+        GSectionHeader(
+            title = stringResource(R.string.home_section_body),
+            actionText = stringResource(R.string.home_section_see_more),
+            onActionClick = onViewBodyDetailClick,
+        )
         Box(
             modifier = modifier
                 .clip(RoundedCornerShape(token.radius.lg))
@@ -264,8 +268,12 @@ fun SectionHorizontalRow(
     Column(
         verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
     ) {
-        if (titleResId != null){
-            SectionTitle(textResId = titleResId, onSeeMoreClick = onSeeMoreClick)
+        if (titleResId != null) {
+            GSectionHeader(
+                title = stringResource(titleResId),
+                actionText = if (onSeeMoreClick != null) stringResource(R.string.home_section_see_more) else null,
+                onActionClick = onSeeMoreClick,
+            )
         }
         LazyRow(
             modifier = modifier,
@@ -295,14 +303,14 @@ fun UpcomingExercisesRow(
             items = exercises,
             key = { it.name }
         ) { item ->
-            CardImageWithText(
-                imageRes = item.imageResId,
+            GImageCard(
+                model = item.imageResId,
+                contentDescription = item.name,
                 firstLineText = item.name,
                 secondLineText = "${item.reps}x${item.sets}",
-                cardSize = CardSize.Small
-            ) {
-
-            }
+                cardSize = CardSize.Small,
+                onClick = {},
+            )
         }
         item(key = "add_exercise") {
             AddCard(cardSize = CardSize.Small, onClick = onAddExerciseClick)
@@ -385,14 +393,14 @@ fun SupplementsRow(
             items = supplements,
             key = { "${it.name}-${it.nutrient}" }
         ) { item ->
-            CardImageWithText(
-                imageRes = item.imageResId,
+            GImageCard(
+                model = item.imageResId,
+                contentDescription = item.name,
                 firstLineText = item.name,
                 secondLineText = item.nutrient,
-                cardSize = CardSize.Large
-            ) {
-
-            }
+                cardSize = CardSize.Large,
+                onClick = {},
+            )
         }
         item(key = "add_supplements") {
             AddCard(cardSize = CardSize.Large, onClick = {})

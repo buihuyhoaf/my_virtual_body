@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GIconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -40,7 +40,7 @@ fun CaptureControlsRow(
             modifier = Modifier.weight(1f),
             contentAlignment = Alignment.CenterStart
         ) {
-            IconButton(
+            GIconButton(
                 onClick = onGallery,
                 enabled = buttonsEnabled,
                 modifier = Modifier
@@ -61,7 +61,7 @@ fun CaptureControlsRow(
             modifier = Modifier,
             contentAlignment = Alignment.Center
         ) {
-            IconButton(
+            GIconButton(
                 onClick = onCapture,
                 enabled = buttonsEnabled,
                 modifier = Modifier
@@ -87,7 +87,7 @@ fun CaptureControlsRow(
             modifier = Modifier.weight(1f),
             contentAlignment = Alignment.CenterEnd
         ) {
-            IconButton(
+            GIconButton(
                 onClick = onRotate,
                 enabled = buttonsEnabled,
                 modifier = Modifier

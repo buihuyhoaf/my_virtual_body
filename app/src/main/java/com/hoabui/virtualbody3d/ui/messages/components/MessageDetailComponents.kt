@@ -22,7 +22,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GIconButton
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GIconButtonVariant
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -206,18 +207,15 @@ internal fun ChatInputBar(
                         .then(if (sendEnabled) Modifier else Modifier.alpha(0.5f)),
                     contentAlignment = Alignment.Center,
                 ) {
-                    IconButton(
+                    GIconButton(
                         onClick = { /* Send logic not implemented */ },
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape)
-                            .background(token.colors.primary),
+                        modifier = Modifier.fillMaxSize(),
                         enabled = sendEnabled,
+                        variant = GIconButtonVariant.Filled,
                     ) {
                         Icon(
                             imageVector = Icons.Default.Send,
                             contentDescription = "Send",
-                            tint = token.colors.onPrimary,
                         )
                     }
                 }

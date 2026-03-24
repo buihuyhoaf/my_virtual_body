@@ -35,10 +35,29 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.ui.common_ui.CardSize
-import com.hoabui.virtualbody3d.ui.common_ui.cardDimensions
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.CardImageWithTextSizeTokens
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CardSize + cardDimensions (moved from deprecated CardImageWithText.kt)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Visual scale for [GImageCard]. Dimensions come from
+ * [CardImageWithTextSizeTokens] on `GymTheme.token.bodyAnalysis.cardImageWithText`.
+ */
+enum class CardSize { Small, Medium, Large }
+
+/**
+ * Resolves [CardImageWithTextSizeTokens] to (width, height) for a given [CardSize].
+ */
+fun CardImageWithTextSizeTokens.cardDimensions(cardSize: CardSize): Pair<Dp, Dp> =
+    when (cardSize) {
+        CardSize.Small -> smallWidth to smallHeight
+        CardSize.Medium -> mediumWidth to mediumHeight
+        CardSize.Large -> largeWidth to largeHeight
+    }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Internal helpers

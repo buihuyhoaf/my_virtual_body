@@ -22,12 +22,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.action.GActionCardRow
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
 import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
 import com.hoabui.virtualbody3d.ui.profile.components.InBodyScoreCard
 import com.hoabui.virtualbody3d.ui.profile.components.LogoutButton
 import com.hoabui.virtualbody3d.ui.profile.components.ProfileHeader
-import com.hoabui.virtualbody3d.ui.profile.components.ProfileSectionTitle
-import com.hoabui.virtualbody3d.ui.profile.components.SettingsRow
 import com.hoabui.virtualbody3d.ui.profile.viewmodel.ProfileViewModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
@@ -71,14 +71,13 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(token.spacing.xl))
 
-            ProfileSectionTitle(stringResource(R.string.profile_section_account))
-            Spacer(modifier = Modifier.height(token.spacing.xs))
-            SettingsRow(
+            GSectionHeader(title = stringResource(R.string.profile_section_account))
+            GActionCardRow(
                 icon = Icons.Default.Person,
                 title = stringResource(R.string.profile_personal_info),
                 onClick = onEditProfile,
             )
-            SettingsRow(
+            GActionCardRow(
                 icon = Icons.Default.Lock,
                 title = stringResource(R.string.profile_change_password),
                 onClick = {},
@@ -86,19 +85,18 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(token.spacing.lg))
 
-            ProfileSectionTitle(stringResource(R.string.profile_section_app_settings))
-            Spacer(modifier = Modifier.height(token.spacing.xs))
-            SettingsRow(
+            GSectionHeader(title = stringResource(R.string.profile_section_app_settings))
+            GActionCardRow(
                 icon = Icons.Default.Notifications,
                 title = stringResource(R.string.profile_notifications),
                 onClick = {},
             )
-            SettingsRow(
+            GActionCardRow(
                 icon = Icons.Default.Security,
                 title = stringResource(R.string.profile_privacy),
                 onClick = {},
             )
-            SettingsRow(
+            GActionCardRow(
                 icon = Icons.Default.Translate,
                 title = stringResource(R.string.profile_language),
                 onClick = {},
@@ -106,14 +104,13 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(token.spacing.lg))
 
-            ProfileSectionTitle(stringResource(R.string.profile_section_support))
-            Spacer(modifier = Modifier.height(token.spacing.xs))
-            SettingsRow(
+            GSectionHeader(title = stringResource(R.string.profile_section_support))
+            GActionCardRow(
                 icon = Icons.Default.QuestionMark,
                 title = stringResource(R.string.profile_help_center),
                 onClick = {},
             )
-            SettingsRow(
+            GActionCardRow(
                 icon = Icons.Default.Info,
                 title = stringResource(R.string.profile_about_app),
                 onClick = {},

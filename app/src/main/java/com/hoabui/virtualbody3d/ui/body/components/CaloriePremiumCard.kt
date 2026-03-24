@@ -14,10 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -88,12 +86,9 @@ fun CaloriePremiumCard(
 
     val ringDescription = stringResource(R.string.calorie_premium_ring_content_description)
 
-    Card(
+    GCard(
         modifier = modifier.wrapContentWidth(),
-        shape = RoundedCornerShape(token.radius.xl),
-        colors = CardDefaults.cardColors(containerColor = token.colors.surface),
         border = BorderStroke(token.spacing.dividerThickness, token.colors.calorieRingTrack),
-        elevation = CardDefaults.cardElevation(defaultElevation = token.card.elevation)
     ) {
         Row(
             modifier = Modifier

@@ -16,7 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.SwitchCamera
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GIconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -137,7 +137,7 @@ fun CameraCaptureContent(
         if (onSwitchCamera == null) {
             val colors = token.colors
             val cameraToken = token.camera
-            IconButton(
+            GIconButton(
                 onClick = switchCamera,
                 modifier = Modifier
                     .align(Alignment.TopStart)

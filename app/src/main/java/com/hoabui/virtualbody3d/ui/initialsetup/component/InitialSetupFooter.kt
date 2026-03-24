@@ -7,15 +7,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.Typography
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,48 +51,34 @@ fun InitialSetupFooter(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(
+                GButton(
+                    text = stringResource(R.string.initial_setup_skip),
                     onClick = onSkip,
-                    colors = ButtonDefaults.textButtonColors(contentColor = colors.primary),
-                    shape = RoundedCornerShape(0.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.initial_setup_skip),
-                        style = typography.titleMedium
-                    )
-                }
+                    variant = GButtonVariant.Ghost,
+                )
             }
         }
-        Button(
+        GButton(
+            text = if (currentStep == totalSteps - 1) {
+                stringResource(R.string.initial_setup_begin)
+            } else {
+                stringResource(R.string.initial_setup_continue)
+            },
             onClick = onPrimaryClick,
             enabled = isNextEnabled,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(onboardingTokens.primaryButtonHeight),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = colors.primary,
-                disabledContainerColor = colors.surfaceSubtle,
-                disabledContentColor = colors.textMuted
-            ),
-            shape = RoundedCornerShape(radius.lg),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = elevation.level0)
-        ) {
-            Text(
-                text = if (currentStep == totalSteps - 1) {
-                    stringResource(R.string.initial_setup_begin)
-                } else {
-                    stringResource(R.string.initial_setup_continue)
-                },
-                style = typography.titleMedium
-            )
-            Spacer(modifier = Modifier.size(spacing.xxs))
-            if (currentStep < totalSteps - 1) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
+            trailingIcon = if (currentStep < totalSteps - 1) {
+                {
+                    Spacer(modifier = Modifier.size(spacing.xxs))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            } else null,
+        )
     }
 }

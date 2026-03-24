@@ -9,9 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import com.hoabui.virtualbody3d.ui.common_ui.atom.progress.GCircularProgress
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -77,7 +75,7 @@ fun FloatingMetricChip(
             if (!value.isNullOrEmpty()){
                 Text(
                     text = value,
-                    style = MaterialTheme.typography.labelLarge,
+                    style = token.typography.labelLarge,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -96,7 +94,7 @@ fun BodyScoreChip(
     val chipShape = RoundedCornerShape(token.radius.lg)
     val progressShape = RoundedCornerShape(token.radius.sm)
     val clamped = score.coerceIn(0, 100)
-    val textStyle = if (prominent) MaterialTheme.typography.titleMedium else MaterialTheme.typography.labelLarge
+    val textStyle = if (prominent) token.typography.titleMedium else token.typography.labelLarge
     Surface(
         modifier = modifier.widthIn(
             min = if (prominent) bodyToken.scoreChipProminentMinWidth else bodyToken.scoreChipMinWidth
@@ -122,8 +120,8 @@ fun BodyScoreChip(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(
-                    progress = { clamped / 100f },
+                GCircularProgress(
+                    progress = clamped / 100f,
                     modifier = Modifier.size(
                         if (prominent) bodyToken.scoreChipProminentProgressSize else bodyToken.scoreChipProgressSize
                     ),
@@ -132,9 +130,7 @@ fun BodyScoreChip(
                     } else {
                         bodyToken.scoreChipStrokeWidth
                     },
-                    color = token.colors.primary,
                     trackColor = token.colors.outlineSoft,
-                    strokeCap = StrokeCap.Round
                 )
                 Box(
                     modifier = Modifier

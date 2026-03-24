@@ -6,18 +6,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.hoabui.virtualbody3d.core.extensions.toVietnameseTopBarDate
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutFeedItem
 import com.hoabui.virtualbody3d.ui.body.components.SectionHorizontalRow
-import com.hoabui.virtualbody3d.ui.common_ui.CardImageWithText
-import com.hoabui.virtualbody3d.ui.common_ui.CardSize
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.CardSize
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCard
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import java.time.LocalDate
 
@@ -53,14 +51,10 @@ fun WorkoutDayCard(
         token.card.padding
     }
 
-    Card(
+    GCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(token.card.cornerRadius),
-        colors = CardDefaults.cardColors(
-            containerColor = containerColor
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = token.card.elevation),
-        content = {
+        containerColor = containerColor,
+    ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -78,14 +72,14 @@ fun WorkoutDayCard(
                         items = day.exercises,
                         key = { "${it.name}-${it.sets}x${it.reps}" }
                     ) { exercise ->
-                        CardImageWithText(
-                            imageRes = exercise.imageResId,
+                        GImageCard(
+                            model = exercise.imageResId,
+                            contentDescription = exercise.name,
                             firstLineText = exercise.name,
                             secondLineText = "${exercise.sets}x${exercise.reps}",
-                            cardSize = CardSize.Large
-                        ) {
-
-                        }
+                            cardSize = CardSize.Large,
+                            onClick = {},
+                        )
                     }
                 }
                 WorkoutSummaryRow(
@@ -94,8 +88,7 @@ fun WorkoutDayCard(
                     muscleGroups = day.muscleGroups
                 )
             }
-        }
-    )
+    }
 }
 
 @Composable

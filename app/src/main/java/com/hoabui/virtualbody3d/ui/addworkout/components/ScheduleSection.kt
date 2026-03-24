@@ -4,17 +4,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Alignment
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
+import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -172,10 +172,7 @@ private fun ScheduleTimePickerDialog(
     )
     androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
         val token = GymTheme.token
-        Card(
-            shape = RoundedCornerShape(token.radius.lg),
-            colors = CardDefaults.cardColors(containerColor = token.colors.surface)
-        ) {
+        GCard(containerColor = token.colors.surface) {
             Column(
                 modifier = Modifier.padding(token.spacing.md),
                 verticalArrangement = Arrangement.spacedBy(token.spacing.md)
@@ -188,17 +185,17 @@ private fun ScheduleTimePickerDialog(
                 androidx.compose.material3.TimePicker(state = state)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+                    horizontalArrangement = Arrangement.spacedBy(token.spacing.xs, Alignment.End)
                 ) {
-                    OutlinedButton(onClick = onDismiss) {
-                        Text(stringResource(android.R.string.cancel))
-                    }
-                    Spacer(modifier = Modifier.width(token.spacing.xs))
-                    Button(
-                        onClick = { onConfirm(LocalTime.of(state.hour, state.minute)) }
-                    ) {
-                        Text(stringResource(android.R.string.ok))
-                    }
+                    GButton(
+                        text = stringResource(android.R.string.cancel),
+                        onClick = onDismiss,
+                        variant = GButtonVariant.Ghost,
+                    )
+                    GButton(
+                        text = stringResource(android.R.string.ok),
+                        onClick = { onConfirm(LocalTime.of(state.hour, state.minute)) },
+                    )
                 }
             }
         }

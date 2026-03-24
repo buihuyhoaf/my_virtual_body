@@ -13,11 +13,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -104,33 +103,17 @@ fun ConfirmWorkoutDialog(
                     horizontalArrangement = Arrangement.spacedBy(token.spacing.md),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedButton(
+                    GButton(
+                        text = stringResource(R.string.add_workout_cancel),
                         onClick = onDismiss,
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(token.button.cornerRadius),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = token.colors.textPrimary
-                        )
-                    ) {
-                        Text(
-                            text = stringResource(R.string.add_workout_cancel),
-                            style = token.typography.labelLarge
-                        )
-                    }
-                    Button(
+                        variant = GButtonVariant.Outlined,
+                    )
+                    GButton(
+                        text = stringResource(R.string.add_workout_confirm_confirm),
                         onClick = onConfirm,
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(token.button.cornerRadius),
-                        colors = ButtonDefaults.buttonColors(containerColor = token.colors.primary),
-                        elevation = ButtonDefaults.buttonElevation(
-                            defaultElevation = token.elevation.level0
-                        )
-                    ) {
-                        Text(
-                            text = stringResource(R.string.add_workout_confirm_confirm),
-                            style = token.typography.labelLarge
-                        )
-                    }
+                    )
                 }
             }
         }

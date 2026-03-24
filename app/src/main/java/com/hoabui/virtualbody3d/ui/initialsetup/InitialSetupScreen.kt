@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.progress.GCircularProgress
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -63,7 +63,7 @@ fun InitialSetupScreen(
                     .background(colors.surface),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = colors.primary)
+                GCircularProgress()
             }
         },
         errorContent = { mod, message ->
@@ -109,7 +109,7 @@ fun InitialSetupScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    CircularProgressIndicator(color = colors.primary)
+                                    GCircularProgress()
                                 }
                             }
                             else -> when (state.currentStep) {

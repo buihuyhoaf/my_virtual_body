@@ -10,9 +10,8 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
+import com.hoabui.virtualbody3d.ui.common_ui.atom.progress.GCircularProgress
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -87,7 +86,6 @@ fun CameraCaptureScreenContent(
         modifier = modifier
             .fillMaxSize()
             .background(colors.background)
-            .statusBarsPadding()
     ) {
         Column(
             modifier = Modifier
@@ -184,7 +182,7 @@ private fun CapturedImageContent(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = colors.primary)
+                GCircularProgress()
             }
         }
     }
