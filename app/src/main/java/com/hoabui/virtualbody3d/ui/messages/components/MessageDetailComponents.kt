@@ -24,7 +24,7 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Icon
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GIconButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GIconButtonVariant
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -154,7 +154,7 @@ internal fun ChatBubbleRow(
                     vertical = token.spacing.xs,
                 ),
         ) {
-            Text(
+            GText(
                 text = text,
                 style = token.typography.bodyMedium,
                 color = if (isOutgoing) token.colors.onPrimary else token.colors.textPrimary,

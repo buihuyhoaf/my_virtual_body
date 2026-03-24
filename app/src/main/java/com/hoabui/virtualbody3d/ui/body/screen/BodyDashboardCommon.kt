@@ -12,7 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import com.hoabui.virtualbody3d.ui.common_ui.atom.progress.GCircularProgress
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,7 +73,7 @@ fun FloatingMetricChip(
                 }
             }
             if (!value.isNullOrEmpty()){
-                Text(
+                GText(
                     text = value,
                     style = token.typography.labelLarge,
                     fontWeight = FontWeight.Bold
@@ -144,7 +144,7 @@ fun BodyScoreChip(
                         .background(token.colors.primarySoft, progressShape)
                 )
             }
-            Text(
+            GText(
                 text = clamped.toString(),
                 style = textStyle,
                 fontWeight = FontWeight.Bold,

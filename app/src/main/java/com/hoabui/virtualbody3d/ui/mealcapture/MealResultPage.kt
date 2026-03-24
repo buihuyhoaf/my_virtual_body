@@ -17,9 +17,9 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Surface
+import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -120,7 +120,7 @@ fun MealResultPage(
                         .padding(spacing.lg),
                     verticalArrangement = Arrangement.spacedBy(spacing.md)
                 ) {
-                    Text(
+                    GText(
                         text = meal.title,
                         style = token.typography.titleMedium,
                         color = colors.textPrimary,
@@ -157,12 +157,12 @@ private fun NutritionMetricColumn(
         verticalArrangement = Arrangement.spacedBy(spacing.xxs),
         horizontalAlignment = Alignment.Start
     ) {
-        Text(
+        GText(
             text = label,
             style = token.typography.labelSmall,
             color = colors.textSecondary
         )
-        Text(
+        GText(
             text = value,
             style = token.typography.titleLarge,
             color = colors.textPrimary,
@@ -197,12 +197,10 @@ private fun NutritionSummaryGrid(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 rowMetrics.forEach { metric ->
-                    Surface(
+                    GSurface(
                         modifier = Modifier.weight(1f),
                         color = colors.surfaceElevated,
-                        tonalElevation = token.elevation.level0,
-                        shadowElevation = token.elevation.level0,
-                        shape = RoundedCornerShape(token.radius.md)
+                        shape = RoundedCornerShape(token.radius.md),
                     ) {
                         Column(
                             modifier = Modifier.padding(
@@ -247,13 +245,13 @@ private fun ReactionSummaryRow() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             emojis.forEach { emoji ->
-                Text(
+                GText(
                     text = emoji,
                     style = token.typography.titleLarge
                 )
             }
         }
-        Text(
+        GText(
             text = reactionCountLabel,
             style = token.typography.labelSmall,
             color = colors.textSecondary

@@ -28,7 +28,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.progress.GProgressBar
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -125,7 +125,7 @@ fun DailyMealsAutoRow(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(token.spacing.xs),
     ) {
-        Text(
+        GText(
             text = title,
             style = token.typography.titleMedium,
             color = token.colors.textPrimary,
@@ -262,7 +262,7 @@ private fun DailyMealCard(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(token.spacing.xxxs),
                 ) {
-                    Text(
+                    GText(
                         text = item.title,
                         style = token.typography.titleSmall,
                         color = token.colors.textPrimary,
@@ -270,7 +270,7 @@ private fun DailyMealCard(
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    Text(
+                    GText(
                         text = "${item.caloriesKcal} kcal",
                         style = token.typography.labelLarge,
                         color = macroColor,
@@ -355,7 +355,7 @@ private fun DailyMealsAutoRowPreview() {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(GymTheme.token.colors.background)
-                .padding(vertical = 8.dp),
+                .padding(vertical = GymTheme.token.spacing.xs),
         )
     }
 }

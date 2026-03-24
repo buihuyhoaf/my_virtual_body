@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -39,7 +39,7 @@ fun InitialSetupHeader(
             .padding(vertical = spacing.xl),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
+        GText(
             text = stringResource(R.string.initial_setup_step, currentStep + 1),
             style = typography.labelMedium,
             color = colors.textSecondary

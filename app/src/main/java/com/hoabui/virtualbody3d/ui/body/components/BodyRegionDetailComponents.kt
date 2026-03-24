@@ -19,7 +19,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.info.GInfoRow
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,7 +54,7 @@ internal fun MuscleCompositionCard(modifier: Modifier = Modifier) {
             modifier = Modifier.padding(token.spacing.md),
             verticalArrangement = Arrangement.spacedBy(token.spacing.md),
         ) {
-            Text(
+            GText(
                 text = stringResource(R.string.body_region_detail_muscle_composition),
                 style = token.typography.titleSmall,
                 color = token.colors.textPrimary,
@@ -82,7 +84,7 @@ internal fun PerformanceCard(modifier: Modifier = Modifier) {
             modifier = Modifier.padding(token.spacing.md),
             verticalArrangement = Arrangement.spacedBy(token.spacing.md),
         ) {
-            Text(
+            GText(
                 text = stringResource(R.string.body_region_detail_performance),
                 style = token.typography.titleSmall,
                 color = token.colors.textPrimary,
@@ -117,7 +119,7 @@ internal fun BalanceCard(modifier: Modifier = Modifier) {
             modifier = Modifier.padding(token.spacing.md),
             verticalArrangement = Arrangement.spacedBy(token.spacing.md),
         ) {
-            Text(
+            GText(
                 text = stringResource(R.string.body_region_detail_balance),
                 style = token.typography.titleSmall,
                 color = token.colors.textPrimary,
@@ -142,7 +144,7 @@ internal fun HealthIndicatorsCard(modifier: Modifier = Modifier) {
             modifier = Modifier.padding(token.spacing.md),
             verticalArrangement = Arrangement.spacedBy(token.spacing.md),
         ) {
-            Text(
+            GText(
                 text = stringResource(R.string.body_region_detail_health_indicators),
                 style = token.typography.titleSmall,
                 color = token.colors.textPrimary,
@@ -178,22 +180,7 @@ internal fun HorizontalBarRow(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(token.spacing.xxs),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = label,
-                style = token.typography.bodySmall,
-                color = token.colors.textSecondary,
-            )
-            Text(
-                text = value,
-                style = token.typography.bodyMedium,
-                color = token.colors.textPrimary,
-            )
-        }
+        GInfoRow(label = label, value = value)
         GProgressBar(progress = progress)
     }
 }
@@ -242,13 +229,13 @@ internal fun RadialScoreBox(
                         style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
                     )
                 }
-                Text(
+                GText(
                     text = "$score",
                     style = token.typography.titleMedium,
                     color = token.colors.textPrimary,
                 )
             }
-            Text(
+            GText(
                 text = label,
                 style = token.typography.labelSmall,
                 color = token.colors.textSecondary,
@@ -270,7 +257,7 @@ internal fun BalanceBarRow(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(token.spacing.xs),
     ) {
-        Text(
+        GText(
             text = leftLabel,
             style = token.typography.bodySmall,
             color = token.colors.textSecondary,
@@ -278,7 +265,7 @@ internal fun BalanceBarRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(24.dp)
+                .height(token.spacing.lg)
                 .clip(RoundedCornerShape(token.radius.sm))
                 .background(token.colors.surfaceSubtle),
             horizontalArrangement = Arrangement.Start,
@@ -302,12 +289,12 @@ internal fun BalanceBarRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(
+            GText(
                 text = "L $leftValue%",
                 style = token.typography.labelSmall,
                 color = token.colors.textSecondary,
             )
-            Text(
+            GText(
                 text = "R $rightValue%",
                 style = token.typography.labelSmall,
                 color = token.colors.textSecondary,
@@ -361,12 +348,12 @@ internal fun ExerciseCard(
             modifier = Modifier.padding(token.spacing.md),
             verticalArrangement = Arrangement.spacedBy(token.spacing.xs),
         ) {
-            Text(
+            GText(
                 text = name,
                 style = token.typography.titleSmall,
                 color = token.colors.textPrimary,
             )
-            Text(
+            GText(
                 text = description,
                 style = token.typography.bodySmall,
                 color = token.colors.textSecondary,
@@ -377,18 +364,18 @@ internal fun ExerciseCard(
                 horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Surface(
+                GSurface(
                     shape = RoundedCornerShape(token.radius.sm),
                     color = token.colors.primarySoft,
                 ) {
-                    Text(
+                    GText(
                         text = difficulty,
                         style = token.typography.labelSmall,
                         color = token.colors.primary,
                         modifier = Modifier.padding(horizontal = token.spacing.xs, vertical = 2.dp),
                     )
                 }
-                Text(
+                GText(
                     text = targetMuscle,
                     style = token.typography.labelSmall,
                     color = token.colors.textSecondary,
@@ -430,7 +417,7 @@ internal fun RealLifeApplicationsCard(modifier: Modifier = Modifier) {
                             .background(token.colors.primary),
                     )
                     Spacer(modifier = Modifier.width(token.spacing.xs))
-                    Text(
+                    GText(
                         text = stringResource(resId),
                         style = token.typography.bodyMedium,
                         color = token.colors.textPrimary,

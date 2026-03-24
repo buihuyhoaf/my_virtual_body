@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -108,7 +108,7 @@ fun WorkoutDayHeader(
     } else {
         token.typography.titleSmall
     }
-    Text(
+    GText(
         text = dateStr,
         style = textStyle,
         color = token.colors.textSecondary
@@ -145,28 +145,28 @@ private fun WorkoutSummaryRow(
         horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
+        GText(
             text = durationText,
             style = token.typography.bodySmall,
             color = token.colors.textSecondary
         )
-        Text(
+        GText(
             text = "·",
             style = token.typography.bodySmall,
             color = token.colors.textSecondary
         )
-        Text(
+        GText(
             text = caloriesText,
             style = token.typography.bodySmall,
             color = token.colors.textSecondary
         )
         if (muscleLabel != null) {
-            Text(
+            GText(
                 text = "·",
                 style = token.typography.bodySmall,
                 color = token.colors.textSecondary
             )
-            Text(
+            GText(
                 text = muscleLabel,
                 style = token.typography.bodySmall,
                 color = token.colors.textPrimary

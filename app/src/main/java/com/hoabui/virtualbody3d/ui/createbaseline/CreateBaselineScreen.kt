@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -185,14 +185,14 @@ private fun CreateBaselineErrorSnackbarOrDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(
+            GText(
                 text = stringResource(R.string.error_dialog_title),
                 style = typography.titleLarge,
                 color = colors.textPrimary
             )
         },
         text = {
-            Text(
+            GText(
                 text = message,
                 style = typography.bodyMedium,
                 color = colors.textPrimary

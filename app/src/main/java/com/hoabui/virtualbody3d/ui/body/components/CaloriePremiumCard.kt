@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -178,7 +178,7 @@ private fun DeficitText(
     }
     val deficitColor =
         if (deficit >= 0) token.colors.calorieDeficitPositive else token.colors.calorieDeficitNegative
-    Text(
+    GText(
         text = text,
         style = token.typography.headlineSmall,
         color = deficitColor,
@@ -217,8 +217,8 @@ private fun MetricHorizontalLineCell(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.Center
         ) {
-            Text(text = "$value", style = token.typography.bodyMedium, color = color)
-            Text(text = label, style = token.typography.labelSmall, color = token.colors.textSecondary)
+            GText(text = "$value", style = token.typography.bodyMedium, color = color)
+            GText(text = label, style = token.typography.labelSmall, color = token.colors.textSecondary)
         }
     }
 }

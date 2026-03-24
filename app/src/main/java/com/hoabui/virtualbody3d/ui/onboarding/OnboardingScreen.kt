@@ -22,7 +22,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -181,13 +181,13 @@ private fun OnboardingSlide1(
             modifier = Modifier.padding(bottom = spacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
+            GText(
                 text = stringResource(R.string.onboarding_slide1_title),
                 style = typography.headlineMedium,
                 color = colors.textPrimary
             )
             Spacer(modifier = Modifier.height(spacing.xs))
-            Text(
+            GText(
                 text = stringResource(R.string.onboarding_slide1_subtitle),
                 style = typography.bodyLarge,
                 color = colors.textSecondary,
@@ -247,13 +247,13 @@ private fun OnboardingSlide2(
             modifier = Modifier.padding(bottom = spacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
+            GText(
                 text = stringResource(R.string.onboarding_slide2_title),
                 style = typography.headlineMedium,
                 color = colors.textPrimary
             )
             Spacer(modifier = Modifier.height(spacing.xs))
-            Text(
+            GText(
                 text = stringResource(R.string.onboarding_slide2_subtitle),
                 style = typography.bodyLarge,
                 color = colors.textSecondary,
@@ -308,13 +308,13 @@ private fun OnboardingSlide3(
             modifier = Modifier.padding(bottom = spacing.xs),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
+            GText(
                 text = stringResource(R.string.onboarding_slide3_title),
                 style = typography.headlineMedium,
                 color = colors.textPrimary
             )
             Spacer(modifier = Modifier.height(spacing.xs))
-            Text(
+            GText(
                 text = stringResource(R.string.onboarding_slide3_subtitle),
                 style = typography.bodyLarge,
                 color = colors.textSecondary,
@@ -322,7 +322,7 @@ private fun OnboardingSlide3(
                 modifier = Modifier.padding(horizontal = spacing.md)
             )
         }
-        Text(
+        GText(
             text = stringResource(R.string.onboarding_disclaimer),
             style = typography.labelSmall,
             color = colors.textSecondary.copy(alpha = 0.7f),

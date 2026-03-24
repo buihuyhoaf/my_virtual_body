@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,12 +38,15 @@ fun GText(
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
     textAlign: TextAlign? = null,
+    fontWeight: FontWeight? = null,
 ) {
     val token = GymTheme.token
+    val resolvedStyle = (style ?: token.typography.bodyMedium)
+        .let { if (fontWeight != null) it.copy(fontWeight = fontWeight) else it }
     Text(
         text = text,
         modifier = modifier,
-        style = style ?: token.typography.bodyMedium,
+        style = resolvedStyle,
         color = color ?: token.colors.textPrimary,
         maxLines = maxLines,
         overflow = overflow,

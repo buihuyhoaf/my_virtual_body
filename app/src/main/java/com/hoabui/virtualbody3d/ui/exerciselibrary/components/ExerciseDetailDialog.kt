@@ -19,8 +19,8 @@ import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Icon
 import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,12 +61,12 @@ fun ExerciseBulletList(
                 horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
                 verticalAlignment = Alignment.Top
             ) {
-                Text(
+                GText(
                     text = "•",
                     style = token.typography.bodyMedium,
                     color = token.colors.textPrimary
                 )
-                Text(
+                GText(
                     text = item,
                     style = token.typography.bodyMedium,
                     color = token.colors.textPrimary,
@@ -87,17 +87,17 @@ fun SafetyNoteCard(
     val backgroundColor = token.colors.surfaceSubtle
     val padding: Dp = token.spacing.xs
 
-    Surface(
+    GSurface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(token.radius.sm),
-        color = backgroundColor
+        color = backgroundColor,
     ) {
         Column(
             modifier = Modifier.padding(padding),
             verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
         ) {
             if (items.isEmpty()) {
-                Text(
+                GText(
                     text = notes,
                     style = token.typography.bodyMedium,
                     color = token.colors.textPrimary
@@ -128,7 +128,7 @@ private fun DialogSectionLabel(
     modifier: Modifier = Modifier
 ) {
     val token = GymTheme.token
-    Text(
+    GText(
         text = text,
         style = token.typography.labelMedium,
         color = token.colors.textSecondary,
@@ -196,7 +196,7 @@ fun ExerciseDetailDialog(
                         verticalArrangement = Arrangement.spacedBy(token.spacing.md)
                     ) {
                     // Exercise name below image
-                    Text(
+                    GText(
                         text = exercise.name,
                         style = token.typography.titleLarge,
                         color = token.colors.textPrimary
@@ -272,7 +272,7 @@ fun ExerciseDetailDialog(
                     if (steps.isNotEmpty()) {
                         ExerciseBulletList(items = steps)
                     } else {
-                        Text(
+                        GText(
                             text = exercise.description,
                             style = token.typography.bodyMedium,
                             color = token.colors.textPrimary
@@ -285,7 +285,7 @@ fun ExerciseDetailDialog(
 
                     // 5. Last weight (optional)
                     exercise.lastWeightKg?.let { kg ->
-                        Text(
+                        GText(
                             text = stringResource(R.string.exercise_detail_last_weight, kg),
                             style = token.typography.bodySmall,
                             color = token.colors.textSecondary
@@ -327,7 +327,7 @@ fun ExerciseDetailDialog(
                             vertical = token.spacing.xxs
                         )
                 ) {
-                    Text(
+                    GText(
                         text = stringResource(ExerciseDisplayResources.difficultyResId(exercise.difficulty)),
                         style = token.typography.labelSmall,
                         color = token.colors.surface

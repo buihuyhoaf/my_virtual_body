@@ -19,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import com.hoabui.virtualbody3d.ui.theme.tokens.GymToken
 
 /**
@@ -68,7 +67,7 @@ fun ReviewControlRow(
                     .size(cameraToken.primaryButtonSize)
                     .clip(CircleShape)
                     .border(cameraToken.primaryButtonBorderWidth, colors.primary, CircleShape)
-                    .background(Color.White)
+                    .background(colors.surface)
                     .clickable(
                         enabled = buttonsEnabled,
                         onClick = onConfirmPhoto,

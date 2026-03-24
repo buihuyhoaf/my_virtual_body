@@ -16,7 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.header.GHeaderBlock
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 @Composable
@@ -54,16 +55,10 @@ internal fun ProfileHeader(
             )
         }
         Spacer(modifier = Modifier.height(token.spacing.md))
-        Text(
-            text = displayName,
-            style = token.typography.headlineMedium,
-            color = token.colors.textPrimary,
-        )
-        Spacer(modifier = Modifier.height(token.spacing.xxs))
-        Text(
-            text = email,
-            style = token.typography.bodyMedium,
-            color = token.colors.textSecondary,
+        GHeaderBlock(
+            title = displayName,
+            subtitle = email,
+            contentAlignment = Alignment.CenterHorizontally,
         )
         Spacer(modifier = Modifier.height(token.spacing.md))
         GButton(
@@ -90,27 +85,27 @@ internal fun InBodyScoreCard(
             .clickable(onClick = onCardClick),
         shape = RoundedCornerShape(token.radius.md),
         color = token.colors.surface,
-        border = BorderStroke(width = 1.dp, color = token.colors.borderSubtle),
+        border = BorderStroke(width = token.spacing.dividerThickness, color = token.colors.borderSubtle),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(token.card.padding),
         ) {
-            Text(
+            GText(
                 text = stringResource(R.string.profile_inbody_score),
                 style = token.typography.titleMedium,
                 color = token.colors.textSecondary,
             )
             if (hasScanData && inBodyScore != null) {
                 Spacer(modifier = Modifier.height(token.spacing.xs))
-                Text(
+                GText(
                     text = inBodyScore.toString(),
                     style = token.typography.displaySmall,
                     color = token.colors.textPrimary,
                 )
                 if (scoreLabel.isNotEmpty()) {
-                    Text(
+                    GText(
                         text = scoreLabel,
                         style = token.typography.bodyMedium,
                         color = token.colors.textSecondary,
@@ -121,26 +116,26 @@ internal fun InBodyScoreCard(
                 } else {
                     stringResource(R.string.profile_last_scan, lastScanDate)
                 }
-                Text(
+                GText(
                     text = dateText,
                     style = token.typography.bodySmall,
                     color = token.colors.textMuted,
                 )
                 Spacer(modifier = Modifier.height(token.spacing.xs))
-                Text(
+                GText(
                     text = stringResource(R.string.profile_view_body_analysis),
                     style = token.typography.labelLarge,
                     color = token.colors.primary,
                 )
             } else {
                 Spacer(modifier = Modifier.height(token.spacing.md))
-                Text(
+                GText(
                     text = stringResource(R.string.profile_no_body_scan_yet),
                     style = token.typography.titleMedium,
                     color = token.colors.textPrimary,
                 )
                 Spacer(modifier = Modifier.height(token.spacing.xxs))
-                Text(
+                GText(
                     text = stringResource(R.string.profile_no_scan_subtitle),
                     style = token.typography.bodyMedium,
                     color = token.colors.textSecondary,

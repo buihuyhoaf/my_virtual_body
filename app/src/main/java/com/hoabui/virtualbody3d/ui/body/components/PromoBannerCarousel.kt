@@ -220,7 +220,7 @@ private fun PromoBannerPagerIndicator(
                     .padding(horizontal = token.spacing.xxs)
                     .size(if (isSelected) 8.dp else 6.dp)
                     .background(
-                        color = Color.White,
+                        color = token.colors.onPrimary,
                         shape = CircleShape
                     )
             )

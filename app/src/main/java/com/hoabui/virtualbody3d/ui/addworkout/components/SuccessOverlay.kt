@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -68,14 +68,14 @@ fun SuccessOverlay(
                 tint = token.colors.primary
             )
             Spacer(modifier = Modifier.height(token.spacing.lg))
-            Text(
+            GText(
                 text = stringResource(R.string.add_workout_success_title),
                 style = token.typography.headlineSmall,
                 color = token.colors.textPrimary,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(token.spacing.xs))
-            Text(
+            GText(
                 text = stringResource(R.string.add_workout_success_subtitle),
                 style = token.typography.bodyMedium,
                 color = token.colors.textSecondary,

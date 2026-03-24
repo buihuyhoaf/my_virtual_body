@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -56,7 +56,7 @@ fun BodyDetailAnalystScreen(
                         .padding(token.spacing.md),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
+                    GText(
                         text = stringResource(R.string.body_detail_analyst_placeholder),
                         style = token.typography.bodyMedium,
                         color = token.colors.textSecondary,

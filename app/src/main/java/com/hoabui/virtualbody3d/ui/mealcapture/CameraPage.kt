@@ -11,7 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -103,14 +103,14 @@ fun CameraPage(
                 AlertDialog(
                     onDismissRequest = viewModel::onErrorDismiss,
                     title = {
-                        Text(
+                        GText(
                             text = stringResource(R.string.error_dialog_title),
                             style = token.typography.titleLarge,
                             color = token.colors.textPrimary
                         )
                     },
                     text = {
-                        Text(
+                        GText(
                             text = message,
                             style = token.typography.bodyMedium,
                             color = token.colors.textPrimary
@@ -123,7 +123,7 @@ fun CameraPage(
                             shape = RoundedCornerShape(token.radius.lg),
                             elevation = ButtonDefaults.buttonElevation(defaultElevation = token.elevation.level0)
                         ) {
-                            Text(
+                            GText(
                                 text = stringResource(R.string.error_ok),
                                 style = token.typography.titleMedium
                             )

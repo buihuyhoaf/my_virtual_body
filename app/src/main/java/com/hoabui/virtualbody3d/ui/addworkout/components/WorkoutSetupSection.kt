@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -29,7 +29,7 @@ fun WorkoutSetupSection(
 ) {
     val token = GymTheme.token
     Column(modifier = modifier) {
-        Text(
+        GText(
             text = stringResource(R.string.add_workout_workout_setup),
             style = token.typography.titleSmall,
             color = token.colors.textPrimary,

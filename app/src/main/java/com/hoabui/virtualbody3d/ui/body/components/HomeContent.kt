@@ -47,11 +47,10 @@ fun HomeContent(
     val bodyScore = ((uiState.bmiScalePosition ?: 0.76f) * 100f).toInt().coerceIn(0, 100)
     var isModelInteracting by remember { mutableStateOf(false) }
 
-    GScaffold(modifier = modifier) { padding ->
+    GScaffold(modifier = modifier) {
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
+                .fillMaxSize(),
         ) {
             Column(
                 modifier = Modifier

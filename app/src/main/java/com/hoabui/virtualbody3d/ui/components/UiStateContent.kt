@@ -3,7 +3,7 @@ package com.hoabui.virtualbody3d.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.common_ui.atom.progress.GCircularProgress
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -58,7 +58,7 @@ private fun DefaultError(modifier: Modifier, message: String) {
             .background(token.colors.background),
         contentAlignment = Alignment.Center
     ) {
-        Text(
+        GText(
             text = message,
             color = token.colors.textSecondary
         )

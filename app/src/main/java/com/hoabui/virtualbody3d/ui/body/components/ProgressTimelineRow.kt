@@ -23,8 +23,8 @@ import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
@@ -181,7 +181,7 @@ private fun TimelineItem(
             modifier = Modifier.height(bodyToken.timelineDateSlotHeight),
             contentAlignment = Alignment.Center
         ) {
-            Text(
+            GText(
                 text = item.date,
                 style = token.typography.labelSmall,
                 color = token.colors.textSecondary,
@@ -468,14 +468,14 @@ private fun AvatarFloatingMetricChip(
     val numberPart = value?.let { "%.1f".format(it) } ?: "—"
     val unitMuted = token.colors.textPrimary.copy(alpha = 0.5f)
 
-    Surface(
+    GSurface(
         shape = RoundedCornerShape(token.radius.sm),
         color = token.colors.surfaceElevated.copy(alpha = 0.94f),
         shadowElevation = token.card.elevation,
         border = BorderStroke(
             width = token.spacing.xxxs,
             color = token.colors.borderSubtle.copy(alpha = 0.45f)
-        )
+        ),
     ) {
         Row(
             modifier = Modifier.padding(
@@ -485,7 +485,7 @@ private fun AvatarFloatingMetricChip(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
-            Text(
+            GText(
                 text = numberPart,
                 style = token.typography.labelMedium.copy(
                     fontFamily = InterFontFamily,
@@ -496,11 +496,10 @@ private fun AvatarFloatingMetricChip(
                 overflow = TextOverflow.Ellipsis
             )
             if (value != null) {
-                Text(
+                GText(
                     text = if (isPercentSuffix) unit else " $unit",
-                    style = token.typography.labelSmall,
+                    style = token.typography.labelSmall.copy(fontFamily = InterFontFamily),
                     color = unitMuted,
-                    fontFamily = InterFontFamily,
                     maxLines = 1
                 )
             }

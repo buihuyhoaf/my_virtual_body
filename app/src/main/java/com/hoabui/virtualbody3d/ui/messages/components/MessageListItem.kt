@@ -12,9 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Divider
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.divider.GDivider
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,7 +22,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.domain.model.chat.MessageThread
 import com.hoabui.virtualbody3d.domain.model.chat.UserInfo
@@ -37,14 +35,13 @@ fun MessageListItem(
     modifier: Modifier = Modifier
 ) {
     val token = GymTheme.token
-    val avatarSize = 48.dp
+    val avatarSize = token.spacing.xxl
     val avatarToTextSpacing = token.spacing.md
 
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = token.colors.surface,
-        tonalElevation = 0.dp,
-        shadowElevation = 0.dp
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(token.colors.surface)
     ) {
         Row(
             modifier = Modifier
@@ -61,7 +58,7 @@ fun MessageListItem(
             Box(
                 modifier = Modifier
                     .size(avatarSize)
-                    .clip(RoundedCornerShape(999.dp))
+                    .clip(RoundedCornerShape(token.radius.pill))
                     .background(token.colors.surfaceOverlay),
                 contentAlignment = Alignment.Center
             ) {
@@ -81,7 +78,7 @@ fun MessageListItem(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
+                    GText(
                         text = user?.displayName ?: message.senderId,
                         style = token.typography.bodyLarge,
                         color = token.colors.textPrimary,
@@ -90,7 +87,7 @@ fun MessageListItem(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
-                    Text(
+                    GText(
                         text = message.timestamp,
                         style = token.typography.labelSmall,
                         color = token.colors.textSecondary,
@@ -98,7 +95,7 @@ fun MessageListItem(
                         overflow = TextOverflow.Clip
                     )
                 }
-                Text(
+                GText(
                     text = message.lastMessage,
                     style = token.typography.bodyMedium,
                     color = token.colors.textSecondary,
@@ -107,9 +104,8 @@ fun MessageListItem(
                 )
             }
         }
-        Divider(
+        GDivider(
             color = token.colors.surfaceBorder,
-            thickness = 1.dp,
             modifier = Modifier.padding(start = token.spacing.md + avatarSize + avatarToTextSpacing)
         )
     }

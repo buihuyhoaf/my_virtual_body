@@ -1,11 +1,9 @@
 package com.hoabui.virtualbody3d.ui.addworkout.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -13,22 +11,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Surface
-import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
-import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.ui.addworkout.state.AddWorkoutUiState
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
+import com.hoabui.virtualbody3d.ui.common_ui.atom.divider.GDivider
+import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GMediaInfoCard
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.info.GInfoRow
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import java.time.format.DateTimeFormatter
@@ -58,7 +58,7 @@ fun ConfirmWorkoutDialog(
                     .fillMaxWidth()
                     .padding(token.spacing.md)
             ) {
-                Text(
+                GText(
                     text = stringResource(R.string.add_workout_confirm_title),
                     style = token.typography.titleLarge,
                     color = token.colors.textPrimary,
@@ -71,18 +71,12 @@ fun ConfirmWorkoutDialog(
                     verticalArrangement = Arrangement.spacedBy(token.spacing.xxs)
                 ) {
                     ConfirmExerciseSummary(exercise = exercise)
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = token.spacing.xs),
-                        color = token.colors.borderSubtle
-                    )
+                    GDivider(modifier = Modifier.padding(vertical = token.spacing.xs))
                     ConfirmScheduleSummary(
                         date = state.selectedDate,
                         time = state.selectedTime
                     )
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = token.spacing.xs),
-                        color = token.colors.borderSubtle
-                    )
+                    GDivider(modifier = Modifier.padding(vertical = token.spacing.xs))
                     ConfirmWorkoutSetupSummary(
                         sets = state.sets,
                         reps = state.reps,
@@ -90,10 +84,7 @@ fun ConfirmWorkoutDialog(
                         restSeconds = state.restSeconds
                     )
                     if (state.notes.isNotBlank()) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(vertical = token.spacing.xs),
-                            color = token.colors.borderSubtle
-                        )
+                        GDivider(modifier = Modifier.padding(vertical = token.spacing.xs))
                         ConfirmNotesSummary(notes = state.notes)
                     }
                 }
@@ -126,62 +117,31 @@ private fun ConfirmExerciseSummary(
     modifier: Modifier = Modifier
 ) {
     val token = GymTheme.token
-    val imageHeight = token.spacing.xxl + token.spacing.lg
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = token.spacing.xxs),
-        horizontalArrangement = Arrangement.spacedBy(token.spacing.md),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Surface(
-            modifier = Modifier
-                .height(imageHeight)
-                .fillMaxWidth(0.2f),
-            shape = RoundedCornerShape(token.radius.sm),
-            color = token.colors.surfaceSubtle
-        ) {
-            Image(
-                painter = painterResource(exercise.imageResId),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = exercise.name,
-                style = token.typography.titleMedium,
-                color = token.colors.textPrimary
-            )
-            Spacer(modifier = Modifier.height(token.spacing.xxs))
-            Text(
-                text = stringResource(ExerciseDisplayResources.bodyRegionResId(exercise.bodyRegion)),
-                style = token.typography.bodySmall,
-                color = token.colors.textSecondary
-            )
-            Spacer(modifier = Modifier.height(token.spacing.xxs))
-            Surface(
-                shape = RoundedCornerShape(token.radius.sm),
-                color = token.colors.surfaceSubtle
-            ) {
-                val difficultyTextColor = when (exercise.difficulty) {
-                    Difficulty.Beginner -> token.colors.difficultyBeginnerText
-                    Difficulty.Intermediate -> token.colors.difficultyIntermediateText
-                    Difficulty.Advanced -> token.colors.difficultyAdvancedText
-                }
-                Text(
+    GMediaInfoCard(
+        imageModel = exercise.imageResId,
+        title = exercise.name,
+        subtitle = stringResource(ExerciseDisplayResources.bodyRegionResId(exercise.bodyRegion)),
+        badge = {
+            val difficultyTextColor = when (exercise.difficulty) {
+                Difficulty.Beginner -> token.colors.difficultyBeginnerText
+                Difficulty.Intermediate -> token.colors.difficultyIntermediateText
+                Difficulty.Advanced -> token.colors.difficultyAdvancedText
+            }
+            GSurface(shape = RoundedCornerShape(token.radius.sm)) {
+                GText(
                     text = stringResource(ExerciseDisplayResources.difficultyResId(exercise.difficulty)),
                     style = token.typography.labelSmall,
                     color = difficultyTextColor,
                     modifier = Modifier.padding(
                         horizontal = token.spacing.xs,
-                        vertical = token.spacing.xxs
-                    )
+                        vertical = token.spacing.xxs,
+                    ),
                 )
             }
-        }
-    }
+        },
+        elevation = 0.dp,
+        modifier = modifier.fillMaxWidth(),
+    )
 }
 
 @Composable
@@ -197,17 +157,13 @@ private fun ConfirmScheduleSummary(
             .padding(vertical = token.spacing.xxs),
         verticalArrangement = Arrangement.spacedBy(token.spacing.xxs)
     ) {
-        Text(
-            text = stringResource(R.string.add_workout_date) + ": " +
-                date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
-            style = token.typography.bodyMedium,
-            color = token.colors.textPrimary
+        GInfoRow(
+            label = stringResource(R.string.add_workout_date),
+            value = date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
         )
-        Text(
-            text = stringResource(R.string.add_workout_time) + ": " +
-                time.format(DateTimeFormatter.ofPattern("HH:mm")),
-            style = token.typography.bodyMedium,
-            color = token.colors.textPrimary
+        GInfoRow(
+            label = stringResource(R.string.add_workout_time),
+            value = time.format(DateTimeFormatter.ofPattern("HH:mm")),
         )
     }
 }
@@ -227,25 +183,21 @@ private fun ConfirmWorkoutSetupSummary(
             .padding(vertical = token.spacing.xxs),
         verticalArrangement = Arrangement.spacedBy(token.spacing.xxs)
     ) {
-        Text(
-            text = "${stringResource(R.string.add_workout_sets)}: $sets",
-            style = token.typography.bodyMedium,
-            color = token.colors.textPrimary
+        GInfoRow(
+            label = stringResource(R.string.add_workout_sets),
+            value = sets.toString(),
         )
-        Text(
-            text = "${stringResource(R.string.add_workout_reps)}: $reps",
-            style = token.typography.bodyMedium,
-            color = token.colors.textPrimary
+        GInfoRow(
+            label = stringResource(R.string.add_workout_reps),
+            value = reps.toString(),
         )
-        Text(
-            text = "${stringResource(R.string.add_workout_weight_kg)}: %.1f".format(weightKg),
-            style = token.typography.bodyMedium,
-            color = token.colors.textPrimary
+        GInfoRow(
+            label = stringResource(R.string.add_workout_weight_kg),
+            value = "%.1f".format(weightKg),
         )
-        Text(
-            text = "${stringResource(R.string.add_workout_rest_seconds)}: $restSeconds s",
-            style = token.typography.bodyMedium,
-            color = token.colors.textPrimary
+        GInfoRow(
+            label = stringResource(R.string.add_workout_rest_seconds),
+            value = "$restSeconds s",
         )
     }
 }
@@ -261,13 +213,13 @@ private fun ConfirmNotesSummary(
             .fillMaxWidth()
             .padding(vertical = token.spacing.xxs)
     ) {
-        Text(
+        GText(
             text = stringResource(R.string.add_workout_notes),
             style = token.typography.labelSmall,
             color = token.colors.textSecondary,
             modifier = Modifier.padding(bottom = token.spacing.xxs)
         )
-        Text(
+        GText(
             text = notes,
             style = token.typography.bodyMedium,
             color = token.colors.textPrimary

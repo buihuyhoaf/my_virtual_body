@@ -15,7 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -107,7 +107,7 @@ fun CalendarScreen(
                 .padding(horizontal = token.spacing.md, vertical = token.spacing.xs),
             verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
         ) {
-            Text(
+            GText(
                 text = visibleYear.toString(),
                 style = token.typography.headlineMedium,
                 color = token.calendar.yearTextColor,
@@ -136,7 +136,7 @@ fun CalendarScreen(
                         .padding(token.spacing.md),
                     verticalArrangement = Arrangement.spacedBy(token.spacing.md)
                 ) {
-                    Text(
+                    GText(
                         text = "Timeline",
                         style = token.typography.titleMedium,
                         color = token.colors.textSecondary
@@ -184,7 +184,7 @@ fun CalendarScreen(
                     Box(
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
-                            .height(4.dp)
+                            .height(token.spacing.xxs)
                             .fillMaxWidth(0.18f)
                             .clip(RoundedCornerShape(token.radius.lg))
                             .background(token.colors.surfaceBorder)

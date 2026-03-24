@@ -1,13 +1,12 @@
 package com.hoabui.virtualbody3d.ui.messages.components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.header.GHeaderBlock
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 @Composable
@@ -16,21 +15,18 @@ fun MessagesScreenHeader(
     showTitle: Boolean = false
 ) {
     val token = GymTheme.token
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(token.spacing.xxs)
-    ) {
-        if (showTitle) {
-            Text(
-                text = stringResource(R.string.messages_screen_title),
-                style = token.typography.headlineSmall,
-                color = token.colors.textPrimary
-            )
-        }
-        Text(
+    if (showTitle) {
+        GHeaderBlock(
+            title = stringResource(R.string.messages_screen_title),
+            subtitle = stringResource(R.string.messages_screen_subtitle),
+            modifier = modifier.fillMaxWidth(),
+        )
+    } else {
+        GText(
             text = stringResource(R.string.messages_screen_subtitle),
             style = token.typography.bodyMedium,
-            color = token.colors.textSecondary
+            color = token.colors.textSecondary,
+            modifier = modifier.fillMaxWidth(),
         )
     }
 }

@@ -21,7 +21,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
 import com.hoabui.virtualbody3d.ui.common_ui.atom.progress.GProgressBar
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -99,7 +99,7 @@ private fun MetricsEmptyState() {
             .height(120.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(
+        GText(
             text = stringResource(R.string.metrics_panel_no_data),
             style = token.typography.bodyMedium,
             color = token.colors.textSecondary,
@@ -142,7 +142,7 @@ private fun BodyCompositionCard(
             modifier = Modifier.padding(token.spacing.md),
             verticalArrangement = Arrangement.spacedBy(token.spacing.md)
         ) {
-            Text(
+            GText(
                 text = stringResource(R.string.body_scan_result_body_composition),
                 style = token.typography.titleMedium,
                 color = colors.textPrimary
@@ -210,12 +210,12 @@ private fun CompositionChip(
             .padding(token.spacing.xs),
         verticalArrangement = Arrangement.spacedBy(token.spacing.xxs)
     ) {
-        Text(
+        GText(
             text = label,
             style = token.typography.labelSmall,
             color = token.colors.textSecondary
         )
-        Text(
+        GText(
             text = value,
             style = token.typography.titleSmall,
             color = token.colors.textPrimary
@@ -237,7 +237,7 @@ private fun MuscleFatChartCard(
             modifier = Modifier.padding(token.spacing.md),
             verticalArrangement = Arrangement.spacedBy(token.spacing.md)
         ) {
-            Text(
+            GText(
                 text = stringResource(R.string.body_scan_result_muscle_fat_analysis),
                 style = token.typography.titleMedium,
                 color = colors.textPrimary
@@ -289,12 +289,12 @@ private fun ChartBarRow(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
+            GText(
                 text = label,
                 style = token.typography.bodySmall,
                 color = token.colors.textSecondary
             )
-            Text(
+            GText(
                 text = value,
                 style = token.typography.bodyMedium,
                 color = token.colors.textPrimary
@@ -324,7 +324,7 @@ private fun ObesityAnalysisCard(
             modifier = Modifier.padding(token.spacing.md),
             verticalArrangement = Arrangement.spacedBy(token.spacing.md)
         ) {
-            Text(
+            GText(
                 text = stringResource(R.string.body_scan_result_obesity_analysis),
                 style = token.typography.titleMedium,
                 color = colors.textPrimary
@@ -332,7 +332,7 @@ private fun ObesityAnalysisCard(
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(32.dp)
+                    .height(token.spacing.xl)
                     .clip(RoundedCornerShape(token.radius.sm))
                     .background(colors.surfaceSubtle)
             ) {
@@ -344,7 +344,7 @@ private fun ObesityAnalysisCard(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.CenterStart
                 ) {
-                    Text(
+                    GText(
                         text = stringResource(R.string.body_scan_result_bmi) + " ${data.bmi.value}",
                         style = token.typography.labelMedium,
                         color = colors.textPrimary,
@@ -421,7 +421,7 @@ private fun SegmentalAnalysisCard(
             modifier = Modifier.padding(token.spacing.md),
             verticalArrangement = Arrangement.spacedBy(token.spacing.md)
         ) {
-            Text(
+            GText(
                 text = title,
                 style = token.typography.titleMedium,
                 color = colors.textPrimary
@@ -485,12 +485,12 @@ private fun SegmentalCell(
             .padding(token.spacing.md),
         verticalArrangement = Arrangement.spacedBy(token.spacing.xxs)
     ) {
-        Text(
+        GText(
             text = label,
             style = token.typography.labelMedium,
             color = token.colors.textSecondary
         )
-        Text(
+        GText(
             text = value,
             style = token.typography.bodyMedium,
             color = token.colors.textPrimary
@@ -519,7 +519,7 @@ private fun MetabolicCard(
             modifier = Modifier.padding(token.spacing.md),
             verticalArrangement = Arrangement.spacedBy(token.spacing.md)
         ) {
-            Text(
+            GText(
                 text = stringResource(R.string.body_scan_result_metabolic),
                 style = token.typography.titleMedium,
                 color = colors.textPrimary
@@ -562,12 +562,12 @@ private fun MetabolicChip(
             .padding(token.spacing.md),
         verticalArrangement = Arrangement.spacedBy(token.spacing.xxs)
     ) {
-        Text(
+        GText(
             text = label,
             style = token.typography.labelSmall,
             color = token.colors.textSecondary
         )
-        Text(
+        GText(
             text = value,
             style = token.typography.titleSmall,
             color = token.colors.textPrimary

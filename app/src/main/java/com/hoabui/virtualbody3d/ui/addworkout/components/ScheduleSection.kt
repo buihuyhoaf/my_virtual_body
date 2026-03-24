@@ -11,11 +11,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
+import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
 import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,7 +49,7 @@ fun ScheduleSection(
     var showTimePicker by remember { mutableStateOf(false) }
 
     Column(modifier = modifier) {
-        Text(
+        GText(
             text = stringResource(R.string.add_workout_schedule),
             style = token.typography.titleSmall,
             color = token.colors.textPrimary,
@@ -97,21 +97,20 @@ private fun ScheduleRowChip(
     modifier: Modifier = Modifier
 ) {
     val token = GymTheme.token
-    Surface(
+    GSurface(
         modifier = modifier.clickable(onClick = onClick),
         shape = RoundedCornerShape(token.radius.sm),
-        color = token.colors.surfaceSubtle
     ) {
         Column(
             modifier = Modifier.padding(token.spacing.md),
             verticalArrangement = Arrangement.spacedBy(token.spacing.xxs)
         ) {
-            Text(
+            GText(
                 text = label,
                 style = token.typography.labelSmall,
                 color = token.colors.textSecondary
             )
-            Text(
+            GText(
                 text = value,
                 style = token.typography.bodyMedium,
                 color = token.colors.textPrimary
@@ -145,12 +144,12 @@ private fun ScheduleDatePickerDialog(
                     }
                 }
             ) {
-                Text(stringResource(android.R.string.ok))
+                GText(text = stringResource(android.R.string.ok))
             }
         },
         dismissButton = {
             OutlinedButton(onClick = onDismiss) {
-                Text(stringResource(android.R.string.cancel))
+                GText(text = stringResource(android.R.string.cancel))
             }
         }
     ) {
@@ -177,7 +176,7 @@ private fun ScheduleTimePickerDialog(
                 modifier = Modifier.padding(token.spacing.md),
                 verticalArrangement = Arrangement.spacedBy(token.spacing.md)
             ) {
-                Text(
+                GText(
                     text = stringResource(R.string.add_workout_time),
                     style = token.typography.titleMedium,
                     color = token.colors.textPrimary

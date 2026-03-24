@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.divider.GDivider
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,20 +34,14 @@ fun LoginSocialSection(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        HorizontalDivider(
-            modifier = Modifier.weight(1f),
-            color = colors.borderSubtle
-        )
-        Text(
+        GDivider(modifier = Modifier.weight(1f))
+        GText(
             text = stringResource(R.string.login_or_continue_with),
             style = typography.labelLarge,
             color = colors.textBlack,
             modifier = Modifier.padding(horizontal = spacing.md)
         )
-        HorizontalDivider(
-            modifier = Modifier.weight(1f),
-            color = colors.borderSubtle
-        )
+        GDivider(modifier = Modifier.weight(1f))
     }
     Row(
         modifier = Modifier

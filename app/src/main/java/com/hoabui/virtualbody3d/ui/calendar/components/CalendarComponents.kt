@@ -20,8 +20,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -62,7 +62,7 @@ internal fun CalendarMonthSection(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(token.spacing.xs),
         ) {
-            Text(
+            GText(
                 text = month.month.getDisplayName(TextStyle.FULL, Locale.ENGLISH).uppercase(Locale.ENGLISH),
                 style = token.typography.labelLarge,
                 color = token.calendar.monthTextColor,
@@ -78,7 +78,7 @@ internal fun CalendarMonthSection(
         cells.chunked(7).forEach { week ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
             ) {
                 week.forEach { date ->
                     if (date == null) {
@@ -148,7 +148,7 @@ internal fun CalendarDayCell(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(4.dp)
+                .padding(token.spacing.xxs)
                 .clip(RoundedCornerShape(token.radius.sm)),
             contentAlignment = Alignment.Center,
         ) {
@@ -167,7 +167,7 @@ internal fun CalendarDayCell(
                     .padding(6.dp)
                     .background(color = token.colors.primary, shape = RoundedCornerShape(token.radius.md)),
             ) {
-                Text(
+                GText(
                     text = badgeText,
                     style = token.typography.labelSmall,
                     color = token.colors.surface,
@@ -196,7 +196,7 @@ internal fun CalendarDetailPanel(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(
+                GText(
                     text = "Select a day to view meals and activities",
                     style = token.typography.bodyMedium,
                     color = token.colors.textSecondary,
@@ -206,19 +206,19 @@ internal fun CalendarDetailPanel(
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(token.spacing.xxs)) {
-            Text(
+            GText(
                 text = selectedDate.format(DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH)),
                 style = token.typography.titleMedium,
                 color = token.colors.textPrimary,
             )
-            Text(
+            GText(
                 text = "$mealCount meals • $activityCount activities",
                 style = token.typography.bodyMedium,
                 color = token.colors.textSecondary,
             )
         }
         if (dailyItems.isEmpty()) {
-            Text(
+            GText(
                 text = "No meals or activities for this day",
                 style = token.typography.bodyMedium,
                 color = token.colors.textSecondary,
@@ -229,7 +229,7 @@ internal fun CalendarDetailPanel(
                 verticalArrangement = Arrangement.spacedBy(token.spacing.md),
             ) {
                 items(items = dailyItems, key = { it.id }) { item ->
-                    Surface(
+                    GSurface(
                         shape = RoundedCornerShape(token.radius.md),
                         color = token.colors.surface,
                     ) {
@@ -252,13 +252,13 @@ internal fun CalendarDetailPanel(
                                 modifier = Modifier.weight(1f),
                                 verticalArrangement = Arrangement.spacedBy(2.dp),
                             ) {
-                                Text(
+                                GText(
                                     text = item.title,
                                     style = token.typography.bodyMedium,
                                     color = token.colors.textPrimary,
                                 )
                                 item.estimatedKcal()?.let { kcal ->
-                                    Text(
+                                    GText(
                                         text = "$kcal kcal",
                                         style = token.typography.labelMedium,
                                         color = if (item.type == DailyItemType.Meal) {

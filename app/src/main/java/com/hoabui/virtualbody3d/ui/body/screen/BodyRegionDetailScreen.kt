@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -100,7 +100,7 @@ fun BodyRegionDetailScreenContent(
 
         // 2. Muscle Metrics Section
         item {
-            Text(
+            GText(
                 modifier = Modifier.padding(horizontal = token.spacing.md),
                 text = stringResource(R.string.body_region_detail_muscle_metrics),
                 style = token.typography.titleMedium,
@@ -131,7 +131,7 @@ fun BodyRegionDetailScreenContent(
 
         // 3. Recommended Exercises Section
         item {
-            Text(
+            GText(
                 modifier = Modifier.padding(horizontal = token.spacing.md),
                 text = stringResource(R.string.body_region_detail_recommended_exercises),
                 style = token.typography.titleMedium,
@@ -148,7 +148,7 @@ fun BodyRegionDetailScreenContent(
 
         // 4. Real-life Applications Section
         item {
-            Text(
+            GText(
                 modifier = Modifier.padding(horizontal = token.spacing.md),
                 text = stringResource(R.string.body_region_detail_real_life_applications),
                 style = token.typography.titleMedium,

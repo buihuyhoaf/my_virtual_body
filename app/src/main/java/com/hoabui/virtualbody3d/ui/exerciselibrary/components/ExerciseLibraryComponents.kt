@@ -13,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import com.hoabui.virtualbody3d.ui.common_ui.atom.field.GTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier

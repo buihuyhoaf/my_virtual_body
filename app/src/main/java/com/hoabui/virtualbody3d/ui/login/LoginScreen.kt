@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -83,7 +83,7 @@ fun LoginScreen(
                     .background(colors.surface),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
+                GText(
                     text = message,
                     color = token.colors.textSecondary
                 )

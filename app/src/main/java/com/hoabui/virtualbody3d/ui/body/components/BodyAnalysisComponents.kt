@@ -29,7 +29,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -171,7 +172,7 @@ fun MuscleProgressCard(
                 .padding(token.card.padding),
             verticalArrangement = Arrangement.spacedBy(token.spacing.md)
         ) {
-            Text(
+            GText(
                 text = stringResource(R.string.analysis_body_progress),
                 style = token.typography.titleMedium,
                 color = token.colors.textPrimary
@@ -221,13 +222,13 @@ private fun BodyProgressMetricItem(
             verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(
+            GText(
                 text = value,
                 style = token.typography.titleMedium,
                 color = token.colors.textPrimary
             )
             if (value != stringResource(R.string.body_placeholder)) {
-                Text(
+                GText(
                     text = unit,
                     style = token.typography.labelSmall,
                     color = token.colors.textSecondary,
@@ -239,13 +240,13 @@ private fun BodyProgressMetricItem(
             val isPositive = delta >= 0f
             val sign = if (isPositive) "+" else ""
             val arrow = if (isPositive) "↑" else "↓"
-            Text(
+            GText(
                 text = "$sign${"%.1f".format(delta)} $arrow",
                 style = token.typography.labelSmall,
                 color = if (isPositive) token.colors.primary else token.colors.error
             )
         }
-        Text(
+        GText(
             text = label,
             style = token.typography.labelSmall,
             color = token.colors.textSecondary
@@ -540,7 +541,7 @@ fun BodyRegionItem(
                     contentScale = ContentScale.Crop
                 )
             }
-            Text(
+            GText(
                 text = when (region) {
                     BodyRegion.UpperBody -> stringResource(R.string.body_region_upper_body)
                     BodyRegion.Core -> stringResource(R.string.body_region_core)
@@ -595,15 +596,15 @@ private fun MealItem(
 
                 // Calories badge overlaid at bottom-end
                 if (item.caloriesKcal > 0) {
-                    Surface(
+                    GSurface(
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .padding(token.spacing.xs),
                         shape = RoundedCornerShape(token.radius.sm),
                         color = token.colors.surfaceElevated,
-                        shadowElevation = token.card.elevation
+                        shadowElevation = token.card.elevation,
                     ) {
-                        Text(
+                        GText(
                             text = stringResource(
                                 R.string.analysis_dashboard_meal_kcal_badge,
                                 item.caloriesKcal
@@ -620,7 +621,7 @@ private fun MealItem(
             }
 
             // Meal title below image
-            Text(
+            GText(
                 text = item.title,
                 style = token.typography.bodyMedium,
                 color = token.colors.textPrimary,

@@ -12,7 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GIconButton
@@ -48,14 +48,14 @@ fun LoginForm(
     val loginTokens = token.login
 
     Column(modifier = modifier.fillMaxWidth()) {
-        Text(
+        GText(
             text = stringResource(R.string.login_welcome_back),
             style = typography.headlineLarge,
             color = colors.textBlack
         )
         Spacer(modifier = Modifier.height(spacing.xl))
 
-        Text(
+        GText(
             text = stringResource(R.string.login_email),
             style = typography.headlineSmall,
             color = colors.textBlack
@@ -73,7 +73,7 @@ fun LoginForm(
         )
         Spacer(modifier = Modifier.height(spacing.lg))
 
-        Text(
+        GText(
             text = stringResource(R.string.login_password),
             style = typography.headlineSmall,
             color = colors.textBlack

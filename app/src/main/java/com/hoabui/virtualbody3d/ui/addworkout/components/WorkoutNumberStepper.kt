@@ -7,7 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GIconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -39,7 +39,7 @@ fun WorkoutNumberStepper(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(
+        GText(
             text = label,
             style = token.typography.bodyMedium,
             color = token.colors.textPrimary
@@ -57,7 +57,7 @@ fun WorkoutNumberStepper(
                     contentDescription = stringResource(R.string.add_workout_decrease)
                 )
             }
-            Text(
+            GText(
                 text = "$value$valueSuffix",
                 style = token.typography.titleMedium,
                 color = token.colors.textPrimary,
@@ -95,7 +95,7 @@ fun WorkoutWeightStepper(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(
+        GText(
             text = label,
             style = token.typography.bodyMedium,
             color = token.colors.textPrimary
@@ -116,7 +116,7 @@ fun WorkoutWeightStepper(
                     contentDescription = stringResource(R.string.add_workout_decrease)
                 )
             }
-            Text(
+            GText(
                 text = "%.1f kg".format(valueKg),
                 style = token.typography.titleMedium,
                 color = token.colors.textPrimary,

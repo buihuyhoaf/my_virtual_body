@@ -35,7 +35,7 @@ import androidx.compose.material.icons.outlined.FitnessCenter
 import androidx.compose.material.icons.outlined.SelfImprovement
 import androidx.compose.material.icons.outlined.Straighten
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -89,7 +89,7 @@ fun InitialSetupStep1Content(
             exit = fadeOut(animationSpec = tween(QUESTION_ANIM_DURATION_MS)) +
                 slideOutVertically(animationSpec = tween(QUESTION_ANIM_DURATION_MS)) { -it / 4 }
         ) {
-            Text(
+            GText(
                 text = step.question,
                 style = typography.headlineLarge,
                 color = colors.primary,
@@ -120,7 +120,7 @@ fun InitialSetupStep1Content(
                                 else colors.surface
                             )
                             .border(
-                                width = if (isSelected) 0.dp else 1.dp,
+                                width = if (isSelected) 0.dp else spacing.dividerThickness,
                                 color = colors.borderSubtle,
                                 shape = RoundedCornerShape(radius.xl)
                             )
@@ -129,7 +129,7 @@ fun InitialSetupStep1Content(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(
+                        GText(
                             text = option.label,
                             style = typography.titleMedium,
                             color = if (isSelected) colors.primary else colors.textPrimary
@@ -138,7 +138,7 @@ fun InitialSetupStep1Content(
                             imageVector = if (isSelected) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
                             contentDescription = null,
                             tint = if (isSelected) colors.primary else colors.initialSetupOptionUnselectedIcon,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(spacing.lg)
                         )
                     }
                 }
@@ -173,7 +173,7 @@ fun InitialSetupStep2Content(
             exit = fadeOut(animationSpec = tween(QUESTION_ANIM_DURATION_MS)) +
                 slideOutVertically(animationSpec = tween(QUESTION_ANIM_DURATION_MS)) { -it / 4 }
         ) {
-            Text(
+            GText(
                 text = step.question,
                 style = typography.headlineLarge,
                 color = colors.textPrimary,
@@ -208,7 +208,7 @@ fun InitialSetupStep2Content(
                                 if (isSelected) colors.primary else colors.surface
                             )
                             .border(
-                                width = if (isSelected) 0.dp else 1.dp,
+                                width = if (isSelected) 0.dp else spacing.dividerThickness,
                                 color = colors.initialSetupOptionBorder,
                                 shape = RoundedCornerShape(radius.xl)
                             )
@@ -216,7 +216,7 @@ fun InitialSetupStep2Content(
                             .padding(vertical = spacing.xl, horizontal = spacing.md),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
+                        GText(
                             text = option.label,
                             style = typography.titleMedium,
                             color = if (isSelected) colors.onPrimary else colors.textPrimary
@@ -268,7 +268,7 @@ fun InitialSetupStep3Content(
             exit = fadeOut(animationSpec = tween(QUESTION_ANIM_DURATION_MS)) +
                 slideOutVertically(animationSpec = tween(QUESTION_ANIM_DURATION_MS)) { -it / 4 }
         ) {
-            Text(
+            GText(
                 text = step.question,
                 style = typography.headlineLarge,
                 color = colors.primary,
@@ -320,7 +320,7 @@ fun InitialSetupStep3Content(
                             if (selectedIndices.contains(fullBodyIndex)) colors.primary else colors.surface
                         )
                         .border(
-                            width = if (selectedIndices.contains(fullBodyIndex)) 0.dp else 1.dp,
+                            width = if (selectedIndices.contains(fullBodyIndex)) 0.dp else spacing.dividerThickness,
                             color = colors.initialSetupOptionBorder,
                             shape = RoundedCornerShape(radius.lg)
                         )
@@ -334,11 +334,11 @@ fun InitialSetupStep3Content(
                             imageVector = icon,
                             contentDescription = null,
                             tint = if (selectedIndices.contains(fullBodyIndex)) colors.onPrimary else colors.primary,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(spacing.lg)
                         )
                     }
                     Spacer(modifier = Modifier.size(spacing.xs))
-                    Text(
+                    GText(
                         text = option.label,
                         style = typography.bodyMedium,
                         color = if (selectedIndices.contains(fullBodyIndex)) colors.onPrimary else colors.textPrimary
@@ -368,7 +368,7 @@ private fun InitialSetupStep3Card(
             .clip(RoundedCornerShape(radius.lg))
             .background(if (isSelected) colors.primary else colors.surface)
             .border(
-                width = if (isSelected) 0.dp else 1.dp,
+                width = if (isSelected) 0.dp else spacing.dividerThickness,
                 color = colors.initialSetupOptionBorder,
                 shape = RoundedCornerShape(radius.lg)
             )
@@ -385,11 +385,11 @@ private fun InitialSetupStep3Card(
                     imageVector = it,
                     contentDescription = null,
                     tint = if (isSelected) colors.onPrimary else colors.primary,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(spacing.lg)
                 )
             }
             Spacer(modifier = Modifier.height(spacing.xxs))
-            Text(
+            GText(
                 text = option.label,
                 style = typography.bodyMedium,
                 color = if (isSelected) colors.onPrimary else colors.textPrimary
@@ -402,7 +402,7 @@ private fun InitialSetupStep3Card(
                 tint = colors.onPrimary,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .size(16.dp)
+                    .size(spacing.md)
             )
         }
     }
@@ -424,7 +424,7 @@ fun InitialSetupStep4Content(
             .padding(vertical = spacing.xl),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
+        GText(
             text = step.question,
             style = typography.headlineLarge,
             color = colors.primary,
@@ -444,7 +444,7 @@ fun InitialSetupStep4Content(
                     .aspectRatio(1f)
                     .clip(RoundedCornerShape(radius.xl))
                     .background(colors.initialSetupStep4IconBg)
-                    .border(1.dp, colors.initialSetupStep4IconBorder, RoundedCornerShape(radius.xl))
+                    .border(spacing.dividerThickness, colors.initialSetupStep4IconBorder, RoundedCornerShape(radius.xl))
             ) {
                 Image(
                     painter = painterResource(R.drawable.body_unsplash),
@@ -455,7 +455,7 @@ fun InitialSetupStep4Content(
             }
             Spacer(modifier = Modifier.height(spacing.lg))
             step.subtitle?.let { subtitle ->
-                Text(
+                GText(
                     text = subtitle,
                     style = typography.bodyLarge,
                     color = colors.textSecondary,
