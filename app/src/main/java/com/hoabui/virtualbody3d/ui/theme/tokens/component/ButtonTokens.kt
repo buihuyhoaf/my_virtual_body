@@ -2,6 +2,7 @@ package com.hoabui.virtualbody3d.ui.theme.tokens.component
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveRadiusTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveSpacingTokens
 
@@ -21,6 +22,9 @@ data class ButtonTokens(
     val cornerRadius: Dp,
     val contentPaddingHorizontal: Dp,
     val iconSize: Dp,
+    val outlinedBorderWidth: Dp,
+    val loadingIndicatorSizeDelta: Dp,
+    val loadingIndicatorStrokeWidth: Dp,
     val disabledContainerAlpha: Float,
     val disabledContentAlpha: Float,
 )
@@ -33,6 +37,9 @@ fun gymButtonTokens(
     cornerRadius = radius.md,                   // 16 dp
     contentPaddingHorizontal = spacing.md,      // 16 dp
     iconSize = spacing.md + spacing.xxs,        // 20 dp  (fits inside 48 dp height with breathing room)
+    outlinedBorderWidth = 1.5.dp,
+    loadingIndicatorSizeDelta = spacing.xxs,
+    loadingIndicatorStrokeWidth = spacing.xxxs,
     disabledContainerAlpha = 0.38f,             // M3 spec: disabled opacity
     disabledContentAlpha = 0.38f,
 )

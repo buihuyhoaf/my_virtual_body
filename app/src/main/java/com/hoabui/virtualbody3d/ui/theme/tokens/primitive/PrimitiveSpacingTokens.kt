@@ -24,7 +24,7 @@ data class PrimitiveSpacingTokens(
     val dividerThickness: Dp
 ) {
     companion object {
-        fun default(): PrimitiveSpacingTokens = PrimitiveSpacingTokens(
+        fun compact(): PrimitiveSpacingTokens = PrimitiveSpacingTokens(
             xxxs = 2.dp,
             xxs = 4.dp,
             xs = 8.dp,
@@ -38,5 +38,22 @@ data class PrimitiveSpacingTokens(
             buttonPrimary = 72.dp,
             dividerThickness = 1.dp
         )
+
+        fun expanded(): PrimitiveSpacingTokens = PrimitiveSpacingTokens(
+            xxxs = 2.dp,
+            xxs = 6.dp,
+            xs = 12.dp,
+            sm = 16.dp,
+            md = 24.dp,
+            lg = 32.dp,
+            xl = 40.dp,
+            xxl = 56.dp,
+            xxxl = 64.dp,
+            iconMedium = 32.dp,
+            buttonPrimary = 80.dp,
+            dividerThickness = 1.dp
+        )
+
+        fun default(): PrimitiveSpacingTokens = compact()
     }
 }

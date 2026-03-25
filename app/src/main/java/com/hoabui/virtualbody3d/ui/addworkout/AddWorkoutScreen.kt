@@ -18,19 +18,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.addworkout.components.BottomActionButtons
 import com.hoabui.virtualbody3d.ui.addworkout.components.ConfirmWorkoutDialog
-import com.hoabui.virtualbody3d.ui.addworkout.components.ExerciseHeader
-import com.hoabui.virtualbody3d.ui.addworkout.components.NotesField
-import com.hoabui.virtualbody3d.ui.addworkout.components.ScheduleSection
 import com.hoabui.virtualbody3d.ui.addworkout.components.SuccessOverlay
-import com.hoabui.virtualbody3d.ui.addworkout.components.WorkoutSetupSection
 import com.hoabui.virtualbody3d.ui.addworkout.state.AddWorkoutUiState
 import com.hoabui.virtualbody3d.ui.addworkout.viewmodel.AddWorkoutViewModel
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBar
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBarBackIcon
 import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
+import com.hoabui.virtualbody3d.ui.common_ui.organism.workout.GAddWorkoutForm
+import com.hoabui.virtualbody3d.ui.common_ui.organism.workout.GAddWorkoutFormUiModel
+import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import kotlinx.coroutines.delay
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun AddWorkoutScreen(
@@ -120,29 +120,44 @@ private fun AddWorkoutContent(
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
                     .padding(GymTheme.token.spacing.md),
-                verticalArrangement = Arrangement.spacedBy(GymTheme.token.spacing.lg)
+                verticalArrangement = Arrangement.spacedBy(GymTheme.token.spacing.lg),
             ) {
                 data.exercise?.let { exercise ->
-                    ExerciseHeader(exercise = exercise)
-                    ScheduleSection(
-                        selectedDate = data.selectedDate,
-                        selectedTime = data.selectedTime,
+                    val token = GymTheme.token
+                    GAddWorkoutForm(
+                        uiModel = GAddWorkoutFormUiModel(
+                            exerciseImageModel = exercise.imageResId,
+                            exerciseTitle = exercise.name,
+                            exerciseSubtitle = stringResource(ExerciseDisplayResources.bodyRegionResId(exercise.bodyRegion)),
+                            exerciseBadgeText = stringResource(ExerciseDisplayResources.difficultyResId(exercise.difficulty)),
+                            scheduleTitle = stringResource(R.string.add_workout_schedule),
+                            dateLabel = stringResource(R.string.add_workout_date),
+                            timeLabel = stringResource(R.string.add_workout_time),
+                            selectedDate = data.selectedDate,
+                            selectedTime = data.selectedTime,
+                            dateValueText = data.selectedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                            timeValueText = data.selectedTime.format(DateTimeFormatter.ofPattern("HH:mm")),
+                            workoutSetupTitle = stringResource(R.string.add_workout_workout_setup),
+                            setsLabel = stringResource(R.string.add_workout_sets),
+                            repsLabel = stringResource(R.string.add_workout_reps),
+                            weightKgLabel = stringResource(R.string.add_workout_weight_kg),
+                            restSecondsLabel = stringResource(R.string.add_workout_rest_seconds),
+                            notesLabel = stringResource(R.string.add_workout_notes),
+                            notesPlaceholder = stringResource(R.string.add_workout_notes_hint),
+                            notesValue = data.notes,
+                            sets = data.sets,
+                            reps = data.reps,
+                            weightKg = data.weightKg,
+                            restSeconds = data.restSeconds,
+                        ),
                         onDateChange = onDateChange,
-                        onTimeChange = onTimeChange
-                    )
-                    WorkoutSetupSection(
-                        sets = data.sets,
-                        reps = data.reps,
-                        weightKg = data.weightKg,
-                        restSeconds = data.restSeconds,
+                        onTimeChange = onTimeChange,
                         onSetsChange = onSetsChange,
                         onRepsChange = onRepsChange,
                         onWeightChange = onWeightChange,
-                        onRestChange = onRestChange
-                    )
-                    NotesField(
-                        notes = data.notes,
-                        onNotesChange = onNotesChange
+                        onRestChange = onRestChange,
+                        onNotesChange = onNotesChange,
+                        modifier = Modifier.fillMaxSize(),
                     )
                 }
             }

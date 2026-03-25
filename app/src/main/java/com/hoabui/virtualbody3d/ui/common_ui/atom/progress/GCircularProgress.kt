@@ -47,14 +47,15 @@ fun GCircularProgress(
     progress: Float? = null,
     color: Color = GymTheme.token.colors.primary,
     trackColor: Color = GymTheme.token.colors.surfaceSubtle,
-    strokeWidth: Dp = 4.dp,
+    strokeWidth: Dp? = null,
     strokeCap: StrokeCap = StrokeCap.Round,
 ) {
+    val resolvedStrokeWidth = strokeWidth ?: GymTheme.token.spacing.xxs
     if (progress == null) {
         CircularProgressIndicator(
             modifier = modifier,
             color = color,
-            strokeWidth = strokeWidth,
+            strokeWidth = resolvedStrokeWidth,
             strokeCap = strokeCap,
         )
     } else {
@@ -64,7 +65,7 @@ fun GCircularProgress(
             modifier = modifier,
             color = color,
             trackColor = trackColor,
-            strokeWidth = strokeWidth,
+            strokeWidth = resolvedStrokeWidth,
             strokeCap = strokeCap,
         )
     }

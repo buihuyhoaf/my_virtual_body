@@ -1,5 +1,6 @@
 package com.hoabui.virtualbody3d.ui.common_ui.molecule.card
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import coil.compose.AsyncImage
 import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
@@ -57,7 +60,8 @@ fun GMediaInfoCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(token.colors.surface),
+                .background(token.colors.surface)
+                .padding(token.spacing.md),
             horizontalArrangement = Arrangement.spacedBy(token.spacing.md),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -96,5 +100,48 @@ fun GMediaInfoCard(
                 }
             }
         }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Previews
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Preview(showBackground = true, name = "GMediaInfoCard — light")
+@Composable
+private fun PreviewGMediaInfoCardLight() {
+    GymTheme {
+        GMediaInfoCard(
+            imageModel = null,
+            title = "Bench Press",
+            subtitle = "Chest",
+            badge = {
+                val token = GymTheme.token
+                GText(
+                    text = "Beginner",
+                    style = token.typography.labelSmall,
+                    color = token.colors.primary,
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+@Preview(
+    showBackground = true,
+    name = "GMediaInfoCard — dark",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
+@Composable
+private fun PreviewGMediaInfoCardDark() {
+    GymTheme(darkTheme = true) {
+        GMediaInfoCard(
+            imageModel = null,
+            title = "Chicken Salad",
+            subtitle = "Lunch idea",
+            elevation = 0.dp,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }

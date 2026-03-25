@@ -2,6 +2,8 @@ package com.hoabui.virtualbody3d.ui.theme.tokens.component
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.ui.theme.tokens.semantic.SemanticColorTokens
 
 /**
@@ -16,7 +18,17 @@ data class CalendarTokens(
     val todayBorderColor: Color,
     val selectedDayBackground: Color,
     val selectedBorderColor: Color,
-    val panelBorder: Color
+    val panelBorder: Color,
+    val selectedBorderWidth: Dp,
+    val todayBorderWidth: Dp,
+    val dayBadgeOuterPadding: Dp,
+    val dayBadgeHorizontalPadding: Dp,
+    val dayBadgeVerticalPadding: Dp,
+    val dayItemImageSize: Dp,
+    val dayItemMetaSpacing: Dp,
+    val panelBottomPadding: Dp,
+    val panelOffsetY: Dp,
+    val panelBorderWidth: Dp
 )
 
 fun gymCalendarTokens(colors: SemanticColorTokens): CalendarTokens = CalendarTokens(
@@ -26,5 +38,15 @@ fun gymCalendarTokens(colors: SemanticColorTokens): CalendarTokens = CalendarTok
     todayBorderColor = colors.borderSubtle,
     selectedDayBackground = colors.primarySoft,
     selectedBorderColor = colors.calendarSelectedBorder,
-    panelBorder = colors.borderSubtle
+    panelBorder = colors.borderSubtle,
+    selectedBorderWidth = 1.5.dp,
+    todayBorderWidth = 1.dp,
+    dayBadgeOuterPadding = 6.dp,
+    dayBadgeHorizontalPadding = 6.dp,
+    dayBadgeVerticalPadding = 2.dp,
+    dayItemImageSize = 34.dp,
+    dayItemMetaSpacing = 2.dp,
+    panelBottomPadding = 14.dp,
+    panelOffsetY = (-12).dp,
+    panelBorderWidth = 1.dp
 )

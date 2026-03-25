@@ -1,11 +1,13 @@
 package com.hoabui.virtualbody3d.ui.common_ui.molecule.input
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import com.hoabui.virtualbody3d.ui.common_ui.atom.field.GTextField
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
@@ -66,6 +68,44 @@ fun GInputFieldGroup(
             keyboardActions = keyboardActions,
             singleLine = singleLine,
             maxLines = maxLines,
+        )
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Previews
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Preview(showBackground = true, name = "GInputFieldGroup — light")
+@Composable
+private fun PreviewGInputFieldGroupLight() {
+    GymTheme {
+        GInputFieldGroup(
+            label = "Notes",
+            value = "",
+            onValueChange = {},
+            placeholder = "Add a note for this workout…",
+            helperText = "Optional",
+            singleLine = false,
+            maxLines = 4,
+        )
+    }
+}
+
+@Preview(
+    showBackground = true,
+    name = "GInputFieldGroup — dark",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
+@Composable
+private fun PreviewGInputFieldGroupDark() {
+    GymTheme(darkTheme = true) {
+        GInputFieldGroup(
+            label = "Email",
+            value = "member@virtualbody.app",
+            onValueChange = {},
+            helperText = "We’ll never share your email.",
+            isError = false,
         )
     }
 }

@@ -28,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.ui.calendar.components.CalendarDetailPanel
 import com.hoabui.virtualbody3d.ui.calendar.components.CalendarMonthSection
 import com.hoabui.virtualbody3d.ui.calendar.components.buildMonthCells
@@ -126,7 +125,7 @@ fun CalendarScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxSize()
-                    .padding(bottom = 14.dp),
+                    .padding(bottom = token.calendar.panelBottomPadding),
                 shape = RoundedCornerShape(token.radius.lg),
                 color = token.colors.surface
             ) {
@@ -165,15 +164,18 @@ fun CalendarScreen(
                     .fillMaxWidth()
                     .fillMaxHeight(0.32f)
                     .align(Alignment.BottomCenter)
-                    .offset(y = (-12).dp),
+                    .offset(y = token.calendar.panelOffsetY),
                 shape = RoundedCornerShape(
                     topStart = token.radius.xl,
                     topEnd = token.radius.xl,
-                    bottomStart = 0.dp,
-                    bottomEnd = 0.dp
+                    bottomStart = token.borderWidth.none,
+                    bottomEnd = token.borderWidth.none
                 ),
                 color = token.colors.surfaceOverlay,
-                border = androidx.compose.foundation.BorderStroke(1.dp, token.calendar.panelBorder)
+                border = androidx.compose.foundation.BorderStroke(
+                    token.calendar.panelBorderWidth,
+                    token.calendar.panelBorder
+                )
             ) {
                 Column(
                     modifier = Modifier

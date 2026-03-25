@@ -8,9 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
@@ -133,7 +131,8 @@ private fun ScheduleDatePickerDialog(
     androidx.compose.material3.DatePickerDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            Button(
+            GButton(
+                text = stringResource(android.R.string.ok),
                 onClick = {
                     state.selectedDateMillis?.let { millis ->
                         onConfirm(
@@ -142,15 +141,15 @@ private fun ScheduleDatePickerDialog(
                                 .toLocalDate()
                         )
                     }
-                }
-            ) {
-                GText(text = stringResource(android.R.string.ok))
-            }
+                },
+            )
         },
         dismissButton = {
-            OutlinedButton(onClick = onDismiss) {
-                GText(text = stringResource(android.R.string.cancel))
-            }
+            GButton(
+                text = stringResource(android.R.string.cancel),
+                onClick = onDismiss,
+                variant = GButtonVariant.Outlined,
+            )
         }
     ) {
         androidx.compose.material3.DatePicker(state = state)

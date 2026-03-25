@@ -3,29 +3,21 @@ package com.hoabui.virtualbody3d.ui.scanresult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
-import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
-import com.hoabui.virtualbody3d.ui.common_ui.atom.progress.GProgressBar
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -33,9 +25,14 @@ import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.domain.model.body.BodyCompositionSection
 import com.hoabui.virtualbody3d.domain.model.body.BodyScanResult
 import com.hoabui.virtualbody3d.domain.model.body.MetabolicSection
+import com.hoabui.virtualbody3d.domain.model.body.MetricWithRange
 import com.hoabui.virtualbody3d.domain.model.body.MuscleFatAnalysisSection
 import com.hoabui.virtualbody3d.domain.model.body.ObesityAnalysisSection
 import com.hoabui.virtualbody3d.domain.model.body.SegmentalAnalysisSection
+import com.hoabui.virtualbody3d.ui.common_ui.organism.scan.GBodyScanMetricsPanel
+import com.hoabui.virtualbody3d.ui.common_ui.organism.scan.GMetricRowUiModel
+import com.hoabui.virtualbody3d.ui.common_ui.organism.scan.GMetricSectionUiModel
+import com.hoabui.virtualbody3d.ui.common_ui.organism.scan.GSegmentalMetricUiModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 /**
@@ -114,463 +111,163 @@ private fun MetricsContent(
     modifier: Modifier = Modifier,
     scanResult: BodyScanResult
 ) {
-    val token = GymTheme.token
-    Column(
+    val sections = buildMetricsSections(scanResult)
+    GBodyScanMetricsPanel(
+        sections = sections,
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(token.spacing.lg)
-    ) {
-        BodyCompositionCard(data = scanResult.bodyComposition)
-        MuscleFatChartCard(data = scanResult.muscleFatAnalysis)
-        ObesityAnalysisCard(data = scanResult.obesityAnalysis)
-        SegmentalLeanCard(data = scanResult.segmentalLean)
-        SegmentalFatCard(data = scanResult.segmentalFat)
-        MetabolicCard(data = scanResult.metabolic)
-    }
+    )
 }
 
 @Composable
-private fun BodyCompositionCard(
-    data: BodyCompositionSection
-) {
-    val token = GymTheme.token
-    val colors = token.colors
-    GCard(
-        modifier = Modifier.fillMaxWidth(),
-        containerColor = colors.surfaceOverlay,
-    ) {
-        Column(
-            modifier = Modifier.padding(token.spacing.md),
-            verticalArrangement = Arrangement.spacedBy(token.spacing.md)
-        ) {
-            GText(
-                text = stringResource(R.string.body_scan_result_body_composition),
-                style = token.typography.titleMedium,
-                color = colors.textPrimary
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(token.spacing.xs)
-            ) {
-                CompositionChip(
-                    modifier = Modifier.weight(1f),
-                    label = stringResource(R.string.body_scan_result_weight),
-                    value = data.weight
-                )
-                CompositionChip(
-                    modifier = Modifier.weight(1f),
-                    label = stringResource(R.string.body_scan_result_body_fat_mass),
-                    value = data.bodyFatMass
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(token.spacing.xs)
-            ) {
-                CompositionChip(
-                    modifier = Modifier.weight(1f),
-                    label = stringResource(R.string.body_scan_result_fat_free_mass),
-                    value = data.fatFreeMass
-                )
-                CompositionChip(
-                    modifier = Modifier.weight(1f),
-                    label = stringResource(R.string.body_scan_result_total_body_water),
-                    value = data.totalBodyWater
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(token.spacing.xs)
-            ) {
-                CompositionChip(
-                    modifier = Modifier.weight(1f),
-                    label = stringResource(R.string.body_scan_result_protein),
-                    value = data.protein
-                )
-                CompositionChip(
-                    modifier = Modifier.weight(1f),
-                    label = stringResource(R.string.body_scan_result_mineral),
-                    value = data.mineral
-                )
-            }
-        }
-    }
+private fun buildMetricsSections(scanResult: BodyScanResult): List<GMetricSectionUiModel> {
+    val body = scanResult.bodyComposition
+    val muscleFat = scanResult.muscleFatAnalysis
+    val obesity = scanResult.obesityAnalysis
+    val segmentalLean = scanResult.segmentalLean
+    val segmentalFat = scanResult.segmentalFat
+    val metabolic = scanResult.metabolic
+
+    return listOf(
+        bodyCompositionSection(body),
+        muscleFatSection(muscleFat),
+        obesitySection(obesity),
+        segmentalSection(
+            id = "segmental_lean",
+            title = stringResource(R.string.body_scan_result_segmental_lean),
+            data = segmentalLean,
+        ),
+        segmentalSection(
+            id = "segmental_fat",
+            title = stringResource(R.string.body_scan_result_segmental_fat),
+            data = segmentalFat,
+        ),
+        metabolicSection(metabolic),
+    )
 }
 
 @Composable
-private fun CompositionChip(
+private fun bodyCompositionSection(data: BodyCompositionSection): GMetricSectionUiModel = GMetricSectionUiModel(
+    id = "body_composition",
+    title = stringResource(R.string.body_scan_result_body_composition),
+    rows = listOf(
+        GMetricRowUiModel.ValueRow("weight", stringResource(R.string.body_scan_result_weight), data.weight),
+        GMetricRowUiModel.ValueRow("body_fat_mass", stringResource(R.string.body_scan_result_body_fat_mass), data.bodyFatMass),
+        GMetricRowUiModel.ValueRow("fat_free_mass", stringResource(R.string.body_scan_result_fat_free_mass), data.fatFreeMass),
+        GMetricRowUiModel.ValueRow("total_body_water", stringResource(R.string.body_scan_result_total_body_water), data.totalBodyWater),
+        GMetricRowUiModel.ValueRow("protein", stringResource(R.string.body_scan_result_protein), data.protein),
+        GMetricRowUiModel.ValueRow("mineral", stringResource(R.string.body_scan_result_mineral), data.mineral),
+    ),
+)
+
+@Composable
+private fun muscleFatSection(data: MuscleFatAnalysisSection): GMetricSectionUiModel = GMetricSectionUiModel(
+    id = "muscle_fat_analysis",
+    title = stringResource(R.string.body_scan_result_muscle_fat_analysis),
+    rows = listOf(
+        data.weight.toProgressRow(
+            id = "weight",
+            label = stringResource(R.string.body_scan_result_weight),
+        ),
+        data.skeletalMuscleMass.toProgressRow(
+            id = "skeletal_muscle_mass",
+            label = stringResource(R.string.body_scan_result_skeletal_muscle_mass),
+        ),
+        data.bodyFatMass.toProgressRow(
+            id = "body_fat_mass",
+            label = stringResource(R.string.body_scan_result_body_fat_mass),
+        ),
+    ),
+)
+
+@Composable
+private fun obesitySection(data: ObesityAnalysisSection): GMetricSectionUiModel = GMetricSectionUiModel(
+    id = "obesity_analysis",
+    title = stringResource(R.string.body_scan_result_obesity_analysis),
+    rows = listOf(
+        data.bmi.toProgressRow(
+            id = "bmi",
+            label = stringResource(R.string.body_scan_result_bmi),
+        ),
+        data.percentBodyFat.toProgressRow(
+            id = "percent_body_fat",
+            label = stringResource(R.string.body_scan_result_percent_body_fat),
+        ),
+    ),
+)
+
+@Composable
+private fun segmentalSection(
+    id: String,
+    title: String,
+    data: SegmentalAnalysisSection,
+): GMetricSectionUiModel = GMetricSectionUiModel(
+    id = id,
+    title = title,
+    rows = listOf(
+        GMetricRowUiModel.SegmentalGridRow(
+            id = "${id}_grid",
+            items = listOf(
+                GSegmentalMetricUiModel(
+                    label = stringResource(R.string.body_scan_result_left_arm),
+                    value = data.leftArm,
+                ),
+                GSegmentalMetricUiModel(
+                    label = stringResource(R.string.body_scan_result_right_arm),
+                    value = data.rightArm,
+                ),
+                GSegmentalMetricUiModel(
+                    label = stringResource(R.string.body_scan_result_trunk),
+                    value = data.trunk,
+                ),
+                GSegmentalMetricUiModel(
+                    label = stringResource(R.string.body_scan_result_left_leg),
+                    value = data.leftLeg,
+                ),
+                GSegmentalMetricUiModel(
+                    label = stringResource(R.string.body_scan_result_right_leg),
+                    value = data.rightLeg,
+                ),
+            ),
+        ),
+    ),
+)
+
+@Composable
+private fun metabolicSection(data: MetabolicSection): GMetricSectionUiModel = GMetricSectionUiModel(
+    id = "metabolic",
+    title = stringResource(R.string.body_scan_result_metabolic),
+    rows = listOf(
+        GMetricRowUiModel.ValueRow(
+            id = "bmr",
+            label = stringResource(R.string.body_scan_result_bmr),
+            value = data.basalMetabolicRate,
+        ),
+        GMetricRowUiModel.ValueRow(
+            id = "obesity_degree",
+            label = stringResource(R.string.body_scan_result_obesity_degree),
+            value = data.obesityDegree,
+        ),
+        GMetricRowUiModel.ValueRow(
+            id = "recommended_calorie_intake",
+            label = stringResource(R.string.body_scan_result_recommended_calorie),
+            value = data.recommendedCalorieIntake,
+        ),
+    ),
+)
+
+private fun MetricWithRange.toProgressRow(
+    id: String,
     label: String,
-    value: String,
-    modifier: Modifier = Modifier
-) {
-    val token = GymTheme.token
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(token.radius.md))
-            .background(token.colors.surfaceSubtle)
-            .padding(token.spacing.xs),
-        verticalArrangement = Arrangement.spacedBy(token.spacing.xxs)
-    ) {
-        GText(
-            text = label,
-            style = token.typography.labelSmall,
-            color = token.colors.textSecondary
-        )
-        GText(
-            text = value,
-            style = token.typography.titleSmall,
-            color = token.colors.textPrimary
-        )
-    }
-}
-
-@Composable
-private fun MuscleFatChartCard(
-    data: MuscleFatAnalysisSection
-) {
-    val token = GymTheme.token
-    val colors = token.colors
-    GCard(
-        modifier = Modifier.fillMaxWidth(),
-        containerColor = colors.surfaceOverlay,
-    ) {
-        Column(
-            modifier = Modifier.padding(token.spacing.md),
-            verticalArrangement = Arrangement.spacedBy(token.spacing.md)
-        ) {
-            GText(
-                text = stringResource(R.string.body_scan_result_muscle_fat_analysis),
-                style = token.typography.titleMedium,
-                color = colors.textPrimary
-            )
-            ChartBarRow(
-                label = stringResource(R.string.body_scan_result_weight),
-                value = data.weight.value,
-                currentValue = data.weight.currentValue,
-                rangeMin = data.weight.rangeMin,
-                rangeMax = data.weight.rangeMax
-            )
-            ChartBarRow(
-                label = stringResource(R.string.body_scan_result_skeletal_muscle_mass),
-                value = data.skeletalMuscleMass.value,
-                currentValue = data.skeletalMuscleMass.currentValue,
-                rangeMin = data.skeletalMuscleMass.rangeMin,
-                rangeMax = data.skeletalMuscleMass.rangeMax
-            )
-            ChartBarRow(
-                label = stringResource(R.string.body_scan_result_body_fat_mass),
-                value = data.bodyFatMass.value,
-                currentValue = data.bodyFatMass.currentValue,
-                rangeMin = data.bodyFatMass.rangeMin,
-                rangeMax = data.bodyFatMass.rangeMax
-            )
-        }
-    }
-}
-
-@Composable
-private fun ChartBarRow(
-    label: String,
-    value: String,
-    currentValue: Float,
-    rangeMin: Float,
-    rangeMax: Float,
-    modifier: Modifier = Modifier
-) {
-    val token = GymTheme.token
+): GMetricRowUiModel.ProgressRow {
     val progress = if (rangeMax > rangeMin) {
         ((currentValue - rangeMin) / (rangeMax - rangeMin)).coerceIn(0f, 1f)
-    } else 0.5f
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(token.spacing.xxs)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            GText(
-                text = label,
-                style = token.typography.bodySmall,
-                color = token.colors.textSecondary
-            )
-            GText(
-                text = value,
-                style = token.typography.bodyMedium,
-                color = token.colors.textPrimary
-            )
-        }
-        GProgressBar(
-            progress = progress,
-            modifier = Modifier.fillMaxWidth(),
-            indicatorColor = token.colors.primary,
-            trackColor = token.colors.surfaceSubtle,
-            height = 6.dp,
-        )
+    } else {
+        0.5f
     }
-}
-
-@Composable
-private fun ObesityAnalysisCard(
-    data: ObesityAnalysisSection
-) {
-    val token = GymTheme.token
-    val colors = token.colors
-    GCard(
-        modifier = Modifier.fillMaxWidth(),
-        containerColor = colors.surfaceOverlay,
-    ) {
-        Column(
-            modifier = Modifier.padding(token.spacing.md),
-            verticalArrangement = Arrangement.spacedBy(token.spacing.md)
-        ) {
-            GText(
-                text = stringResource(R.string.body_scan_result_obesity_analysis),
-                style = token.typography.titleMedium,
-                color = colors.textPrimary
-            )
-            BoxWithConstraints(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(token.spacing.xl)
-                    .clip(RoundedCornerShape(token.radius.sm))
-                    .background(colors.surfaceSubtle)
-            ) {
-                val bmiProgress = if (data.bmi.rangeMax > data.bmi.rangeMin) {
-                    ((data.bmi.currentValue - data.bmi.rangeMin) / (data.bmi.rangeMax - data.bmi.rangeMin)).coerceIn(0f, 1f)
-                } else 0.5f
-                val thumbOffsetPx = maxWidth.value * bmiProgress
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    GText(
-                        text = stringResource(R.string.body_scan_result_bmi) + " ${data.bmi.value}",
-                        style = token.typography.labelMedium,
-                        color = colors.textPrimary,
-                        modifier = Modifier.padding(horizontal = token.spacing.xs)
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(4.dp)
-                        .offset(x = (thumbOffsetPx - 2.dp.value).coerceAtLeast(0f).dp)
-                        .background(token.colors.primary)
-                        .align(Alignment.CenterStart)
-                )
-            }
-            ChartBarRow(
-                label = stringResource(R.string.body_scan_result_percent_body_fat),
-                value = data.percentBodyFat.value,
-                currentValue = data.percentBodyFat.currentValue,
-                rangeMin = data.percentBodyFat.rangeMin,
-                rangeMax = data.percentBodyFat.rangeMax
-            )
-        }
-    }
-}
-
-@Composable
-private fun SegmentalLeanCard(
-    data: SegmentalAnalysisSection
-) {
-    val items = listOf(
-        SegmentalMetric(stringResource(R.string.body_scan_result_left_arm), data.leftArm),
-        SegmentalMetric(stringResource(R.string.body_scan_result_right_arm), data.rightArm),
-        SegmentalMetric(stringResource(R.string.body_scan_result_trunk), data.trunk),
-        SegmentalMetric(stringResource(R.string.body_scan_result_left_leg), data.leftLeg),
-        SegmentalMetric(stringResource(R.string.body_scan_result_right_leg), data.rightLeg)
+    return GMetricRowUiModel.ProgressRow(
+        id = id,
+        label = label,
+        value = value,
+        progress = progress,
     )
-    SegmentalAnalysisCard(
-        title = stringResource(R.string.body_scan_result_segmental_lean),
-        items = items
-    )
-}
-
-@Composable
-private fun SegmentalFatCard(
-    data: SegmentalAnalysisSection
-) {
-    val items = listOf(
-        SegmentalMetric(stringResource(R.string.body_scan_result_left_arm), data.leftArm),
-        SegmentalMetric(stringResource(R.string.body_scan_result_right_arm), data.rightArm),
-        SegmentalMetric(stringResource(R.string.body_scan_result_trunk), data.trunk),
-        SegmentalMetric(stringResource(R.string.body_scan_result_left_leg), data.leftLeg),
-        SegmentalMetric(stringResource(R.string.body_scan_result_right_leg), data.rightLeg)
-    )
-    SegmentalAnalysisCard(
-        title = stringResource(R.string.body_scan_result_segmental_fat),
-        items = items
-    )
-}
-
-@Composable
-private fun SegmentalAnalysisCard(
-    title: String,
-    items: List<SegmentalMetric>,
-    modifier: Modifier = Modifier
-) {
-    val token = GymTheme.token
-    val colors = token.colors
-    GCard(
-        modifier = modifier.fillMaxWidth(),
-        containerColor = colors.surfaceOverlay,
-    ) {
-        Column(
-            modifier = Modifier.padding(token.spacing.md),
-            verticalArrangement = Arrangement.spacedBy(token.spacing.md)
-        ) {
-            GText(
-                text = title,
-                style = token.typography.titleMedium,
-                color = colors.textPrimary
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(token.spacing.md)
-            ) {
-                SegmentalCell(
-                    modifier = Modifier.weight(1f),
-                    label = items.getOrNull(0)?.label ?: "",
-                    value = items.getOrNull(0)?.value ?: ""
-                )
-                SegmentalCell(
-                    modifier = Modifier.weight(1f),
-                    label = items.getOrNull(1)?.label ?: "",
-                    value = items.getOrNull(1)?.value ?: ""
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(token.spacing.md)
-            ) {
-                SegmentalCell(
-                    modifier = Modifier.weight(1f),
-                    label = items.getOrNull(2)?.label ?: "",
-                    value = items.getOrNull(2)?.value ?: ""
-                )
-                Spacer(modifier = Modifier.weight(1f))
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(token.spacing.md)
-            ) {
-                SegmentalCell(
-                    modifier = Modifier.weight(1f),
-                    label = items.getOrNull(3)?.label ?: "",
-                    value = items.getOrNull(3)?.value ?: ""
-                )
-                SegmentalCell(
-                    modifier = Modifier.weight(1f),
-                    label = items.getOrNull(4)?.label ?: "",
-                    value = items.getOrNull(4)?.value ?: ""
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun SegmentalCell(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier
-) {
-    val token = GymTheme.token
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(token.radius.md))
-            .background(token.colors.surfaceSubtle)
-            .padding(token.spacing.md),
-        verticalArrangement = Arrangement.spacedBy(token.spacing.xxs)
-    ) {
-        GText(
-            text = label,
-            style = token.typography.labelMedium,
-            color = token.colors.textSecondary
-        )
-        GText(
-            text = value,
-            style = token.typography.bodyMedium,
-            color = token.colors.textPrimary
-        )
-        GProgressBar(
-            progress = 1f,
-            modifier = Modifier.fillMaxWidth(),
-            indicatorColor = token.colors.primary.copy(alpha = 0.5f),
-            trackColor = token.colors.surfaceOverlay,
-            height = 4.dp,
-        )
-    }
-}
-
-@Composable
-private fun MetabolicCard(
-    data: MetabolicSection
-) {
-    val token = GymTheme.token
-    val colors = token.colors
-    GCard(
-        modifier = Modifier.fillMaxWidth(),
-        containerColor = colors.surfaceOverlay,
-    ) {
-        Column(
-            modifier = Modifier.padding(token.spacing.md),
-            verticalArrangement = Arrangement.spacedBy(token.spacing.md)
-        ) {
-            GText(
-                text = stringResource(R.string.body_scan_result_metabolic),
-                style = token.typography.titleMedium,
-                color = colors.textPrimary
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(token.spacing.xs)
-            ) {
-                MetabolicChip(
-                    modifier = Modifier.weight(1f),
-                    label = stringResource(R.string.body_scan_result_bmr),
-                    value = data.basalMetabolicRate
-                )
-                MetabolicChip(
-                    modifier = Modifier.weight(1f),
-                    label = stringResource(R.string.body_scan_result_obesity_degree),
-                    value = data.obesityDegree
-                )
-            }
-            MetabolicChip(
-                modifier = Modifier.fillMaxWidth(),
-                label = stringResource(R.string.body_scan_result_recommended_calorie),
-                value = data.recommendedCalorieIntake
-            )
-        }
-    }
-}
-
-@Composable
-private fun MetabolicChip(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier
-) {
-    val token = GymTheme.token
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(token.radius.md))
-            .background(token.colors.surfaceSubtle)
-            .padding(token.spacing.md),
-        verticalArrangement = Arrangement.spacedBy(token.spacing.xxs)
-    ) {
-        GText(
-            text = label,
-            style = token.typography.labelSmall,
-            color = token.colors.textSecondary
-        )
-        GText(
-            text = value,
-            style = token.typography.titleSmall,
-            color = token.colors.textPrimary
-        )
-    }
 }

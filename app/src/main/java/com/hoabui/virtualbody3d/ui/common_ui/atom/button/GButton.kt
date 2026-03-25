@@ -1,7 +1,6 @@
 package com.hoabui.virtualbody3d.ui.common_ui.atom.button
 
 import android.content.res.Configuration
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -153,12 +152,18 @@ fun GButton(
     // Crossfade: content ↔ spinner over 150 ms (fast enough to feel snappy)
     val contentAlpha by animateFloatAsState(
         targetValue = if (isLoading) 0f else 1f,
-        animationSpec = tween(durationMillis = 150, easing = LinearEasing),
+        animationSpec = tween(
+            durationMillis = token.motion.duration.short,
+            easing = token.motion.easing.standard
+        ),
         label = "g_button_content_alpha",
     )
     val spinnerAlpha by animateFloatAsState(
         targetValue = if (isLoading) 1f else 0f,
-        animationSpec = tween(durationMillis = 150, easing = LinearEasing),
+        animationSpec = tween(
+            durationMillis = token.motion.duration.short,
+            easing = token.motion.easing.standard
+        ),
         label = "g_button_spinner_alpha",
     )
 
@@ -177,19 +182,19 @@ fun GButton(
         // Surface propagates contentColor as LocalContentColor → icons auto-tint
         contentColor = resolved.contentColor,
         border = if (variant == GButtonVariant.Outlined) {
-            BorderStroke(width = 1.5.dp, color = resolved.borderColor)
+            BorderStroke(width = buttonTokens.outlinedBorderWidth, color = resolved.borderColor)
         } else {
             null
         },
         tonalElevation = if (variant == GButtonVariant.Primary && enabled) {
             token.elevation.level1
         } else {
-            0.dp
+            token.borderWidth.none
         },
         shadowElevation = if (variant == GButtonVariant.Primary && enabled) {
             token.elevation.level1
         } else {
-            0.dp
+            token.borderWidth.none
         },
     ) {
         // Box stacks spinner and content row; the larger child (content row) controls size,
@@ -201,10 +206,10 @@ fun GButton(
             // pushes the content row out of place.
             CircularProgressIndicator(
                 modifier = Modifier
-                    .size(buttonTokens.iconSize + 4.dp)
+                    .size(buttonTokens.iconSize + buttonTokens.loadingIndicatorSizeDelta)
                     .graphicsLayer { alpha = spinnerAlpha },
                 color = resolved.contentColor,
-                strokeWidth = 2.dp,
+                strokeWidth = buttonTokens.loadingIndicatorStrokeWidth,
             )
 
             // ── Content layer ────────────────────────────────────────────────

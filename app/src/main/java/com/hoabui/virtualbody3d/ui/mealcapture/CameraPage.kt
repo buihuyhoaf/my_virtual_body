@@ -7,10 +7,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -27,6 +24,8 @@ import com.hoabui.virtualbody3d.ui.camera.CameraCaptureScreenContent
 import com.hoabui.virtualbody3d.ui.camera.viewmodel.CameraCaptureUiState
 import com.hoabui.virtualbody3d.ui.camera.viewmodel.CameraCaptureViewModel
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
 import com.hoabui.virtualbody3d.ui.createbaseline.component.ChatGPTThinkingCard
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import java.io.File
@@ -117,19 +116,13 @@ fun CameraPage(
                         )
                     },
                     confirmButton = {
-                        Button(
+                        GButton(
+                            text = stringResource(R.string.error_ok),
                             onClick = viewModel::onErrorDismiss,
-                            colors = ButtonDefaults.buttonColors(containerColor = token.colors.primary),
-                            shape = RoundedCornerShape(token.radius.lg),
-                            elevation = ButtonDefaults.buttonElevation(defaultElevation = token.elevation.level0)
-                        ) {
-                            GText(
-                                text = stringResource(R.string.error_ok),
-                                style = token.typography.titleMedium
-                            )
-                        }
+                            variant = GButtonVariant.Primary,
+                        )
                     },
-                    shape = RoundedCornerShape(token.radius.lg)
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(token.radius.lg)
                 )
             }
         },

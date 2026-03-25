@@ -30,7 +30,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.calendar.extensions.estimatedKcal
 import com.hoabui.virtualbody3d.ui.calendar.extensions.toCalendarOffset
@@ -70,7 +69,7 @@ internal fun CalendarMonthSection(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(1.dp)
+                    .height(token.borderWidth.thin)
                     .background(token.calendar.monthDividerColor),
             )
         }
@@ -131,9 +130,9 @@ internal fun CalendarDayCell(
             .background(if (selected) token.calendar.selectedDayBackground else token.colors.surface)
             .border(
                 width = when {
-                    selected -> 1.5.dp
-                    isToday -> 1.dp
-                    else -> 0.dp
+                    selected -> token.calendar.selectedBorderWidth
+                    isToday -> token.calendar.todayBorderWidth
+                    else -> token.borderWidth.none
                 },
                 color = when {
                     selected -> token.calendar.selectedBorderColor
@@ -164,14 +163,17 @@ internal fun CalendarDayCell(
             Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(6.dp)
+                    .padding(token.calendar.dayBadgeOuterPadding)
                     .background(color = token.colors.primary, shape = RoundedCornerShape(token.radius.md)),
             ) {
                 GText(
                     text = badgeText,
                     style = token.typography.labelSmall,
                     color = token.colors.surface,
-                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                    modifier = Modifier.padding(
+                        horizontal = token.calendar.dayBadgeHorizontalPadding,
+                        vertical = token.calendar.dayBadgeVerticalPadding
+                    ),
                 )
             }
         }
@@ -245,12 +247,12 @@ internal fun CalendarDetailPanel(
                                 contentDescription = item.title,
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
-                                    .size(34.dp)
+                                    .size(token.calendar.dayItemImageSize)
                                     .clip(RoundedCornerShape(token.radius.sm)),
                             )
                             Column(
                                 modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(2.dp),
+                                verticalArrangement = Arrangement.spacedBy(token.calendar.dayItemMetaSpacing),
                             ) {
                                 GText(
                                     text = item.title,

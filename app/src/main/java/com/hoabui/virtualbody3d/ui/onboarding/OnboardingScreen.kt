@@ -33,7 +33,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
@@ -119,7 +118,10 @@ fun OnboardingScreen(
                         scope.launch {
                             pagerState.animateScrollToPage(
                                 page = pagerState.currentPage + 1,
-                                animationSpec = tween(durationMillis = 300, easing = LinearEasing)
+                                animationSpec = tween(
+                                    durationMillis = token.motion.duration.standard,
+                                    easing = token.motion.easing.standard
+                                )
                             )
                         }
                     }
@@ -152,28 +154,30 @@ private fun OnboardingSlide1(
         ) {
             Canvas(modifier = Modifier.size(onboardingTokens.illustrationBodyWidth, onboardingTokens.illustrationBodyHeight)) {
                 val w = size.width
-                val strokeWidth = 1.5.dp.toPx()
+                val unit = onboardingTokens.illustrationBaseUnit.toPx()
+                val fine = onboardingTokens.illustrationFineUnit.toPx()
+                val strokeWidth = onboardingTokens.illustrationStrokeStandard.toPx()
                 val plum = colors.textSecondary
                 drawCircle(
                     color = plum,
-                    radius = 15.dp.toPx(),
-                    center = Offset(w / 2f, 40.dp.toPx()),
+                    radius = unit - fine,
+                    center = Offset(w / 2f, unit * 2f),
                     style = Stroke(width = strokeWidth)
                 )
                 val path = Path().apply {
-                    moveTo(w * 0.29f, 140.dp.toPx())
-                    lineTo(w * 0.29f, 100.dp.toPx())
-                    lineTo(w / 2f, 115.dp.toPx())
-                    lineTo(w * 0.71f, 100.dp.toPx())
-                    lineTo(w * 0.71f, 140.dp.toPx())
-                    lineTo(w * 0.71f, 200.dp.toPx())
-                    lineTo(w * 0.71f, 240.dp.toPx())
+                    moveTo(w * 0.29f, unit * 7f)
+                    lineTo(w * 0.29f, unit * 5f)
+                    lineTo(w / 2f, unit * 5f + fine * 3f)
+                    lineTo(w * 0.71f, unit * 5f)
+                    lineTo(w * 0.71f, unit * 7f)
+                    lineTo(w * 0.71f, unit * 10f)
+                    lineTo(w * 0.71f, unit * 12f)
                 }
                 drawPath(path, plum, style = Stroke(width = strokeWidth))
-                drawLine(plum, Offset(w * 0.21f, 240.dp.toPx()), Offset(w * 0.21f, 300.dp.toPx()), strokeWidth)
-                drawLine(plum, Offset(w * 0.38f, 240.dp.toPx()), Offset(w * 0.38f, 300.dp.toPx()), strokeWidth)
-                drawLine(plum, Offset(w * 0.62f, 240.dp.toPx()), Offset(w * 0.62f, 300.dp.toPx()), strokeWidth)
-                drawLine(plum, Offset(w * 0.79f, 240.dp.toPx()), Offset(w * 0.79f, 300.dp.toPx()), strokeWidth)
+                drawLine(plum, Offset(w * 0.21f, unit * 12f), Offset(w * 0.21f, unit * 15f), strokeWidth)
+                drawLine(plum, Offset(w * 0.38f, unit * 12f), Offset(w * 0.38f, unit * 15f), strokeWidth)
+                drawLine(plum, Offset(w * 0.62f, unit * 12f), Offset(w * 0.62f, unit * 15f), strokeWidth)
+                drawLine(plum, Offset(w * 0.79f, unit * 12f), Offset(w * 0.79f, unit * 15f), strokeWidth)
             }
         }
         Spacer(modifier = Modifier.height(spacing.md))
@@ -210,7 +214,10 @@ private fun OnboardingSlide2(
         initialValue = 0.4f,
         targetValue = 0.8f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1500),
+            animation = tween(
+                durationMillis = GymTheme.token.motion.duration.long * 3,
+                easing = GymTheme.token.motion.easing.standard
+            ),
             repeatMode = RepeatMode.Reverse
         ),
         label = "alpha"
@@ -232,15 +239,18 @@ private fun OnboardingSlide2(
         ) {
             Canvas(modifier = Modifier.size(onboardingTokens.illustrationScannerSize)) {
                 val w = size.width
-                val strokeWidth = 1.5.dp.toPx()
+                val unit = onboardingTokens.illustrationBaseUnit.toPx()
+                val strokeWidth = onboardingTokens.illustrationStrokeStandard.toPx()
+                val thinStroke = onboardingTokens.illustrationStrokeThin.toPx()
+                val boldStroke = onboardingTokens.illustrationStrokeBold.toPx()
                 val plum = colors.textSecondary.copy(alpha = alpha * 0.5f)
-                drawRect(plum, topLeft = Offset(60.dp.toPx(), 40.dp.toPx()), size = androidx.compose.ui.geometry.Size(2.dp.toPx(), 160.dp.toPx()))
-                drawRect(plum, topLeft = Offset(w / 2f - 1.dp.toPx(), 20.dp.toPx()), size = androidx.compose.ui.geometry.Size(2.dp.toPx(), 200.dp.toPx()))
-                drawRect(plum, topLeft = Offset(180.dp.toPx(), 60.dp.toPx()), size = androidx.compose.ui.geometry.Size(2.dp.toPx(), 120.dp.toPx()))
-                drawLine(plum, Offset(40.dp.toPx(), 80.dp.toPx()), Offset(200.dp.toPx(), 80.dp.toPx()), strokeWidth)
-                drawLine(plum, Offset(40.dp.toPx(), 160.dp.toPx()), Offset(200.dp.toPx(), 160.dp.toPx()), strokeWidth)
-                drawCircle(color = plum, radius = 40.dp.toPx(), center = Offset(w / 2f, w / 2f), style = Stroke(width = 1.dp.toPx()))
-                drawCircle(color = plum, radius = 2.dp.toPx(), center = Offset(w / 2f, w / 2f))
+                drawRect(plum, topLeft = Offset(unit * 3f, unit * 2f), size = androidx.compose.ui.geometry.Size(boldStroke, unit * 8f))
+                drawRect(plum, topLeft = Offset(w / 2f - thinStroke, unit), size = androidx.compose.ui.geometry.Size(boldStroke, unit * 10f))
+                drawRect(plum, topLeft = Offset(unit * 9f, unit * 3f), size = androidx.compose.ui.geometry.Size(boldStroke, unit * 6f))
+                drawLine(plum, Offset(unit * 2f, unit * 4f), Offset(unit * 10f, unit * 4f), strokeWidth)
+                drawLine(plum, Offset(unit * 2f, unit * 8f), Offset(unit * 10f, unit * 8f), strokeWidth)
+                drawCircle(color = plum, radius = unit * 2f, center = Offset(w / 2f, w / 2f), style = Stroke(width = thinStroke))
+                drawCircle(color = plum, radius = boldStroke, center = Offset(w / 2f, w / 2f))
             }
         }
         Column(
@@ -286,22 +296,28 @@ private fun OnboardingSlide3(
             contentAlignment = Alignment.Center
         ) {
             Canvas(modifier = Modifier.size(onboardingTokens.illustrationJournalWidth, onboardingTokens.illustrationJournalHeight)) {
-                val strokeWidth = 2.dp.toPx()
-                val thinStroke = 1.5.dp.toPx()
+                val unit = onboardingTokens.illustrationBaseUnit.toPx()
+                val strokeWidth = onboardingTokens.illustrationStrokeBold.toPx()
+                val thinStroke = onboardingTokens.illustrationStrokeStandard.toPx()
                 val plum = colors.textSecondary.copy(alpha = 0.4f)
                 val path = Path().apply {
-                    moveTo(40.dp.toPx(), 90.dp.toPx())
-                    quadraticTo(70.dp.toPx(), 85.dp.toPx(), 90.dp.toPx(), 60.dp.toPx())
-                    quadraticTo(110.dp.toPx(), 35.dp.toPx(), 140.dp.toPx(), 30.dp.toPx())
-                    quadraticTo(160.dp.toPx(), 50.dp.toPx(), 180.dp.toPx(), 70.dp.toPx())
-                    lineTo(200.dp.toPx(), 65.dp.toPx())
-                    lineTo(210.dp.toPx(), 55.dp.toPx())
+                    moveTo(unit * 2f, unit * 4.5f)
+                    quadraticTo(unit * 3.5f, unit * 4.25f, unit * 4.5f, unit * 3f)
+                    quadraticTo(unit * 5.5f, unit * 1.75f, unit * 7f, unit * 1.5f)
+                    quadraticTo(unit * 8f, unit * 2.5f, unit * 9f, unit * 3.5f)
+                    lineTo(unit * 10f, unit * 3.25f)
+                    lineTo(unit * 10.5f, unit * 2.75f)
                 }
                 drawPath(path, plum, style = Stroke(width = strokeWidth))
-                drawRect(plum, topLeft = Offset(60.dp.toPx(), 20.dp.toPx()), size = androidx.compose.ui.geometry.Size(120.dp.toPx(), 80.dp.toPx()), style = Stroke(width = thinStroke))
-                drawLine(plum, Offset(75.dp.toPx(), 40.dp.toPx()), Offset(145.dp.toPx(), 40.dp.toPx()), thinStroke)
-                drawLine(plum, Offset(75.dp.toPx(), 55.dp.toPx()), Offset(125.dp.toPx(), 55.dp.toPx()), thinStroke)
-                drawLine(plum, Offset(75.dp.toPx(), 70.dp.toPx()), Offset(165.dp.toPx(), 70.dp.toPx()), thinStroke)
+                drawRect(
+                    plum,
+                    topLeft = Offset(unit * 3f, unit),
+                    size = androidx.compose.ui.geometry.Size(unit * 6f, unit * 4f),
+                    style = Stroke(width = thinStroke)
+                )
+                drawLine(plum, Offset(unit * 3.75f, unit * 2f), Offset(unit * 7.25f, unit * 2f), thinStroke)
+                drawLine(plum, Offset(unit * 3.75f, unit * 2.75f), Offset(unit * 6.25f, unit * 2.75f), thinStroke)
+                drawLine(plum, Offset(unit * 3.75f, unit * 3.5f), Offset(unit * 8.25f, unit * 3.5f), thinStroke)
             }
         }
         Column(

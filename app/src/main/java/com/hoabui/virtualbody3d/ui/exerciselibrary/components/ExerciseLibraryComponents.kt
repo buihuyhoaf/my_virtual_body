@@ -1,14 +1,10 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -23,11 +19,11 @@ import com.hoabui.virtualbody3d.core.extensions.badgeLevelBackground
 import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
 import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
-import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.CardSize
-import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCard
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.chip.GSelectableTagRow
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.chip.GTagOption
-import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
+import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
+import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseSectionRow
+import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseSectionUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseSectionUiItem
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseUiModel
@@ -112,59 +108,44 @@ fun ExerciseSection(
     section: ExerciseSectionUiItem,
     onExerciseClick: (ExerciseUiModel) -> Unit = {},
 ) {
-    val token = GymTheme.token
     val regionLabel = stringResource(ExerciseDisplayResources.bodyRegionResId(section.bodyRegion))
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
-    ) {
-        GSectionHeader(title = regionLabel)
-        ExerciseRow(
-            exercises = section.exercises,
-            onExerciseClick = onExerciseClick
-        )
-    }
-}
-
-@Composable
-fun ExerciseRow(
-    exercises: List<ExerciseUiModel>,
-    onExerciseClick: (ExerciseUiModel) -> Unit = {},
-    modifier: Modifier = Modifier
-) {
-    val token = GymTheme.token
-    LazyRow(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(token.spacing.md),
-        contentPadding = PaddingValues(horizontal = token.spacing.xxs, vertical = token.spacing.xs)
-    ) {
-        items(exercises, key = { it.id }) { item ->
-            val token = GymTheme.token
-            GImageCard(
-                model = item.imageResId,
-                contentDescription = item.name,
-                firstLineText = item.name,
-                secondLineText = stringResource(ExerciseDisplayResources.bodyRegionResId(item.bodyRegion)),
-                cardSize = CardSize.Large,
-                badge = {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(token.radius.sm))
-                            .badgeLevelBackground(item.difficulty)
-                            .padding(
-                                horizontal = token.spacing.xs,
-                                vertical = token.spacing.xxs,
-                            ),
-                    ) {
-                        GText(
-                            text = stringResource(ExerciseDisplayResources.difficultyResId(item.difficulty)),
-                            style = token.typography.labelSmall,
-                            color = token.colors.onPrimary,
-                        )
-                    }
-                },
-                onClick = { onExerciseClick(item) },
+    val uiSection = GExerciseSectionUiModel(
+        id = section.bodyRegion.name,
+        title = regionLabel,
+        items = section.exercises.map { exercise ->
+            GExerciseCardUiModel(
+                id = exercise.id,
+                imageModel = exercise.imageResId,
+                title = exercise.name,
+                subtitle = stringResource(ExerciseDisplayResources.bodyRegionResId(exercise.bodyRegion)),
+                badgeText = stringResource(ExerciseDisplayResources.difficultyResId(exercise.difficulty)),
             )
-        }
-    }
+        },
+    )
+    GExerciseSectionRow(
+        section = uiSection,
+        modifier = modifier,
+        onItemClick = { id -> section.exercises.firstOrNull { it.id == id }?.let(onExerciseClick) },
+        badgeContent = { item ->
+            val exercise = section.exercises.firstOrNull { it.id == item.id }
+            if (exercise != null) {
+                val token = GymTheme.token
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(token.radius.sm))
+                        .badgeLevelBackground(exercise.difficulty)
+                        .padding(
+                            horizontal = token.spacing.xs,
+                            vertical = token.spacing.xxs,
+                        ),
+                ) {
+                    GText(
+                        text = item.badgeText ?: "",
+                        style = token.typography.labelSmall,
+                        color = token.colors.onPrimary,
+                    )
+                }
+            }
+        },
+    )
 }

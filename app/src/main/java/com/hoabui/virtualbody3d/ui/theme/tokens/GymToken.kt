@@ -4,6 +4,7 @@ import androidx.compose.material3.Typography
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.Dp
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.BodyAnalysisTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.BodyDetailTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.ButtonTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.CalendarTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.CameraTokens
@@ -12,15 +13,18 @@ import com.hoabui.virtualbody3d.ui.theme.tokens.component.ChatTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.CreateBaselineTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.ControlPanelTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.LoginTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.MealTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.OnboardingTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.SliderTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.StatusPopupTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.ThinkingCardTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymBodyDetailTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymCalendarTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymCameraTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymChatTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymCreateBaselineTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymLoginTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymMealTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymOnboardingTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymBodyAnalysisTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymButtonTokens
@@ -46,6 +50,8 @@ data class GymToken(
     val spacing: SpacingTokens,
     val radius: RadiusTokens,
     val elevation: ElevationTokens,
+    val motion: MotionTokens,
+    val borderWidth: BorderWidthTokens,
     val typography: Typography,
     val button: ButtonTokens,
     val card: CardTokens,
@@ -59,7 +65,9 @@ data class GymToken(
     val createBaseline: CreateBaselineTokens,
     val camera: CameraTokens,
     val statusPopup: StatusPopupTokens,
-    val thinkingCard: ThinkingCardTokens
+    val thinkingCard: ThinkingCardTokens,
+    val meal: MealTokens,
+    val bodyDetail: BodyDetailTokens
 )
 
 @Immutable
@@ -89,7 +97,10 @@ fun darkGymToken(
     primitiveColors: PrimitiveColorTokens = PrimitiveColorTokens.default(),
     primitiveSpacing: PrimitiveSpacingTokens = PrimitiveSpacingTokens.default(),
     primitiveRadius: PrimitiveRadiusTokens = PrimitiveRadiusTokens.default(),
-    elevation: ElevationTokens = ElevationTokens.default()
+    elevation: ElevationTokens = ElevationTokens.default(),
+    motion: MotionTokens = MotionTokens.default(),
+    borderWidth: BorderWidthTokens = BorderWidthTokens.default(),
+    typography: Typography = gymTypographyTokens().material
 ): GymToken {
     val colors = darkSemanticColors(primitiveColors)
     return GymToken(
@@ -114,7 +125,9 @@ fun darkGymToken(
         pill = primitiveRadius.pill
     ),
     elevation = elevation,
-    typography = gymTypographyTokens().material,
+    motion = motion,
+    borderWidth = borderWidth,
+    typography = typography,
     button = gymButtonTokens(primitiveSpacing, primitiveRadius),
     card = gymCardTokens(primitiveSpacing, primitiveRadius),
     chat = gymChatTokens(primitiveSpacing),
@@ -127,7 +140,9 @@ fun darkGymToken(
     createBaseline = gymCreateBaselineTokens(primitiveSpacing, primitiveColors),
     camera = gymCameraTokens(primitiveSpacing),
     statusPopup = gymStatusPopupTokens(primitiveSpacing, primitiveRadius),
-    thinkingCard = gymThinkingCardTokens(primitiveSpacing, primitiveRadius)
+    thinkingCard = gymThinkingCardTokens(primitiveSpacing, primitiveRadius),
+    meal = gymMealTokens(primitiveSpacing),
+    bodyDetail = gymBodyDetailTokens()
     )
 }
 
@@ -135,7 +150,10 @@ fun lightGymToken(
     primitiveColors: PrimitiveColorTokens = PrimitiveColorTokens.default(),
     primitiveSpacing: PrimitiveSpacingTokens = PrimitiveSpacingTokens.default(),
     primitiveRadius: PrimitiveRadiusTokens = PrimitiveRadiusTokens.default(),
-    elevation: ElevationTokens = ElevationTokens.default()
+    elevation: ElevationTokens = ElevationTokens.default(),
+    motion: MotionTokens = MotionTokens.default(),
+    borderWidth: BorderWidthTokens = BorderWidthTokens.default(),
+    typography: Typography = gymTypographyTokens().material
 ): GymToken {
     val colors = lightSemanticColors(primitiveColors)
     return GymToken(
@@ -160,7 +178,9 @@ fun lightGymToken(
         pill = primitiveRadius.pill
     ),
     elevation = elevation,
-    typography = gymTypographyTokens().material,
+    motion = motion,
+    borderWidth = borderWidth,
+    typography = typography,
     button = gymButtonTokens(primitiveSpacing, primitiveRadius),
     card = gymCardTokens(primitiveSpacing, primitiveRadius),
     chat = gymChatTokens(primitiveSpacing),
@@ -173,6 +193,8 @@ fun lightGymToken(
     createBaseline = gymCreateBaselineTokens(primitiveSpacing, primitiveColors),
     camera = gymCameraTokens(primitiveSpacing),
     statusPopup = gymStatusPopupTokens(primitiveSpacing, primitiveRadius),
-    thinkingCard = gymThinkingCardTokens(primitiveSpacing, primitiveRadius)
+    thinkingCard = gymThinkingCardTokens(primitiveSpacing, primitiveRadius),
+    meal = gymMealTokens(primitiveSpacing),
+    bodyDetail = gymBodyDetailTokens()
     )
 }

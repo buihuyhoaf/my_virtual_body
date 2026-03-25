@@ -18,7 +18,12 @@ data class OnboardingTokens(
     val illustrationBodyHeight: Dp,
     val illustrationScannerSize: Dp,
     val illustrationJournalWidth: Dp,
-    val illustrationJournalHeight: Dp
+    val illustrationJournalHeight: Dp,
+    val illustrationBaseUnit: Dp,
+    val illustrationFineUnit: Dp,
+    val illustrationStrokeThin: Dp,
+    val illustrationStrokeStandard: Dp,
+    val illustrationStrokeBold: Dp
 ) {
     companion object {
         fun default(): OnboardingTokens = OnboardingTokens(
@@ -29,7 +34,12 @@ data class OnboardingTokens(
             illustrationBodyHeight = 320.dp,
             illustrationScannerSize = 240.dp,
             illustrationJournalWidth = 240.dp,
-            illustrationJournalHeight = 120.dp
+            illustrationJournalHeight = 120.dp,
+            illustrationBaseUnit = 20.dp,
+            illustrationFineUnit = 5.dp,
+            illustrationStrokeThin = 1.dp,
+            illustrationStrokeStandard = 1.5.dp,
+            illustrationStrokeBold = 2.dp
         )
     }
 }
@@ -43,5 +53,10 @@ fun gymOnboardingTokens(primitiveSpacing: PrimitiveSpacingTokens): OnboardingTok
         illustrationBodyHeight = 320.dp,
         illustrationScannerSize = 240.dp,
         illustrationJournalWidth = 240.dp,
-        illustrationJournalHeight = 120.dp
+        illustrationJournalHeight = 120.dp,
+        illustrationBaseUnit = 20.dp,
+        illustrationFineUnit = 5.dp,
+        illustrationStrokeThin = 1.dp,
+        illustrationStrokeStandard = 1.5.dp,
+        illustrationStrokeBold = 2.dp
     )

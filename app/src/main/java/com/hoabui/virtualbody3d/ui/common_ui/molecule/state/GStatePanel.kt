@@ -1,14 +1,19 @@
 package com.hoabui.virtualbody3d.ui.common_ui.molecule.state
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.tooling.preview.Preview
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
@@ -71,5 +76,53 @@ fun GStatePanel(
                 )
             }
         }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Previews
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Preview(showBackground = true, name = "GStatePanel — light")
+@Composable
+private fun PreviewGStatePanelLight() {
+    GymTheme {
+        val token = GymTheme.token
+        GStatePanel(
+            title = "No messages yet",
+            subtitle = "Start a conversation to see it here.",
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    tint = token.colors.textSecondary,
+                )
+            },
+            actionText = "Refresh",
+            onActionClick = {},
+        )
+    }
+}
+
+@Preview(
+    showBackground = true,
+    name = "GStatePanel — dark",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
+@Composable
+private fun PreviewGStatePanelDark() {
+    GymTheme(darkTheme = true) {
+        val token = GymTheme.token
+        GStatePanel(
+            title = "Something went wrong",
+            subtitle = "Please try again.",
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    tint = token.colors.textSecondary,
+                )
+            },
+        )
     }
 }

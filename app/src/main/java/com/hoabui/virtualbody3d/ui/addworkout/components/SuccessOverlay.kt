@@ -41,11 +41,17 @@ fun SuccessOverlay(
     LaunchedEffect(Unit) {
         scale.animateTo(
             targetValue = 1f,
-            animationSpec = tween(durationMillis = 400)
+            animationSpec = tween(
+                durationMillis = token.motion.duration.long,
+                easing = token.motion.easing.emphasized
+            )
         )
         alpha.animateTo(
             targetValue = 1f,
-            animationSpec = tween(durationMillis = 300)
+            animationSpec = tween(
+                durationMillis = token.motion.duration.standard,
+                easing = token.motion.easing.decelerate
+            )
         )
     }
 
