@@ -28,9 +28,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.common_ui.atom.chip.GFilterChip
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
-import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
-import com.hoabui.virtualbody3d.ui.common_ui.image.toImageModel
-import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseSectionCardRow
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseSectionUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.ExerciseLibraryQuickChip
@@ -38,7 +35,6 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
 import com.hoabui.virtualbody3d.ui.exerciselibrary.selectedQuickChip
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseSectionUiItem
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseUiModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 @Composable
@@ -136,44 +132,21 @@ fun ExerciseLibraryEmptyState(modifier: Modifier = Modifier) {
 fun ExerciseSection(
     modifier: Modifier = Modifier,
     section: ExerciseSectionUiItem,
-    onExerciseClick: (ExerciseUiModel) -> Unit = {},
+    onExerciseClick: (String) -> Unit = {},
     onQuickAdd: ((String) -> Unit)? = null,
     quickAddContentDescription: String = "",
 ) {
-    val resourceProvider = LocalResourceProvider.current
     val regionLabel = stringResource(ExerciseDisplayResources.bodyRegionResId(section.bodyRegion))
     val uiSection = GExerciseSectionUiModel(
         id = section.bodyRegion.name,
         title = regionLabel,
-        items = section.exercises.map { exercise ->
-            GExerciseCardUiModel(
-                id = exercise.id,
-                imageModel = exercise.image.toImageModel(resourceProvider),
-                title = exercise.name,
-                subtitle = exerciseCardSubtitleLine(exercise),
-            )
-        },
+        items = section.items,
     )
     GExerciseSectionCardRow(
         section = uiSection,
         modifier = modifier,
-        onItemClick = { id -> section.exercises.firstOrNull { it.id == id }?.let(onExerciseClick) },
+        onItemClick = onExerciseClick,
         onQuickAdd = onQuickAdd,
         quickAddContentDescription = quickAddContentDescription,
     )
-}
-
-@Composable
-private fun exerciseCardSubtitleLine(exercise: ExerciseUiModel): String {
-    if (exercise.primaryMuscles.isNotEmpty()) {
-        val parts = mutableListOf<String>()
-        for (muscle in exercise.primaryMuscles.take(2)) {
-            parts.add(stringResource(ExerciseDisplayResources.muscleGroupResId(muscle)))
-        }
-        return parts.joinToString()
-    }
-    if (exercise.equipment != null) {
-        return stringResource(ExerciseDisplayResources.equipmentResId(exercise.equipment))
-    }
-    return stringResource(R.string.exercise_library_card_subtitle_fallback)
 }

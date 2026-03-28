@@ -1,19 +1,22 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.viewModelScope
 import com.hoabui.virtualbody3d.core.base.UiStateViewModel
 import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
 import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
-import com.hoabui.virtualbody3d.ui.exerciselibrary.ExerciseLibraryQuickChip
 import com.hoabui.virtualbody3d.domain.model.exercise.matchesLibrarySearch
 import com.hoabui.virtualbody3d.domain.model.exercise.normalizeExerciseLibraryQuery
+import com.hoabui.virtualbody3d.domain.repository.ResourceProvider
 import com.hoabui.virtualbody3d.domain.usecase.GetExerciseLibraryUseCase
-import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toExerciseUiModel
+import com.hoabui.virtualbody3d.ui.exerciselibrary.ExerciseLibraryQuickChip
+import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toLibraryCardUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseSectionUiItem
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
@@ -24,7 +27,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ExerciseLibraryViewModel @Inject constructor(
-    private val getExerciseLibraryUseCase: GetExerciseLibraryUseCase
+    private val getExerciseLibraryUseCase: GetExerciseLibraryUseCase,
+    @ApplicationContext private val appContext: Context,
+    private val resourceProvider: ResourceProvider,
 ) : UiStateViewModel<ExerciseLibraryUiState, Unit>() {
 
     private val groupedExercises = MutableStateFlow<Map<BodyRegion, List<Exercise>>>(emptyMap())
@@ -38,12 +43,7 @@ class ExerciseLibraryViewModel @Inject constructor(
             .launchIn(viewModelScope)
 
         combine(groupedExercises, filterState, selectedExerciseId) { grouped, filters, selectedId ->
-            val sections = buildSections(
-                grouped,
-                filters.searchQuery,
-                filters.selectedExerciseCategory,
-                filters.selectedEquipment,
-            )
+            val sections = buildSections(grouped, filters)
             val selectedExercise = selectedId?.let { id ->
                 grouped.values.flatten().find { it.id == id }
             }
@@ -80,11 +80,13 @@ class ExerciseLibraryViewModel @Inject constructor(
                     selectedExerciseCategory = null,
                     selectedEquipment = EquipmentType.Bodyweight,
                 )
-                ExerciseLibraryQuickChip.Dumbbell -> state.copy(
-                    selectedExerciseCategory = null,
-                    selectedEquipment = EquipmentType.Dumbbell,
-                )
             }
+        }
+    }
+
+    fun onQuickAddToWorkout(exerciseId: String) {
+        filterState.update { state ->
+            state.copy(quickAddedExerciseIds = state.quickAddedExerciseIds + exerciseId)
         }
     }
 
@@ -98,21 +100,24 @@ class ExerciseLibraryViewModel @Inject constructor(
 
     private fun buildSections(
         grouped: Map<BodyRegion, List<Exercise>>,
-        searchQuery: String,
-        selectedExerciseCategory: ExerciseCategory?,
-        selectedEquipment: EquipmentType?,
+        filters: ExerciseLibraryUiState,
     ): List<ExerciseSectionUiItem> {
-        val query = normalizeExerciseLibraryQuery(searchQuery)
+        val query = normalizeExerciseLibraryQuery(filters.searchQuery)
+        val category = filters.selectedExerciseCategory
+        val equipment = filters.selectedEquipment
+        val quickAdded = filters.quickAddedExerciseIds
         return BodyRegion.entries.mapNotNull { region ->
-            val exercises = grouped[region]
+            val items = grouped[region]
                 ?.filter { ex ->
                     ex.matchesLibrarySearch(query) &&
-                    (selectedExerciseCategory == null || ex.category == selectedExerciseCategory) &&
-                    (selectedEquipment == null || ex.equipment == selectedEquipment)
+                        (category == null || ex.category == category) &&
+                        (equipment == null || ex.equipment == equipment)
                 }
-                ?.map { it.toExerciseUiModel() }
+                ?.map { ex ->
+                    ex.toLibraryCardUiModel(appContext, resourceProvider, quickAdded)
+                }
                 ?: emptyList()
-            if (exercises.isEmpty()) null else ExerciseSectionUiItem(region, exercises)
+            if (items.isEmpty()) null else ExerciseSectionUiItem(region, items)
         }
     }
 }

@@ -9,14 +9,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.CardSize
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCard
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCardBadgeChrome
@@ -30,6 +34,7 @@ data class GExerciseCardUiModel(
     val title: String,
     val subtitle: String,
     val badgeText: String? = null,
+    val isSelected: Boolean = false,
 )
 
 data class GExerciseSectionUiModel(
@@ -51,6 +56,7 @@ fun GExerciseSectionCardRow(
     badgeContent: (@Composable (GExerciseCardUiModel) -> Unit)? = null,
 ) {
     val token = GymTheme.token
+    val haptic = LocalHapticFeedback.current
     LazyRow(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(token.spacing.md),
@@ -74,21 +80,26 @@ fun GExerciseSectionCardRow(
                     {
                         IconButton(
                             onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                 onQuickAdd.invoke(item.id)
-                                // Haptics: when enabling feedback, use
-                                // val haptic = LocalHapticFeedback.current
-                                // haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                // (or Confirm) — pick type per UX; requires
-                                // androidx.compose.ui:ui + HapticFeedbackType import.
                             },
-                            modifier = Modifier.clip(RoundedCornerShape(token.radius.sm)),
+                            modifier = Modifier
+                                .sizeIn(
+                                    minWidth = token.spacing.xxl,
+                                    minHeight = token.spacing.xxl,
+                                )
+                                .clip(RoundedCornerShape(token.radius.sm)),
                             colors = IconButtonDefaults.iconButtonColors(
                                 containerColor = token.colors.surface.copy(alpha = 0.92f),
                                 contentColor = token.colors.primary,
                             ),
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Add,
+                                imageVector = if (item.isSelected) {
+                                    Icons.Default.Check
+                                } else {
+                                    Icons.Default.Add
+                                },
                                 contentDescription = quickAddContentDescription,
                             )
                         }
@@ -105,6 +116,7 @@ fun GExerciseSectionCardRow(
                 badge = badgeSlot,
                 badgeChrome = chrome,
                 imageOverlayEnd = quickAddOverlay,
+                selectionHighlight = item.isSelected,
                 onClick = { onItemClick(item.id) },
             )
         }

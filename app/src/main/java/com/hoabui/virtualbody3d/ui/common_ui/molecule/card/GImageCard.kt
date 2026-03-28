@@ -147,6 +147,8 @@ private fun rememberCardBorderStroke(): BorderStroke {
 /**
  * Soft-edge professional card: [Column] with square image on top, text below on [surface].
  * Optional [badge] floats on the image (glass-style when [badgeChrome] is [Holistic]).
+ *
+ * @param selectionHighlight When `true`, uses primary border and subtle elevation for selected state.
  */
 @Composable
 fun GImageCard(
@@ -161,6 +163,7 @@ fun GImageCard(
     /** Optional overlay on the image (e.g. bottom-end quick action); drawn above the image, below badge hit-testing order depends on declaration order. */
     imageOverlayEnd: (@Composable BoxScope.() -> Unit)? = null,
     textSectionLeading: (@Composable RowScope.() -> Unit)? = null,
+    selectionHighlight: Boolean = false,
     onClick: (() -> Unit)? = null,
 ) {
     val token = GymTheme.token
@@ -188,10 +191,15 @@ fun GImageCard(
     val containerColor = token.colors.surface
     val cardColors = CardDefaults.cardColors(containerColor = containerColor)
     val flatElevation = CardDefaults.cardElevation(
-        defaultElevation = token.elevation.level0,
-        pressedElevation = token.elevation.level0,
+        defaultElevation = if (selectionHighlight) token.elevation.level1 else token.elevation.level0,
+        pressedElevation = if (selectionHighlight) token.elevation.level1 else token.elevation.level0,
     )
-    val borderStroke = rememberCardBorderStroke()
+    val defaultBorder = rememberCardBorderStroke()
+    val borderStroke = if (selectionHighlight) {
+        BorderStroke(token.borderWidth.thin, token.colors.primary)
+    } else {
+        defaultBorder
+    }
 
     if (onClick != null) {
         Card(
@@ -350,6 +358,48 @@ private fun GImageCardContent(
 // ─────────────────────────────────────────────────────────────────────────────
 // Previews
 // ─────────────────────────────────────────────────────────────────────────────
+
+@Preview(showBackground = true, name = "GImageCard — Selected")
+@Composable
+private fun PreviewSelected() {
+    GymTheme {
+        val token = GymTheme.token
+        Box(modifier = Modifier.padding(token.spacing.md)) {
+            GImageCard(
+                model = R.drawable.body_unsplash,
+                contentDescription = "Selected card",
+                firstLineText = "Added to workout",
+                secondLineText = "Quick add",
+                cardSize = CardSize.Medium,
+                selectionHighlight = true,
+                onClick = {},
+            )
+        }
+    }
+}
+
+@Preview(
+    showBackground = true,
+    name = "GImageCard — Selected dark",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
+@Composable
+private fun PreviewSelectedDark() {
+    GymTheme(darkTheme = true) {
+        val token = GymTheme.token
+        Box(modifier = Modifier.padding(token.spacing.md)) {
+            GImageCard(
+                model = R.drawable.body_unsplash,
+                contentDescription = null,
+                firstLineText = "Added to workout",
+                secondLineText = "Quick add",
+                cardSize = CardSize.Medium,
+                selectionHighlight = true,
+                onClick = {},
+            )
+        }
+    }
+}
 
 @Preview(showBackground = true, name = "GImageCard — All sizes")
 @Composable

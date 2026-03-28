@@ -2,10 +2,10 @@ package com.hoabui.virtualbody3d.ui.exerciselibrary
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,7 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
@@ -37,6 +37,7 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel.ExerciseLibraryViewModel
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
+import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
 
 @Composable
 fun ExerciseLibraryScreen(
@@ -61,12 +62,16 @@ fun ExerciseLibraryScreen(
                     onQueryChange = viewModel::updateSearchQuery,
                     onQuickChipSelect = viewModel::selectQuickChip,
                     onExerciseClick = viewModel::selectExerciseForDetail,
-                    onQuickAdd = onAddToWorkout,
+                    onQuickAdd = { exerciseId ->
+                        viewModel.onQuickAddToWorkout(exerciseId)
+                        onAddToWorkout(exerciseId)
+                    },
                 )
                 data.selectedExerciseForDetail?.let { exercise ->
                     ExerciseDetailDialog(
                         exercise = exercise,
                         onAddClick = {
+                            viewModel.onQuickAddToWorkout(exercise.id)
                             viewModel.clearExerciseDetail()
                             onAddToWorkout(exercise.id)
                         },
@@ -96,7 +101,7 @@ fun ExerciseLibraryScreenContent(
         durationMillis = token.motion.duration.standard,
         easing = token.motion.easing.standard,
     )
-    val sizeSpec = tween<IntSize>(
+    val slideSpec = tween<IntOffset>(
         durationMillis = token.motion.duration.standard,
         easing = token.motion.easing.standard,
     )
@@ -110,7 +115,7 @@ fun ExerciseLibraryScreenContent(
                     .fillMaxWidth()
                     .padding(
                         top = token.spacing.xs,
-                        bottom = token.spacing.xs,
+                        bottom = if (showSuggestionLayer) token.spacing.xs else token.spacing.xxs,
                         start = token.spacing.md,
                         end = token.spacing.md,
                     ),
@@ -122,8 +127,14 @@ fun ExerciseLibraryScreenContent(
                 )
                 AnimatedVisibility(
                     visible = showSuggestionLayer,
-                    enter = fadeIn(fadeSpec) + expandVertically(animationSpec = sizeSpec),
-                    exit = fadeOut(fadeSpec) + shrinkVertically(animationSpec = sizeSpec),
+                    enter = fadeIn(fadeSpec) + slideInVertically(
+                        animationSpec = slideSpec,
+                        initialOffsetY = { fullHeight -> -(fullHeight / 2) },
+                    ),
+                    exit = fadeOut(fadeSpec) + slideOutVertically(
+                        animationSpec = slideSpec,
+                        targetOffsetY = { fullHeight -> -(fullHeight / 2) },
+                    ),
                 ) {
                     ExerciseSearchSuggestionChips(
                         libraryState = state,
@@ -140,7 +151,11 @@ fun ExerciseLibraryScreenContent(
                         .fillMaxWidth(),
                     contentAlignment = Alignment.Center,
                 ) {
-                    ExerciseLibraryEmptyState()
+                    ExerciseLibraryEmptyState(
+                        modifier = Modifier
+                            .fillParentMaxHeight()
+                            .fillMaxWidth(),
+                    )
                 }
             }
         } else {
@@ -150,7 +165,11 @@ fun ExerciseLibraryScreenContent(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(token.colors.background)
+                            .background(
+                                token.colors.background.copy(
+                                    alpha = PrimitiveAlphaTokens.STICKY_HEADER_SCRIM,
+                                ),
+                            )
                             .padding(
                                 horizontal = token.spacing.md,
                                 vertical = token.spacing.xs,
@@ -163,7 +182,7 @@ fun ExerciseLibraryScreenContent(
                     ExerciseSection(
                         modifier = Modifier.padding(horizontal = token.spacing.md),
                         section = section,
-                        onExerciseClick = { uiModel -> onExerciseClick(uiModel.id) },
+                        onExerciseClick = onExerciseClick,
                         onQuickAdd = onQuickAdd,
                         quickAddContentDescription = quickAddCd,
                     )
