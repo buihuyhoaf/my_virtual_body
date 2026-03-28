@@ -1,20 +1,36 @@
 package com.hoabui.virtualbody3d.data.model
 
+import com.google.gson.annotations.SerializedName
+
 data class ExerciseDto(
-    // Base exercise info (used in all contexts)
-    val id: String,
-    val name: String,
-    val imageResId: Int,
+    @SerializedName("id")
+    val id: String? = null,
+    @SerializedName("name")
+    val name: String? = null,
+    @SerializedName("image_res_id")
+    val imageResId: Int? = null,
+    @SerializedName("image_url")
     val imageResUrl: String? = null,
-    val bodyRegion: String,
-    val difficulty: String,
-    val description: String,
-    val primaryMuscles: List<String>,
+    @SerializedName("local_image_name")
+    val localImageName: String? = null,
+    @SerializedName("body_region")
+    val bodyRegion: String? = null,
+    @SerializedName("difficulty")
+    val difficulty: String? = null,
+    @SerializedName("description")
+    val description: String? = null,
+    @SerializedName("primary_muscles")
+    val primaryMuscles: List<String>? = null,
+    @SerializedName("secondary_muscles")
     val secondaryMuscles: List<String>? = null,
-    val equipment: String,
-    val safetyNotes: String,
+    @SerializedName("equipment")
+    val equipment: String? = null,
+    @SerializedName("safety_notes")
+    val safetyNotes: String? = null,
+    @SerializedName("last_weight_kg")
     val lastWeightKg: Double? = null,
-    // Workout-specific info
-    val sets: Int = 0,
-    val reps: Int = 0
+    @SerializedName("sets")
+    val sets: Int? = null,
+    @SerializedName("reps")
+    val reps: Int? = null
 )

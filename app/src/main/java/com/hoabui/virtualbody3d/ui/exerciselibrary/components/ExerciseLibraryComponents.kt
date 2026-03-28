@@ -19,6 +19,8 @@ import com.hoabui.virtualbody3d.core.extensions.badgeLevelBackground
 import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
 import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
+import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
+import com.hoabui.virtualbody3d.ui.common_ui.image.toImageModel
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.chip.GSelectableTagRow
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.chip.GTagOption
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
@@ -108,6 +110,7 @@ fun ExerciseSection(
     section: ExerciseSectionUiItem,
     onExerciseClick: (ExerciseUiModel) -> Unit = {},
 ) {
+    val resourceProvider = LocalResourceProvider.current
     val regionLabel = stringResource(ExerciseDisplayResources.bodyRegionResId(section.bodyRegion))
     val uiSection = GExerciseSectionUiModel(
         id = section.bodyRegion.name,
@@ -115,7 +118,7 @@ fun ExerciseSection(
         items = section.exercises.map { exercise ->
             GExerciseCardUiModel(
                 id = exercise.id,
-                imageModel = exercise.imageResId,
+                imageModel = exercise.image.toImageModel(resourceProvider),
                 title = exercise.name,
                 subtitle = stringResource(ExerciseDisplayResources.bodyRegionResId(exercise.bodyRegion)),
                 badgeText = stringResource(ExerciseDisplayResources.difficultyResId(exercise.difficulty)),

@@ -10,7 +10,7 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseUiModel
 fun Exercise.toExerciseUiModel(): ExerciseUiModel = ExerciseUiModel(
     id = id,
     name = name,
-    imageResId = imageResId,
+    image = image,
     difficulty = difficulty,
     bodyRegion = bodyRegion,
     primaryMuscles = primaryMuscles,

@@ -11,6 +11,7 @@ import com.hoabui.virtualbody3d.data.repository.MessageRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.ProgressTimelineRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.PromoBannerRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.ExerciseRepositoryImpl
+import com.hoabui.virtualbody3d.data.repository.ResourceProviderImpl
 import com.hoabui.virtualbody3d.data.repository.SupplementRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.UserInfoRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.WorkoutFeedRepositoryImpl
@@ -26,6 +27,7 @@ import com.hoabui.virtualbody3d.domain.repository.MessageRepository
 import com.hoabui.virtualbody3d.domain.repository.ProgressTimelineRepository
 import com.hoabui.virtualbody3d.domain.repository.PromoBannerRepository
 import com.hoabui.virtualbody3d.domain.repository.ExerciseRepository
+import com.hoabui.virtualbody3d.domain.repository.ResourceProvider
 import com.hoabui.virtualbody3d.domain.repository.SupplementRepository
 import com.hoabui.virtualbody3d.domain.repository.UserInfoRepository
 import com.hoabui.virtualbody3d.domain.repository.WorkoutFeedRepository
@@ -129,4 +131,10 @@ abstract class RepositoryModule {
     abstract fun bindWorkoutScheduleRepository(
         workoutScheduleRepositoryImpl: WorkoutScheduleRepositoryImpl
     ): WorkoutScheduleRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindResourceProvider(
+        resourceProviderImpl: ResourceProviderImpl
+    ): ResourceProvider
 }

@@ -1,6 +1,5 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,7 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
@@ -39,9 +37,12 @@ import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
+import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
+import com.hoabui.virtualbody3d.ui.common_ui.image.toImageModel
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.info.GInfoRow
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
+import coil.compose.AsyncImage
 
 // ----- Small reusable composables -----
 
@@ -146,6 +147,7 @@ fun ExerciseDetailDialog(
 ) {
     val token = GymTheme.token
     val scrollState = rememberScrollState()
+    val resourceProvider = LocalResourceProvider.current
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -181,8 +183,8 @@ fun ExerciseDetailDialog(
                             )
                             .background(token.colors.surfaceSubtle)
                     ) {
-                        Image(
-                            painter = painterResource(exercise.imageResId),
+                        AsyncImage(
+                            model = exercise.image.toImageModel(resourceProvider),
                             contentDescription = null,
                             modifier = Modifier
                                 .fillMaxWidth()

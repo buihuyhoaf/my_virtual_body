@@ -1,0 +1,175 @@
+package com.hoabui.virtualbody3d.data.local.mock
+
+import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.data.model.ExerciseDto
+
+object ExerciseMockData {
+    fun allExercises(): List<ExerciseDto> = listOf(
+        ExerciseDto(
+            id = "1",
+            name = "Bench Press",
+            imageResId = R.drawable.body_unsplash,
+            localImageName = "body_unsplash",
+            bodyRegion = "Chest",
+            difficulty = "Intermediate",
+            description = "Bench press",
+            primaryMuscles = listOf("Pectoralis", "Triceps"),
+            secondaryMuscles = listOf("Deltoids"),
+            equipment = "Barbell",
+            safetyNotes = "Keep shoulder blades retracted.",
+            lastWeightKg = 80.0
+        ),
+        ExerciseDto(
+            id = "2",
+            name = "Incline Dumbbell Press",
+            imageResId = R.drawable.body_unsplash,
+            localImageName = "body_unsplash",
+            bodyRegion = "Chest",
+            difficulty = "Intermediate",
+            description = "Incline dumbbell press",
+            primaryMuscles = listOf("Pectoralis"),
+            secondaryMuscles = listOf("Triceps"),
+            equipment = "Dumbbell",
+            safetyNotes = "Avoid flaring elbows.",
+            lastWeightKg = 30.0
+        ),
+        ExerciseDto(
+            id = "3",
+            name = "Lat Pulldown",
+            imageResId = R.drawable.body_unsplash,
+            localImageName = "body_unsplash",
+            bodyRegion = "Back",
+            difficulty = "Beginner",
+            description = "Lat pulldown",
+            primaryMuscles = listOf("LatissimusDorsi"),
+            secondaryMuscles = listOf("Biceps"),
+            equipment = "Cable",
+            safetyNotes = "Pull with back, not momentum.",
+            lastWeightKg = 50.0
+        ),
+        ExerciseDto(
+            id = "4",
+            name = "Seated Cable Row",
+            imageResId = R.drawable.body_unsplash,
+            localImageName = "body_unsplash",
+            bodyRegion = "Back",
+            difficulty = "Intermediate",
+            description = "Seated cable row",
+            primaryMuscles = listOf("LatissimusDorsi", "Biceps"),
+            secondaryMuscles = listOf("Deltoids"),
+            equipment = "Cable",
+            safetyNotes = "Keep chest tall.",
+            lastWeightKg = 55.0
+        ),
+        ExerciseDto(
+            id = "5",
+            name = "Overhead Press",
+            imageResId = R.drawable.body_unsplash,
+            localImageName = "body_unsplash",
+            bodyRegion = "Shoulders",
+            difficulty = "Intermediate",
+            description = "Overhead press",
+            primaryMuscles = listOf("Deltoids", "Triceps"),
+            secondaryMuscles = listOf("Abdominals"),
+            equipment = "Barbell",
+            safetyNotes = "Brace core through the press.",
+            lastWeightKg = 45.0
+        ),
+        ExerciseDto(
+            id = "6",
+            name = "Lateral Raise",
+            imageResId = R.drawable.body_unsplash,
+            localImageName = "body_unsplash",
+            bodyRegion = "Shoulders",
+            difficulty = "Beginner",
+            description = "Lateral raise",
+            primaryMuscles = listOf("Deltoids"),
+            secondaryMuscles = listOf(),
+            equipment = "Dumbbell",
+            safetyNotes = "Control the eccentric.",
+            lastWeightKg = 12.0
+        ),
+        ExerciseDto(
+            id = "7",
+            name = "Barbell Curl",
+            imageResId = R.drawable.body_unsplash,
+            localImageName = "body_unsplash",
+            bodyRegion = "Arms",
+            difficulty = "Beginner",
+            description = "Barbell curl",
+            primaryMuscles = listOf("Biceps"),
+            secondaryMuscles = listOf("Forearms"),
+            equipment = "Barbell",
+            safetyNotes = "Do not swing torso.",
+            lastWeightKg = 25.0
+        ),
+        ExerciseDto(
+            id = "8",
+            name = "Triceps Pushdown",
+            imageResId = R.drawable.body_unsplash,
+            localImageName = "body_unsplash",
+            bodyRegion = "Arms",
+            difficulty = "Beginner",
+            description = "Triceps pushdown",
+            primaryMuscles = listOf("Triceps"),
+            secondaryMuscles = listOf("Forearms"),
+            equipment = "Cable",
+            safetyNotes = "Keep elbows fixed.",
+            lastWeightKg = 30.0
+        ),
+        ExerciseDto(
+            id = "9",
+            name = "Plank",
+            imageResId = R.drawable.body_unsplash,
+            localImageName = "body_unsplash",
+            bodyRegion = "Core",
+            difficulty = "Beginner",
+            description = "Plank hold",
+            primaryMuscles = listOf("Abdominals"),
+            secondaryMuscles = listOf("Glutes"),
+            equipment = "Bodyweight",
+            safetyNotes = "Avoid lower-back sag."
+        ),
+        ExerciseDto(
+            id = "10",
+            name = "Russian Twist",
+            imageResId = R.drawable.body_unsplash,
+            localImageName = "body_unsplash",
+            bodyRegion = "Core",
+            difficulty = "Intermediate",
+            description = "Russian twist",
+            primaryMuscles = listOf("Abdominals"),
+            secondaryMuscles = listOf("Obliques"),
+            equipment = "Bodyweight",
+            safetyNotes = "Move with control."
+        ),
+        ExerciseDto(
+            id = "11",
+            name = "Squat",
+            imageResId = R.drawable.body_unsplash,
+            localImageName = "body_unsplash",
+            bodyRegion = "Legs",
+            difficulty = "Beginner",
+            description = "Back squat",
+            primaryMuscles = listOf("Quadriceps", "Glutes"),
+            secondaryMuscles = listOf("Hamstrings"),
+            equipment = "Barbell",
+            safetyNotes = "Track knees over toes.",
+            lastWeightKg = 100.0
+        ),
+        ExerciseDto(
+            id = "12",
+            name = "Romanian Deadlift",
+            imageResId = R.drawable.body_unsplash,
+            localImageName = "body_unsplash",
+            bodyRegion = "Legs",
+            difficulty = "Intermediate",
+            description = "Romanian deadlift",
+            primaryMuscles = listOf("Hamstrings", "Glutes"),
+            secondaryMuscles = listOf("Abdominals"),
+            equipment = "Barbell",
+            safetyNotes = "Keep neutral spine.",
+            lastWeightKg = 90.0
+        )
+    )
+}

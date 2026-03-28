@@ -56,6 +56,8 @@ import com.hoabui.virtualbody3d.ui.body.screen.BodyScoreChip
 import com.hoabui.virtualbody3d.ui.body.screen.FloatingMetricChip
 import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
 import com.hoabui.virtualbody3d.ui.body.state.BodyUiState
+import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
+import com.hoabui.virtualbody3d.ui.common_ui.image.toImageModel
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.CardSize
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCard
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.cardDimensions
@@ -295,6 +297,7 @@ fun UpcomingExercisesRow(
     onAddExerciseClick: () -> Unit = {},
     onSeeMoreClick: (() -> Unit)? = null
 ) {
+    val resourceProvider = LocalResourceProvider.current
     SectionHorizontalRow(
         titleResId = R.string.home_section_incomming_exercises,
         modifier = modifier,
@@ -305,7 +308,7 @@ fun UpcomingExercisesRow(
             key = { it.name }
         ) { item ->
             GImageCard(
-                model = item.imageResId,
+                model = item.image.toImageModel(resourceProvider),
                 contentDescription = item.name,
                 firstLineText = item.name,
                 secondLineText = "${item.reps}x${item.sets}",

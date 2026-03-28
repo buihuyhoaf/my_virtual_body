@@ -1,7 +1,7 @@
 package com.hoabui.virtualbody3d.data.local
 
 import com.hoabui.virtualbody3d.data.model.ExerciseDto
-import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.data.local.mock.ExerciseMockData
 import java.time.LocalDate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -21,51 +21,12 @@ class ExercisesLocalDataSource @Inject constructor() {
     fun getExercisesByDay(day: LocalDate): Flow<List<ExerciseDto>> =
         getExercises()
 
-    private fun sampleExercises(): List<ExerciseDto> = listOf(
-        ExerciseDto(
-            id = "1",
-            name = "Bench Press",
-            imageResId = R.drawable.body_unsplash,
-            bodyRegion = "Chest",
-            difficulty = "Intermediate",
-            description = "Bench press",
-            primaryMuscles = listOf("Pectoralis"),
-            secondaryMuscles = listOf("Triceps"),
-            equipment = "Barbell",
-            safetyNotes = "",
-            lastWeightKg = null,
-            sets = 4,
-            reps = 12,
-        ),
-        ExerciseDto(
-            id = "2",
-            name = "Squat",
-            imageResId = R.drawable.body_unsplash,
-            bodyRegion = "Legs",
-            difficulty = "Intermediate",
-            description = "Squat",
-            primaryMuscles = listOf("Quadriceps", "Glutes"),
-            secondaryMuscles = listOf("Hamstrings"),
-            equipment = "Barbell",
-            safetyNotes = "",
-            lastWeightKg = null,
-            sets = 3,
-            reps = 8,
-        ),
-        ExerciseDto(
-            id = "3",
-            name = "Deadlift",
-            imageResId = R.drawable.body_unsplash,
-            bodyRegion = "Back",
-            difficulty = "Advanced",
-            description = "Deadlift",
-            primaryMuscles = listOf("Back", "Hamstrings", "Glutes"),
-            secondaryMuscles = listOf("Quadriceps"),
-            equipment = "Barbell",
-            safetyNotes = "",
-            lastWeightKg = null,
-            sets = 4,
-            reps = 10,
-        ),
-    )
+    private fun sampleExercises(): List<ExerciseDto> = ExerciseMockData.allExercises()
+        .take(3)
+        .mapIndexed { index, dto ->
+            dto.copy(
+                sets = if (index == 1) 3 else 4,
+                reps = if (index == 1) 8 else 12
+            )
+        }
 }

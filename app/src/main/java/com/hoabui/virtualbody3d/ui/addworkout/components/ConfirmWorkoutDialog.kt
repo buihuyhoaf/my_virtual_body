@@ -25,6 +25,8 @@ import com.hoabui.virtualbody3d.ui.addworkout.state.AddWorkoutUiState
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
 import com.hoabui.virtualbody3d.ui.common_ui.atom.divider.GDivider
+import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
+import com.hoabui.virtualbody3d.ui.common_ui.image.toImageModel
 import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GMediaInfoCard
@@ -47,6 +49,7 @@ fun ConfirmWorkoutDialog(
 ) {
     val token = GymTheme.token
     val exercise = state.exercise ?: return
+    val resourceProvider = LocalResourceProvider.current
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -70,7 +73,10 @@ fun ConfirmWorkoutDialog(
                         .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(token.spacing.xxs)
                 ) {
-                    ConfirmExerciseSummary(exercise = exercise)
+                    ConfirmExerciseSummary(
+                        exercise = exercise,
+                        imageModel = exercise.image.toImageModel(resourceProvider)
+                    )
                     GDivider(modifier = Modifier.padding(vertical = token.spacing.xs))
                     ConfirmScheduleSummary(
                         date = state.selectedDate,
@@ -114,11 +120,12 @@ fun ConfirmWorkoutDialog(
 @Composable
 private fun ConfirmExerciseSummary(
     exercise: Exercise,
+    imageModel: Any?,
     modifier: Modifier = Modifier
 ) {
     val token = GymTheme.token
     GMediaInfoCard(
-        imageModel = exercise.imageResId,
+        imageModel = imageModel,
         title = exercise.name,
         subtitle = stringResource(ExerciseDisplayResources.bodyRegionResId(exercise.bodyRegion)),
         badge = {

@@ -23,6 +23,8 @@ import com.hoabui.virtualbody3d.ui.addworkout.state.AddWorkoutUiState
 import com.hoabui.virtualbody3d.ui.addworkout.viewmodel.AddWorkoutViewModel
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBar
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBarBackIcon
+import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
+import com.hoabui.virtualbody3d.ui.common_ui.image.toImageModel
 import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
 import com.hoabui.virtualbody3d.ui.common_ui.organism.workout.GAddWorkoutForm
 import com.hoabui.virtualbody3d.ui.common_ui.organism.workout.GAddWorkoutFormUiModel
@@ -104,6 +106,7 @@ private fun AddWorkoutContent(
     onRestChange: (Int) -> Unit,
     onNotesChange: (String) -> Unit
 ) {
+    val resourceProvider = LocalResourceProvider.current
     GScaffold(
         modifier = modifier,
         topBar = {
@@ -126,7 +129,7 @@ private fun AddWorkoutContent(
                     val token = GymTheme.token
                     GAddWorkoutForm(
                         uiModel = GAddWorkoutFormUiModel(
-                            exerciseImageModel = exercise.imageResId,
+                            exerciseImageModel = exercise.image.toImageModel(resourceProvider),
                             exerciseTitle = exercise.name,
                             exerciseSubtitle = stringResource(ExerciseDisplayResources.bodyRegionResId(exercise.bodyRegion)),
                             exerciseBadgeText = stringResource(ExerciseDisplayResources.difficultyResId(exercise.difficulty)),

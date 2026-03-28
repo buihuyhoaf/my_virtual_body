@@ -1,5 +1,7 @@
 package com.hoabui.virtualbody3d.domain.model.exercise
 
+import com.hoabui.virtualbody3d.domain.model.common.ImageSource
+
 /**
  * Domain model for an exercise with full information for library and detail screens.
  *
@@ -8,7 +10,7 @@ package com.hoabui.virtualbody3d.domain.model.exercise
 data class Exercise(
     val id: String,
     val name: String,
-    val imageResId: Int,
+    val image: ImageSource,
     val bodyRegion: BodyRegion,
     val difficulty: Difficulty,
     val description: String,

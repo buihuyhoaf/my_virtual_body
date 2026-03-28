@@ -8,6 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
+import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
+import com.hoabui.virtualbody3d.ui.common_ui.image.toImageModel
 import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GMediaInfoCard
@@ -24,8 +26,9 @@ fun ExerciseHeader(
     modifier: Modifier = Modifier
 ) {
     val token = GymTheme.token
+    val resourceProvider = LocalResourceProvider.current
     GMediaInfoCard(
-        imageModel = exercise.imageResId,
+        imageModel = exercise.image.toImageModel(resourceProvider),
         title = exercise.name,
         subtitle = stringResource(ExerciseDisplayResources.bodyRegionResId(exercise.bodyRegion)),
         badge = {

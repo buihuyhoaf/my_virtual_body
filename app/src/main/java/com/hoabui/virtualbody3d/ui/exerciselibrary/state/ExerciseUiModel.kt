@@ -1,6 +1,7 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.state
 
 import androidx.compose.runtime.Immutable
+import com.hoabui.virtualbody3d.domain.model.common.ImageSource
 import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
 import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
 import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
@@ -16,7 +17,7 @@ import com.hoabui.virtualbody3d.domain.model.exercise.MuscleGroup
 data class ExerciseUiModel(
     val id: String,
     val name: String,
-    val imageResId: Int,
+    val image: ImageSource,
     val difficulty: Difficulty,
     val bodyRegion: BodyRegion,
     val primaryMuscles: List<MuscleGroup>,
