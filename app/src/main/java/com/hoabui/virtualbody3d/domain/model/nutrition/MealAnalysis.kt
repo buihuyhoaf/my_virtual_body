@@ -1,5 +1,7 @@
 package com.hoabui.virtualbody3d.domain.model.nutrition
 
+import com.hoabui.virtualbody3d.domain.model.common.ImageSource
+
 /**
  * Domain model representing the result of meal analysis for a single image.
  */
@@ -13,6 +15,5 @@ data class MealAnalysis(
     val servingSizeText: String? = null,
     val notes: String? = null,
     val rawLines: List<String> = emptyList(),
-    /** Optional image URL when meal is loaded from API (e.g. getMealsByDay). */
-    val imageUrl: String? = null
+    val image: ImageSource,
 )

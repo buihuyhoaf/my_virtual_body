@@ -1,8 +1,7 @@
 package com.hoabui.virtualbody3d.ui.mealcapture
 
-import android.net.Uri
+import com.hoabui.virtualbody3d.domain.model.common.ImageSource
 import com.hoabui.virtualbody3d.domain.model.nutrition.MealAnalysis
-import androidx.core.net.toUri
 
 /**
  * Dominant macro for UI accents (e.g. meal cards), derived from gram totals.
@@ -19,7 +18,7 @@ enum class MealMacroGroup {
  */
 data class MealPageUiModel(
     val id: String,
-    val imageUri: Uri,
+    val image: ImageSource,
     val title: String,
     val caloriesKcal: Int,
     val caloriesText: String,
@@ -28,9 +27,7 @@ data class MealPageUiModel(
     val dominantMacro: MealMacroGroup,
 )
 
-fun MealAnalysis.toMealPageUiModel(
-    imageUri: Uri
-): MealPageUiModel {
+fun MealAnalysis.toMealPageUiModel(image: ImageSource): MealPageUiModel {
     val title = name.ifBlank { "Meal" }
 
     val kcal = caloriesKcal ?: 0
@@ -44,7 +41,7 @@ fun MealAnalysis.toMealPageUiModel(
 
     return MealPageUiModel(
         id = id,
-        imageUri = imageUri,
+        image = image,
         title = title,
         caloriesKcal = kcal,
         caloriesText = caloriesText,
@@ -70,10 +67,6 @@ private fun dominantMacroFromGrams(
 }
 
 /**
- * Maps [MealAnalysis] to [MealPageUiModel] when loaded from API (uses [MealAnalysis.imageUrl] or placeholder).
+ * Maps [MealAnalysis] to [MealPageUiModel] using domain [MealAnalysis.image] (network, local, or fallback).
  */
-fun MealAnalysis.toMealPageUiModelFromApi(): MealPageUiModel {
-    val imageUri = imageUrl?.toUri() ?: Uri.EMPTY
-    return toMealPageUiModel(imageUri)
-}
-
+fun MealAnalysis.toMealPageUiModelFromApi(): MealPageUiModel = toMealPageUiModel(image)

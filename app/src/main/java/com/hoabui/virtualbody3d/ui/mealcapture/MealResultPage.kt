@@ -1,7 +1,5 @@
 package com.hoabui.virtualbody3d.ui.mealcapture
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,23 +19,19 @@ import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import coil.compose.AsyncImage
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
+import com.hoabui.virtualbody3d.ui.common_ui.image.toImageModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 @Composable
 fun MealResultPage(
@@ -53,18 +47,8 @@ fun MealResultPage(
             .fillMaxSize()
             .padding(spacing.md)
     ) {
-        var bitmap by remember(meal.imageUri) { mutableStateOf<Bitmap?>(null) }
-
-        LaunchedEffect(meal.imageUri) {
-            val path = meal.imageUri.path
-            bitmap = if (path != null) {
-                withContext(Dispatchers.IO) {
-                    runCatching { BitmapFactory.decodeFile(path) }.getOrNull()
-                }
-            } else {
-                null
-            }
-        }
+        val resourceProvider = LocalResourceProvider.current
+        val imageModel = remember(meal.image) { meal.image.toImageModel(resourceProvider) }
 
         val scrollState = rememberScrollState()
 
@@ -83,13 +67,12 @@ fun MealResultPage(
                     .clip(RoundedCornerShape(token.radius.lg)),
                 contentAlignment = Alignment.Center
             ) {
-                val imageBitmap = bitmap?.asImageBitmap()
-                if (imageBitmap != null) {
-                    Image(
-                        bitmap = imageBitmap,
+                if (imageModel != null) {
+                    AsyncImage(
+                        model = imageModel,
                         contentDescription = meal.title,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
                     )
                 } else {
                     Image(

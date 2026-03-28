@@ -68,12 +68,8 @@ fun HomeContent(
                         enabled = !isModelInteracting,
                     )
                     .padding(token.spacing.md),
-                verticalArrangement = Arrangement.spacedBy(token.spacing.md),
+                verticalArrangement = Arrangement.spacedBy(token.spacing.lg),
             ) {
-                UpcomingExercisesRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    exercises = upcomingWorkouts,
-                )
                 GBodyHeroPanel(
                     uiModel = GBodyHeroPanelUiModel(
                         title = stringResource(R.string.home_section_body),
@@ -114,7 +110,17 @@ fun HomeContent(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(contentHeight * 0.45f),
+                        .height(contentHeight * 0.38f),
+                )
+                NutritionSummaryCard(
+                    nutritionToday = nutritionToday,
+                    mealsForToday = mealsForToday,
+                    onClick = {},
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                UpcomingExercisesRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    exercises = upcomingWorkouts,
                 )
                 ProgressTimelineRow(
                     modifier = Modifier

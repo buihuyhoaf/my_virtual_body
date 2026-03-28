@@ -46,12 +46,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.core.extensions.formatMeasurement
 import com.hoabui.virtualbody3d.core.utils.Constants
-import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
 import com.hoabui.virtualbody3d.ui.body.data.SupplementUiItem
-import com.hoabui.virtualbody3d.ui.body.data.UpcomingExerciseHighlight
 import com.hoabui.virtualbody3d.ui.body.data.UpcomingWorkoutUiItem
 import com.hoabui.virtualbody3d.ui.body.screen.BodyModelPreview
 import com.hoabui.virtualbody3d.ui.body.screen.BodyScoreChip
@@ -62,9 +61,7 @@ import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
 import com.hoabui.virtualbody3d.ui.common_ui.image.toImageModel
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.CardSize
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCard
-import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCardBadgeChrome
-import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCardBeginnerDifficultyDot
-import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCardHolisticCapsuleLabel
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GUpcomingExerciseCard
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.cardDimensions
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
 import com.hoabui.virtualbody3d.ui.mealcapture.MealPageUiModel
@@ -299,7 +296,6 @@ fun SectionHorizontalRow(
 fun UpcomingExercisesRow(
     modifier: Modifier = Modifier,
     exercises: List<UpcomingWorkoutUiItem>,
-    onAddExerciseClick: () -> Unit = {},
     onSeeMoreClick: (() -> Unit)? = null
 ) {
     val token = GymTheme.token
@@ -315,38 +311,21 @@ fun UpcomingExercisesRow(
         )
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(token.spacing.sm),
-            contentPadding = PaddingValues(horizontal = token.spacing.md),
         ) {
             items(
                 items = exercises,
                 key = { it.id }
             ) { item ->
-                GImageCard(
+                GUpcomingExerciseCard(
                     model = item.image.toImageModel(resourceProvider),
-                    contentDescription = item.name,
-                    firstLineText = item.name,
-                    secondLineText = stringResource(
-                        R.string.home_upcoming_reps_sets,
+                    title = item.name,
+                    subtitle = stringResource(
+                        R.string.home_upcoming_chip_subtitle,
                         item.reps,
                         item.sets,
                     ),
-                    cardSize = CardSize.Small,
-                    textSectionLeading = if (item.difficulty == Difficulty.Beginner) {
-                        { GImageCardBeginnerDifficultyDot() }
-                    } else {
-                        null
-                    },
-                    badge = if (item.highlight == UpcomingExerciseHighlight.New) {
-                        { GImageCardHolisticCapsuleLabel(stringResource(R.string.home_exercise_badge_new)) }
-                    } else {
-                        null
-                    },
-                    badgeChrome = GImageCardBadgeChrome.Holistic,
                     onClick = {},
                 )
-            }
-            item(key = "add_exercise") {
-                AddCard(cardSize = CardSize.Small, onClick = onAddExerciseClick)
             }
         }
     }
@@ -371,7 +350,7 @@ private fun AddCard(
     }
     val imageCorner = RoundedCornerShape(bodyToken.gImageCardCornerRadius)
     val addCardBorder = BorderStroke(
-        token.borderWidth.hairlineSubtle,
+        token.borderWidth.hairline,
         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
     )
     Card(
@@ -601,8 +580,10 @@ private fun MealItem(
     modifier: Modifier = Modifier,
     item: MealPageUiModel
 ) {
+    val resourceProvider = LocalResourceProvider.current
     val token = GymTheme.token
     val bodyToken = token.bodyAnalysis
+    val imageModel = remember(item.image) { item.image.toImageModel(resourceProvider) }
     Card(
         modifier = modifier.width(bodyToken.dashboardMealItemWidth),
         shape = RoundedCornerShape(token.radius.md),
@@ -626,12 +607,21 @@ private fun MealItem(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Image(
-                    painter = painterResource(R.drawable.body_unsplash),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
+                if (imageModel != null) {
+                    AsyncImage(
+                        model = imageModel,
+                        contentDescription = item.title,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(R.drawable.body_unsplash),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
 
                 // Calories badge overlaid at bottom-end
                 if (item.caloriesKcal > 0) {

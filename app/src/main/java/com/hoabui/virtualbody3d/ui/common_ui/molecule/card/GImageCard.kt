@@ -137,7 +137,7 @@ private fun Modifier.pressScale(interactionSource: MutableInteractionSource, sca
 private fun rememberCardBorderStroke(): BorderStroke {
     val token = GymTheme.token
     val onSurfaceInk = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
-    return BorderStroke(token.borderWidth.hairlineSubtle, onSurfaceInk)
+    return BorderStroke(token.borderWidth.hairline, onSurfaceInk)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -283,7 +283,7 @@ private fun GImageCardContent(
                                     .clip(RoundedCornerShape(token.radius.pill))
                                     .background(token.colors.surface.copy(alpha = 0.7f))
                                     .border(
-                                        width = token.borderWidth.hairlineSubtle,
+                                        width = token.borderWidth.hairline,
                                         color = glassBorderColor,
                                         shape = RoundedCornerShape(token.radius.pill),
                                     )

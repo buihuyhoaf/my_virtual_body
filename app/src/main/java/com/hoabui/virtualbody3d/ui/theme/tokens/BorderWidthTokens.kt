@@ -7,15 +7,15 @@ import androidx.compose.ui.unit.dp
 @Immutable
 data class BorderWidthTokens(
     val none: Dp,
-    /** Hairline for soft UI borders (e.g. image cards). */
-    val hairlineSubtle: Dp,
+    /** Ultra-thin border (chips, cards, subtle outlines). */
+    val hairline: Dp,
     val thin: Dp,
     val standard: Dp
 ) {
     companion object {
         fun default(): BorderWidthTokens = BorderWidthTokens(
             none = 0.dp,
-            hairlineSubtle = 0.5.dp,
+            hairline = 0.5.dp,
             thin = 1.dp,
             standard = 1.5.dp
         )

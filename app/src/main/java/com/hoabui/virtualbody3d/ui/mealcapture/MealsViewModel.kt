@@ -2,6 +2,7 @@ package com.hoabui.virtualbody3d.ui.mealcapture
 
 import android.net.Uri
 import com.hoabui.virtualbody3d.core.base.UiStateViewModel
+import com.hoabui.virtualbody3d.domain.model.common.ImageSource
 import com.hoabui.virtualbody3d.domain.usecase.AnalyzeMealImageUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetMealDaysUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetMealsByDayUseCase
@@ -127,8 +128,9 @@ class MealsViewModel @Inject constructor(
                     return@launchSafely
                 }
 
-                val imageUri = Uri.fromFile(prepared)
-                val page = mealAnalysis.toMealPageUiModel(imageUri = imageUri)
+                val page = mealAnalysis.toMealPageUiModel(
+                    ImageSource.ContentUri(Uri.fromFile(prepared).toString())
+                )
 
                 _mealPages.update { current ->
                     listOf(page) + current

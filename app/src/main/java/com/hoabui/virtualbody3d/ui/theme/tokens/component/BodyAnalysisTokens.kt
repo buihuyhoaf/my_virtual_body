@@ -88,6 +88,15 @@ data class BodyAnalysisTokens(
     val gImageCardTextSectionTopPadding: Dp,
     /** Corner radius for home [GImageCard] small tile + matching [AddCard] / image clip. */
     val gImageCardCornerRadius: Dp,
+    /** Horizontal slim chip for [GUpcomingExerciseCard] (home upcoming row). */
+    val upcomingExerciseChipWidth: Dp,
+    val upcomingExerciseChipHeight: Dp,
+    /** Thumbnail edge length inside the chip. */
+    val upcomingExerciseChipImageSize: Dp,
+    /** Corner radius for the chip thumbnail. */
+    val upcomingExerciseChipImageCornerRadius: Dp,
+    /** Horizontal padding inside the chip [Row]. */
+    val upcomingExerciseChipContentHorizontalPadding: Dp,
     val bodyRegionPlaceholderSize: Dp,
     val supplementCardWidth: Dp,
     val supplementCardHeight: Dp,
@@ -181,6 +190,11 @@ fun gymBodyAnalysisTokens(spacing: PrimitiveSpacingTokens): BodyAnalysisTokens =
     ),
     gImageCardTextSectionTopPadding = 6.dp,
     gImageCardCornerRadius = 18.dp,
+    upcomingExerciseChipWidth = 200.dp,
+    upcomingExerciseChipHeight = 64.dp,
+    upcomingExerciseChipImageSize = 44.dp,
+    upcomingExerciseChipImageCornerRadius = 10.dp,
+    upcomingExerciseChipContentHorizontalPadding = 10.dp,
     bodyRegionPlaceholderSize = 40.dp,
     supplementCardWidth = 80.dp,
     supplementCardHeight = 100.dp,

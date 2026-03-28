@@ -10,7 +10,13 @@ data class MealTokens(
     val carouselRowHeight: Dp,
     val cardWidth: Dp,
     val imageSize: Dp,
-    val macroProgressHeight: Dp
+    val macroProgressHeight: Dp,
+    /** Home nutrition summary card calorie ring diameter. */
+    val nutritionSummaryRingSize: Dp,
+    val nutritionSummaryRingStrokeWidth: Dp,
+    val nutritionSummarySnapshotSize: Dp,
+    /** Horizontal overlap between stacked meal thumbnails (step = snapshotSize − overlap). */
+    val nutritionSummarySnapshotOverlap: Dp,
 )
 
 fun gymMealTokens(
@@ -19,5 +25,9 @@ fun gymMealTokens(
     carouselRowHeight = spacing.xxl + spacing.xxl + spacing.xs, // 104.dp
     cardWidth = 228.dp,
     imageSize = 52.dp,
-    macroProgressHeight = 3.dp
+    macroProgressHeight = 3.dp,
+    nutritionSummaryRingSize = 64.dp,
+    nutritionSummaryRingStrokeWidth = 6.dp,
+    nutritionSummarySnapshotSize = 38.dp,
+    nutritionSummarySnapshotOverlap = 12.dp,
 )

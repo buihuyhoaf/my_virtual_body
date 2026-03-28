@@ -1,6 +1,5 @@
 package com.hoabui.virtualbody3d.ui.body.components
 
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,16 +8,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
-import com.hoabui.virtualbody3d.ui.common_ui.atom.progress.GProgressBar
-import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,6 +25,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import coil.compose.AsyncImage
+import com.hoabui.virtualbody3d.domain.model.common.ImageSource
+import com.hoabui.virtualbody3d.ui.common_ui.atom.progress.GProgressBar
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
+import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
+import com.hoabui.virtualbody3d.ui.common_ui.image.toImageModel
 import com.hoabui.virtualbody3d.ui.common_ui.organism.carousel.GAutoCarouselRow
 import com.hoabui.virtualbody3d.ui.common_ui.organism.carousel.GCarouselUiModel
 import com.hoabui.virtualbody3d.ui.mealcapture.MealMacroGroup
@@ -92,6 +94,7 @@ private fun DailyMealCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
+    val resourceProvider = LocalResourceProvider.current
     val token = GymTheme.token
     val shape = RoundedCornerShape(token.radius.md)
     val macroColor = macroColorFor(item.dominantMacro, token.colors)
@@ -120,9 +123,10 @@ private fun DailyMealCard(
                         .background(token.colors.surfaceSubtle),
                     contentAlignment = Alignment.Center,
                 ) {
-                    if (item.imageUri != Uri.EMPTY) {
+                    val model = remember(item.image) { item.image.toImageModel(resourceProvider) }
+                    if (model != null) {
                         AsyncImage(
-                            model = item.imageUri,
+                            model = model,
                             contentDescription = item.title,
                             modifier = Modifier
                                 .fillMaxHeight()
@@ -181,7 +185,7 @@ private fun DailyMealsAutoRowPreview() {
             meals = listOf(
                 MealPageUiModel(
                     id = "1",
-                    imageUri = Uri.EMPTY,
+                    image = ImageSource.LocalResource("body_unsplash"),
                     title = "Grilled salmon bowl",
                     caloriesKcal = 420,
                     caloriesText = "420 kcal",
@@ -191,7 +195,7 @@ private fun DailyMealsAutoRowPreview() {
                 ),
                 MealPageUiModel(
                     id = "2",
-                    imageUri = Uri.EMPTY,
+                    image = ImageSource.LocalResource("body_unsplash"),
                     title = "Oatmeal & berries",
                     caloriesKcal = 320,
                     caloriesText = "320 kcal",
@@ -201,7 +205,7 @@ private fun DailyMealsAutoRowPreview() {
                 ),
                 MealPageUiModel(
                     id = "3",
-                    imageUri = Uri.EMPTY,
+                    image = ImageSource.LocalResource("body_unsplash"),
                     title = "Avocado toast",
                     caloriesKcal = 280,
                     caloriesText = "280 kcal",
