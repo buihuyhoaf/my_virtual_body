@@ -24,7 +24,7 @@ import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveSpacingTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.semantic.gymTypographyTokens
 
 /**
- * Theme host for GymToken: warm terracotta body-inspired. Provides Material3 and token access in one place.
+ * Theme host for GymToken: Holistic Vitality — light (sage / sand / slate) and dark (moss / muted sage / parchment).
  */
 @Composable
 fun GymTheme(
@@ -100,7 +100,10 @@ private fun com.hoabui.virtualbody3d.ui.theme.tokens.semantic.SemanticColorToken
         darkColorScheme(
             primary = primary,
             onPrimary = onPrimary,
-            secondary = primary,
+            secondary = secondary,
+            onSecondary = onSecondary,
+            secondaryContainer = secondaryContainer,
+            onSecondaryContainer = onSecondaryContainer,
             background = background,
             surface = surface,
             onBackground = textPrimary,
@@ -117,7 +120,10 @@ private fun com.hoabui.virtualbody3d.ui.theme.tokens.semantic.SemanticColorToken
         lightColorScheme(
             primary = primary,
             onPrimary = onPrimary,
-            secondary = primary,
+            secondary = secondary,
+            onSecondary = onSecondary,
+            secondaryContainer = secondaryContainer,
+            onSecondaryContainer = onSecondaryContainer,
             background = background,
             surface = surface,
             onBackground = textPrimary,

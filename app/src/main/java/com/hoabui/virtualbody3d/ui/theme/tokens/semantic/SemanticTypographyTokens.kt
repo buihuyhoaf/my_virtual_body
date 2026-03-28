@@ -5,12 +5,12 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import com.hoabui.virtualbody3d.ui.theme.font.InterFontFamily
+import com.hoabui.virtualbody3d.ui.theme.font.PlusJakartaSansFamily
+import com.hoabui.virtualbody3d.ui.theme.font.ReadexProFamily
 
 /**
- * Full typography scale for warm terracotta body-inspired theme.
- * Uses Inter variable font.
- * Overrides entire Material3 Typography to eliminate fallbacks.
+ * Holistic Vitality typography: Plus Jakarta Sans Bold for display, headline, and [titleMedium];
+ * Readex Pro for other titles, all body, and labels.
  */
 @Immutable
 data class SemanticTypographyTokens(
@@ -20,109 +20,109 @@ data class SemanticTypographyTokens(
 fun gymTypographyTokens(): SemanticTypographyTokens = SemanticTypographyTokens(
     material = Typography(
         displayLarge = TextStyle(
-            fontFamily = InterFontFamily,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 30.sp,
-            lineHeight = 34.sp,
-            letterSpacing = (-0.3).sp
+            fontFamily = PlusJakartaSansFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 32.sp,
+            lineHeight = 40.sp,
+            letterSpacing = (-0.2).sp
         ),
         displayMedium = TextStyle(
-            fontFamily = InterFontFamily,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 26.sp,
-            lineHeight = 32.sp,
-            letterSpacing = (-0.2).sp
+            fontFamily = PlusJakartaSansFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 28.sp,
+            lineHeight = 36.sp,
+            letterSpacing = (-0.15).sp
         ),
         displaySmall = TextStyle(
-            fontFamily = InterFontFamily,
-            fontWeight = FontWeight.Medium,
+            fontFamily = PlusJakartaSansFamily,
+            fontWeight = FontWeight.Bold,
             fontSize = 24.sp,
-            lineHeight = 30.sp,
-            letterSpacing = (-0.2).sp
+            lineHeight = 32.sp,
+            letterSpacing = (-0.1).sp
         ),
         headlineLarge = TextStyle(
-            fontFamily = InterFontFamily,
-            fontWeight = FontWeight.SemiBold,
+            fontFamily = PlusJakartaSansFamily,
+            fontWeight = FontWeight.Bold,
             fontSize = 22.sp,
-            lineHeight = 28.sp,
-            letterSpacing = (-0.2).sp
+            lineHeight = 30.sp,
+            letterSpacing = (-0.1).sp
         ),
         headlineMedium = TextStyle(
-            fontFamily = InterFontFamily,
-            fontWeight = FontWeight.SemiBold,
+            fontFamily = PlusJakartaSansFamily,
+            fontWeight = FontWeight.Bold,
             fontSize = 20.sp,
             lineHeight = 28.sp,
-            letterSpacing = (-0.2).sp
+            letterSpacing = (-0.05).sp
         ),
         headlineSmall = TextStyle(
-            fontFamily = InterFontFamily,
-            fontWeight = FontWeight.SemiBold,
+            fontFamily = PlusJakartaSansFamily,
+            fontWeight = FontWeight.Bold,
             fontSize = 18.sp,
-            lineHeight = 24.sp,
-            letterSpacing = (-0.1).sp
+            lineHeight = 26.sp,
+            letterSpacing = 0.sp
         ),
         titleLarge = TextStyle(
-            fontFamily = InterFontFamily,
-            fontWeight = FontWeight.Medium,
+            fontFamily = ReadexProFamily,
+            fontWeight = FontWeight.Normal,
             fontSize = 17.sp,
-            lineHeight = 24.sp,
-            letterSpacing = (-0.1).sp
+            lineHeight = 26.sp,
+            letterSpacing = 0.sp
         ),
         titleMedium = TextStyle(
-            fontFamily = InterFontFamily,
-            fontWeight = FontWeight.Medium,
+            fontFamily = PlusJakartaSansFamily,
+            fontWeight = FontWeight.Bold,
             fontSize = 16.sp,
             lineHeight = 24.sp,
-            letterSpacing = 0.sp
+            letterSpacing = 0.1.sp
         ),
         titleSmall = TextStyle(
-            fontFamily = InterFontFamily,
-            fontWeight = FontWeight.Medium,
-            fontSize = 15.sp,
-            lineHeight = 24.sp,
-            letterSpacing = 0.sp
-        ),
-        bodyLarge = TextStyle(
-            fontFamily = InterFontFamily,
+            fontFamily = ReadexProFamily,
             fontWeight = FontWeight.Normal,
             fontSize = 15.sp,
             lineHeight = 22.sp,
-            letterSpacing = 0.sp
+            letterSpacing = 0.1.sp
+        ),
+        bodyLarge = TextStyle(
+            fontFamily = ReadexProFamily,
+            fontWeight = FontWeight.Normal,
+            fontSize = 16.sp,
+            lineHeight = 24.sp,
+            letterSpacing = 0.15.sp
         ),
         bodyMedium = TextStyle(
-            fontFamily = InterFontFamily,
+            fontFamily = ReadexProFamily,
             fontWeight = FontWeight.Normal,
             fontSize = 14.sp,
-            lineHeight = 20.sp,
-            letterSpacing = 0.sp
+            lineHeight = 22.sp,
+            letterSpacing = 0.15.sp
         ),
         bodySmall = TextStyle(
-            fontFamily = InterFontFamily,
+            fontFamily = ReadexProFamily,
             fontWeight = FontWeight.Normal,
             fontSize = 12.sp,
-            lineHeight = 16.sp,
-            letterSpacing = 0.sp
+            lineHeight = 18.sp,
+            letterSpacing = 0.2.sp
         ),
         labelLarge = TextStyle(
-            fontFamily = InterFontFamily,
-            fontWeight = FontWeight.Medium,
+            fontFamily = ReadexProFamily,
+            fontWeight = FontWeight.Normal,
             fontSize = 13.sp,
-            lineHeight = 18.sp,
-            letterSpacing = 0.sp
+            lineHeight = 20.sp,
+            letterSpacing = 0.2.sp
         ),
         labelMedium = TextStyle(
-            fontFamily = InterFontFamily,
-            fontWeight = FontWeight.Medium,
+            fontFamily = ReadexProFamily,
+            fontWeight = FontWeight.Normal,
             fontSize = 12.sp,
-            lineHeight = 16.sp,
-            letterSpacing = 0.sp
+            lineHeight = 18.sp,
+            letterSpacing = 0.3.sp
         ),
         labelSmall = TextStyle(
-            fontFamily = InterFontFamily,
-            fontWeight = FontWeight.Medium,
+            fontFamily = ReadexProFamily,
+            fontWeight = FontWeight.Normal,
             fontSize = 11.sp,
             lineHeight = 16.sp,
-            letterSpacing = 0.sp
+            letterSpacing = 0.3.sp
         )
     )
 )

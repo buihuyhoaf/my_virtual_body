@@ -7,7 +7,7 @@ import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveSpacingTokens
 
 /**
  * Design tokens for login screen: input fields, CTA button, social buttons.
- * Aligns with brand plum (#8E3B46) and rounded-cta (24dp) from reference.
+ * Aligns with Holistic Vitality sage primary and rounded CTA (24dp) from reference.
  */
 @Immutable
 data class LoginTokens(

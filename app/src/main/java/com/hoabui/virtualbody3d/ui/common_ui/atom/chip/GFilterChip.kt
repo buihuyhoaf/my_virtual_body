@@ -32,7 +32,7 @@ import com.hoabui.virtualbody3d.ui.theme.GymTheme
  *
  * M3's `FilterChip` defaults to Material baseline purple tones for the selected state.
  * `GFilterChip` overrides all colour roles with `GymTheme.token.colors` so the chip
- * automatically matches the wine-plum brand palette in both light and dark modes.
+ * automatically matches the token palette (sage primary) in both light and dark modes.
  *
  * ### Colour contract
  * | State              | Container           | Label / Icon           | Border             |

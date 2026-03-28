@@ -5,6 +5,7 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import com.hoabui.virtualbody3d.ui.common_ui.atom.progress.GCircularProgress
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -15,10 +16,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.android.filament.ColorGrading
+import com.google.android.filament.Colors
 import com.hoabui.virtualbody3d.core.utils.Constants.BODY_DEV_LOG_TAG
 import com.hoabui.virtualbody3d.core.utils.Constants.BODY_DEV_MODE
 import com.hoabui.virtualbody3d.core.utils.Constants.BODY_MODEL_ASSET_PATH
@@ -62,6 +66,13 @@ fun BodyModelPreview(
     // Default camera: đứng phía trước model theo trục Z.
     var orbitHomePosition by remember { mutableStateOf(Position(x = 0f, y = 0f, z = 4f)) }
     var orbitTargetPosition by remember { mutableStateOf(Position(x = 0f, y = 0f, z = 0f)) }
+
+    val colorScheme = MaterialTheme.colorScheme
+    val clayMatteBase = if (colorScheme.background.luminance() < 0.45f) {
+        colorScheme.primaryContainer
+    } else {
+        colorScheme.secondaryContainer
+    }
 
     val localEngine = rememberEngine()
     val localModelLoader = rememberModelLoader(localEngine)
@@ -166,7 +177,7 @@ fun BodyModelPreview(
         }
     }
 
-    LaunchedEffect(sceneViewRef, useShared) {
+    LaunchedEffect(sceneViewRef, useShared, clayMatteBase) {
         val sceneView = sceneViewRef ?: return@LaunchedEffect
         if (modelNode != null) return@LaunchedEffect
 
@@ -276,6 +287,8 @@ fun BodyModelPreview(
 
                 node.rotation = Rotation(0f, 180f, 0f)
 
+                applyHolisticVitalityClayMaterials(node, clayMatteBase)
+
                 if (BODY_DEV_MODE && glbBounds != null) {
                     Log.d(
                         BODY_DEV_LOG_TAG,
@@ -288,6 +301,30 @@ fun BodyModelPreview(
                 sceneView.addChildNode(node)
             }
             isLoading = false
+        }
+    }
+}
+
+/**
+ * Matte clay: light mode uses [androidx.compose.material3.ColorScheme.secondaryContainer] (soft sage);
+ * dark mode uses [androidx.compose.material3.ColorScheme.primaryContainer] (muted sage). Roughness 0.85, metallic 0.
+ */
+private fun applyHolisticVitalityClayMaterials(node: ModelNode, baseColor: Color) {
+    val r = baseColor.red
+    val g = baseColor.green
+    val b = baseColor.blue
+    val a = baseColor.alpha
+    node.renderableNodes.forEach { renderable ->
+        renderable.materialInstances.forEach { instance ->
+            runCatching {
+                instance.setParameter("baseColorFactor", r, g, b, a)
+                instance.setParameter("metallicFactor", 0.0f)
+                instance.setParameter("roughnessFactor", 0.85f)
+            }.recoverCatching {
+                instance.setParameter("baseColor", Colors.RgbType.SRGB, r, g, b)
+                instance.setParameter("metallic", 0.0f)
+                instance.setParameter("roughness", 0.85f)
+            }
         }
     }
 }

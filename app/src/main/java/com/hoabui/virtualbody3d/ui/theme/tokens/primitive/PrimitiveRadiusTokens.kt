@@ -5,7 +5,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * Primitive corner radii to keep curvature consistent app-wide.
+ * Primitive corner radii – Holistic Vitality: softer corners (large 24dp, extra-large 32dp).
  */
 @Immutable
 data class PrimitiveRadiusTokens(

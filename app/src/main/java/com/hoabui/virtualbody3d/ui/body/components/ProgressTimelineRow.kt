@@ -60,7 +60,6 @@ import com.hoabui.virtualbody3d.core.extensions.timelineAvatarLayer
 import com.hoabui.virtualbody3d.core.extensions.timelineItemLayer
 import com.hoabui.virtualbody3d.ui.body.data.ProgressSnapshotUiModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
-import com.hoabui.virtualbody3d.ui.theme.font.InterFontFamily
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -487,10 +486,7 @@ private fun AvatarFloatingMetricChip(
         ) {
             GText(
                 text = numberPart,
-                style = token.typography.labelMedium.copy(
-                    fontFamily = InterFontFamily,
-                    fontWeight = FontWeight.Bold
-                ),
+                style = token.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                 color = token.colors.textPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -498,7 +494,7 @@ private fun AvatarFloatingMetricChip(
             if (value != null) {
                 GText(
                     text = if (isPercentSuffix) unit else " $unit",
-                    style = token.typography.labelSmall.copy(fontFamily = InterFontFamily),
+                    style = token.typography.labelSmall,
                     color = unitMuted,
                     maxLines = 1
                 )

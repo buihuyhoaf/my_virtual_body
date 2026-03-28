@@ -2,24 +2,36 @@ package com.hoabui.virtualbody3d.ui.theme.tokens.semantic
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
+import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveColorTokens
 
 /**
- * Semantic colors – wine-plum brand. Maps primitive tokens to UI meaning.
- * Legacy names (surfaceBorder, outlineSoft, dashboard*, etc.) kept for compatibility.
+ * Semantic colors – Holistic Vitality. Light: sage primary / sand surfaces / slate text.
+ * Dark: muted sage primary / deep moss surfaces / parchment text. Maps primitives to UI roles.
  */
 @Immutable
 data class SemanticColorTokens(
     val primary: Color,
     val primarySoft: Color,
     val onPrimaryContainer: Color,
+    val secondary: Color,
+    val onSecondary: Color,
+    val secondaryContainer: Color,
+    val onSecondaryContainer: Color,
     val background: Color,
+    /** Same hue as [background] at [PrimitiveAlphaTokens.SUBTLE_LAYER] — vertical fade (e.g. top bar). */
+    val backgroundSubtleGradientEnd: Color,
     val surface: Color,
     val surfaceElevated: Color,
     val surfaceSubtle: Color,
     val borderSubtle: Color,
     val borderStrong: Color,
     val textPrimary: Color,
+    /** [textPrimary] at [PrimitiveAlphaTokens.SUBTLE_LAYER] — soft foreground icons. */
+    val textPrimarySoft: Color,
+    /** Accent (Terracotta) — badges, highlights; pairs with [onAccent]. */
+    val accent: Color,
+    val onAccent: Color,
     val textSecondary: Color,
     val textMuted: Color,
     val textPlaceholder: Color,
@@ -98,13 +110,21 @@ fun lightSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens {
         primary = primitive.primary,
         primarySoft = primitive.primaryContainerLight,
         onPrimaryContainer = primitive.onPrimaryContainerLight,
+        secondary = primitive.secondary,
+        onSecondary = primitive.onSecondary,
+        secondaryContainer = primitive.secondaryContainerLight,
+        onSecondaryContainer = primitive.onSecondaryContainerLight,
         background = primitive.backgroundLight,
+        backgroundSubtleGradientEnd = primitive.backgroundLight.copy(alpha = PrimitiveAlphaTokens.SUBTLE_LAYER),
         surface = primitive.surfaceLight,
         surfaceElevated = primitive.surfaceLight,
         surfaceSubtle = primitive.surfaceVariantLight,
         borderSubtle = primitive.borderSubtleLight,
         borderStrong = primitive.outlineLight,
         textPrimary = primitive.textPrimaryLight,
+        textPrimarySoft = primitive.textPrimaryLight.copy(alpha = PrimitiveAlphaTokens.SUBTLE_LAYER),
+        accent = primitive.secondary,
+        onAccent = primitive.onSecondary,
         textSecondary = primitive.textSecondaryLight,
         textMuted = primitive.textSecondaryLight,
         textPlaceholder = Color(0xFF757575),
@@ -172,20 +192,28 @@ fun lightSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens {
 
 fun darkSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens {
     return SemanticColorTokens(
-        primary = primitive.primary,
+        primary = primitive.primaryDark,
         primarySoft = primitive.primaryContainerDark,
         onPrimaryContainer = primitive.onPrimaryContainerDark,
+        secondary = primitive.secondary,
+        onSecondary = primitive.onSecondary,
+        secondaryContainer = primitive.secondaryContainerDark,
+        onSecondaryContainer = primitive.onSecondaryContainerDark,
         background = primitive.backgroundDark,
+        backgroundSubtleGradientEnd = primitive.backgroundDark.copy(alpha = PrimitiveAlphaTokens.SUBTLE_LAYER),
         surface = primitive.surfaceDark,
         surfaceElevated = primitive.surfaceDark,
         surfaceSubtle = primitive.surfaceVariantDark,
         borderSubtle = primitive.borderSubtleDark,
         borderStrong = primitive.outlineDark,
         textPrimary = primitive.textPrimaryDark,
+        textPrimarySoft = primitive.textPrimaryDark.copy(alpha = PrimitiveAlphaTokens.SUBTLE_LAYER),
+        accent = primitive.secondary,
+        onAccent = primitive.onSecondary,
         textSecondary = primitive.textSecondaryDark,
         textMuted = primitive.textSecondaryDark,
-        textPlaceholder = Color(0xFFB0B0B0),
-        textBlack = Color(0xFFFFFFFF),
+        textPlaceholder = Color(0xFF9CA8A4),
+        textBlack = primitive.textPrimaryDark,
         error = primitive.error,
         onPrimary = primitive.onPrimary,
         onError = primitive.onPrimary,
@@ -224,8 +252,8 @@ fun darkSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens {
         calorieIntake = Color(0xFF60A5FA),
         calorieBurned = Color(0xFFFF758F),
         calendarYearBackground = primitive.primaryContainerDark,
-        calendarSelectedBorder = primitive.primary,
-        splashBackground = primitive.primary,
+        calendarSelectedBorder = primitive.primaryDark,
+        splashBackground = primitive.primaryDark,
         splashCardBackground = primitive.splashCard,
         initialSetupProgressDotUnselected = primitive.outlineDark,
         initialSetupSkipText = primitive.textSecondaryDark,

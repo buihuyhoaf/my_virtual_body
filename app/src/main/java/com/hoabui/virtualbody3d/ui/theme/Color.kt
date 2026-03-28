@@ -4,39 +4,58 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-// Wine-plum brand (#8E3B46). Mature, editorial, calm. No dynamic color.
+// Holistic Vitality – matches [PrimitiveColorTokens] (light: sage / sand / slate; dark: moss / muted sage / parchment).
 
-private val BrandPrimary = Color(0xFF8E3B46)
-private val BrandPrimaryContainerLight = Color(0xFFF3D9DD)
-private val BrandPrimaryContainerDark = Color(0xFF4A1F24)
+private val SageGreen = Color(0xFF7DAA92)
+private val WarmSand = Color(0xFFFDFCF8)
+private val SlateGray = Color(0xFF4A5568)
+private val DeepMoss = Color(0xFF1A2421)
+private val MutedSage = Color(0xFF8ABBA3)
+private val Parchment = Color(0xFFE2E2E2)
+private val Terracotta = Color(0xFFE2725B)
+
+private val BrandPrimaryLight = SageGreen
+private val BrandPrimaryDark = MutedSage
+private val BrandPrimaryContainerLight = Color(0xFFE5F0E9)
+private val BrandPrimaryContainerDark = Color(0xFF6A9082)
 private val BrandOnPrimary = Color(0xFFFFFFFF)
-private val BrandOnPrimaryContainerLight = Color(0xFF4A1F24)
-private val BrandOnPrimaryContainerDark = Color(0xFFF3D9DD)
+private val BrandOnPrimaryContainerLight = Color(0xFF2F4538)
+private val BrandOnPrimaryContainerDark = Parchment
 
-private val LightBackground = Color(0xFFFAF5F6)
-private val LightSurface = Color(0xFFFFFFFF)
-private val LightSurfaceVariant = Color(0xFFF8EDEE)
-private val LightOutline = Color(0xFFE6C7CB)
-private val LightOnBackground = Color(0xFF2C1115)
-private val LightOnSurface = Color(0xFF2C1115)
-private val LightOnSurfaceVariant = Color(0xFF6A2B33)
+private val BrandSecondary = Terracotta
+private val BrandOnSecondary = Color(0xFFFFFFFF)
+private val BrandSecondaryContainerLight = Color(0xFFE2EDE5)
+private val BrandSecondaryContainerDark = Color(0xFF2A3834)
+private val BrandOnSecondaryContainerLight = Color(0xFF2D4136)
+private val BrandOnSecondaryContainerDark = Parchment
 
-private val DarkBackground = Color(0xFF1C0F12)
-private val DarkSurface = Color(0xFF261418)
-private val DarkSurfaceVariant = Color(0xFF301A1F)
-private val DarkOutline = Color(0xFF4A2A2F)
-private val DarkOnBackground = Color(0xFFFBEFF1)
-private val DarkOnSurface = Color(0xFFFBEFF1)
-private val DarkOnSurfaceVariant = Color(0xFFE0B9BE)
+private val LightBackground = WarmSand
+private val LightSurface = WarmSand
+private val LightSurfaceVariant = Color(0xFFF5F1EA)
+private val LightOutline = Color(0xFFB8CDC4)
+private val LightOnBackground = SlateGray
+private val LightOnSurface = SlateGray
+private val LightOnSurfaceVariant = Color(0xFF718096)
+
+private val DarkBackground = DeepMoss
+private val DarkSurface = DeepMoss
+private val DarkSurfaceVariant = Color(0xFF222D2A)
+private val DarkOutline = Color(0xFF4A5E56)
+private val DarkOnBackground = Parchment
+private val DarkOnSurface = Parchment
+private val DarkOnSurfaceVariant = Color(0xFFBFC9C6)
 
 private val ErrorColor = Color(0xFFB3261E)
 
 val FitnessLightColorScheme = lightColorScheme(
-    primary = BrandPrimary,
+    primary = BrandPrimaryLight,
     onPrimary = BrandOnPrimary,
     primaryContainer = BrandPrimaryContainerLight,
     onPrimaryContainer = BrandOnPrimaryContainerLight,
-    secondary = BrandPrimary,
+    secondary = BrandSecondary,
+    onSecondary = BrandOnSecondary,
+    secondaryContainer = BrandSecondaryContainerLight,
+    onSecondaryContainer = BrandOnSecondaryContainerLight,
     background = LightBackground,
     surface = LightSurface,
     surfaceVariant = LightSurfaceVariant,
@@ -49,11 +68,14 @@ val FitnessLightColorScheme = lightColorScheme(
 )
 
 val FitnessDarkColorScheme = darkColorScheme(
-    primary = BrandPrimary,
+    primary = BrandPrimaryDark,
     onPrimary = BrandOnPrimary,
     primaryContainer = BrandPrimaryContainerDark,
     onPrimaryContainer = BrandOnPrimaryContainerDark,
-    secondary = BrandPrimary,
+    secondary = BrandSecondary,
+    onSecondary = BrandOnSecondary,
+    secondaryContainer = BrandSecondaryContainerDark,
+    onSecondaryContainer = BrandOnSecondaryContainerDark,
     background = DarkBackground,
     surface = DarkSurface,
     surfaceVariant = DarkSurfaceVariant,
@@ -65,36 +87,36 @@ val FitnessDarkColorScheme = darkColorScheme(
     onError = BrandOnPrimary
 )
 
-// Feature colors – wine-plum only. No orange, no brown text.
-val BodyPrimary = BrandPrimary
-val BodyPrimaryTint = Color(0x0F8E3B46)
-val BodyPrimaryLight = Color(0x268E3B46)
-val BodyPrimaryBorder = Color(0x338E3B46)
+// Feature colors – light brand reference (use tokens in Composables for dark-aware UI).
+val BodyPrimary = BrandPrimaryLight
+val BodyPrimaryTint = BrandPrimaryLight.copy(alpha = 0.06f)
+val BodyPrimaryLight = BrandPrimaryLight.copy(alpha = 0.15f)
+val BodyPrimaryBorder = BrandPrimaryLight.copy(alpha = 0.20f)
 val BodyEmerald = BrandPrimaryContainerLight
-val BodyEmeraldLight = Color(0x26F3D9DD)
-val BodyAmber = BrandPrimary
-val BodyAmberLight = Color(0x4D8E3B46)
+val BodyEmeraldLight = BrandPrimaryContainerLight.copy(alpha = 0.15f)
+val BodyAmber = BrandSecondary
+val BodyAmberLight = BrandSecondary.copy(alpha = 0.30f)
 val BodyRose = BrandPrimaryContainerDark
-val BodyRoseLight = Color(0x4D4A1F24)
+val BodyRoseLight = BrandPrimaryContainerDark.copy(alpha = 0.30f)
 val BodySceneBackground = DarkBackground
 val BodyBackgroundLight = LightBackground
 val BodyBackgroundDark = DarkBackground
-val BodyPreviewTrack = Color(0x0D2C1115)
-val TopBarBackground = Color(0xCCFFFFFF)
-val TopBarBorder = Color(0x80E6C7CB)
-val ViewControlBackground = Color(0xE6FFFFFF)
-val CardBackground = Color(0x80F8EDEE)
-val PrimaryMetricColor = BrandPrimary
-val MuscleMetricColor = BrandPrimary
+val BodyPreviewTrack = SlateGray.copy(alpha = 0.05f)
+val TopBarBackground = Color(0xCCFDFCF8)
+val TopBarBorder = BrandPrimaryLight.copy(alpha = 0.25f)
+val ViewControlBackground = Color(0xE6FDFCF8)
+val CardBackground = LightSurfaceVariant.copy(alpha = 0.50f)
+val PrimaryMetricColor = BrandPrimaryLight
+val MuscleMetricColor = BrandPrimaryLight
 val FatMetricColor = BrandPrimaryContainerDark
 val GlassChipBackgroundStart = LightSurface
 val GlassChipBackgroundEnd = LightSurface
-val GlassChipBorder = Color(0x4DF1DADC)
-val GlassChipIconBackground = Color(0x268E3B46)
-val ScoreRingTrack = Color(0x332C1115)
-val BmiNormalColor = BrandPrimary
+val GlassChipBorder = LightOutline.copy(alpha = 0.30f)
+val GlassChipIconBackground = BrandPrimaryLight.copy(alpha = 0.15f)
+val ScoreRingTrack = SlateGray.copy(alpha = 0.20f)
+val BmiNormalColor = BrandPrimaryLight
 val BmiOverColor = BrandPrimaryContainerDark
 val BmiUnderColor = BrandPrimaryContainerLight
 val FatGradientStart = BrandPrimaryContainerLight
 val FatGradientEnd = BrandPrimaryContainerDark
-val MuscleGradientEnd = BrandPrimary
+val MuscleGradientEnd = BrandPrimaryLight

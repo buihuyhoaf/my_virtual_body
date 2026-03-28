@@ -1,6 +1,8 @@
 package com.hoabui.virtualbody3d.navigation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -10,22 +12,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.NightsStay
-import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
+import com.adamglin.PhosphorIcons
+import com.adamglin.phosphoricons.Light
+import com.adamglin.phosphoricons.light.Bell
+import com.adamglin.phosphoricons.light.CaretLeft
+import com.adamglin.phosphoricons.light.Moon
+import com.adamglin.phosphoricons.light.Sun
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.core.extensions.toVietnameseTopBarDate
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
@@ -46,67 +48,79 @@ fun AppTopBar(
     } else {
         stringResource(R.string.analysis_dashboard_greeting_night)
     }
-    val greetingIcon = if (isDayTime) Icons.Default.WbSunny else Icons.Default.NightsStay
+    val greetingImageVector = if (isDayTime) {
+        PhosphorIcons.Light.Sun
+    } else {
+        PhosphorIcons.Light.Moon
+    }
+    val iconSize = token.spacing.lg
+    val topBarGradient = Brush.verticalGradient(
+        colors = listOf(
+            token.colors.background,
+            token.colors.backgroundSubtleGradientEnd
+        )
+    )
 
-    Row(
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .windowInsetsPadding(WindowInsets.statusBars)
-            .padding(
-                start = token.spacing.md,
-                end = token.spacing.md,
-                bottom = token.spacing.md
-            ),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .background(brush = topBarGradient)
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(token.spacing.xxs)) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = greetingIcon,
-                    contentDescription = null,
-                    tint = token.colors.primary
-                )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.statusBars)
+                .padding(
+                    start = token.spacing.lg,
+                    end = token.spacing.lg,
+                    bottom = token.spacing.md
+                ),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(token.spacing.xxs)) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(token.spacing.sm),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = greetingImageVector,
+                        contentDescription = null,
+                        modifier = Modifier.size(iconSize),
+                        tint = token.colors.primary
+                    )
+                    Text(
+                        text = greeting,
+                        style = token.typography.titleMedium,
+                        color = token.colors.textPrimary
+                    )
+                }
                 Text(
-                    text = greeting,
-                    style = token.typography.titleMedium
+                    text = dateText,
+                    style = token.typography.bodySmall,
+                    color = token.colors.textSecondary
                 )
             }
-            Text(
-                text = dateText,
-                style = token.typography.bodyMedium,
-                color = token.colors.textSecondary
-            )
-        }
-        Surface(
-            shape = RoundedCornerShape(token.radius.md),
-            color = token.colors.surfaceOverlay,
-        ) {
-            IconButton(
-                onClick = onNotificationClick,
-                modifier = Modifier.size(token.bodyAnalysis.topBarIconSize)
-            ) {
+            IconButton(onClick = onNotificationClick) {
                 BadgedBox(
                     badge = {
                         Badge(
-                            containerColor = token.colors.error,
-                            contentColor = token.colors.surface
+                            containerColor = token.colors.accent,
+                            contentColor = token.colors.onAccent
                         ) {
                             Text(
                                 text = AppTopBarDefaults.notificationBadgeCount,
-                                style = token.typography.labelMedium
+                                style = token.typography.labelMedium,
+                                color = token.colors.onAccent
                             )
                         }
                     }
                 ) {
                     Icon(
-                        modifier = Modifier.size(token.bodyAnalysis.bottomBarIconSize),
-                        painter = painterResource(id = R.drawable.bells),
+                        imageVector = PhosphorIcons.Light.Bell,
                         contentDescription = stringResource(R.string.analysis_dashboard_notifications),
-                        tint = token.colors.textPrimary
+                        modifier = Modifier.size(iconSize),
+                        tint = token.colors.textPrimarySoft
                     )
                 }
             }
@@ -121,12 +135,13 @@ fun AppTopBarBack(
     content: @Composable RowScope.() -> Unit
 ) {
     val token = GymTheme.token
+    val iconSize = token.spacing.lg
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(
-                start = token.spacing.xxs,
-                end = token.spacing.md,
+                start = token.spacing.lg,
+                end = token.spacing.lg,
                 bottom = token.spacing.md
             ),
         horizontalArrangement = Arrangement.Start,
@@ -134,8 +149,9 @@ fun AppTopBarBack(
     ) {
         IconButton(onClick = onBack) {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                imageVector = PhosphorIcons.Light.CaretLeft,
                 contentDescription = stringResource(R.string.body_region_detail_back),
+                modifier = Modifier.size(iconSize),
                 tint = token.colors.textPrimary
             )
         }
