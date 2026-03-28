@@ -43,6 +43,10 @@ data class BodyAnalysisTokens(
     val bottomBarLabelTopSpacing: Dp,
     val bottomBarIconContainerSize: Dp,
     val bottomBarIconSize: Dp,
+    /** Horizontal capsule behind the selected tab icon (expanded width). */
+    val bottomBarSelectionPillWidthExpanded: Dp,
+    /** Capsule height for the floating nav selection indicator. */
+    val bottomBarSelectionPillHeight: Dp,
     val dashboardPanelTopRadius: Dp,
     val dashboardPanelHorizontalPadding: Dp,
     val dashboardPanelTopPadding: Dp,
@@ -124,8 +128,10 @@ fun gymBodyAnalysisTokens(spacing: PrimitiveSpacingTokens): BodyAnalysisTokens =
     bottomBarLabelTopSpacing = spacing.xxs,
     // Keep consistent with the existing bottom bar icon container sizing.
     bottomBarIconContainerSize = 36.dp,
-    // Match Material3 Icon default size (previously Icon had no explicit size modifier).
+    // Phosphor Light tab icons — single size for Holistic Vitality nav.
     bottomBarIconSize = 24.dp,
+    bottomBarSelectionPillWidthExpanded = 56.dp,
+    bottomBarSelectionPillHeight = 36.dp,
     dashboardPanelTopRadius = spacing.xl,
     dashboardPanelHorizontalPadding = spacing.md,
     dashboardPanelTopPadding = spacing.lg,
