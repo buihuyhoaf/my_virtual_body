@@ -84,6 +84,10 @@ data class BodyAnalysisTokens(
     val bodyRegionItemHeight: Dp,
     /** Sizes for image cards (e.g. exercise tiles); use instead of scaling [bodyRegionItemWidth]/[bodyRegionItemHeight]. */
     val cardImageWithText: CardImageWithTextSizeTokens,
+    /** Top inset between square image and title row on [GImageCard] (home soft-edge). */
+    val gImageCardTextSectionTopPadding: Dp,
+    /** Corner radius for home [GImageCard] small tile + matching [AddCard] / image clip. */
+    val gImageCardCornerRadius: Dp,
     val bodyRegionPlaceholderSize: Dp,
     val supplementCardWidth: Dp,
     val supplementCardHeight: Dp,
@@ -168,13 +172,15 @@ fun gymBodyAnalysisTokens(spacing: PrimitiveSpacingTokens): BodyAnalysisTokens =
     bodyRegionItemWidth = 120.dp,
     bodyRegionItemHeight = 120.dp, // 1.5 × width for fitness-style tile
     cardImageWithText = CardImageWithTextSizeTokens(
-        smallWidth = 72.dp,
-        smallHeight = 72.dp,
+        smallWidth = 100.dp,
+        smallHeight = 145.dp,
         mediumWidth = 96.dp,
-        mediumHeight = 96.dp,
+        mediumHeight = 141.dp,
         largeWidth = 120.dp,
-        largeHeight = 120.dp
+        largeHeight = 165.dp
     ),
+    gImageCardTextSectionTopPadding = 6.dp,
+    gImageCardCornerRadius = 18.dp,
     bodyRegionPlaceholderSize = 40.dp,
     supplementCardWidth = 80.dp,
     supplementCardHeight = 100.dp,

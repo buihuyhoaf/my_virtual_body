@@ -2,7 +2,9 @@ package com.hoabui.virtualbody3d.ui.common_ui.molecule.card
 
 import android.content.res.Configuration
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -10,26 +12,28 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Surface
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -59,24 +63,53 @@ fun CardImageWithTextSizeTokens.cardDimensions(cardSize: CardSize): Pair<Dp, Dp>
         CardSize.Large -> largeWidth to largeHeight
     }
 
+/**
+ * How the optional [GImageCard] `badge` slot is framed.
+ * [Holistic]: glass-style capsule behind label-only content.
+ * [None]: caller owns all badge visuals; only top-end float + padding.
+ */
+enum class GImageCardBadgeChrome {
+    Holistic,
+    None,
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Public atoms for call sites (Holistic Vitality)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Readex Pro Regular via [androidx.compose.material3.Typography.labelSmall]. */
+@Composable
+fun GImageCardHolisticCapsuleLabel(text: String, modifier: Modifier = Modifier) {
+    val token = GymTheme.token
+    GText(
+        modifier = modifier,
+        text = text,
+        style = token.typography.labelSmall,
+        color = token.colors.textPrimary,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
+}
+
+/** Beginner difficulty indicator: green dot for use in [GImageCard] `textSectionLeading`. */
+@Composable
+fun GImageCardBeginnerDifficultyDot(modifier: Modifier = Modifier) {
+    val token = GymTheme.token
+    Box(
+        modifier = modifier
+            .size(token.spacing.xs)
+            .clip(CircleShape)
+            .background(token.colors.difficultyBeginnerText),
+    )
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Internal helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Resolved per-size typography and spacing values for [GImageCard].
- * Extracted into a data class so the `when(cardSize)` block runs once
- * and the resulting values are stable for the rest of the composition.
- */
 private data class CardSizeStyle(
     val firstLineStyle: TextStyle,
     val secondLineStyle: TextStyle,
-    val textPaddingH: Dp,
-    val textPaddingV: Dp,
-    val textLineSpacing: Dp,
-    val badgeOuterPadding: Dp,
-    val badgeInnerH: Dp,
-    val badgeInnerV: Dp,
 )
 
 @Composable
@@ -86,73 +119,34 @@ private fun resolveCardSizeStyle(cardSize: CardSize): CardSizeStyle {
         CardSize.Small -> CardSizeStyle(
             firstLineStyle = token.typography.labelMedium,
             secondLineStyle = token.typography.labelSmall,
-            textPaddingH = token.spacing.xxs,
-            textPaddingV = token.spacing.xxs,
-            textLineSpacing = token.spacing.xxxs,
-            badgeOuterPadding = token.spacing.xxs,
-            badgeInnerH = token.spacing.xxs,
-            badgeInnerV = token.spacing.xxxs,
         )
-        CardSize.Medium -> CardSizeStyle(
-            firstLineStyle = token.typography.titleSmall,
+        CardSize.Medium, CardSize.Large -> CardSizeStyle(
+            firstLineStyle = token.typography.labelMedium,
             secondLineStyle = token.typography.labelSmall,
-            textPaddingH = token.spacing.xs,
-            textPaddingV = token.spacing.xxs,
-            textLineSpacing = token.spacing.xxs,
-            badgeOuterPadding = token.spacing.xs,
-            badgeInnerH = token.spacing.xs,
-            badgeInnerV = token.spacing.xxs,
-        )
-        CardSize.Large -> CardSizeStyle(
-            firstLineStyle = token.typography.titleSmall,
-            secondLineStyle = token.typography.labelSmall,
-            textPaddingH = token.spacing.xs,
-            textPaddingV = token.spacing.xs,
-            textLineSpacing = token.spacing.xxs,
-            badgeOuterPadding = token.spacing.xs,
-            badgeInnerH = token.spacing.xs,
-            badgeInnerV = token.spacing.xxs,
         )
     }
 }
 
-/**
- * Stateless press-scale animation: shrinks to 96% on press.
- * Extracted as a private Modifier extension — stateless, no composition context.
- */
 private fun Modifier.pressScale(interactionSource: MutableInteractionSource, scale: Float): Modifier =
     this.graphicsLayer {
         scaleX = scale
         scaleY = scale
     }
 
+@Composable
+private fun rememberCardBorderStroke(): BorderStroke {
+    val token = GymTheme.token
+    val onSurfaceInk = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+    return BorderStroke(token.borderWidth.hairlineSubtle, onSurfaceInk)
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // GImageCard
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Media card molecule: an image filling the card background, a vertical gradient
- * overlay, two lines of text at the bottom, and an optional badge slot at the top-end.
- *
- * Supersedes [com.hoabui.virtualbody3d.ui.common_ui.CardImageWithText], fixing:
- * - `model: Any?` accepts remote URLs, `@DrawableRes` Int, `Uri`, or `Painter` —
- *   powered by Coil's [AsyncImage] (same as [GRoundedImage])
- * - `badge` is a composable **slot**, not an `Enum<*>` — the card is decoupled from
- *   the `Difficulty` domain model
- * - Single `shape` application (no double `.clip()` + `shape` bug)
- * - Typography and spacing resolved once via [CardSizeStyle] (no copy-pasted `when` blocks)
- * - Text rendered via [GText] (design-system token aware)
- * - Press scale is a private `Modifier` extension (stateless, reusable)
- *
- * @param model Image source. Accepts anything Coil understands: URL `String`, `@DrawableRes`
- *   `Int`, `Uri`, `File`, `Painter`, `ImageBitmap`, etc.
- * @param contentDescription Accessibility description for the background image.
- * @param firstLineText Primary label line (title / name).
- * @param secondLineText Secondary label line (subtitle / metadata).
- * @param cardSize Controls card dimensions from `GymTheme.token.bodyAnalysis.cardImageWithText`.
- * @param badge Optional slot rendered at the top-end of the card (e.g. a difficulty badge).
- *   The slot receives [BoxScope] so `Modifier.align(...)` works without extra wrapping.
- * @param onClick Optional click callback. When `null`, the card is non-interactive.
+ * Soft-edge professional card: [Column] with square image on top, text below on [surface].
+ * Optional [badge] floats on the image (glass-style when [badgeChrome] is [Holistic]).
  */
 @Composable
 fun GImageCard(
@@ -163,14 +157,20 @@ fun GImageCard(
     secondLineText: String,
     cardSize: CardSize = CardSize.Medium,
     badge: (@Composable BoxScope.() -> Unit)? = null,
+    badgeChrome: GImageCardBadgeChrome = GImageCardBadgeChrome.Holistic,
+    textSectionLeading: (@Composable RowScope.() -> Unit)? = null,
     onClick: (() -> Unit)? = null,
 ) {
     val token = GymTheme.token
     val (cardWidth, cardHeight) = token.bodyAnalysis.cardImageWithText.cardDimensions(cardSize)
     val sizeStyle = resolveCardSizeStyle(cardSize)
-    val shape = RoundedCornerShape(token.radius.lg)
+    val softCorner = token.bodyAnalysis.gImageCardCornerRadius
+    val cardShape = when (cardSize) {
+        CardSize.Small -> RoundedCornerShape(softCorner)
+        CardSize.Medium, CardSize.Large -> RoundedCornerShape(token.radius.lg)
+    }
+    val imageClip = RoundedCornerShape(softCorner)
 
-    // Press-scale state — only allocated when the card is interactive
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
@@ -183,41 +183,56 @@ fun GImageCard(
         .height(cardHeight)
         .pressScale(interactionSource, scale)
 
+    val containerColor = token.colors.surface
+    val cardColors = CardDefaults.cardColors(containerColor = containerColor)
+    val flatElevation = CardDefaults.cardElevation(
+        defaultElevation = token.elevation.level0,
+        pressedElevation = token.elevation.level0,
+    )
+    val borderStroke = rememberCardBorderStroke()
+
     if (onClick != null) {
         Card(
             onClick = onClick,
             modifier = cardModifier,
-            shape = shape,
-            colors = CardDefaults.cardColors(containerColor = token.colors.surface),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = token.elevation.level2,
-                pressedElevation = token.elevation.level1,
-            ),
+            shape = cardShape,
+            colors = cardColors,
+            elevation = flatElevation,
+            border = borderStroke,
             interactionSource = interactionSource,
         ) {
             GImageCardContent(
+                cardWidth = cardWidth,
+                imageClip = imageClip,
                 model = model,
                 contentDescription = contentDescription,
                 sizeStyle = sizeStyle,
                 firstLineText = firstLineText,
                 secondLineText = secondLineText,
                 badge = badge,
+                badgeChrome = badgeChrome,
+                textSectionLeading = textSectionLeading,
             )
         }
     } else {
         Card(
             modifier = cardModifier,
-            shape = shape,
-            colors = CardDefaults.cardColors(containerColor = token.colors.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = token.elevation.level2),
+            shape = cardShape,
+            colors = cardColors,
+            elevation = flatElevation,
+            border = borderStroke,
         ) {
             GImageCardContent(
+                cardWidth = cardWidth,
+                imageClip = imageClip,
                 model = model,
                 contentDescription = contentDescription,
                 sizeStyle = sizeStyle,
                 firstLineText = firstLineText,
                 secondLineText = secondLineText,
                 badge = badge,
+                badgeChrome = badgeChrome,
+                textSectionLeading = textSectionLeading,
             )
         }
     }
@@ -225,85 +240,94 @@ fun GImageCard(
 
 @Composable
 private fun GImageCardContent(
+    cardWidth: Dp,
+    imageClip: RoundedCornerShape,
     model: Any?,
     contentDescription: String?,
     sizeStyle: CardSizeStyle,
     firstLineText: String,
     secondLineText: String,
     badge: (@Composable BoxScope.() -> Unit)?,
+    badgeChrome: GImageCardBadgeChrome,
+    textSectionLeading: (@Composable RowScope.() -> Unit)?,
 ) {
     val token = GymTheme.token
-    Box(modifier = Modifier.fillMaxSize()) {
+    val textTopInset = token.bodyAnalysis.gImageCardTextSectionTopPadding
+    val onSurfaceInk = MaterialTheme.colorScheme.onSurface
+    val glassBorderColor = onSurfaceInk.copy(alpha = 0.12f)
 
-        // Background image via Coil — supports URL, @DrawableRes, Uri, etc.
-        AsyncImage(
-            model = model,
-            contentDescription = contentDescription,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop,
-        )
-
-        // Gradient: transparent at top → scrim at bottom
+    Column(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
-                .matchParentSize()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            token.colors.backgroundScrim.copy(alpha = 0f),
-                            token.colors.backgroundScrim.copy(alpha = 0.8f),
-                        ),
-                    ),
-                ),
-        )
-
-        // Text overlay — bottom-start
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
                 .fillMaxWidth()
-                .padding(
-                    horizontal = sizeStyle.textPaddingH,
-                    vertical = sizeStyle.textPaddingV,
-                ),
-            verticalArrangement = Arrangement.spacedBy(sizeStyle.textLineSpacing),
+                .height(cardWidth),
         ) {
-            GText(
-                text = firstLineText,
-                style = sizeStyle.firstLineStyle,
-                color = token.colors.onPrimary,
-                maxLines = 1,
-            )
-            GText(
-                text = secondLineText,
-                style = sizeStyle.secondLineStyle,
-                color = token.colors.onPrimary.copy(alpha = 0.8f),
-                maxLines = 1,
-            )
-        }
-
-        // Badge slot — top-end; caller provides full content and positioning
-        if (badge != null) {
-            Box(
+            AsyncImage(
+                model = model,
+                contentDescription = contentDescription,
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(sizeStyle.badgeOuterPadding),
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(token.radius.sm),
-                    color = Color.Transparent,
+                    .fillMaxSize()
+                    .clip(imageClip),
+                contentScale = ContentScale.Crop,
+            )
+            if (badge != null) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(token.spacing.xs),
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(token.radius.sm))
-                            .padding(
-                                horizontal = sizeStyle.badgeInnerH,
-                                vertical = sizeStyle.badgeInnerV,
-                            ),
-                    ) {
-                        badge()
+                    when (badgeChrome) {
+                        GImageCardBadgeChrome.Holistic -> {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(token.radius.pill))
+                                    .background(token.colors.surface.copy(alpha = 0.7f))
+                                    .border(
+                                        width = token.borderWidth.hairlineSubtle,
+                                        color = glassBorderColor,
+                                        shape = RoundedCornerShape(token.radius.pill),
+                                    )
+                                    .padding(
+                                        horizontal = token.spacing.xs,
+                                        vertical = token.spacing.xxxs,
+                                    ),
+                            ) {
+                                badge()
+                            }
+                        }
+                        GImageCardBadgeChrome.None -> Box { badge() }
                     }
                 }
+            }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .padding(horizontal = token.spacing.xs)
+                .padding(top = textTopInset),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(token.spacing.xxxs),
+        ) {
+            textSectionLeading?.invoke(this)
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(token.spacing.xxxs),
+            ) {
+                GText(
+                    text = firstLineText,
+                    style = sizeStyle.firstLineStyle,
+                    color = token.colors.textPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                GText(
+                    text = secondLineText,
+                    style = sizeStyle.secondLineStyle,
+                    color = token.colors.textSecondary.copy(alpha = 0.7f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
         }
     }
@@ -326,15 +350,16 @@ private fun PreviewAllSizes() {
                 model = R.drawable.body_unsplash,
                 contentDescription = "Small card",
                 firstLineText = "Push Day",
-                secondLineText = "Chest · 3 sets",
+                secondLineText = "12 reps · 3 sets",
                 cardSize = CardSize.Small,
+                textSectionLeading = { GImageCardBeginnerDifficultyDot() },
                 onClick = {},
             )
             GImageCard(
                 model = R.drawable.body_unsplash,
                 contentDescription = "Medium card",
                 firstLineText = "Bench Press",
-                secondLineText = "Intermediate",
+                secondLineText = "10 reps · 4 sets",
                 cardSize = CardSize.Medium,
                 onClick = {},
             )
@@ -342,7 +367,7 @@ private fun PreviewAllSizes() {
                 model = R.drawable.body_unsplash,
                 contentDescription = "Large card",
                 firstLineText = "Full Body Blast",
-                secondLineText = "Advanced · 60 min",
+                secondLineText = "8 reps · 5 sets",
                 cardSize = CardSize.Large,
                 onClick = {},
             )
@@ -350,7 +375,7 @@ private fun PreviewAllSizes() {
     }
 }
 
-@Preview(showBackground = true, name = "GImageCard — With badge slot")
+@Preview(showBackground = true, name = "GImageCard — Holistic badge")
 @Composable
 private fun PreviewWithBadge() {
     GymTheme {
@@ -360,24 +385,10 @@ private fun PreviewWithBadge() {
                 model = R.drawable.body_unsplash,
                 contentDescription = "Card with badge",
                 firstLineText = "Squat Circuit",
-                secondLineText = "Legs · 5 sets",
+                secondLineText = "12 reps · 3 sets",
                 cardSize = CardSize.Large,
-                badge = {
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                color = token.colors.primary,
-                                shape = RoundedCornerShape(token.radius.sm),
-                            )
-                            .padding(horizontal = token.spacing.xs, vertical = token.spacing.xxxs),
-                    ) {
-                        GText(
-                            text = "Beginner",
-                            style = token.typography.labelSmall,
-                            color = token.colors.onPrimary,
-                        )
-                    }
-                },
+                badge = { GImageCardHolisticCapsuleLabel("New") },
+                badgeChrome = GImageCardBadgeChrome.Holistic,
                 onClick = {},
             )
         }
@@ -394,7 +405,7 @@ private fun PreviewNonClickable() {
                 model = R.drawable.body_unsplash,
                 contentDescription = "Non-clickable card",
                 firstLineText = "Rest Day",
-                secondLineText = "Recovery",
+                secondLineText = "—",
                 cardSize = CardSize.Medium,
             )
         }
@@ -415,7 +426,7 @@ private fun PreviewDark() {
                 model = R.drawable.body_unsplash,
                 contentDescription = null,
                 firstLineText = "Night Training",
-                secondLineText = "Full Body · 45 min",
+                secondLineText = "12 reps · 3 sets",
                 cardSize = CardSize.Large,
                 onClick = {},
             )

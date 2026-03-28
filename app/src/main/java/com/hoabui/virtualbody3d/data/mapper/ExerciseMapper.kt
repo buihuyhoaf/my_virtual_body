@@ -34,7 +34,8 @@ class ExerciseMapper @Inject constructor(
         name = dto.name.orEmpty(),
         image = dto.toImageSource(),
         sets = dto.sets ?: 0,
-        reps = dto.reps ?: 0
+        reps = dto.reps ?: 0,
+        difficulty = dto.difficulty.orEmpty().toDifficulty(),
     )
 
     private fun ExerciseDto.toImageSource(): ImageSource {

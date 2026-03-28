@@ -21,6 +21,8 @@
     <string name="home_section_incomming_exercises">Bài tập sắp tới</string>
     <string name="home_section_supplements">Thực phẩm bổ sung</string>
     <string name="home_section_see_more">Xem thêm</string>
+    <string name="home_exercise_badge_new">New</string>
+    <string name="home_upcoming_reps_sets">%1$d reps · %2$d sets</string>
     <string name="analysis_basic_info">Thông tin cơ bản</string>
     <string name="analysis_body_score">Body Score</string>
     <string name="analysis_score_scale">/100</string>

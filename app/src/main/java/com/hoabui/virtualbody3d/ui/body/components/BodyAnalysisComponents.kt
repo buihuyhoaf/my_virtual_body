@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
@@ -39,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -49,7 +49,9 @@ import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.core.extensions.formatMeasurement
 import com.hoabui.virtualbody3d.core.utils.Constants
+import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
 import com.hoabui.virtualbody3d.ui.body.data.SupplementUiItem
+import com.hoabui.virtualbody3d.ui.body.data.UpcomingExerciseHighlight
 import com.hoabui.virtualbody3d.ui.body.data.UpcomingWorkoutUiItem
 import com.hoabui.virtualbody3d.ui.body.screen.BodyModelPreview
 import com.hoabui.virtualbody3d.ui.body.screen.BodyScoreChip
@@ -60,6 +62,9 @@ import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
 import com.hoabui.virtualbody3d.ui.common_ui.image.toImageModel
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.CardSize
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCard
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCardBadgeChrome
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCardBeginnerDifficultyDot
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCardHolisticCapsuleLabel
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.cardDimensions
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
 import com.hoabui.virtualbody3d.ui.mealcapture.MealPageUiModel
@@ -297,27 +302,52 @@ fun UpcomingExercisesRow(
     onAddExerciseClick: () -> Unit = {},
     onSeeMoreClick: (() -> Unit)? = null
 ) {
+    val token = GymTheme.token
     val resourceProvider = LocalResourceProvider.current
-    SectionHorizontalRow(
-        titleResId = R.string.home_section_incomming_exercises,
+    Column(
         modifier = modifier,
-        onSeeMoreClick = onSeeMoreClick
+        verticalArrangement = Arrangement.spacedBy(token.spacing.xs),
     ) {
-        items(
-            items = exercises,
-            key = { it.name }
-        ) { item ->
-            GImageCard(
-                model = item.image.toImageModel(resourceProvider),
-                contentDescription = item.name,
-                firstLineText = item.name,
-                secondLineText = "${item.reps}x${item.sets}",
-                cardSize = CardSize.Small,
-                onClick = {},
-            )
-        }
-        item(key = "add_exercise") {
-            AddCard(cardSize = CardSize.Small, onClick = onAddExerciseClick)
+        GSectionHeader(
+            title = stringResource(R.string.home_section_incomming_exercises),
+            actionText = if (onSeeMoreClick != null) stringResource(R.string.home_section_see_more) else null,
+            onActionClick = onSeeMoreClick,
+        )
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(token.spacing.sm),
+            contentPadding = PaddingValues(horizontal = token.spacing.md),
+        ) {
+            items(
+                items = exercises,
+                key = { it.id }
+            ) { item ->
+                GImageCard(
+                    model = item.image.toImageModel(resourceProvider),
+                    contentDescription = item.name,
+                    firstLineText = item.name,
+                    secondLineText = stringResource(
+                        R.string.home_upcoming_reps_sets,
+                        item.reps,
+                        item.sets,
+                    ),
+                    cardSize = CardSize.Small,
+                    textSectionLeading = if (item.difficulty == Difficulty.Beginner) {
+                        { GImageCardBeginnerDifficultyDot() }
+                    } else {
+                        null
+                    },
+                    badge = if (item.highlight == UpcomingExerciseHighlight.New) {
+                        { GImageCardHolisticCapsuleLabel(stringResource(R.string.home_exercise_badge_new)) }
+                    } else {
+                        null
+                    },
+                    badgeChrome = GImageCardBadgeChrome.Holistic,
+                    onClick = {},
+                )
+            }
+            item(key = "add_exercise") {
+                AddCard(cardSize = CardSize.Small, onClick = onAddExerciseClick)
+            }
         }
     }
 }
@@ -335,6 +365,15 @@ private fun AddCard(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale = if (isPressed) 0.97f else 1f
+    val cardCorner = when (cardSize) {
+        CardSize.Small -> bodyToken.gImageCardCornerRadius
+        CardSize.Medium, CardSize.Large -> token.radius.lg
+    }
+    val imageCorner = RoundedCornerShape(bodyToken.gImageCardCornerRadius)
+    val addCardBorder = BorderStroke(
+        token.borderWidth.hairlineSubtle,
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+    )
     Card(
         modifier = modifier
             .width(cardWidth)
@@ -348,28 +387,20 @@ private fun AddCard(
                 indication = null,
                 onClick = onClick
             ),
-        shape = RoundedCornerShape(token.radius.md),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        shape = RoundedCornerShape(cardCorner),
+        colors = CardDefaults.cardColors(containerColor = token.colors.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = token.elevation.level0),
-        border = BorderStroke(bodyToken.topBarBorderWidth, token.colors.borderSubtle)
+        border = addCardBorder
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Top area: full width, touches edges, clipped to card top corners
             Box(
                 modifier = Modifier
-                    .weight(1f)
                     .fillMaxWidth()
-                    .clip(
-                        RoundedCornerShape(
-                            topStart = token.radius.md,
-                            topEnd = token.radius.md,
-                            bottomEnd = 0.dp,
-                            bottomStart = 0.dp
-                        )
-                    ),
+                    .height(cardWidth)
+                    .clip(imageCorner),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -379,6 +410,11 @@ private fun AddCard(
                     modifier = Modifier.size(token.spacing.xl)
                 )
             }
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            )
         }
     }
 }
