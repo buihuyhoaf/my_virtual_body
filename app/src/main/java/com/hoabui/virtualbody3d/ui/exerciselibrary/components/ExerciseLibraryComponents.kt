@@ -1,32 +1,42 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.field.GTextField
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.core.extensions.badgeLevelBackground
-import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
-import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
+import com.hoabui.virtualbody3d.ui.common_ui.atom.chip.GFilterChip
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
 import com.hoabui.virtualbody3d.ui.common_ui.image.toImageModel
-import com.hoabui.virtualbody3d.ui.common_ui.molecule.chip.GSelectableTagRow
-import com.hoabui.virtualbody3d.ui.common_ui.molecule.chip.GTagOption
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
-import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseSectionRow
+import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseSectionCardRow
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseSectionUiModel
+import com.hoabui.virtualbody3d.ui.exerciselibrary.ExerciseLibraryQuickChip
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
+import com.hoabui.virtualbody3d.ui.exerciselibrary.selectedQuickChip
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseSectionUiItem
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseUiModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
@@ -35,71 +45,89 @@ import com.hoabui.virtualbody3d.ui.theme.GymTheme
 fun ExerciseSearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
+    onSearchFocusChange: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val token = GymTheme.token
-    GTextField(
-        value = query,
-        onValueChange = onQueryChange,
+    Surface(
         modifier = modifier.fillMaxWidth(),
-        placeholder = stringResource(R.string.exercise_library_search_hint),
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = null,
-                tint = token.colors.textSecondary
-            )
-        },
-        singleLine = true,
-    )
+        shape = RoundedCornerShape(token.radius.pill),
+        color = token.colors.surface,
+        shadowElevation = token.elevation.level1,
+    ) {
+        GTextField(
+            value = query,
+            onValueChange = onQueryChange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = token.spacing.lg + token.spacing.md)
+                .onFocusChanged { onSearchFocusChange(it.isFocused) },
+            placeholder = stringResource(R.string.exercise_library_search_hint),
+            textStyle = token.typography.bodyMedium,
+            placeholderStyle = token.typography.bodyMedium,
+            shape = RoundedCornerShape(token.radius.pill),
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = null,
+                    modifier = Modifier.size(token.spacing.md),
+                    tint = token.colors.textSecondary,
+                )
+            },
+            singleLine = true,
+        )
+    }
 }
 
-private const val FILTER_ALL_ID = "__all__"
+@Composable
+fun ExerciseSearchSuggestionChips(
+    libraryState: ExerciseLibraryUiState,
+    onQuickChipSelect: (ExerciseLibraryQuickChip?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val token = GymTheme.token
+    val selected = libraryState.selectedQuickChip()
+    LazyRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
+        contentPadding = PaddingValues(
+            top = token.spacing.xs,
+            bottom = token.spacing.xxs,
+        ),
+    ) {
+        items(ExerciseLibraryQuickChip.entries.toList(), key = { it.name }) { chip ->
+            GFilterChip(
+                label = stringResource(chip.labelRes),
+                selected = chip == selected,
+                onSelectedChange = { nowSelected ->
+                    if (nowSelected) onQuickChipSelect(chip) else onQuickChipSelect(null)
+                },
+                labelStyle = token.typography.labelSmall,
+            )
+        }
+    }
+}
 
 @Composable
-fun ExerciseFilterChips(
-    selectedBodyRegion: BodyRegion?,
-    selectedDifficulty: Difficulty?,
-    onBodyRegionSelect: (BodyRegion?) -> Unit,
-    onDifficultySelect: (Difficulty?) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val allLabel = stringResource(R.string.exercise_library_filter_all)
-    val bodyRegionOptions = buildList {
-        add(GTagOption(id = FILTER_ALL_ID, label = allLabel))
-        BodyRegion.entries.forEach { region ->
-            add(GTagOption(id = region.name, label = stringResource(ExerciseDisplayResources.bodyRegionResId(region))))
-        }
-    }
-    val difficultyOptions = buildList {
-        add(GTagOption(id = FILTER_ALL_ID, label = allLabel))
-        Difficulty.entries.forEach { difficulty ->
-            add(GTagOption(id = difficulty.name, label = stringResource(ExerciseDisplayResources.difficultyResId(difficulty))))
-        }
-    }
-    val selectedRegion = if (selectedBodyRegion == null) setOf(FILTER_ALL_ID) else setOf(selectedBodyRegion.name)
-    val selectedDiff = if (selectedDifficulty == null) setOf(FILTER_ALL_ID) else setOf(selectedDifficulty.name)
-
-    Column(modifier = modifier.fillMaxWidth()) {
-        GSelectableTagRow(
-            options = bodyRegionOptions,
-            selected = selectedRegion,
-            onToggle = { id ->
-                if (id == FILTER_ALL_ID) onBodyRegionSelect(null)
-                else onBodyRegionSelect(BodyRegion.valueOf(id))
-            },
-            title = stringResource(R.string.exercise_library_filter_body_region),
-            singleSelect = true,
+fun ExerciseLibraryEmptyState(modifier: Modifier = Modifier) {
+    val token = GymTheme.token
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = token.spacing.lg, vertical = token.spacing.md),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        GText(
+            text = stringResource(R.string.exercise_library_empty_title),
+            style = token.typography.titleMedium,
+            color = token.colors.textPrimary,
         )
-        GSelectableTagRow(
-            options = difficultyOptions,
-            selected = selectedDiff,
-            onToggle = { id ->
-                if (id == FILTER_ALL_ID) onDifficultySelect(null)
-                else onDifficultySelect(Difficulty.valueOf(id))
-            },
-            title = stringResource(R.string.exercise_library_filter_difficulty),
-            singleSelect = true,
+        GText(
+            text = stringResource(R.string.exercise_library_empty_message),
+            style = token.typography.bodyMedium,
+            color = token.colors.textSecondary,
+            modifier = Modifier.padding(top = token.spacing.sm),
         )
     }
 }
@@ -109,6 +137,8 @@ fun ExerciseSection(
     modifier: Modifier = Modifier,
     section: ExerciseSectionUiItem,
     onExerciseClick: (ExerciseUiModel) -> Unit = {},
+    onQuickAdd: ((String) -> Unit)? = null,
+    quickAddContentDescription: String = "",
 ) {
     val resourceProvider = LocalResourceProvider.current
     val regionLabel = stringResource(ExerciseDisplayResources.bodyRegionResId(section.bodyRegion))
@@ -120,35 +150,30 @@ fun ExerciseSection(
                 id = exercise.id,
                 imageModel = exercise.image.toImageModel(resourceProvider),
                 title = exercise.name,
-                subtitle = stringResource(ExerciseDisplayResources.bodyRegionResId(exercise.bodyRegion)),
-                badgeText = stringResource(ExerciseDisplayResources.difficultyResId(exercise.difficulty)),
+                subtitle = exerciseCardSubtitleLine(exercise),
             )
         },
     )
-    GExerciseSectionRow(
+    GExerciseSectionCardRow(
         section = uiSection,
         modifier = modifier,
         onItemClick = { id -> section.exercises.firstOrNull { it.id == id }?.let(onExerciseClick) },
-        badgeContent = { item ->
-            val exercise = section.exercises.firstOrNull { it.id == item.id }
-            if (exercise != null) {
-                val token = GymTheme.token
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(token.radius.sm))
-                        .badgeLevelBackground(exercise.difficulty)
-                        .padding(
-                            horizontal = token.spacing.xs,
-                            vertical = token.spacing.xxs,
-                        ),
-                ) {
-                    GText(
-                        text = item.badgeText ?: "",
-                        style = token.typography.labelSmall,
-                        color = token.colors.onPrimary,
-                    )
-                }
-            }
-        },
+        onQuickAdd = onQuickAdd,
+        quickAddContentDescription = quickAddContentDescription,
     )
+}
+
+@Composable
+private fun exerciseCardSubtitleLine(exercise: ExerciseUiModel): String {
+    if (exercise.primaryMuscles.isNotEmpty()) {
+        val parts = mutableListOf<String>()
+        for (muscle in exercise.primaryMuscles.take(2)) {
+            parts.add(stringResource(ExerciseDisplayResources.muscleGroupResId(muscle)))
+        }
+        return parts.joinToString()
+    }
+    if (exercise.equipment != null) {
+        return stringResource(ExerciseDisplayResources.equipmentResId(exercise.equipment))
+    }
+    return stringResource(R.string.exercise_library_card_subtitle_fallback)
 }

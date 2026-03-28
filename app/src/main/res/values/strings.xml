@@ -175,7 +175,15 @@
     <string name="exercise_library_filter_all">Tất cả</string>
     <string name="exercise_library_last_weight">%1$.0f kg</string>
     <string name="exercise_library_filter_body_region">Nhóm cơ</string>
-    <string name="exercise_library_filter_difficulty">Độ khó</string>
+    <string name="exercise_library_filter_category">Thể loại</string>
+    <string name="exercise_category_strength">Sức mạnh</string>
+    <string name="exercise_category_mobility">Linh hoạt</string>
+    <string name="exercise_category_stretching">Kéo giãn</string>
+    <string name="exercise_category_cardio">Cardio</string>
+    <string name="exercise_library_empty_title">Không tìm thấy bài tập</string>
+    <string name="exercise_library_empty_message">Thử đổi bộ lọc hoặc từ khóa tìm kiếm.</string>
+    <string name="exercise_library_card_subtitle_fallback">—</string>
+    <string name="exercise_quick_add_cd">Thêm nhanh vào buổi tập</string>
 
     <!-- Workout Feed Screen -->
     <string name="workout_feed_title">Workout feed</string>
@@ -187,11 +195,6 @@
     <string name="exercise_region_arms">Tay</string>
     <string name="exercise_region_core">Core</string>
     <string name="exercise_region_legs">Chân</string>
-
-    <!-- Exercise domain: Difficulty -->
-    <string name="exercise_difficulty_beginner">Người mới</string>
-    <string name="exercise_difficulty_intermediate">Trung cấp</string>
-    <string name="exercise_difficulty_advanced">Nâng cao</string>
 
     <!-- Exercise domain: MuscleGroup -->
     <string name="exercise_muscle_pectoralis">Pectoralis</string>

@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
@@ -46,10 +47,11 @@ import com.hoabui.virtualbody3d.ui.theme.GymTheme
  * When [leadingIcon] is `null` and [selected] = `true`, M3's `FilterChip` renders its
  * built-in animated checkmark. Pass a composable to override with a custom icon.
  *
- * @param label Chip label text. Rendered with `token.typography.labelMedium`.
+ * @param label Chip label text. Rendered with [labelStyle] or `token.typography.labelMedium` by default.
  * @param selected Whether the chip is in the selected (active) state.
  * @param onSelectedChange Called with the new selected value on click.
  * @param leadingIcon Optional slot. When `null` and [selected] = `true`, M3 shows a checkmark.
+ * @param labelStyle Typography for the chip label; defaults to `token.typography.labelMedium`.
  * @param enabled When `false`, the chip ignores clicks and renders at reduced opacity.
  */
 @Composable
@@ -60,9 +62,11 @@ fun GFilterChip(
     modifier: Modifier = Modifier,
     leadingIcon: (@Composable () -> Unit)? = null,
     enabled: Boolean = true,
+    labelStyle: TextStyle? = null,
 ) {
     val token = GymTheme.token
     val colors = token.colors
+    val resolvedLabelStyle = labelStyle ?: token.typography.labelMedium
 
     FilterChip(
         selected = selected,
@@ -70,7 +74,7 @@ fun GFilterChip(
         label = {
             GText(
                 text = label,
-                style = token.typography.labelMedium,
+                style = resolvedLabelStyle,
                 // Color will be inherited from FilterChip's LocalContentColor;
                 // GText's explicit color parameter is not set here so M3 state
                 // colours (selected/disabled) propagate automatically.

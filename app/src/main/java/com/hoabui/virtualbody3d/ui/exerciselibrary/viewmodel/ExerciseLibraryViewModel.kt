@@ -3,8 +3,12 @@ package com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel
 import androidx.lifecycle.viewModelScope
 import com.hoabui.virtualbody3d.core.base.UiStateViewModel
 import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
-import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
+import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
+import com.hoabui.virtualbody3d.ui.exerciselibrary.ExerciseLibraryQuickChip
+import com.hoabui.virtualbody3d.domain.model.exercise.matchesLibrarySearch
+import com.hoabui.virtualbody3d.domain.model.exercise.normalizeExerciseLibraryQuery
 import com.hoabui.virtualbody3d.domain.usecase.GetExerciseLibraryUseCase
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toExerciseUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
@@ -37,8 +41,8 @@ class ExerciseLibraryViewModel @Inject constructor(
             val sections = buildSections(
                 grouped,
                 filters.searchQuery,
-                filters.selectedBodyRegion,
-                filters.selectedDifficulty
+                filters.selectedExerciseCategory,
+                filters.selectedEquipment,
             )
             val selectedExercise = selectedId?.let { id ->
                 grouped.values.flatten().find { it.id == id }
@@ -56,12 +60,32 @@ class ExerciseLibraryViewModel @Inject constructor(
         filterState.update { it.copy(searchQuery = query) }
     }
 
-    fun selectBodyRegion(region: BodyRegion?) {
-        filterState.update { it.copy(selectedBodyRegion = region) }
-    }
-
-    fun selectDifficulty(difficulty: Difficulty?) {
-        filterState.update { it.copy(selectedDifficulty = difficulty) }
+    fun selectQuickChip(chip: ExerciseLibraryQuickChip?) {
+        filterState.update { state ->
+            when (chip) {
+                null -> state.copy(selectedExerciseCategory = null, selectedEquipment = null)
+                ExerciseLibraryQuickChip.Strength -> state.copy(
+                    selectedExerciseCategory = ExerciseCategory.Strength,
+                    selectedEquipment = null,
+                )
+                ExerciseLibraryQuickChip.Mobility -> state.copy(
+                    selectedExerciseCategory = ExerciseCategory.Mobility,
+                    selectedEquipment = null,
+                )
+                ExerciseLibraryQuickChip.Cardio -> state.copy(
+                    selectedExerciseCategory = ExerciseCategory.Cardio,
+                    selectedEquipment = null,
+                )
+                ExerciseLibraryQuickChip.Bodyweight -> state.copy(
+                    selectedExerciseCategory = null,
+                    selectedEquipment = EquipmentType.Bodyweight,
+                )
+                ExerciseLibraryQuickChip.Dumbbell -> state.copy(
+                    selectedExerciseCategory = null,
+                    selectedEquipment = EquipmentType.Dumbbell,
+                )
+            }
+        }
     }
 
     fun selectExerciseForDetail(exerciseId: String) {
@@ -75,16 +99,16 @@ class ExerciseLibraryViewModel @Inject constructor(
     private fun buildSections(
         grouped: Map<BodyRegion, List<Exercise>>,
         searchQuery: String,
-        selectedBodyRegion: BodyRegion?,
-        selectedDifficulty: Difficulty?
+        selectedExerciseCategory: ExerciseCategory?,
+        selectedEquipment: EquipmentType?,
     ): List<ExerciseSectionUiItem> {
-        val query = searchQuery.trim().lowercase()
-        val regions = if (selectedBodyRegion != null) listOf(selectedBodyRegion) else BodyRegion.entries
-        return regions.mapNotNull { region ->
+        val query = normalizeExerciseLibraryQuery(searchQuery)
+        return BodyRegion.entries.mapNotNull { region ->
             val exercises = grouped[region]
                 ?.filter { ex ->
-                    (query.isEmpty() || ex.name.lowercase().contains(query)) &&
-                    (selectedDifficulty == null || ex.difficulty == selectedDifficulty)
+                    ex.matchesLibrarySearch(query) &&
+                    (selectedExerciseCategory == null || ex.category == selectedExerciseCategory) &&
+                    (selectedEquipment == null || ex.equipment == selectedEquipment)
                 }
                 ?.map { it.toExerciseUiModel() }
                 ?: emptyList()

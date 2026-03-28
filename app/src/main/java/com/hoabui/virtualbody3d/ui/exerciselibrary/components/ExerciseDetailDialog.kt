@@ -31,9 +31,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.core.extensions.badgeLevelBackground
-import com.hoabui.virtualbody3d.core.extensions.badgeLevelBorder
-import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
@@ -162,14 +159,11 @@ fun ExerciseDetailDialog(
                 .fillMaxWidth()
                 .padding(token.spacing.md),
         ) {
-            Box(
-                modifier = Modifier.fillMaxWidth()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(scrollState)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .verticalScroll(scrollState)
-                ) {
                     // 1. Exercise hero: image (fixed height) + name below
                     Box(
                         modifier = Modifier
@@ -314,26 +308,6 @@ fun ExerciseDetailDialog(
                             modifier = Modifier.weight(1f),
                         )
                     }
-                }
-                }
-                // Overlay badge on top of the card
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(token.spacing.md)
-                        .clip(RoundedCornerShape(token.radius.sm))
-                        .badgeLevelBackground(exercise.difficulty)
-                        .badgeLevelBorder(exercise.difficulty)
-                        .padding(
-                            horizontal = token.spacing.xs,
-                            vertical = token.spacing.xxs
-                        )
-                ) {
-                    GText(
-                        text = stringResource(ExerciseDisplayResources.difficultyResId(exercise.difficulty)),
-                        style = token.typography.labelSmall,
-                        color = token.colors.surface
-                    )
                 }
             }
         }

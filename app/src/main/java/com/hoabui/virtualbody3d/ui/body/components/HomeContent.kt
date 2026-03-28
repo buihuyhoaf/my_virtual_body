@@ -76,7 +76,7 @@ fun HomeContent(
                         rememberScrollState(),
                         enabled = !isModelInteracting,
                     )
-                    .padding(token.spacing.md),
+                    .padding(horizontal = token.spacing.md),
                 verticalArrangement = Arrangement.spacedBy(token.spacing.lg),
             ) {
                 GBodyHeroPanel(

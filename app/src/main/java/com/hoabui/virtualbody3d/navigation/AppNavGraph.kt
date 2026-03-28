@@ -159,7 +159,12 @@ fun AppNavGraph(
             )
         }
         composable<CenfitCoachRoute> {
-            WorkoutFeedScreen()
+            ExerciseLibraryScreen(
+                onBack = { navController.popBackStack() },
+                onAddToWorkout = { exerciseId ->
+                    navController.navigate(AddWorkoutRoute(exerciseId))
+                }
+            )
         }
         composable<ProfileRoute> {
             ProfileScreen(

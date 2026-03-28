@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,8 +22,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -60,6 +63,9 @@ import com.hoabui.virtualbody3d.ui.theme.outlinedTextFieldColors
  * @param isError When `true`, field border, cursor, and [supportingText] use error colours.
  * @param leadingIcon Optional composable rendered at the start of the field.
  * @param trailingIcon Optional composable rendered at the end of the field.
+ * @param textStyle Optional typography for input text; defaults to [LocalTextStyle].
+ * @param placeholderStyle Optional typography for [placeholder]; defaults to [GymTheme.token.typography.bodyLarge].
+ * @param shape Optional outline shape; defaults to `token.radius.md`.
  * @param visualTransformation Use [PasswordVisualTransformation] for password fields.
  * @param singleLine When `true` (default), field stays on one line and sends IME action.
  * @param maxLines Maximum lines when [singleLine] = `false`.
@@ -77,6 +83,9 @@ fun GTextField(
     readOnly: Boolean = false,
     leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
+    textStyle: TextStyle? = null,
+    placeholderStyle: TextStyle? = null,
+    shape: Shape? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
@@ -84,6 +93,8 @@ fun GTextField(
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
 ) {
     val token = GymTheme.token
+    val resolvedTextStyle = textStyle ?: LocalTextStyle.current
+    val resolvedPlaceholderStyle = placeholderStyle ?: token.typography.bodyLarge
 
     // Announce error message to accessibility services (TalkBack)
     val semanticsModifier = if (isError && !supportingText.isNullOrBlank()) {
@@ -98,6 +109,7 @@ fun GTextField(
         modifier = semanticsModifier.fillMaxWidth(),
         enabled = enabled,
         readOnly = readOnly,
+        textStyle = resolvedTextStyle,
         label = if (label != null) {
             { GText(text = label, style = token.typography.bodyMedium) }
         } else null,
@@ -105,7 +117,7 @@ fun GTextField(
             {
                 GText(
                     text = placeholder,
-                    style = token.typography.bodyLarge,
+                    style = resolvedPlaceholderStyle,
                     color = token.colors.textPlaceholder,
                 )
             }
@@ -127,7 +139,7 @@ fun GTextField(
         keyboardActions = keyboardActions,
         singleLine = singleLine,
         maxLines = maxLines,
-        shape = RoundedCornerShape(token.radius.md),
+        shape = shape ?: RoundedCornerShape(token.radius.md),
         colors = outlinedTextFieldColors(
             colors = token.colors,
             isError = isError,

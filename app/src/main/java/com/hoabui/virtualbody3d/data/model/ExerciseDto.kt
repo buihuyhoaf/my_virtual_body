@@ -15,8 +15,8 @@ data class ExerciseDto(
     val localImageName: String? = null,
     @SerializedName("body_region")
     val bodyRegion: String? = null,
-    @SerializedName("difficulty")
-    val difficulty: String? = null,
+    @SerializedName("category")
+    val category: String? = null,
     @SerializedName("description")
     val description: String? = null,
     @SerializedName("primary_muscles")

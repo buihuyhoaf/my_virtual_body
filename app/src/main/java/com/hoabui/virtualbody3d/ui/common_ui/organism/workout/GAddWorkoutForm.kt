@@ -89,18 +89,19 @@ fun GAddWorkoutForm(
             imageModel = uiModel.exerciseImageModel,
             title = uiModel.exerciseTitle,
             subtitle = uiModel.exerciseSubtitle,
-            badge = {
-                val badgeText = uiModel.exerciseBadgeText ?: return@GMediaInfoCard
-                GSurface(shape = RoundedCornerShape(token.radius.sm)) {
-                    GText(
-                        text = badgeText,
-                        style = token.typography.labelSmall,
-                        color = token.colors.textPrimary,
-                        modifier = Modifier.padding(
-                            horizontal = token.spacing.xs,
-                            vertical = token.spacing.xxs,
-                        ),
-                    )
+            badge = uiModel.exerciseBadgeText?.let { badgeText ->
+                {
+                    GSurface(shape = RoundedCornerShape(token.radius.sm)) {
+                        GText(
+                            text = badgeText,
+                            style = token.typography.labelSmall,
+                            color = token.colors.textPrimary,
+                            modifier = Modifier.padding(
+                                horizontal = token.spacing.xs,
+                                vertical = token.spacing.xxs,
+                            ),
+                        )
+                    }
                 }
             },
             modifier = Modifier.fillMaxWidth(),

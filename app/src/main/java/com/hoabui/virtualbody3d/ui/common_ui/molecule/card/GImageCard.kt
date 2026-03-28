@@ -91,15 +91,15 @@ fun GImageCardHolisticCapsuleLabel(text: String, modifier: Modifier = Modifier) 
     )
 }
 
-/** Beginner difficulty indicator: green dot for use in [GImageCard] `textSectionLeading`. */
+/** Accent dot for use in [GImageCard] `textSectionLeading` (e.g. previews). */
 @Composable
-fun GImageCardBeginnerDifficultyDot(modifier: Modifier = Modifier) {
+fun GImageCardAccentDot(modifier: Modifier = Modifier) {
     val token = GymTheme.token
     Box(
         modifier = modifier
             .size(token.spacing.xs)
             .clip(CircleShape)
-            .background(token.colors.difficultyBeginnerText),
+            .background(token.colors.primary),
     )
 }
 
@@ -158,6 +158,8 @@ fun GImageCard(
     cardSize: CardSize = CardSize.Medium,
     badge: (@Composable BoxScope.() -> Unit)? = null,
     badgeChrome: GImageCardBadgeChrome = GImageCardBadgeChrome.Holistic,
+    /** Optional overlay on the image (e.g. bottom-end quick action); drawn above the image, below badge hit-testing order depends on declaration order. */
+    imageOverlayEnd: (@Composable BoxScope.() -> Unit)? = null,
     textSectionLeading: (@Composable RowScope.() -> Unit)? = null,
     onClick: (() -> Unit)? = null,
 ) {
@@ -211,6 +213,7 @@ fun GImageCard(
                 secondLineText = secondLineText,
                 badge = badge,
                 badgeChrome = badgeChrome,
+                imageOverlayEnd = imageOverlayEnd,
                 textSectionLeading = textSectionLeading,
             )
         }
@@ -232,6 +235,7 @@ fun GImageCard(
                 secondLineText = secondLineText,
                 badge = badge,
                 badgeChrome = badgeChrome,
+                imageOverlayEnd = imageOverlayEnd,
                 textSectionLeading = textSectionLeading,
             )
         }
@@ -249,6 +253,7 @@ private fun GImageCardContent(
     secondLineText: String,
     badge: (@Composable BoxScope.() -> Unit)?,
     badgeChrome: GImageCardBadgeChrome,
+    imageOverlayEnd: (@Composable BoxScope.() -> Unit)?,
     textSectionLeading: (@Composable RowScope.() -> Unit)?,
 ) {
     val token = GymTheme.token
@@ -297,6 +302,15 @@ private fun GImageCardContent(
                         }
                         GImageCardBadgeChrome.None -> Box { badge() }
                     }
+                }
+            }
+            if (imageOverlayEnd != null) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(token.spacing.xs),
+                ) {
+                    imageOverlayEnd.invoke(this)
                 }
             }
         }
@@ -352,7 +366,7 @@ private fun PreviewAllSizes() {
                 firstLineText = "Push Day",
                 secondLineText = "12 reps · 3 sets",
                 cardSize = CardSize.Small,
-                textSectionLeading = { GImageCardBeginnerDifficultyDot() },
+                textSectionLeading = { GImageCardAccentDot() },
                 onClick = {},
             )
             GImageCard(

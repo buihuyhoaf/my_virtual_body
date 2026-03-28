@@ -32,7 +32,7 @@ import com.hoabui.virtualbody3d.ui.theme.GymTheme
  *   `@DrawableRes Int`, [java.io.File], etc.
  * @param title Primary text shown below the image area.
  * @param subtitle Optional secondary line.
- * @param badge Optional composable slot (e.g. difficulty badge) rendered below [subtitle].
+ * @param badge Optional composable slot rendered below [subtitle].
  * @param imageWidthFraction Fraction of the card width used by the image. Default `0.25f`.
  * @param contentDescription Accessibility description for the image.
  * @param onClick If non-null, the card is clickable with M3 ripple.

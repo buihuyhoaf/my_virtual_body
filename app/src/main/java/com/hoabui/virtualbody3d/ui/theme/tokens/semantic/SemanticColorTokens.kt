@@ -85,12 +85,6 @@ data class SemanticColorTokens(
     val initialSetupStep4IconBorder: Color,
     val initialSetupStep4DecorationBg: Color,
     val initialSetupOptionUnselectedIcon: Color,
-    /** Difficulty badge: Beginner – text #16A34A */
-    val difficultyBeginnerText: Color,
-    /** Difficulty badge: Intermediate – text #D97706 */
-    val difficultyIntermediateText: Color,
-    /** Difficulty badge: Advanced – text #DC2626 */
-    val difficultyAdvancedText: Color,
     /** Body region chip: Chest */
     val bodyRegionChest: Color,
     /** Body region chip: Back */
@@ -178,9 +172,6 @@ fun lightSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens {
         initialSetupStep4IconBorder = primitive.outlineLight,
         initialSetupStep4DecorationBg = primitive.surfaceVariantLight,
         initialSetupOptionUnselectedIcon = primitive.textSecondaryLight,
-        difficultyBeginnerText = Color(0xFF16A34A),
-        difficultyIntermediateText = Color(0xFFD97706),
-        difficultyAdvancedText = Color(0xFFDC2626),
         bodyRegionChest = Color(0xFFDC2626),
         bodyRegionBack = Color(0xFF2563EB),
         bodyRegionShoulders = Color(0xFFEA580C),
@@ -263,9 +254,6 @@ fun darkSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens {
         initialSetupStep4IconBorder = primitive.outlineDark,
         initialSetupStep4DecorationBg = primitive.surfaceVariantDark,
         initialSetupOptionUnselectedIcon = primitive.textSecondaryDark,
-        difficultyBeginnerText = Color(0xFF16A34A),
-        difficultyIntermediateText = Color(0xFFD97706),
-        difficultyAdvancedText = Color(0xFFDC2626),
         bodyRegionChest = Color(0xFFDC2626),
         bodyRegionBack = Color(0xFF2563EB),
         bodyRegionShoulders = Color(0xFFEA580C),

@@ -1,7 +1,6 @@
 package com.hoabui.virtualbody3d.ui.body.data
 
 import com.hoabui.virtualbody3d.domain.model.common.ImageSource
-import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
 import com.hoabui.virtualbody3d.domain.model.exercise.FeedExercise
 
 enum class UpcomingExerciseHighlight {
@@ -15,7 +14,6 @@ data class UpcomingWorkoutUiItem(
     val image: ImageSource,
     val sets: Int,
     val reps: Int,
-    val difficulty: Difficulty = Difficulty.Intermediate,
     val highlight: UpcomingExerciseHighlight = UpcomingExerciseHighlight.None,
 )
 
@@ -26,5 +24,4 @@ fun FeedExercise.toUpcomingItem(): UpcomingWorkoutUiItem =
         image = this.image,
         sets = this.sets,
         reps = this.reps,
-        difficulty = this.difficulty,
     )

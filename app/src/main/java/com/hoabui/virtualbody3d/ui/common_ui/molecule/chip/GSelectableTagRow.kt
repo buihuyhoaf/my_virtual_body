@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.hoabui.virtualbody3d.ui.common_ui.atom.chip.GFilterChip
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
@@ -61,6 +62,8 @@ data class GTagOption(val id: String, val label: String)
  * @param onToggle Called with the toggled [GTagOption.id]. The caller is responsible for
  *   updating [selected]; this component is fully controlled.
  * @param title Optional section label rendered above the [FlowRow].
+ * @param titleStyle Typography for [title]; defaults to `token.typography.labelMedium`.
+ * @param chipLabelStyle Typography for each chip label; defaults to `token.typography.labelMedium`.
  * @param singleSelect When `true`, forces radio-button semantics (one active at a time).
  */
 @OptIn(ExperimentalLayoutApi::class)
@@ -71,9 +74,13 @@ fun GSelectableTagRow(
     onToggle: (String) -> Unit,
     modifier: Modifier = Modifier,
     title: String? = null,
+    titleStyle: TextStyle? = null,
+    chipLabelStyle: TextStyle? = null,
     singleSelect: Boolean = false,
 ) {
     val token = GymTheme.token
+    val resolvedTitleStyle = titleStyle ?: token.typography.labelMedium
+    val resolvedChipLabelStyle = chipLabelStyle ?: token.typography.labelMedium
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(token.spacing.xxs),
@@ -81,7 +88,7 @@ fun GSelectableTagRow(
         if (title != null) {
             GText(
                 text = title,
-                style = token.typography.labelMedium,
+                style = resolvedTitleStyle,
                 color = token.colors.textSecondary,
             )
         }
@@ -94,6 +101,7 @@ fun GSelectableTagRow(
                 GFilterChip(
                     label = option.label,
                     selected = isSelected,
+                    labelStyle = resolvedChipLabelStyle,
                     onSelectedChange = { nowSelected ->
                         if (singleSelect) {
                             // For single-select, always notify the new selection;
@@ -123,10 +131,10 @@ private val previewBodyRegions = listOf(
     GTagOption("CORE", "Lõi"),
 )
 
-private val previewDifficulty = listOf(
-    GTagOption("BEGINNER", "Người mới"),
-    GTagOption("INTERMEDIATE", "Trung cấp"),
-    GTagOption("ADVANCED", "Nâng cao"),
+private val previewSingleSelectOptions = listOf(
+    GTagOption("OPT_A", "Alpha"),
+    GTagOption("OPT_B", "Beta"),
+    GTagOption("OPT_C", "Gamma"),
 )
 
 @Preview(showBackground = true, name = "GSelectableTagRow — multi-select")
@@ -152,12 +160,12 @@ private fun PreviewMultiSelect() {
 private fun PreviewSingleSelect() {
     GymTheme {
         val token = GymTheme.token
-        var selected by remember { mutableStateOf(setOf("BEGINNER")) }
+        var selected by remember { mutableStateOf(setOf("OPT_A")) }
         GSelectableTagRow(
-            options = previewDifficulty,
+            options = previewSingleSelectOptions,
             selected = selected,
             onToggle = { id -> selected = setOf(id) },
-            title = "Độ khó",
+            title = "Tùy chọn",
             singleSelect = true,
             modifier = Modifier.padding(token.spacing.md),
         )

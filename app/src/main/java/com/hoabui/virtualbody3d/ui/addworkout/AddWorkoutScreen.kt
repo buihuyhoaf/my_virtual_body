@@ -132,7 +132,7 @@ private fun AddWorkoutContent(
                             exerciseImageModel = exercise.image.toImageModel(resourceProvider),
                             exerciseTitle = exercise.name,
                             exerciseSubtitle = stringResource(ExerciseDisplayResources.bodyRegionResId(exercise.bodyRegion)),
-                            exerciseBadgeText = stringResource(ExerciseDisplayResources.difficultyResId(exercise.difficulty)),
+                            exerciseBadgeText = null,
                             scheduleTitle = stringResource(R.string.add_workout_schedule),
                             dateLabel = stringResource(R.string.add_workout_date),
                             timeLabel = stringResource(R.string.add_workout_time),

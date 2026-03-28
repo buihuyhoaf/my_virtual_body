@@ -4,9 +4,9 @@ import android.content.Context
 import com.hoabui.virtualbody3d.data.model.ExerciseDto
 import com.hoabui.virtualbody3d.domain.model.common.ImageSource
 import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
-import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
 import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.domain.model.exercise.FeedExercise
 import com.hoabui.virtualbody3d.domain.model.exercise.MuscleGroup
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -19,8 +19,8 @@ class ExerciseMapper @Inject constructor(
         id = dto.id.orEmpty(),
         name = dto.name.orEmpty(),
         image = dto.toImageSource(),
+        category = dto.category.toExerciseCategory(),
         bodyRegion = dto.bodyRegion.orEmpty().toBodyRegion(),
-        difficulty = dto.difficulty.orEmpty().toDifficulty(),
         description = dto.description.orEmpty(),
         primaryMuscles = dto.primaryMuscles.orEmpty().mapNotNull { it.toMuscleGroupOrNull() },
         secondaryMuscles = dto.secondaryMuscles.orEmpty().mapNotNull { it.toMuscleGroupOrNull() },
@@ -35,7 +35,6 @@ class ExerciseMapper @Inject constructor(
         image = dto.toImageSource(),
         sets = dto.sets ?: 0,
         reps = dto.reps ?: 0,
-        difficulty = dto.difficulty.orEmpty().toDifficulty(),
     )
 
     private fun ExerciseDto.toImageSource(): ImageSource {
@@ -52,6 +51,17 @@ class ExerciseMapper @Inject constructor(
 
 private const val FALLBACK_IMAGE_NAME = "body_unsplash"
 
+private fun String?.toExerciseCategory(): ExerciseCategory {
+    val key = this?.trim()?.lowercase().orEmpty()
+    return when (key) {
+        "strength" -> ExerciseCategory.Strength
+        "mobility" -> ExerciseCategory.Mobility
+        "stretching" -> ExerciseCategory.Stretching
+        "cardio" -> ExerciseCategory.Cardio
+        else -> ExerciseCategory.Strength
+    }
+}
+
 private fun String.toBodyRegion(): BodyRegion = when (this) {
     "Chest" -> BodyRegion.Chest
     "Back" -> BodyRegion.Back
@@ -60,13 +70,6 @@ private fun String.toBodyRegion(): BodyRegion = when (this) {
     "Core" -> BodyRegion.Core
     "Legs" -> BodyRegion.Legs
     else -> BodyRegion.Chest
-}
-
-private fun String.toDifficulty(): Difficulty = when (this) {
-    "Beginner" -> Difficulty.Beginner
-    "Intermediate" -> Difficulty.Intermediate
-    "Advanced" -> Difficulty.Advanced
-    else -> Difficulty.Intermediate
 }
 
 private fun String.toMuscleGroupOrNull(): MuscleGroup? = when (this) {

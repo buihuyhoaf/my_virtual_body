@@ -3,21 +3,22 @@ package com.hoabui.virtualbody3d.ui.exerciselibrary.data
 import androidx.annotation.StringRes
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
-import com.hoabui.virtualbody3d.domain.model.exercise.Difficulty
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.MuscleGroup
 
 /**
  * Maps domain enums to string resource IDs for display in Exercise Library and Detail screens.
- * Use with [stringResource] in composables to get difficultyLabel, bodyRegionLabel, etc.
+ * Use with [stringResource] in composables to get bodyRegionLabel, etc.
  */
 object ExerciseDisplayResources {
 
     @StringRes
-    fun difficultyResId(difficulty: Difficulty): Int = when (difficulty) {
-        Difficulty.Beginner -> R.string.exercise_difficulty_beginner
-        Difficulty.Intermediate -> R.string.exercise_difficulty_intermediate
-        Difficulty.Advanced -> R.string.exercise_difficulty_advanced
+    fun categoryResId(category: ExerciseCategory): Int = when (category) {
+        ExerciseCategory.Strength -> R.string.exercise_category_strength
+        ExerciseCategory.Mobility -> R.string.exercise_category_mobility
+        ExerciseCategory.Stretching -> R.string.exercise_category_stretching
+        ExerciseCategory.Cardio -> R.string.exercise_category_cardio
     }
 
     @StringRes

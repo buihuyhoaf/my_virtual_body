@@ -21,7 +21,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.core.utils.Constants
-import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.GymToken
 data class BottomBarItemState(
     val contentColor: Color,
@@ -103,36 +102,6 @@ fun Modifier.selectedBorder(
     width: Dp = 2.dp,
     shape: Shape
 ): Modifier = if (selected) this.border(width, color, shape) else this
-
-/**
- * Soft background for difficulty badge/chip (surfaceSubtle). Border and text use difficulty color for semantic meaning.
- */
-@Composable
-fun Modifier.badgeLevelBackground(level: Enum<*>?): Modifier {
-    val token = GymTheme.token
-    val color = when (level?.name?.lowercase()) {
-        "beginner" -> token.colors.difficultyBeginnerText
-        "intermediate" -> token.colors.difficultyIntermediateText
-        "advanced" -> token.colors.difficultyAdvancedText
-        else -> token.colors.difficultyBeginnerText
-    }
-    return this.background(color,)
-}
-
-/**
- * Viền theo level (cùng màu nền đậm).
- */
-@Composable
-fun Modifier.badgeLevelBorder(level: Enum<*>?): Modifier {
-    val token = GymTheme.token
-    val color = when (level?.name?.lowercase()) {
-        "beginner" -> token.colors.difficultyBeginnerText
-        "intermediate" -> token.colors.difficultyIntermediateText
-        "advanced" -> token.colors.difficultyAdvancedText
-        else -> token.colors.difficultyBeginnerText
-    }
-    return this.border(token.spacing.xxs, color)
-}
 
 @Composable
 fun rememberBottomBarItemState(

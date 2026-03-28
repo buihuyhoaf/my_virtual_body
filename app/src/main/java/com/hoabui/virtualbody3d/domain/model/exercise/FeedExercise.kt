@@ -12,5 +12,4 @@ data class FeedExercise(
     val image: ImageSource,
     val sets: Int,
     val reps: Int,
-    val difficulty: Difficulty = Difficulty.Intermediate,
 )
