@@ -2,7 +2,9 @@ package com.hoabui.virtualbody3d.ui.theme.tokens.component
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveSpacingTokens
 
 /** Explicit width/height per card size for image+text tiles (no formula — token-only). */
@@ -114,12 +116,39 @@ data class BodyAnalysisTokens(
     val timelineLineThickness: Dp,
     val timelineLineOffsetY: Dp,
     val timelineDateSlotHeight: Dp,
-    val timelineDateToAvatarGap: Dp,
-    val timelineAvatarToDotGap: Dp,
-    val timelineDotToMetricGap: Dp
+    /** Border width when a timeline page is centered (pager selection). */
+    val timelineAvatarSelectedBorderWidth: Dp,
+    /** [GSurface] fill alpha behind the home progress timeline. */
+    val timelineRowSurfaceAlpha: Float,
+    /** Scale on centered timeline avatar (layout bounds unchanged). */
+    val timelineAvatarSelectedScale: Float,
+    /** Icon size for fat / muscle mini-columns below the weight line. */
+    val timelineSecondaryMetricIconSize: Dp,
+    /** Alpha for whole item when page is not centered. */
+    val timelineUnselectedItemAlpha: Float,
+    /** [PagerDefaults.flingBehavior] snap threshold for single-page flings. */
+    val timelinePagerSnapPositionalThreshold: Float,
+    /** Fixed height for [com.hoabui.virtualbody3d.ui.common_ui.organism.body.GBodyHeroPanel] slim chips. */
+    val heroSlimChipHeight: Dp,
+    val heroSlimChipPaddingHorizontal: Dp,
+    val heroSlimChipIconSize: Dp,
+    val heroSlimChipIconTextGap: Dp,
+    /** Tighter [androidx.compose.material3.Typography.labelSmall] on hero chips. */
+    val heroSlimChipLabelLetterSpacing: TextUnit,
 )
 
-fun gymBodyAnalysisTokens(spacing: PrimitiveSpacingTokens): BodyAnalysisTokens = BodyAnalysisTokens(
+fun gymBodyAnalysisTokens(spacing: PrimitiveSpacingTokens): BodyAnalysisTokens {
+    val heroSlimChipHeight = 32.dp
+    val heroSlimChipIconTextGap = 4.dp
+    val heroSlimChipPaddingHorizontal = 8.dp
+    val heroSlimChipIconSize = 16.dp
+    val timelineAvatarSize = 64.dp
+    val timelineAvatarCorner = 12.dp
+    val timelineAvatarSelectedBorder = 1.5.dp
+    val timelineWeightLineEstimate = 20.dp
+    /** Icon + gap + bold labelSmall for fat/muscle mini-grid. */
+    val timelineSecondaryBlockEstimate = 28.dp
+    return BodyAnalysisTokens(
     topBarHorizontalPadding = spacing.md,
     topBarVerticalPadding = 10.dp,
     topBarInnerHorizontalPadding = spacing.xxs,
@@ -167,7 +196,7 @@ fun gymBodyAnalysisTokens(spacing: PrimitiveSpacingTokens): BodyAnalysisTokens =
     dashboardFloatingNavHorizontalPadding = spacing.md,
     dashboardFloatingNavVerticalPadding = spacing.xs,
     dashboardFloatingNavBottomPadding = spacing.md,
-    metricChipMinWidth = 92.dp,
+    metricChipMinWidth = 100.dp,
     metricChipIconContainerSize = 22.dp,
     metricChipIconSize = 13.dp,
     scoreChipMinWidth = 92.dp,
@@ -202,20 +231,27 @@ fun gymBodyAnalysisTokens(spacing: PrimitiveSpacingTokens): BodyAnalysisTokens =
     dashboardCaloriePremiumRingStrokeWidth = spacing.md,
     // Slightly wider than [dashboardCalorieRingSize] so metric/deficit text aligns without clipping.
     dashboardCaloriePremiumSideColumnWidth = 88.dp,
-    // Home reference: meal item is 160dp and body-region item is 120dp.
-    // Timeline is intentionally smaller for quick scan density.
-    // Wide enough for weight + delta chip and two secondary metric lines.
-    timelineItemWidth = 104.dp,
+    // Home timeline: narrow tiles for side-by-side comparison; 64dp avatar for quick scan.
+    timelineItemWidth = 90.dp,
     timelineItemSpacing = spacing.md,
-    timelineAvatarSquareSize = 80.dp,
-    timelineAvatarCornerRadius = spacing.md,
+    timelineAvatarSquareSize = timelineAvatarSize,
+    timelineAvatarCornerRadius = timelineAvatarCorner,
     timelinePlaceholderIconSize = spacing.xl,
     timelineDotSize = spacing.xs,
     timelineLineThickness = spacing.dividerThickness,
-    // Align line with dot center: date + gap + square avatar + gap + half dot.
-    timelineLineOffsetY = spacing.md + spacing.xs + spacing.xxl + spacing.md + spacing.xs + spacing.xs / 2f,
+    timelineAvatarSelectedBorderWidth = timelineAvatarSelectedBorder,
+    timelineRowSurfaceAlpha = 0.2f,
+    timelineAvatarSelectedScale = 1.05f,
+    timelineSecondaryMetricIconSize = 10.dp,
+    timelineUnselectedItemAlpha = 0.5f,
+    timelinePagerSnapPositionalThreshold = 0.4f,
     timelineDateSlotHeight = spacing.md,
-    timelineDateToAvatarGap = spacing.xs,
-    timelineAvatarToDotGap = spacing.xs,
-    timelineDotToMetricGap = spacing.xs
+    // Dot center Y from top of each pager page: date + gaps + avatar + gaps + weight row + gaps + secondary row + gaps + half dot.
+    timelineLineOffsetY = spacing.md + spacing.xxs + timelineAvatarSize + spacing.xxs + timelineWeightLineEstimate + spacing.xxs + timelineSecondaryBlockEstimate + spacing.xxs + spacing.xs / 2f,
+    heroSlimChipHeight = heroSlimChipHeight,
+    heroSlimChipPaddingHorizontal = heroSlimChipPaddingHorizontal,
+    heroSlimChipIconSize = heroSlimChipIconSize,
+    heroSlimChipIconTextGap = heroSlimChipIconTextGap,
+    heroSlimChipLabelLetterSpacing = 0.05.sp,
 )
+}

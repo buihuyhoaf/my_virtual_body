@@ -14,6 +14,11 @@
     <string name="body_placeholder">--</string>
     <string name="body_unit_percent">%</string>
     <string name="body_unit_kg">kg</string>
+    <string name="progress_timeline_fat_compact">F %1$.1f%%</string>
+    <string name="progress_timeline_muscle_compact">M %1$.1f %2$s</string>
+    <string name="progress_timeline_metrics_divider"> · </string>
+    <string name="progress_timeline_metric_placeholder">—</string>
+    <string name="progress_timeline_weight_kg">%1$.1f %2$s</string>
 
     <!-- Home content section titles -->
     <string name="home_section_calories_today">Calories hôm nay</string>
@@ -21,6 +26,7 @@
     <string name="home_section_incomming_exercises">Bài tập sắp tới</string>
     <string name="home_section_supplements">Thực phẩm bổ sung</string>
     <string name="home_section_see_more">Xem thêm</string>
+    <string name="home_hero_bmi_analyzing">Analyzing…</string>
     <string name="home_nutrition_remaining_percent">%1$d%%</string>
     <string name="home_nutrition_track_meal">Track Meal</string>
     <string name="home_exercise_badge_new">New</string>
@@ -58,6 +64,7 @@
     <string name="analysis_under">Thiếu cân</string>
     <string name="analysis_normal">Bình thường</string>
     <string name="analysis_over">Thừa cân</string>
+    <string name="analysis_obese">Béo phì</string>
     <string name="analysis_insights">Gợi ý</string>
     <string name="analysis_chart_coming_soon">Biểu đồ sắp ra mắt</string>
     <string name="analysis_panel_today_energy">Năng lượng hôm nay</string>

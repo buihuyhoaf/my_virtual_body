@@ -17,18 +17,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.unit.dp
-import com.hoabui.virtualbody3d.domain.model.body.BodyScanResult
-import com.hoabui.virtualbody3d.R
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import com.adamglin.PhosphorIcons
+import com.adamglin.phosphoricons.Fill
+import com.adamglin.phosphoricons.fill.Barbell
+import com.adamglin.phosphoricons.fill.Drop
+import com.adamglin.phosphoricons.fill.Scales
+import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.domain.model.body.BodyScanResult
 import com.hoabui.virtualbody3d.core.extensions.formatMeasurement
 import com.hoabui.virtualbody3d.core.utils.Constants
 import com.hoabui.virtualbody3d.ui.body.data.CalorieGoalUiModel
 import com.hoabui.virtualbody3d.ui.body.data.ProgressSnapshotUiModel
 import com.hoabui.virtualbody3d.ui.body.data.UpcomingWorkoutUiItem
-import com.hoabui.virtualbody3d.ui.body.state.BodyUiState
-import com.hoabui.virtualbody3d.ui.body.state.toUiState
 import com.hoabui.virtualbody3d.ui.body.screen.BodyModelPreview
+import com.hoabui.virtualbody3d.ui.body.state.BodyUiState
+import com.hoabui.virtualbody3d.ui.body.state.heroBmiIndicatorColor
+import com.hoabui.virtualbody3d.ui.body.state.heroBmiStatusLabel
+import com.hoabui.virtualbody3d.ui.body.state.toUiState
 import com.hoabui.virtualbody3d.ui.common_ui.organism.body.GBodyHeroPanel
 import com.hoabui.virtualbody3d.ui.common_ui.organism.body.GBodyHeroPanelUiModel
 import com.hoabui.virtualbody3d.ui.common_ui.organism.body.GHeroMetricChipUiModel
@@ -52,8 +59,10 @@ fun HomeContent(
     val token = GymTheme.token
     val contentHeight = LocalConfiguration.current.screenHeightDp.dp
     val uiState = scanResult?.toUiState() ?: BodyUiState()
-    val bodyScore = ((uiState.bmiScalePosition ?: 0.76f) * 100f).toInt().coerceIn(0, 100)
     var isModelInteracting by remember { mutableStateOf(false) }
+
+    val bmiStatusLabel = uiState.heroBmiStatusLabel()
+    val bmiIndicatorColor = uiState.heroBmiIndicatorColor()
 
     GScaffold(modifier = modifier) {
         Box(
@@ -74,34 +83,27 @@ fun HomeContent(
                     uiModel = GBodyHeroPanelUiModel(
                         title = stringResource(R.string.home_section_body),
                         actionText = stringResource(R.string.home_section_see_more),
-                        bodyScore = bodyScore,
-                        topEndChips = listOf(
+                        bmiStatus = bmiStatusLabel,
+                        bmiIndicatorColor = bmiIndicatorColor,
+                        metrics = listOf(
                             GHeroMetricChipUiModel(
                                 id = "weight",
-                                iconResId = R.drawable.scale,
+                                icon = PhosphorIcons.Fill.Scales,
                                 value = uiState.weight.formatMeasurement(Constants.KILOGRAM),
                             ),
                             GHeroMetricChipUiModel(
-                                id = "height",
-                                iconResId = R.drawable.ruler_vertical,
-                                value = uiState.height.formatMeasurement(Constants.CENTIMETER),
-                            ),
-                        ),
-                        bottomStartChips = listOf(
-                            GHeroMetricChipUiModel(
                                 id = "bodyFat",
-                                iconResId = R.drawable.scale,
+                                icon = PhosphorIcons.Fill.Drop,
                                 value = uiState.bodyFat.formatMeasurement(Constants.PERCENT),
                             ),
                             GHeroMetricChipUiModel(
                                 id = "muscleMass",
-                                iconResId = R.drawable.scale,
+                                icon = PhosphorIcons.Fill.Barbell,
                                 value = uiState.muscleMass.formatMeasurement(Constants.PERCENT),
                             ),
                         ),
                     ),
                     onActionClick = onViewBodyDetailClick,
-                    onModelInteractionChanged = { isModelInteracting = it },
                     modelContent = { mod ->
                         BodyModelPreview(
                             modifier = mod,
@@ -110,7 +112,7 @@ fun HomeContent(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(contentHeight * 0.38f),
+                        .height(contentHeight * 0.45f),
                 )
                 NutritionSummaryCard(
                     nutritionToday = nutritionToday,

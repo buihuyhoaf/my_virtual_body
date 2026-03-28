@@ -11,7 +11,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -24,8 +23,6 @@ import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.core.utils.Constants
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.GymToken
-import kotlin.math.abs
-
 data class BottomBarItemState(
     val contentColor: Color,
     val scale: Float,
@@ -206,28 +203,4 @@ fun rememberBottomBarItemState(
         pillWidth = pillWidth,
         pillBackgroundColor = pillBackgroundColor,
     )
-}
-
-fun Modifier.timelineItemLayer(
-    pagerState: PagerState,
-    pageIndex: Int
-): Modifier = this.graphicsLayer {
-    val distanceFraction = abs(pagerState.getOffsetDistanceInPages(pageIndex)).coerceIn(0f, 1f)
-
-    val itemScale = 0.7f.lerpTo( 1f, 1f - distanceFraction)
-    val itemAlpha = 0.3f.lerpTo(1f, 1f - distanceFraction)
-    scaleX = itemScale
-    scaleY = itemScale
-    alpha = itemAlpha
-}
-
-
-fun Modifier.timelineAvatarLayer(
-    pagerState: PagerState,
-    pageIndex: Int
-): Modifier = this.graphicsLayer {
-    val distanceFraction = abs(pagerState.getOffsetDistanceInPages(pageIndex)).coerceIn(0f, 1f)
-    val avatarScale = if (distanceFraction < 0.5f) 1.12f else 1f
-    scaleX = avatarScale
-    scaleY = avatarScale
 }

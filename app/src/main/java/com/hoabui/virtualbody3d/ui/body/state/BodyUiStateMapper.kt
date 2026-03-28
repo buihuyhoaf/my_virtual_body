@@ -13,9 +13,19 @@ fun BodyScanResult.toUiState(): BodyUiState {
         bodyFat = obesity.percentBodyFat.value,
         muscleMass = muscleFat.skeletalMuscleMass.value,
         bmi = obesity.bmi.value,
-        bmiStatus = null,
+        bmiCategory = obesity.bmi.toBmiCategory(),
         bmiScalePosition = obesity.bmi.toScalePosition()
     )
+}
+
+private fun MetricWithRange.toBmiCategory(): BodyBmiCategory {
+    if (currentValue <= 0f) return BodyBmiCategory.UNKNOWN
+    return when {
+        currentValue < 18.5f -> BodyBmiCategory.UNDERWEIGHT
+        currentValue < 25f -> BodyBmiCategory.NORMAL
+        currentValue < 30f -> BodyBmiCategory.OVERWEIGHT
+        else -> BodyBmiCategory.OBESE
+    }
 }
 
 private fun MetricWithRange.toScalePosition(): Float? {
