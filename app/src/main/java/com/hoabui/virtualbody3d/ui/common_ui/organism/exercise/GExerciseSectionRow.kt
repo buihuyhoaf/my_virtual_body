@@ -31,7 +31,10 @@ data class GExerciseCardUiModel(
     val title: String,
     val subtitle: String,
     val badgeText: String? = null,
+    /** Strong highlight: active line in the cart. */
     val isSelected: Boolean = false,
+    /** Softer highlight: in cart but not the active line. */
+    val isInCartInactive: Boolean = false,
 )
 
 data class GExerciseSectionUiModel(
@@ -104,6 +107,7 @@ fun GExerciseSectionCardRow(
                 badge = badgeSlot,
                 badgeChrome = chrome,
                 selectionHighlight = item.isSelected,
+                weakSelectionHighlight = item.isInCartInactive,
                 onClick = shortClick,
                 onLongClick = longClick,
             )

@@ -118,10 +118,16 @@ data class BodyAnalysisTokens(
     val exerciseLibraryStickySearchHeaderMinHeight: Dp,
     val exerciseLibraryQuickAddIconContainerSize: Dp,
     val exerciseLibraryQuickAddTextInset: Dp,
+    val exerciseLibrarySelectionBarTopCornerRadius: Dp,
     val exerciseLibraryCartNumericFieldWidth: Dp,
     val exerciseLibrarySelectionBarMinHeight: Dp,
     val exerciseLibrarySelectionBarAddButtonMaxWidth: Dp,
+    val exerciseLibraryCartThumbnailSize: Dp,
+    val exerciseLibraryAnchoredConsoleTopBorderWidth: Dp,
+    val exerciseLibraryCartThumbnailActiveInset: Dp,
+    val exerciseLibraryConsolePrecisionRowHeight: Dp,
     val gImageCardSelectedSurfaceTintAlpha: Float,
+    val gImageCardWeakSelectionSurfaceTintAlpha: Float,
 )
 
 fun gymBodyAnalysisTokens(
@@ -236,9 +242,15 @@ fun gymBodyAnalysisTokens(
         exerciseLibraryStickySearchHeaderMinHeight = spacing.lg + spacing.md + spacing.xs + layout.heroSlimChipHeight + spacing.xxs,
         exerciseLibraryQuickAddIconContainerSize = layout.heroSlimChipHeight,
         exerciseLibraryQuickAddTextInset = spacing.xxl + spacing.xs,
+        exerciseLibrarySelectionBarTopCornerRadius = layout.exerciseLibrarySelectionBarTopCornerRadius,
         exerciseLibraryCartNumericFieldWidth = layout.exerciseLibraryCartNumericFieldWidth,
-        exerciseLibrarySelectionBarMinHeight = layout.heroSlimChipHeight + layout.heroSlimChipHeight + spacing.md,
+        exerciseLibrarySelectionBarMinHeight = layout.exerciseLibraryCartThumbnailSize + layout.heroSlimChipHeight * 2 + spacing.md * 3,
         exerciseLibrarySelectionBarAddButtonMaxWidth = spacing.xl + spacing.xl + spacing.md,
+        exerciseLibraryCartThumbnailSize = layout.exerciseLibraryCartThumbnailSize,
+        exerciseLibraryAnchoredConsoleTopBorderWidth = layout.exerciseLibraryAnchoredConsoleTopBorderWidth,
+        exerciseLibraryCartThumbnailActiveInset = layout.exerciseLibraryCartThumbnailActiveInset,
+        exerciseLibraryConsolePrecisionRowHeight = layout.exerciseLibraryConsolePrecisionRowHeight,
         gImageCardSelectedSurfaceTintAlpha = alpha.IMAGE_CARD_SELECTED_TINT,
+        gImageCardWeakSelectionSurfaceTintAlpha = alpha.IMAGE_CARD_WEAK_SELECTION_TINT,
     )
 }

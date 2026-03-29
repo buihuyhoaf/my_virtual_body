@@ -13,16 +13,20 @@ import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiMo
  */
 fun Exercise.toLibraryCardUiModel(
     context: Context,
-    selectedExerciseId: String?,
-): GExerciseCardUiModel =
-    GExerciseCardUiModel(
+    cartExerciseIds: Set<String>,
+    activeExerciseId: String?,
+): GExerciseCardUiModel {
+    val inCart = id in cartExerciseIds
+    return GExerciseCardUiModel(
         id = id,
         image = image.toExerciseLibraryCardImage(),
         title = name,
         subtitle = libraryCardSubtitle(context),
         badgeText = null,
-        isSelected = id == selectedExerciseId,
+        isSelected = inCart && id == activeExerciseId,
+        isInCartInactive = inCart && id != activeExerciseId,
     )
+}
 
 private fun Exercise.libraryCardSubtitle(context: Context): String {
     if (primaryMuscles.isNotEmpty()) {

@@ -135,6 +135,8 @@ fun GButton(
     variant: GButtonVariant = GButtonVariant.Primary,
     isLoading: Boolean = false,
     enabled: Boolean = true,
+    /** When set with [GButtonVariant.Ghost], overrides label/icon tint (e.g. error destructive text). */
+    contentColor: Color? = null,
     leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
 ) {
@@ -148,6 +150,11 @@ fun GButton(
         disabledContainerAlpha = buttonTokens.disabledContainerAlpha,
         disabledContentAlpha = buttonTokens.disabledContentAlpha,
     )
+    val contentCol = if (enabled && contentColor != null && variant == GButtonVariant.Ghost) {
+        contentColor
+    } else {
+        resolved.contentColor
+    }
 
     // Crossfade: content ↔ spinner over 150 ms (fast enough to feel snappy)
     val contentAlpha by animateFloatAsState(
@@ -180,7 +187,7 @@ fun GButton(
         shape = RoundedCornerShape(buttonTokens.cornerRadius),
         color = resolved.containerColor,
         // Surface propagates contentColor as LocalContentColor → icons auto-tint
-        contentColor = resolved.contentColor,
+        contentColor = contentCol,
         border = if (variant == GButtonVariant.Outlined) {
             BorderStroke(width = buttonTokens.outlinedBorderWidth, color = resolved.borderColor)
         } else {
@@ -208,7 +215,7 @@ fun GButton(
                 modifier = Modifier
                     .size(buttonTokens.iconSize + buttonTokens.loadingIndicatorSizeDelta)
                     .graphicsLayer { alpha = spinnerAlpha },
-                color = resolved.contentColor,
+                color = contentCol,
                 strokeWidth = buttonTokens.loadingIndicatorStrokeWidth,
             )
 

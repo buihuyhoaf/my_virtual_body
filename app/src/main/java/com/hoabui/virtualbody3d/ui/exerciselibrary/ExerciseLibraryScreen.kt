@@ -49,6 +49,7 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel.ExerciseLibraryView
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
+import java.time.LocalTime
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 
@@ -68,30 +69,31 @@ fun ExerciseLibraryScreen(
             val dataRef = rememberUpdatedState(data)
             val addToWorkoutRef = rememberUpdatedState(onAddToWorkout)
             val onQuickAdd = remember(viewModel) {
-                { exerciseId: String -> viewModel.onQuickAddToWorkout(exerciseId) }
+                { exerciseId: String -> viewModel.onQuickAdd(exerciseId) }
             }
-            GScaffold(
-                modifier = mod,
-            ) {
+            GScaffold(modifier = mod) {
                 ExerciseLibraryScreenContent(
-                    modifier = Modifier
-                        .fillMaxSize(),
+                    modifier = Modifier.fillMaxSize(),
                     state = data,
                     onQueryChange = viewModel::updateSearchQuery,
                     onQuickChipSelect = viewModel::selectQuickChip,
                     onExerciseClick = viewModel::selectExerciseForDetail,
                     onQuickAdd = onQuickAdd,
-                    onGlobalDraftChange = viewModel::updateGlobalDraft,
-                    onConfirmSingleToWorkout = viewModel::confirmSingleToWorkout,
+                    onSelectCartItem = viewModel::setActiveCartExercise,
+                    onClearCart = viewModel::clearAll,
+                    onCartDateSelected = viewModel::updateCartDate,
+                    onCartTimeSelected = viewModel::updateCartTime,
+                    onActiveDraftChange = viewModel::updateActiveDraft,
+                    onConfirmCart = viewModel::confirmCartToWorkout,
                 )
                 data.selectedExerciseForDetail?.let { exercise ->
                     val onDetailAdd = remember(exercise.id, viewModel) {
                         { ex: Exercise ->
                             val d = dataRef.value
-                            val wasSelected = d.selectedExerciseId == ex.id
-                            viewModel.onQuickAddToWorkout(ex.id)
+                            val wasInCart = d.itemDrafts.containsKey(ex.id)
+                            viewModel.onQuickAdd(ex.id)
                             viewModel.clearExerciseDetail()
-                            if (!wasSelected) addToWorkoutRef.value(ex.id)
+                            if (!wasInCart) addToWorkoutRef.value(ex.id)
                         }
                     }
                     ExerciseDetailDialog(
@@ -114,8 +116,12 @@ fun ExerciseLibraryScreenContent(
     onQuickChipSelect: (ExerciseLibraryQuickChip?) -> Unit,
     onExerciseClick: (String) -> Unit = {},
     onQuickAdd: (String) -> Unit = {},
-    onGlobalDraftChange: (reps: Int, sets: Int, dateMillis: Long) -> Unit = { _, _, _ -> },
-    onConfirmSingleToWorkout: () -> Unit = {},
+    onSelectCartItem: (String) -> Unit = {},
+    onClearCart: () -> Unit = {},
+    onCartDateSelected: (Long) -> Unit = {},
+    onCartTimeSelected: (LocalTime) -> Unit = {},
+    onActiveDraftChange: (sets: String, reps: String) -> Unit = { _, _ -> },
+    onConfirmCart: () -> Unit = {},
 ) {
     val isSearchFocused = remember { mutableStateOf(false) }
     val showSuggestionLayer = isSearchFocused.value || state.searchQuery.isNotEmpty()
@@ -149,7 +155,7 @@ fun ExerciseLibraryScreenContent(
     val onSearchFocusChanged = remember {
         { focused: Boolean -> isSearchFocused.value = focused }
     }
-    val cartVisible = state.selectedExerciseId != null
+    val cartVisible = state.itemDrafts.isNotEmpty()
     val barMinHeight = token.bodyAnalysis.exerciseLibrarySelectionBarMinHeight
     val listBottomPadding =
         if (cartVisible) barMinHeight else token.spacing.md
@@ -235,12 +241,15 @@ fun ExerciseLibraryScreenContent(
         if (cartVisible) {
             ExerciseLibrarySelectionBar(
                 libraryState = state,
-                onDraftChange = onGlobalDraftChange,
-                onConfirm = onConfirmSingleToWorkout,
+                onSelectCartItem = onSelectCartItem,
+                onClearAll = onClearCart,
+                onCartDateSelected = onCartDateSelected,
+                onCartTimeSelected = onCartTimeSelected,
+                onActiveDraftChange = onActiveDraftChange,
+                onConfirm = onConfirmCart,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .navigationBarsPadding(),
+                    .fillMaxWidth(),
             )
         }
     }

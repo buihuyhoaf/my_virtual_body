@@ -162,6 +162,7 @@ private fun Modifier.pressScale(interactionSource: MutableInteractionSource, sca
  * @param trailingOverlayEnd Optional overlay aligned to the bottom-end of the **whole** card (e.g. library quick-add).
  *
  * @param selectionHighlight When `true`, uses primary border and subtle elevation for selected state.
+ * @param weakSelectionHighlight When `true` (and selection is not strong), uses a softer border/tint for in-cart items.
  * @param onLongClick Optional long-press handler (e.g. open detail). Uses [combinedClickable] when non-null.
  */
 @Composable
@@ -180,6 +181,7 @@ fun GImageCard(
     trailingOverlayEnd: (@Composable BoxScope.() -> Unit)? = null,
     textSectionLeading: (@Composable RowScope.() -> Unit)? = null,
     selectionHighlight: Boolean = false,
+    weakSelectionHighlight: Boolean = false,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
 ) {
@@ -213,10 +215,10 @@ fun GImageCard(
         .pressScale(interactionSource, scale)
 
     val cardElevation = if (selectionHighlight) token.elevation.level1 else token.elevation.level0
-    val borderStroke = if (selectionHighlight) {
-        BorderStroke(token.borderWidth.thin, token.colors.primary)
-    } else {
-        BorderStroke(token.borderWidth.hairline, token.colors.borderSubtle)
+    val borderStroke = when {
+        selectionHighlight -> BorderStroke(token.borderWidth.thin, token.colors.primary)
+        weakSelectionHighlight -> BorderStroke(token.borderWidth.thin, token.colors.outlineSoft)
+        else -> BorderStroke(token.borderWidth.hairline, token.colors.borderSubtle)
     }
 
     when {
@@ -249,6 +251,7 @@ fun GImageCard(
                     trailingOverlayEnd = trailingOverlayEnd,
                     textSectionLeading = textSectionLeading,
                     selectionHighlight = selectionHighlight,
+                    weakSelectionHighlight = weakSelectionHighlight,
                 )
             }
         }
@@ -280,6 +283,7 @@ fun GImageCard(
                     trailingOverlayEnd = trailingOverlayEnd,
                     textSectionLeading = textSectionLeading,
                     selectionHighlight = selectionHighlight,
+                    weakSelectionHighlight = weakSelectionHighlight,
                 )
             }
         }
@@ -309,6 +313,7 @@ fun GImageCard(
                     trailingOverlayEnd = trailingOverlayEnd,
                     textSectionLeading = textSectionLeading,
                     selectionHighlight = selectionHighlight,
+                    weakSelectionHighlight = weakSelectionHighlight,
                 )
             }
         }
@@ -332,6 +337,7 @@ private fun GImageCardStack(
     trailingOverlayEnd: (@Composable BoxScope.() -> Unit)?,
     textSectionLeading: (@Composable RowScope.() -> Unit)?,
     selectionHighlight: Boolean,
+    weakSelectionHighlight: Boolean,
 ) {
     val token = GymTheme.token
     val reserveQuickAddEndInset = trailingOverlayEnd != null && cardSize == CardSize.ExerciseLibraryTile
@@ -343,6 +349,16 @@ private fun GImageCardStack(
                     .background(
                         color = token.colors.primary.copy(
                             alpha = token.bodyAnalysis.gImageCardSelectedSurfaceTintAlpha,
+                        ),
+                    ),
+            )
+        } else if (weakSelectionHighlight) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(
+                        color = token.colors.primary.copy(
+                            alpha = token.bodyAnalysis.gImageCardWeakSelectionSurfaceTintAlpha,
                         ),
                     ),
             )

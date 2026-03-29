@@ -191,7 +191,17 @@
     <string name="exercise_library_cart_pick_date">Ngày</string>
     <string name="exercise_library_cart_placeholder_sets">S</string>
     <string name="exercise_library_cart_placeholder_reps">R</string>
-
+    <string name="exercise_library_selection_sets_placeholder">Số set</string>
+    <string name="exercise_library_selection_reps_placeholder">Số rep</string>
+    <string name="exercise_library_console_sets_placeholder">Sets</string>
+    <string name="exercise_library_console_reps_placeholder">Reps</string>
+    <string name="exercise_library_cart_clear_all">xóa tất cả</string>
+    <string name="exercise_library_cart_pick_date_time">Chọn ngày và giờ</string>
+    <string name="exercise_library_cart_choose_date">Chọn ngày</string>
+    <string name="exercise_library_cart_choose_time">Chọn giờ</string>
+    <string name="exercise_library_cart_add_short">Thêm</string>
+    <string name="exercise_library_cart_times_separator">×</string>
+    <string name="exercise_library_console_times_operator">×</string>
     <!-- Workout Feed Screen -->
     <string name="workout_feed_title">Workout feed</string>
 
