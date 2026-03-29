@@ -17,10 +17,10 @@ data class PrimitiveRadiusTokens(
 ) {
     companion object {
         fun default(): PrimitiveRadiusTokens = PrimitiveRadiusTokens(
-            sm = 8.dp,
-            md = 16.dp,
-            lg = 24.dp,
-            xl = 32.dp,
+            sm = 12.dp,
+            md = 20.dp,
+            lg = 28.dp,
+            xl = 36.dp,
             pill = 999.dp
         )
     }

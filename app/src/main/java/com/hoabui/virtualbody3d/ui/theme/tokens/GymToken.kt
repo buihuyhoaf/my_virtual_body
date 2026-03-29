@@ -17,6 +17,7 @@ import com.hoabui.virtualbody3d.ui.theme.tokens.component.MealTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.OnboardingTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.SliderTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.StatusPopupTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.SurfaceTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.ThinkingCardTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymBodyDetailTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymCalendarTokens
@@ -32,6 +33,7 @@ import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymCardTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymControlPanelTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymSliderTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymStatusPopupTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymSurfaceTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymThinkingCardTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveColorTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveRadiusTokens
@@ -53,6 +55,7 @@ data class GymToken(
     val motion: MotionTokens,
     val borderWidth: BorderWidthTokens,
     val typography: Typography,
+    val surface: SurfaceTokens,
     val button: ButtonTokens,
     val card: CardTokens,
     val chat: ChatTokens,
@@ -81,6 +84,8 @@ data class SpacingTokens(
     val xl: Dp,
     val xxl: Dp,
     val xxxl: Dp,
+    /** Leading icons in list rows (from primitive icon scale). */
+    val iconMedium: Dp,
     val dividerThickness: Dp
 )
 
@@ -115,6 +120,7 @@ fun darkGymToken(
         xl = primitiveSpacing.xl,
         xxl = primitiveSpacing.xxl,
         xxxl = primitiveSpacing.xxxl,
+        iconMedium = primitiveSpacing.iconMedium,
         dividerThickness = primitiveSpacing.dividerThickness
     ),
     radius = RadiusTokens(
@@ -128,8 +134,9 @@ fun darkGymToken(
     motion = motion,
     borderWidth = borderWidth,
     typography = typography,
+    surface = gymSurfaceTokens(elevation),
     button = gymButtonTokens(primitiveSpacing, primitiveRadius),
-    card = gymCardTokens(primitiveSpacing, primitiveRadius),
+    card = gymCardTokens(primitiveSpacing, primitiveRadius, elevation),
     chat = gymChatTokens(primitiveSpacing),
     slider = gymSliderTokens(primitiveSpacing),
     controlPanel = gymControlPanelTokens(primitiveSpacing),
@@ -168,6 +175,7 @@ fun lightGymToken(
         xl = primitiveSpacing.xl,
         xxl = primitiveSpacing.xxl,
         xxxl = primitiveSpacing.xxxl,
+        iconMedium = primitiveSpacing.iconMedium,
         dividerThickness = primitiveSpacing.dividerThickness
     ),
     radius = RadiusTokens(
@@ -181,8 +189,9 @@ fun lightGymToken(
     motion = motion,
     borderWidth = borderWidth,
     typography = typography,
+    surface = gymSurfaceTokens(elevation),
     button = gymButtonTokens(primitiveSpacing, primitiveRadius),
-    card = gymCardTokens(primitiveSpacing, primitiveRadius),
+    card = gymCardTokens(primitiveSpacing, primitiveRadius, elevation),
     chat = gymChatTokens(primitiveSpacing),
     slider = gymSliderTokens(primitiveSpacing),
     controlPanel = gymControlPanelTokens(primitiveSpacing),

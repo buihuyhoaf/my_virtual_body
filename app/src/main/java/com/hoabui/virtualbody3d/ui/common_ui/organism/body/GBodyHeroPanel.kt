@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
+import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +37,7 @@ import com.adamglin.phosphoricons.fill.Scales
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
 
 data class GHeroMetricChipUiModel(
@@ -132,7 +133,7 @@ private fun GHeroBaseChip(
     val chipFill = token.colors.surfaceOverlay.copy(
         alpha = PrimitiveAlphaTokens.HERO_CHIP_GLASS_FILL,
     )
-    Surface(
+    GSurface(
         modifier = modifier
             .height(bodyToken.heroSlimChipHeight)
             .wrapContentWidth(),
@@ -140,6 +141,7 @@ private fun GHeroBaseChip(
         color = chipFill,
         border = BorderStroke(token.borderWidth.hairline, token.colors.borderSubtle),
         shadowElevation = token.card.elevation,
+        treatment = GSurfaceTreatment.Flat,
     ) {
         Row(
             modifier = Modifier

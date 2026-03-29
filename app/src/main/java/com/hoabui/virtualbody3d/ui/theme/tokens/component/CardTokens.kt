@@ -2,6 +2,7 @@ package com.hoabui.virtualbody3d.ui.theme.tokens.component
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.Dp
+import com.hoabui.virtualbody3d.ui.theme.tokens.ElevationTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveRadiusTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveSpacingTokens
 
@@ -17,9 +18,10 @@ data class CardTokens(
 
 fun gymCardTokens(
     spacing: PrimitiveSpacingTokens,
-    radius: PrimitiveRadiusTokens
+    radius: PrimitiveRadiusTokens,
+    elevation: ElevationTokens,
 ): CardTokens = CardTokens(
-    elevation = spacing.xs,
+    elevation = elevation.level1,
     cornerRadius = radius.md,
     padding = spacing.md
 )

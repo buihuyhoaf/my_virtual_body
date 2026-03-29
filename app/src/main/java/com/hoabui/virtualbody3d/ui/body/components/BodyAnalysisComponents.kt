@@ -346,7 +346,7 @@ private fun AddCard(
     val scale = if (isPressed) 0.97f else 1f
     val cardCorner = when (cardSize) {
         CardSize.Small -> bodyToken.gImageCardCornerRadius
-        CardSize.Medium, CardSize.Large -> token.radius.lg
+        CardSize.Medium, CardSize.Large, CardSize.ExerciseLibraryTile -> token.radius.lg
     }
     val imageCorner = RoundedCornerShape(bodyToken.gImageCardCornerRadius)
     val addCardBorder = BorderStroke(

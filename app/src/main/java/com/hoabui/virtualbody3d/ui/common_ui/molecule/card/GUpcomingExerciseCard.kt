@@ -15,7 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Surface
+import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -62,7 +63,7 @@ fun GUpcomingExerciseCard(
         color = token.colors.borderSubtle,
     )
 
-    Surface(
+    GSurface(
         modifier = modifier
             .width(chipWidth)
             .height(chipHeight)
@@ -77,9 +78,9 @@ fun GUpcomingExerciseCard(
             ),
         shape = surfaceShape,
         color = token.colors.surface,
-        tonalElevation = token.elevation.level0,
         shadowElevation = token.elevation.level0,
         border = chipBorder,
+        treatment = GSurfaceTreatment.Flat,
     ) {
         Row(
             modifier = Modifier

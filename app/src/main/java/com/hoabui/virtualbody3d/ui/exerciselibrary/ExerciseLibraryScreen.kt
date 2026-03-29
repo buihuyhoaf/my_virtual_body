@@ -1,6 +1,7 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -12,14 +13,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -31,13 +40,17 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseDetailDial
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryEmptyState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseSearchBar
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseSearchSuggestionChips
+import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySelectionBar
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseSection
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
+import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel.ExerciseLibraryViewModel
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 
 @Composable
 fun ExerciseLibraryScreen(
@@ -52,6 +65,11 @@ fun ExerciseLibraryScreen(
         state = screenState,
         modifier = modifier,
         successContent = { mod, data ->
+            val dataRef = rememberUpdatedState(data)
+            val addToWorkoutRef = rememberUpdatedState(onAddToWorkout)
+            val onQuickAdd = remember(viewModel) {
+                { exerciseId: String -> viewModel.onQuickAddToWorkout(exerciseId) }
+            }
             GScaffold(
                 modifier = mod,
             ) {
@@ -62,19 +80,23 @@ fun ExerciseLibraryScreen(
                     onQueryChange = viewModel::updateSearchQuery,
                     onQuickChipSelect = viewModel::selectQuickChip,
                     onExerciseClick = viewModel::selectExerciseForDetail,
-                    onQuickAdd = { exerciseId ->
-                        viewModel.onQuickAddToWorkout(exerciseId)
-                        onAddToWorkout(exerciseId)
-                    },
+                    onQuickAdd = onQuickAdd,
+                    onGlobalDraftChange = viewModel::updateGlobalDraft,
+                    onConfirmAllToWorkout = viewModel::confirmAllToWorkout,
                 )
                 data.selectedExerciseForDetail?.let { exercise ->
+                    val onDetailAdd = remember(exercise.id, viewModel) {
+                        { ex: Exercise ->
+                            val d = dataRef.value
+                            val wasSelected = d.quickAddedExerciseIds.contains(ex.id)
+                            viewModel.onQuickAddToWorkout(ex.id)
+                            viewModel.clearExerciseDetail()
+                            if (!wasSelected) addToWorkoutRef.value(ex.id)
+                        }
+                    }
                     ExerciseDetailDialog(
                         exercise = exercise,
-                        onAddClick = {
-                            viewModel.onQuickAddToWorkout(exercise.id)
-                            viewModel.clearExerciseDetail()
-                            onAddToWorkout(exercise.id)
-                        },
+                        onAddClick = onDetailAdd,
                         onDismiss = viewModel::clearExerciseDetail
                     )
                 }
@@ -92,6 +114,8 @@ fun ExerciseLibraryScreenContent(
     onQuickChipSelect: (ExerciseLibraryQuickChip?) -> Unit,
     onExerciseClick: (String) -> Unit = {},
     onQuickAdd: (String) -> Unit = {},
+    onGlobalDraftChange: (reps: Int, sets: Int, dateMillis: Long) -> Unit = { _, _, _ -> },
+    onConfirmAllToWorkout: () -> Unit = {},
 ) {
     val isSearchFocused = remember { mutableStateOf(false) }
     val showSuggestionLayer = isSearchFocused.value || state.searchQuery.isNotEmpty()
@@ -105,38 +129,56 @@ fun ExerciseLibraryScreenContent(
         durationMillis = token.motion.duration.standard,
         easing = token.motion.easing.standard,
     )
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = token.spacing.md),
-    ) {
+    val lazyListState = rememberLazyListState()
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val stickyHeaderScrim = remember(token.colors.background) {
+        token.colors.background.copy(
+            alpha = PrimitiveAlphaTokens.STICKY_HEADER_SCRIM,
+        )
+    }
+    LaunchedEffect(lazyListState) {
+        snapshotFlow { lazyListState.isScrollInProgress }
+            .distinctUntilChanged()
+            .filter { it }
+            .collect {
+                focusManager.clearFocus()
+                keyboardController?.hide()
+            }
+    }
+    val onSearchFocusChanged = remember {
+        { focused: Boolean -> isSearchFocused.value = focused }
+    }
+    val cartVisible = state.quickAddedExerciseIds.isNotEmpty()
+    val barMinHeight = token.bodyAnalysis.exerciseLibraryStickySearchHeaderMinHeight
+    val listBottomPadding =
+        if (cartVisible) token.spacing.md + token.spacing.md + barMinHeight else token.spacing.md
+    Box(modifier = modifier.fillMaxSize()) {
+        LazyColumn(
+            state = lazyListState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = listBottomPadding),
+        ) {
         stickyHeader(key = "exercise_library_search") {
-            Column(
+            Box(
                 modifier = Modifier
+                    .heightIn(min = token.bodyAnalysis.exerciseLibraryStickySearchHeaderMinHeight)
                     .fillMaxWidth()
                     .padding(
-                        top = token.spacing.xs,
-                        bottom = if (showSuggestionLayer) token.spacing.xs else token.spacing.xxs,
-                        start = token.spacing.md,
-                        end = token.spacing.md,
+                        horizontal = token.spacing.md,
+                        vertical = token.spacing.xs,
                     ),
             ) {
-                ExerciseSearchBar(
-                    query = state.searchQuery,
-                    onQueryChange = onQueryChange,
-                    onSearchFocusChange = { isSearchFocused.value = it },
-                )
-                AnimatedVisibility(
-                    visible = showSuggestionLayer,
-                    enter = fadeIn(fadeSpec) + slideInVertically(
-                        animationSpec = slideSpec,
-                        initialOffsetY = { fullHeight -> -(fullHeight / 2) },
-                    ),
-                    exit = fadeOut(fadeSpec) + slideOutVertically(
-                        animationSpec = slideSpec,
-                        targetOffsetY = { fullHeight -> -(fullHeight / 2) },
-                    ),
-                ) {
-                    ExerciseSearchSuggestionChips(
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    ExerciseSearchBar(
+                        query = state.searchQuery,
+                        onQueryChange = onQueryChange,
+                        onSearchFocusChange = onSearchFocusChanged,
+                    )
+                    ExerciseLibrarySuggestionLayer(
+                        showSuggestionLayer = showSuggestionLayer,
+                        fadeSpec = fadeSpec,
+                        slideSpec = slideSpec,
                         libraryState = state,
                         onQuickChipSelect = onQuickChipSelect,
                     )
@@ -165,22 +207,22 @@ fun ExerciseLibraryScreenContent(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(
-                                token.colors.background.copy(
-                                    alpha = PrimitiveAlphaTokens.STICKY_HEADER_SCRIM,
-                                ),
-                            )
+                            .background(stickyHeaderScrim)
                             .padding(
                                 horizontal = token.spacing.md,
-                                vertical = token.spacing.xs,
+                                vertical = token.spacing.xxs,
                             ),
                     ) {
                         GSectionHeader(title = regionLabel)
                     }
                 }
-                item(key = "${section.bodyRegion.name}_cards") {
+                item(
+                    key = "${section.bodyRegion.name}_cards",
+                    contentType = "exercise_section_row",
+                ) {
                     ExerciseSection(
-                        modifier = Modifier.padding(horizontal = token.spacing.md),
+                        modifier = Modifier
+                            .padding(horizontal = token.spacing.md),
                         section = section,
                         onExerciseClick = onExerciseClick,
                         onQuickAdd = onQuickAdd,
@@ -188,6 +230,46 @@ fun ExerciseLibraryScreenContent(
                     )
                 }
             }
+        }
+        }
+        if (cartVisible) {
+            ExerciseLibrarySelectionBar(
+                libraryState = state,
+                onDraftChange = onGlobalDraftChange,
+                onConfirm = onConfirmAllToWorkout,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(token.spacing.md),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ExerciseLibrarySuggestionLayer(
+    showSuggestionLayer: Boolean,
+    fadeSpec: FiniteAnimationSpec<Float>,
+    slideSpec: FiniteAnimationSpec<IntOffset>,
+    libraryState: ExerciseLibraryUiState,
+    onQuickChipSelect: (ExerciseLibraryQuickChip?) -> Unit,
+) {
+    Box(modifier = Modifier.fillMaxWidth()) {
+        AnimatedVisibility(
+            visible = showSuggestionLayer,
+            enter = fadeIn(fadeSpec) + slideInVertically(
+                animationSpec = slideSpec,
+                initialOffsetY = { fullHeight -> -(fullHeight / 2) },
+            ),
+            exit = fadeOut(fadeSpec) + slideOutVertically(
+                animationSpec = slideSpec,
+                targetOffsetY = { fullHeight -> -(fullHeight / 2) },
+            ),
+        ) {
+            ExerciseSearchSuggestionChips(
+                libraryState = libraryState,
+                onQuickChipSelect = onQuickChipSelect,
+            )
         }
     }
 }

@@ -3,22 +3,21 @@ package com.hoabui.virtualbody3d.ui.exerciselibrary.data
 import android.content.Context
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
-import com.hoabui.virtualbody3d.domain.repository.ResourceProvider
-import com.hoabui.virtualbody3d.ui.common_ui.image.toImageModel
+import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toExerciseLibraryCardImage
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
 
 /**
  * Maps domain [Exercise] to [GExerciseCardUiModel] for the exercise library list, resolving
- * strings and image models outside composables (Context + [ResourceProvider]).
+ * strings outside composables (Context). Image uses [com.hoabui.virtualbody3d.ui.exerciselibrary.model.ExerciseLibraryCardImage]
+ * for stable composition; resolve to Coil in the organism with [ResourceProvider].
  */
 fun Exercise.toLibraryCardUiModel(
     context: Context,
-    resourceProvider: ResourceProvider,
     quickAddedExerciseIds: Set<String>,
 ): GExerciseCardUiModel =
     GExerciseCardUiModel(
         id = id,
-        imageModel = image.toImageModel(resourceProvider),
+        image = image.toExerciseLibraryCardImage(),
         title = name,
         subtitle = libraryCardSubtitle(context),
         badgeText = null,

@@ -14,7 +14,8 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
+import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,7 +24,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
@@ -78,47 +78,48 @@ fun GActionCardRow(
         Modifier
     }
 
-    Surface(
+    GCard(
         modifier = modifier
             .fillMaxWidth()
             .then(interactionModifier),
-        onClick = onClick ?: {},
-        enabled = onClick != null,
-        color = token.colors.surface,
+        onClick = onClick,
         shape = RoundedCornerShape(token.radius.sm),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = token.spacing.md, vertical = token.spacing.md),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(token.spacing.md),
-        ) {
-            if (icon != null) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = token.colors.textSecondary,
-                )
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                GText(
-                    text = title,
-                    style = token.typography.bodyLarge,
-                    color = token.colors.textPrimary,
-                )
-                if (subtitle != null) {
-                    GText(
-                        text = subtitle,
-                        style = token.typography.bodySmall,
-                        color = token.colors.textSecondary,
+        treatment = GSurfaceTreatment.Standard,
+        pressedElevation = token.elevation.level0,
+        content = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = token.spacing.md, vertical = token.spacing.md),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(token.spacing.md),
+            ) {
+                if (icon != null) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(token.spacing.iconMedium),
+                        tint = token.colors.textSecondary,
                     )
                 }
+                Column(modifier = Modifier.weight(1f)) {
+                    GText(
+                        text = title,
+                        style = token.typography.bodyLarge,
+                        color = token.colors.textPrimary,
+                    )
+                    if (subtitle != null) {
+                        GText(
+                            text = subtitle,
+                            style = token.typography.bodySmall,
+                            color = token.colors.textSecondary,
+                        )
+                    }
+                }
+                trailing?.invoke()
             }
-            trailing?.invoke()
-        }
-    }
+        },
+    )
 }
 
 // Default trailing content — chevron icon. Declared as a top-level val so it
@@ -129,7 +130,7 @@ private val DefaultTrailingChevron: @Composable () -> Unit = {
     Icon(
         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
         contentDescription = null,
-        modifier = Modifier.size(24.dp),
+        modifier = Modifier.size(token.spacing.iconMedium),
         tint = token.colors.textSecondary,
     )
 }

@@ -15,9 +15,9 @@ data class BorderWidthTokens(
     companion object {
         fun default(): BorderWidthTokens = BorderWidthTokens(
             none = 0.dp,
-            hairline = 0.5.dp,
-            thin = 1.dp,
-            standard = 1.5.dp
+            hairline = 1.dp,
+            thin = 1.5.dp,
+            standard = 2.dp
         )
     }
 }

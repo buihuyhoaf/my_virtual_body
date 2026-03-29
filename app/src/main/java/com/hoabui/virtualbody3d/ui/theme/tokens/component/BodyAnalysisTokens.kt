@@ -15,7 +15,10 @@ data class CardImageWithTextSizeTokens(
     val mediumWidth: Dp,
     val mediumHeight: Dp,
     val largeWidth: Dp,
-    val largeHeight: Dp
+    val largeHeight: Dp,
+    /** Compact horizontal tile for exercise library (~2.3–2.5 cards visible). */
+    val exerciseLibraryWidth: Dp,
+    val exerciseLibraryHeight: Dp,
 )
 
 /**
@@ -135,6 +138,19 @@ data class BodyAnalysisTokens(
     val heroSlimChipIconTextGap: Dp,
     /** Tighter [androidx.compose.material3.Typography.labelSmall] on hero chips. */
     val heroSlimChipLabelLetterSpacing: TextUnit,
+    /**
+     * Min height for exercise library sticky header (search + reserved chip row) so
+     * [AnimatedVisibility] does not change LazyColumn measure during scroll.
+     */
+    val exerciseLibraryStickySearchHeaderMinHeight: Dp,
+    /** Visual size of the quick-add icon container on library tiles (touch via [minimumInteractiveComponentSize]). */
+    val exerciseLibraryQuickAddIconContainerSize: Dp,
+    /** End padding on title row when quick-add overlaps bottom-end so text does not collide. */
+    val exerciseLibraryQuickAddTextInset: Dp,
+    /** Fixed width for compact Sets/Reps fields on the library cart bar. */
+    val exerciseLibraryCartNumericFieldWidth: Dp,
+    /** Subtle primary wash behind [GImageCard] content when [selectionHighlight] is true. */
+    val gImageCardSelectedSurfaceTintAlpha: Float,
 )
 
 fun gymBodyAnalysisTokens(spacing: PrimitiveSpacingTokens): BodyAnalysisTokens {
@@ -215,7 +231,10 @@ fun gymBodyAnalysisTokens(spacing: PrimitiveSpacingTokens): BodyAnalysisTokens {
         mediumWidth = 96.dp,
         mediumHeight = 141.dp,
         largeWidth = 120.dp,
-        largeHeight = 165.dp
+        largeHeight = 165.dp,
+        exerciseLibraryWidth = 140.dp,
+        // 3:2 image ~93.3dp + xxs gap + two text lines + inset (fixed outer height for LazyRow).
+        exerciseLibraryHeight = 158.dp,
     ),
     gImageCardTextSectionTopPadding = 6.dp,
     gImageCardCornerRadius = 18.dp,
@@ -253,5 +272,11 @@ fun gymBodyAnalysisTokens(spacing: PrimitiveSpacingTokens): BodyAnalysisTokens {
     heroSlimChipIconSize = heroSlimChipIconSize,
     heroSlimChipIconTextGap = heroSlimChipIconTextGap,
     heroSlimChipLabelLetterSpacing = 0.05.sp,
+    exerciseLibraryStickySearchHeaderMinHeight =
+        spacing.lg + spacing.md + spacing.xs + heroSlimChipHeight + spacing.xxs,
+    exerciseLibraryQuickAddIconContainerSize = heroSlimChipHeight,
+    exerciseLibraryQuickAddTextInset = spacing.xxl + spacing.xs,
+    exerciseLibraryCartNumericFieldWidth = 64.dp,
+    gImageCardSelectedSurfaceTintAlpha = 0.08f,
 )
 }

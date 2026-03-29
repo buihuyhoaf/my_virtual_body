@@ -18,7 +18,9 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Surface
+import androidx.compose.ui.graphics.RectangleShape
+import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,7 +28,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
@@ -89,10 +90,12 @@ fun GTopBar(
         GTopBarVariant.Transparent -> Color.Transparent
     }
 
-    Surface(
+    GSurface(
         modifier = modifier.fillMaxWidth(),
+        shape = RectangleShape,
         color = containerColor,
-        shadowElevation = 0.dp,
+        shadowElevation = token.elevation.level0,
+        treatment = GSurfaceTreatment.Flat,
     ) {
         // Content column: inset padding + row + optional divider
         androidx.compose.foundation.layout.Column {
@@ -111,7 +114,7 @@ fun GTopBar(
             ) {
                 // Leading: navigation icon (fixed 48×48 touch target) or spacer
                 if (navigationIcon != null) {
-                    Box(modifier = Modifier.size(48.dp)) {
+                    Box(modifier = Modifier.size(token.spacing.xxl)) {
                         navigationIcon()
                     }
                 }
@@ -166,7 +169,7 @@ fun GTopBarBackIcon(
     val token = GymTheme.token
     IconButton(
         onClick = onBack,
-        modifier = modifier.size(48.dp),
+        modifier = modifier.size(token.spacing.xxl),
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -261,7 +264,7 @@ private fun PreviewLongTitle() {
                         tint = GymTheme.token.colors.textPrimary,
                     )
                 }
-                Spacer(modifier = Modifier.size(4.dp))
+                Spacer(modifier = Modifier.size(GymTheme.token.spacing.xxs))
             },
         )
     }

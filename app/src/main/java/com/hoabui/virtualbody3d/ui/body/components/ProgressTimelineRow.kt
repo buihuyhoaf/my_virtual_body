@@ -57,6 +57,7 @@ import com.hoabui.virtualbody3d.ui.body.data.ProgressSnapshotUiModel
 import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
 import java.util.Locale
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -105,7 +106,8 @@ fun ProgressTimelineRow(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(token.radius.lg),
         color = token.colors.surfaceSubtle.copy(alpha = bodyToken.timelineRowSurfaceAlpha),
-        shadowElevation = 0.dp,
+        shadowElevation = token.elevation.level0,
+        treatment = GSurfaceTreatment.Flat,
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             val horizontalPad =

@@ -184,6 +184,13 @@
     <string name="exercise_library_empty_message">Thử đổi bộ lọc hoặc từ khóa tìm kiếm.</string>
     <string name="exercise_library_card_subtitle_fallback">—</string>
     <string name="exercise_quick_add_cd">Thêm nhanh vào buổi tập</string>
+    <string name="exercise_library_cart_sets">Hiệp</string>
+    <string name="exercise_library_cart_reps">Lần</string>
+    <string name="exercise_library_cart_add">Thêm buổi tập</string>
+    <string name="exercise_library_cart_selected_count">Đã chọn %d</string>
+    <string name="exercise_library_cart_pick_date">Ngày</string>
+    <string name="exercise_library_cart_placeholder_sets">S</string>
+    <string name="exercise_library_cart_placeholder_reps">R</string>
 
     <!-- Workout Feed Screen -->
     <string name="workout_feed_title">Workout feed</string>

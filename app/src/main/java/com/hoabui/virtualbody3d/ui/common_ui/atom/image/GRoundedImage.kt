@@ -14,7 +14,8 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Surface
+import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -146,12 +147,13 @@ private fun PreviewGVerticalMediaCard() {
                             cornerRadius = 16.dp,
                             borderWidth = 1.dp,
                         )
-                        Surface(
+                        GSurface(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
-                                .padding(8.dp),
+                                .padding(token.spacing.xs),
                             shape = RoundedCornerShape(token.radius.sm),
                             color = token.colors.primary,
+                            treatment = GSurfaceTreatment.Flat,
                         ) {
                             GText(
                                 modifier = Modifier

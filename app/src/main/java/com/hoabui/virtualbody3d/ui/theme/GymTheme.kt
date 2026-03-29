@@ -20,6 +20,7 @@ import com.hoabui.virtualbody3d.ui.theme.tokens.darkGymToken
 import com.hoabui.virtualbody3d.ui.theme.tokens.lightGymToken
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.LocalButtonTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.LocalCardTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.LocalSurfaceTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveSpacingTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.semantic.gymTypographyTokens
 
@@ -58,7 +59,8 @@ fun GymTheme(
     CompositionLocalProvider(
         LocalGymToken provides token,
         LocalButtonTokens provides token.button,
-        LocalCardTokens provides token.card
+        LocalCardTokens provides token.card,
+        LocalSurfaceTokens provides token.surface,
     ) {
         MaterialTheme(
             colorScheme = token.colors.toMaterialColorScheme(darkTheme),

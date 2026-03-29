@@ -10,6 +10,7 @@ import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.domain.model.exercise.FeedExercise
 import com.hoabui.virtualbody3d.domain.model.exercise.MuscleGroup
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.collections.immutable.toImmutableList
 import javax.inject.Inject
 
 class ExerciseMapper @Inject constructor(
@@ -22,8 +23,8 @@ class ExerciseMapper @Inject constructor(
         category = dto.category.toExerciseCategory(),
         bodyRegion = dto.bodyRegion.orEmpty().toBodyRegion(),
         description = dto.description.orEmpty(),
-        primaryMuscles = dto.primaryMuscles.orEmpty().mapNotNull { it.toMuscleGroupOrNull() },
-        secondaryMuscles = dto.secondaryMuscles.orEmpty().mapNotNull { it.toMuscleGroupOrNull() },
+        primaryMuscles = dto.primaryMuscles.orEmpty().mapNotNull { it.toMuscleGroupOrNull() }.toImmutableList(),
+        secondaryMuscles = dto.secondaryMuscles.orEmpty().mapNotNull { it.toMuscleGroupOrNull() }.toImmutableList(),
         equipment = dto.equipment.orEmpty().toEquipmentTypeOrNull(),
         safetyNotes = dto.safetyNotes.orEmpty(),
         lastWeightKg = dto.lastWeightKg

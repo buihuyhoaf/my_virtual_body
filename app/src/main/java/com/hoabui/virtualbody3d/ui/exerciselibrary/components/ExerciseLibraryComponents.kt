@@ -6,24 +6,41 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
+import androidx.compose.material3.rememberDatePickerState
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
 import com.hoabui.virtualbody3d.ui.common_ui.atom.field.GTextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.common_ui.atom.chip.GFilterChip
@@ -36,6 +53,10 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.selectedQuickChip
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseSectionUiItem
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 @Composable
 fun ExerciseSearchBar(
@@ -104,6 +125,172 @@ fun ExerciseSearchSuggestionChips(
     }
 }
 
+/**
+ * High-density cart bar: selected count + date (left column), compact S/R fields + confirm (right).
+ */
+@Composable
+fun ExerciseLibrarySelectionBar(
+    libraryState: ExerciseLibraryUiState,
+    onDraftChange: (reps: Int, sets: Int, dateMillis: Long) -> Unit,
+    onConfirm: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val token = GymTheme.token
+    val zone = ZoneId.systemDefault()
+    val barMin = token.bodyAnalysis.exerciseLibraryStickySearchHeaderMinHeight
+    val fieldWidth = token.bodyAnalysis.exerciseLibraryCartNumericFieldWidth
+    var setsText by remember { mutableStateOf(libraryState.globalSets.toString()) }
+    var repsText by remember { mutableStateOf(libraryState.globalReps.toString()) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    val dateLabel = remember(libraryState.selectedDate) {
+        val d = Instant.ofEpochMilli(libraryState.selectedDate).atZone(zone).toLocalDate()
+        DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format(d)
+    }
+    val count = libraryState.quickAddedExerciseIds.size
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = barMin),
+        shape = RoundedCornerShape(token.radius.pill),
+        color = token.colors.surface,
+        shadowElevation = token.elevation.level2,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = barMin)
+                .padding(horizontal = token.spacing.sm, vertical = token.spacing.xs),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(token.spacing.sm),
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(token.spacing.xs),
+                horizontalAlignment = Alignment.Start,
+            ) {
+                GText(
+                    text = stringResource(R.string.exercise_library_cart_selected_count, count),
+                    style = token.typography.labelMedium,
+                    color = token.colors.textSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                GButton(
+                    text = dateLabel,
+                    onClick = { showDatePicker = true },
+                    variant = GButtonVariant.Ghost,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            Row(
+                modifier = Modifier.wrapContentWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
+            ) {
+                Box(modifier = Modifier.width(fieldWidth)) {
+                    GTextField(
+                        value = setsText,
+                        onValueChange = { raw ->
+                            val digits = raw.filter { it.isDigit() }.take(3)
+                            setsText = digits
+                            digits.toIntOrNull()?.let { s ->
+                                onDraftChange(
+                                    libraryState.globalReps,
+                                    s.coerceAtLeast(1),
+                                    libraryState.selectedDate,
+                                )
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = null,
+                        placeholder = stringResource(R.string.exercise_library_cart_placeholder_sets),
+                        singleLine = true,
+                        textStyle = token.typography.bodyMedium,
+                        placeholderStyle = token.typography.bodyMedium,
+                        shape = RoundedCornerShape(token.radius.pill),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    )
+                }
+                Box(modifier = Modifier.width(fieldWidth)) {
+                    GTextField(
+                        value = repsText,
+                        onValueChange = { raw ->
+                            val digits = raw.filter { it.isDigit() }.take(3)
+                            repsText = digits
+                            digits.toIntOrNull()?.let { r ->
+                                onDraftChange(
+                                    r.coerceAtLeast(1),
+                                    libraryState.globalSets,
+                                    libraryState.selectedDate,
+                                )
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = null,
+                        placeholder = stringResource(R.string.exercise_library_cart_placeholder_reps),
+                        singleLine = true,
+                        textStyle = token.typography.bodyMedium,
+                        placeholderStyle = token.typography.bodyMedium,
+                        shape = RoundedCornerShape(token.radius.pill),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    )
+                }
+                GButton(
+                    text = stringResource(R.string.exercise_library_cart_add),
+                    onClick = onConfirm,
+                    variant = GButtonVariant.Primary,
+                )
+            }
+        }
+    }
+    if (showDatePicker) {
+        ExerciseLibraryCartDatePickerDialog(
+            initialSelectedDateMillis = libraryState.selectedDate,
+            onConfirm = { millis ->
+                onDraftChange(libraryState.globalReps, libraryState.globalSets, millis)
+                showDatePicker = false
+            },
+            onDismiss = { showDatePicker = false },
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ExerciseLibraryCartDatePickerDialog(
+    initialSelectedDateMillis: Long,
+    onConfirm: (Long) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val state = rememberDatePickerState(initialSelectedDateMillis = initialSelectedDateMillis)
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            GButton(
+                text = stringResource(android.R.string.ok),
+                onClick = {
+                    state.selectedDateMillis?.let { millis ->
+                        val zone = ZoneId.systemDefault()
+                        val localDate =
+                            Instant.ofEpochMilli(millis).atZone(zone).toLocalDate()
+                        onConfirm(localDate.atStartOfDay(zone).toInstant().toEpochMilli())
+                    } ?: onDismiss()
+                },
+            )
+        },
+        dismissButton = {
+            GButton(
+                text = stringResource(android.R.string.cancel),
+                onClick = onDismiss,
+                variant = GButtonVariant.Outlined,
+            )
+        },
+    ) {
+        DatePicker(state = state)
+    }
+}
+
 @Composable
 fun ExerciseLibraryEmptyState(modifier: Modifier = Modifier) {
     val token = GymTheme.token
@@ -137,11 +324,13 @@ fun ExerciseSection(
     quickAddContentDescription: String = "",
 ) {
     val regionLabel = stringResource(ExerciseDisplayResources.bodyRegionResId(section.bodyRegion))
-    val uiSection = GExerciseSectionUiModel(
-        id = section.bodyRegion.name,
-        title = regionLabel,
-        items = section.items,
-    )
+    val uiSection = remember(section.bodyRegion, section.items, regionLabel) {
+        GExerciseSectionUiModel(
+            id = section.bodyRegion.name,
+            title = regionLabel,
+            items = section.items,
+        )
+    }
     GExerciseSectionCardRow(
         section = uiSection,
         modifier = modifier,
