@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.Dp
 import com.hoabui.virtualbody3d.ui.theme.tokens.ElevationTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.semantic.gymSurfaceEffectSemantics
 
 /**
  * Med-Tech premium surface styling: defaults for borders, inner depth, and hero-only elevation.
@@ -34,12 +35,15 @@ data class SurfaceTokens(
 
 fun gymSurfaceTokens(
     elevation: ElevationTokens,
-): SurfaceTokens = SurfaceTokens(
-    applyDefaultSubtleBorder = true,
-    innerRadialDepthAlpha = PrimitiveAlphaTokens.SURFACE_INNER_RADIAL_DEPTH,
-    innerRadialRadiusFraction = 1.18f,
-    innerRadialCenterYFraction = -0.38f,
-    gradientRimAlphaHigh = PrimitiveAlphaTokens.SURFACE_GRADIENT_RIM_HIGH,
-    gradientRimAlphaLow = PrimitiveAlphaTokens.SURFACE_GRADIENT_RIM_LOW,
-    heroShadowElevation = elevation.level3,
-)
+): SurfaceTokens {
+    val effect = gymSurfaceEffectSemantics()
+    return SurfaceTokens(
+        applyDefaultSubtleBorder = true,
+        innerRadialDepthAlpha = PrimitiveAlphaTokens.SURFACE_INNER_RADIAL_DEPTH,
+        innerRadialRadiusFraction = effect.innerRadialRadiusFraction,
+        innerRadialCenterYFraction = effect.innerRadialCenterYFraction,
+        gradientRimAlphaHigh = PrimitiveAlphaTokens.SURFACE_GRADIENT_RIM_HIGH,
+        gradientRimAlphaLow = PrimitiveAlphaTokens.SURFACE_GRADIENT_RIM_LOW,
+        heroShadowElevation = elevation.level3,
+    )
+}

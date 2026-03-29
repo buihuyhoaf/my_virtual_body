@@ -2,9 +2,10 @@ package com.hoabui.virtualbody3d.ui.theme.tokens.component
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveBorderTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveRadiusTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveSpacingTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.semantic.gymStatusPopupLayoutSemantics
 
 /**
  * Design tokens for StatusPopup: width, spacing, shape, border.
@@ -20,10 +21,11 @@ data class StatusPopupTokens(
 
 fun gymStatusPopupTokens(
     primitiveSpacing: PrimitiveSpacingTokens,
-    primitiveRadius: PrimitiveRadiusTokens
+    primitiveRadius: PrimitiveRadiusTokens,
+    border: PrimitiveBorderTokens,
 ): StatusPopupTokens = StatusPopupTokens(
-    width = 340.dp,
+    width = gymStatusPopupLayoutSemantics().width,
     contentSpacing = primitiveSpacing.lg,
     cornerRadius = primitiveRadius.md,
-    borderWidth = 1.dp
+    borderWidth = border.hairline
 )

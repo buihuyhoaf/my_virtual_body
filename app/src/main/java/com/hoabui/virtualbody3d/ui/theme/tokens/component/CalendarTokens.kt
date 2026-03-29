@@ -3,8 +3,10 @@ package com.hoabui.virtualbody3d.ui.theme.tokens.component
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveBorderTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveSpacingTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.semantic.SemanticColorTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.semantic.gymCalendarLayoutSemantics
 
 /**
  * Calendar screen tokens for Rose Social Soft vibe.
@@ -31,22 +33,29 @@ data class CalendarTokens(
     val panelBorderWidth: Dp
 )
 
-fun gymCalendarTokens(colors: SemanticColorTokens): CalendarTokens = CalendarTokens(
-    yearTextColor = colors.textPrimary,
-    monthTextColor = colors.textSecondary,
-    monthDividerColor = colors.borderSubtle,
-    todayBorderColor = colors.borderSubtle,
-    selectedDayBackground = colors.primarySoft,
-    selectedBorderColor = colors.calendarSelectedBorder,
-    panelBorder = colors.borderSubtle,
-    selectedBorderWidth = 1.5.dp,
-    todayBorderWidth = 1.dp,
-    dayBadgeOuterPadding = 6.dp,
-    dayBadgeHorizontalPadding = 6.dp,
-    dayBadgeVerticalPadding = 2.dp,
-    dayItemImageSize = 34.dp,
-    dayItemMetaSpacing = 2.dp,
-    panelBottomPadding = 14.dp,
-    panelOffsetY = (-12).dp,
-    panelBorderWidth = 1.dp
-)
+fun gymCalendarTokens(
+    colors: SemanticColorTokens,
+    spacing: PrimitiveSpacingTokens,
+    border: PrimitiveBorderTokens,
+): CalendarTokens {
+    val layout = gymCalendarLayoutSemantics()
+    return CalendarTokens(
+        yearTextColor = colors.textPrimary,
+        monthTextColor = colors.textSecondary,
+        monthDividerColor = colors.borderSubtle,
+        todayBorderColor = colors.borderSubtle,
+        selectedDayBackground = colors.primarySoft,
+        selectedBorderColor = colors.calendarSelectedBorder,
+        panelBorder = colors.borderSubtle,
+        selectedBorderWidth = border.thin,
+        todayBorderWidth = border.hairline,
+        dayBadgeOuterPadding = spacing.xxs + spacing.xxxs,
+        dayBadgeHorizontalPadding = spacing.xxs + spacing.xxxs,
+        dayBadgeVerticalPadding = spacing.xxxs,
+        dayItemImageSize = layout.dayItemImageSize,
+        dayItemMetaSpacing = spacing.xxxs,
+        panelBottomPadding = layout.panelBottomPadding,
+        panelOffsetY = layout.panelOffsetY,
+        panelBorderWidth = border.hairline
+    )
+}

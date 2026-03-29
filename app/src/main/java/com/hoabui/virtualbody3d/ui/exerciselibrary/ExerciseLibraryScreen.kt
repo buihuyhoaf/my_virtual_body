@@ -82,13 +82,13 @@ fun ExerciseLibraryScreen(
                     onExerciseClick = viewModel::selectExerciseForDetail,
                     onQuickAdd = onQuickAdd,
                     onGlobalDraftChange = viewModel::updateGlobalDraft,
-                    onConfirmAllToWorkout = viewModel::confirmAllToWorkout,
+                    onConfirmSingleToWorkout = viewModel::confirmSingleToWorkout,
                 )
                 data.selectedExerciseForDetail?.let { exercise ->
                     val onDetailAdd = remember(exercise.id, viewModel) {
                         { ex: Exercise ->
                             val d = dataRef.value
-                            val wasSelected = d.quickAddedExerciseIds.contains(ex.id)
+                            val wasSelected = d.selectedExerciseId == ex.id
                             viewModel.onQuickAddToWorkout(ex.id)
                             viewModel.clearExerciseDetail()
                             if (!wasSelected) addToWorkoutRef.value(ex.id)
@@ -115,7 +115,7 @@ fun ExerciseLibraryScreenContent(
     onExerciseClick: (String) -> Unit = {},
     onQuickAdd: (String) -> Unit = {},
     onGlobalDraftChange: (reps: Int, sets: Int, dateMillis: Long) -> Unit = { _, _, _ -> },
-    onConfirmAllToWorkout: () -> Unit = {},
+    onConfirmSingleToWorkout: () -> Unit = {},
 ) {
     val isSearchFocused = remember { mutableStateOf(false) }
     val showSuggestionLayer = isSearchFocused.value || state.searchQuery.isNotEmpty()
@@ -149,10 +149,10 @@ fun ExerciseLibraryScreenContent(
     val onSearchFocusChanged = remember {
         { focused: Boolean -> isSearchFocused.value = focused }
     }
-    val cartVisible = state.quickAddedExerciseIds.isNotEmpty()
-    val barMinHeight = token.bodyAnalysis.exerciseLibraryStickySearchHeaderMinHeight
+    val cartVisible = state.selectedExerciseId != null
+    val barMinHeight = token.bodyAnalysis.exerciseLibrarySelectionBarMinHeight
     val listBottomPadding =
-        if (cartVisible) token.spacing.md + token.spacing.md + barMinHeight else token.spacing.md
+        if (cartVisible) barMinHeight else token.spacing.md
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(
             state = lazyListState,
@@ -236,11 +236,11 @@ fun ExerciseLibraryScreenContent(
             ExerciseLibrarySelectionBar(
                 libraryState = state,
                 onDraftChange = onGlobalDraftChange,
-                onConfirm = onConfirmAllToWorkout,
+                onConfirm = onConfirmSingleToWorkout,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .navigationBarsPadding()
-                    .padding(token.spacing.md),
+                    .fillMaxWidth()
+                    .navigationBarsPadding(),
             )
         }
     }

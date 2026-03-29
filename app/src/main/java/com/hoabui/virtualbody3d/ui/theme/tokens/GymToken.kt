@@ -35,6 +35,8 @@ import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymSliderTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymStatusPopupTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymSurfaceTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymThinkingCardTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveBorderTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveColorTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveRadiusTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveSpacingTokens
@@ -102,6 +104,8 @@ fun darkGymToken(
     primitiveColors: PrimitiveColorTokens = PrimitiveColorTokens.default(),
     primitiveSpacing: PrimitiveSpacingTokens = PrimitiveSpacingTokens.default(),
     primitiveRadius: PrimitiveRadiusTokens = PrimitiveRadiusTokens.default(),
+    primitiveBorder: PrimitiveBorderTokens = PrimitiveBorderTokens.default(),
+    primitiveAlpha: PrimitiveAlphaTokens = PrimitiveAlphaTokens,
     elevation: ElevationTokens = ElevationTokens.default(),
     motion: MotionTokens = MotionTokens.default(),
     borderWidth: BorderWidthTokens = BorderWidthTokens.default(),
@@ -135,19 +139,19 @@ fun darkGymToken(
     borderWidth = borderWidth,
     typography = typography,
     surface = gymSurfaceTokens(elevation),
-    button = gymButtonTokens(primitiveSpacing, primitiveRadius),
+    button = gymButtonTokens(primitiveSpacing, primitiveRadius, primitiveBorder, primitiveAlpha),
     card = gymCardTokens(primitiveSpacing, primitiveRadius, elevation),
     chat = gymChatTokens(primitiveSpacing),
     slider = gymSliderTokens(primitiveSpacing),
     controlPanel = gymControlPanelTokens(primitiveSpacing),
-    bodyAnalysis = gymBodyAnalysisTokens(primitiveSpacing),
-    calendar = gymCalendarTokens(colors),
-    onboarding = gymOnboardingTokens(primitiveSpacing),
+    bodyAnalysis = gymBodyAnalysisTokens(primitiveSpacing, primitiveBorder, primitiveAlpha, elevation),
+    calendar = gymCalendarTokens(colors, primitiveSpacing, primitiveBorder),
+    onboarding = gymOnboardingTokens(primitiveSpacing, primitiveBorder),
     login = gymLoginTokens(primitiveSpacing, primitiveRadius),
-    createBaseline = gymCreateBaselineTokens(primitiveSpacing, primitiveColors),
+    createBaseline = gymCreateBaselineTokens(primitiveSpacing, primitiveColors, primitiveBorder, primitiveAlpha),
     camera = gymCameraTokens(primitiveSpacing),
-    statusPopup = gymStatusPopupTokens(primitiveSpacing, primitiveRadius),
-    thinkingCard = gymThinkingCardTokens(primitiveSpacing, primitiveRadius),
+    statusPopup = gymStatusPopupTokens(primitiveSpacing, primitiveRadius, primitiveBorder),
+    thinkingCard = gymThinkingCardTokens(primitiveSpacing, primitiveRadius, elevation, primitiveAlpha),
     meal = gymMealTokens(primitiveSpacing),
     bodyDetail = gymBodyDetailTokens()
     )
@@ -157,6 +161,8 @@ fun lightGymToken(
     primitiveColors: PrimitiveColorTokens = PrimitiveColorTokens.default(),
     primitiveSpacing: PrimitiveSpacingTokens = PrimitiveSpacingTokens.default(),
     primitiveRadius: PrimitiveRadiusTokens = PrimitiveRadiusTokens.default(),
+    primitiveBorder: PrimitiveBorderTokens = PrimitiveBorderTokens.default(),
+    primitiveAlpha: PrimitiveAlphaTokens = PrimitiveAlphaTokens,
     elevation: ElevationTokens = ElevationTokens.default(),
     motion: MotionTokens = MotionTokens.default(),
     borderWidth: BorderWidthTokens = BorderWidthTokens.default(),
@@ -190,19 +196,19 @@ fun lightGymToken(
     borderWidth = borderWidth,
     typography = typography,
     surface = gymSurfaceTokens(elevation),
-    button = gymButtonTokens(primitiveSpacing, primitiveRadius),
+    button = gymButtonTokens(primitiveSpacing, primitiveRadius, primitiveBorder, primitiveAlpha),
     card = gymCardTokens(primitiveSpacing, primitiveRadius, elevation),
     chat = gymChatTokens(primitiveSpacing),
     slider = gymSliderTokens(primitiveSpacing),
     controlPanel = gymControlPanelTokens(primitiveSpacing),
-    bodyAnalysis = gymBodyAnalysisTokens(primitiveSpacing),
-    calendar = gymCalendarTokens(colors),
-    onboarding = gymOnboardingTokens(primitiveSpacing),
+    bodyAnalysis = gymBodyAnalysisTokens(primitiveSpacing, primitiveBorder, primitiveAlpha, elevation),
+    calendar = gymCalendarTokens(colors, primitiveSpacing, primitiveBorder),
+    onboarding = gymOnboardingTokens(primitiveSpacing, primitiveBorder),
     login = gymLoginTokens(primitiveSpacing, primitiveRadius),
-    createBaseline = gymCreateBaselineTokens(primitiveSpacing, primitiveColors),
+    createBaseline = gymCreateBaselineTokens(primitiveSpacing, primitiveColors, primitiveBorder, primitiveAlpha),
     camera = gymCameraTokens(primitiveSpacing),
-    statusPopup = gymStatusPopupTokens(primitiveSpacing, primitiveRadius),
-    thinkingCard = gymThinkingCardTokens(primitiveSpacing, primitiveRadius),
+    statusPopup = gymStatusPopupTokens(primitiveSpacing, primitiveRadius, primitiveBorder),
+    thinkingCard = gymThinkingCardTokens(primitiveSpacing, primitiveRadius, elevation, primitiveAlpha),
     meal = gymMealTokens(primitiveSpacing),
     bodyDetail = gymBodyDetailTokens()
     )

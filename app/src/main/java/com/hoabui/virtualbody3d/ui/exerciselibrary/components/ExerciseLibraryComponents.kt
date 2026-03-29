@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -126,7 +126,7 @@ fun ExerciseSearchSuggestionChips(
 }
 
 /**
- * High-density cart bar: selected count + date (left column), compact S/R fields + confirm (right).
+ * Anchored bottom slab: header row (name + date), action row (sets/reps + add).
  */
 @Composable
 fun ExerciseLibrarySelectionBar(
@@ -137,63 +137,81 @@ fun ExerciseLibrarySelectionBar(
 ) {
     val token = GymTheme.token
     val zone = ZoneId.systemDefault()
-    val barMin = token.bodyAnalysis.exerciseLibraryStickySearchHeaderMinHeight
+    val barMin = token.bodyAnalysis.exerciseLibrarySelectionBarMinHeight
     val fieldWidth = token.bodyAnalysis.exerciseLibraryCartNumericFieldWidth
-    var setsText by remember { mutableStateOf(libraryState.globalSets.toString()) }
-    var repsText by remember { mutableStateOf(libraryState.globalReps.toString()) }
+    val addButtonMaxWidth = token.bodyAnalysis.exerciseLibrarySelectionBarAddButtonMaxWidth
+    val slabShape = remember(token.radius.md, token.borderWidth.none) {
+        RoundedCornerShape(
+            topStart = token.radius.md,
+            topEnd = token.radius.md,
+            bottomStart = token.borderWidth.none,
+            bottomEnd = token.borderWidth.none,
+        )
+    }
+    val fieldShape = remember(token.radius.md) {
+        RoundedCornerShape(token.radius.md)
+    }
     var showDatePicker by remember { mutableStateOf(false) }
     val dateLabel = remember(libraryState.selectedDate) {
         val d = Instant.ofEpochMilli(libraryState.selectedDate).atZone(zone).toLocalDate()
         DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format(d)
     }
-    val count = libraryState.quickAddedExerciseIds.size
+    val selectedExerciseName = remember(libraryState.sections, libraryState.selectedExerciseId) {
+        val selectedId = libraryState.selectedExerciseId ?: return@remember ""
+        libraryState.sections
+            .asSequence()
+            .flatMap { it.items.asSequence() }
+            .firstOrNull { item -> item.id == selectedId }
+            ?.title
+            .orEmpty()
+    }
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = barMin),
-        shape = RoundedCornerShape(token.radius.pill),
+        shape = slabShape,
         color = token.colors.surface,
         shadowElevation = token.elevation.level2,
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = barMin)
-                .padding(horizontal = token.spacing.sm, vertical = token.spacing.xs),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(token.spacing.sm),
+                .padding(
+                    horizontal = token.spacing.md,
+                    vertical = token.spacing.sm,
+                ),
+            verticalArrangement = Arrangement.spacedBy(token.spacing.sm),
         ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(token.spacing.xs),
-                horizontalAlignment = Alignment.Start,
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(token.spacing.sm),
             ) {
                 GText(
-                    text = stringResource(R.string.exercise_library_cart_selected_count, count),
-                    style = token.typography.labelMedium,
-                    color = token.colors.textSecondary,
+                    text = selectedExerciseName,
+                    style = token.typography.labelLarge,
+                    color = token.colors.textPrimary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.weight(1f),
                 )
                 GButton(
                     text = dateLabel,
                     onClick = { showDatePicker = true },
                     variant = GButtonVariant.Ghost,
-                    modifier = Modifier.fillMaxWidth(),
                 )
             }
             Row(
-                modifier = Modifier.wrapContentWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
             ) {
                 Box(modifier = Modifier.width(fieldWidth)) {
                     GTextField(
-                        value = setsText,
+                        value = libraryState.globalSets.toString(),
                         onValueChange = { raw ->
                             val digits = raw.filter { it.isDigit() }.take(3)
-                            setsText = digits
                             digits.toIntOrNull()?.let { s ->
                                 onDraftChange(
                                     libraryState.globalReps,
@@ -204,20 +222,26 @@ fun ExerciseLibrarySelectionBar(
                         },
                         modifier = Modifier.fillMaxWidth(),
                         label = null,
-                        placeholder = stringResource(R.string.exercise_library_cart_placeholder_sets),
+                        placeholder = null,
                         singleLine = true,
-                        textStyle = token.typography.bodyMedium,
-                        placeholderStyle = token.typography.bodyMedium,
-                        shape = RoundedCornerShape(token.radius.pill),
+                        textStyle = token.typography.labelLarge,
+                        placeholderStyle = token.typography.labelLarge,
+                        shape = fieldShape,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        leadingIcon = {
+                            GText(
+                                text = stringResource(R.string.exercise_library_cart_placeholder_sets),
+                                style = token.typography.labelSmall,
+                                color = token.colors.textMuted,
+                            )
+                        },
                     )
                 }
                 Box(modifier = Modifier.width(fieldWidth)) {
                     GTextField(
-                        value = repsText,
+                        value = libraryState.globalReps.toString(),
                         onValueChange = { raw ->
                             val digits = raw.filter { it.isDigit() }.take(3)
-                            repsText = digits
                             digits.toIntOrNull()?.let { r ->
                                 onDraftChange(
                                     r.coerceAtLeast(1),
@@ -228,18 +252,27 @@ fun ExerciseLibrarySelectionBar(
                         },
                         modifier = Modifier.fillMaxWidth(),
                         label = null,
-                        placeholder = stringResource(R.string.exercise_library_cart_placeholder_reps),
+                        placeholder = null,
                         singleLine = true,
-                        textStyle = token.typography.bodyMedium,
-                        placeholderStyle = token.typography.bodyMedium,
-                        shape = RoundedCornerShape(token.radius.pill),
+                        textStyle = token.typography.labelLarge,
+                        placeholderStyle = token.typography.labelLarge,
+                        shape = fieldShape,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        leadingIcon = {
+                            GText(
+                                text = stringResource(R.string.exercise_library_cart_placeholder_reps),
+                                style = token.typography.labelSmall,
+                                color = token.colors.textMuted,
+                            )
+                        },
                     )
                 }
+                Spacer(modifier = Modifier.weight(1f))
                 GButton(
                     text = stringResource(R.string.exercise_library_cart_add),
                     onClick = onConfirm,
                     variant = GButtonVariant.Primary,
+                    modifier = Modifier.widthIn(max = addButtonMaxWidth),
                 )
             }
         }

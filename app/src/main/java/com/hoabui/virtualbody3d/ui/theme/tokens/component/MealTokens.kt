@@ -2,8 +2,8 @@ package com.hoabui.virtualbody3d.ui.theme.tokens.component
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveSpacingTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.semantic.gymMealLayoutSemantics
 
 @Immutable
 data class MealTokens(
@@ -21,13 +21,16 @@ data class MealTokens(
 
 fun gymMealTokens(
     spacing: PrimitiveSpacingTokens
-): MealTokens = MealTokens(
-    carouselRowHeight = spacing.xxl + spacing.xxl + spacing.xs, // 104.dp
-    cardWidth = 228.dp,
-    imageSize = 52.dp,
-    macroProgressHeight = 3.dp,
-    nutritionSummaryRingSize = 64.dp,
-    nutritionSummaryRingStrokeWidth = 6.dp,
-    nutritionSummarySnapshotSize = 38.dp,
-    nutritionSummarySnapshotOverlap = 12.dp,
-)
+): MealTokens {
+    val layout = gymMealLayoutSemantics()
+    return MealTokens(
+        carouselRowHeight = spacing.xxl + spacing.xxl + spacing.xs,
+        cardWidth = layout.cardWidth,
+        imageSize = layout.imageSize,
+        macroProgressHeight = layout.macroProgressHeight,
+        nutritionSummaryRingSize = layout.nutritionSummaryRingSize,
+        nutritionSummaryRingStrokeWidth = layout.nutritionSummaryRingStrokeWidth,
+        nutritionSummarySnapshotSize = layout.nutritionSummarySnapshotSize,
+        nutritionSummarySnapshotOverlap = layout.nutritionSummarySnapshotOverlap,
+    )
+}

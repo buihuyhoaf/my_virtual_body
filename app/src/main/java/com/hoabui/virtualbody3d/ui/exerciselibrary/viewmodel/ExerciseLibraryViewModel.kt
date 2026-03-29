@@ -25,10 +25,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.mutate
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.collections.immutable.persistentSetOf
-import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.flow.update
 import java.time.Instant
 import java.time.LocalDateTime
@@ -46,7 +43,7 @@ class ExerciseLibraryViewModel @Inject constructor(
 
     private val groupedExercises = MutableStateFlow<Map<BodyRegion, List<Exercise>>>(emptyMap())
     private val filterState = MutableStateFlow(ExerciseLibraryUiState())
-    private val selectedExerciseId = MutableStateFlow<String?>(null)
+    private val detailExerciseId = MutableStateFlow<String?>(null)
 
     init {
         getExerciseLibraryUseCase()
@@ -54,7 +51,7 @@ class ExerciseLibraryViewModel @Inject constructor(
             .catch { setError(it.message ?: "Unknown error") }
             .launchIn(viewModelScope)
 
-        combine(groupedExercises, filterState, selectedExerciseId) { grouped, filters, selectedId ->
+        combine(groupedExercises, filterState, detailExerciseId) { grouped, filters, selectedId ->
             val sections = buildSections(grouped, filters)
             val selectedExercise = selectedId?.let { id ->
                 grouped.values.flatten().find { it.id == id }
@@ -96,13 +93,19 @@ class ExerciseLibraryViewModel @Inject constructor(
         }
     }
 
-    /** Toggles exercise id in the shopping cart ([quickAddedExerciseIds]). */
+    /** Single-select toggle for instant-add flow. */
     fun onQuickAddToWorkout(exerciseId: String) {
         filterState.update { state ->
-            val next = state.quickAddedExerciseIds.toPersistentSet().mutate { m ->
-                if (exerciseId in m) m.remove(exerciseId) else m.add(exerciseId)
+            if (state.selectedExerciseId == exerciseId) {
+                state.copy(selectedExerciseId = null)
+            } else {
+                state.copy(
+                    selectedExerciseId = exerciseId,
+                    globalSets = DEFAULT_SETS,
+                    globalReps = DEFAULT_REPS,
+                    selectedDate = defaultExerciseLibraryCartDateMillis(),
+                )
             }
-            state.copy(quickAddedExerciseIds = next)
         }
     }
 
@@ -116,35 +119,32 @@ class ExerciseLibraryViewModel @Inject constructor(
         }
     }
 
-    fun confirmAllToWorkout() {
+    fun confirmSingleToWorkout() {
         launchSafely {
             val filters = filterState.value
-            val ids = filters.quickAddedExerciseIds
-            if (ids.isEmpty()) return@launchSafely
+            val selectedId = filters.selectedExerciseId ?: return@launchSafely
             val exercisesById = groupedExercises.value.values.flatten().associateBy { it.id }
             val zone = ZoneId.systemDefault()
             val date = Instant.ofEpochMilli(filters.selectedDate).atZone(zone).toLocalDate()
             val scheduledAt = LocalDateTime.of(date, LocalTime.now())
-            for (id in ids) {
-                val ex = exercisesById[id] ?: continue
-                addWorkoutUseCase(
-                    WorkoutSchedule(
-                        id = UUID.randomUUID().toString(),
-                        exerciseId = id,
-                        scheduledAt = scheduledAt,
-                        sets = filters.globalSets,
-                        reps = filters.globalReps,
-                        weightKg = ex.lastWeightKg ?: 0.0,
-                        restSeconds = 90,
-                        notes = null,
-                    ),
-                )
-            }
+            val ex = exercisesById[selectedId] ?: return@launchSafely
+            addWorkoutUseCase(
+                WorkoutSchedule(
+                    id = UUID.randomUUID().toString(),
+                    exerciseId = selectedId,
+                    scheduledAt = scheduledAt,
+                    sets = filters.globalSets,
+                    reps = filters.globalReps,
+                    weightKg = ex.lastWeightKg ?: 0.0,
+                    restSeconds = 90,
+                    notes = null,
+                ),
+            )
             filterState.update { state ->
                 state.copy(
-                    quickAddedExerciseIds = persistentSetOf(),
-                    globalSets = 3,
-                    globalReps = 10,
+                    selectedExerciseId = null,
+                    globalSets = DEFAULT_SETS,
+                    globalReps = DEFAULT_REPS,
                     selectedDate = defaultExerciseLibraryCartDateMillis(),
                 )
             }
@@ -152,11 +152,11 @@ class ExerciseLibraryViewModel @Inject constructor(
     }
 
     fun selectExerciseForDetail(exerciseId: String) {
-        selectedExerciseId.value = exerciseId
+        detailExerciseId.value = exerciseId
     }
 
     fun clearExerciseDetail() {
-        selectedExerciseId.value = null
+        detailExerciseId.value = null
     }
 
     private fun buildSections(
@@ -166,7 +166,7 @@ class ExerciseLibraryViewModel @Inject constructor(
         val query = normalizeExerciseLibraryQuery(filters.searchQuery)
         val category = filters.selectedExerciseCategory
         val equipment = filters.selectedEquipment
-        val quickAdded = filters.quickAddedExerciseIds
+        val selectedExerciseId = filters.selectedExerciseId
         return BodyRegion.entries.mapNotNull { region ->
             val items = grouped[region]
                 ?.filter { ex ->
@@ -175,10 +175,15 @@ class ExerciseLibraryViewModel @Inject constructor(
                         (equipment == null || ex.equipment == equipment)
                 }
                 ?.map { ex ->
-                    ex.toLibraryCardUiModel(appContext, quickAdded)
+                    ex.toLibraryCardUiModel(appContext, selectedExerciseId)
                 }
                 ?: emptyList()
             if (items.isEmpty()) null else ExerciseSectionUiItem(region, items.toImmutableList())
         }.toImmutableList()
+    }
+
+    private companion object {
+        const val DEFAULT_SETS = 3
+        const val DEFAULT_REPS = 10
     }
 }

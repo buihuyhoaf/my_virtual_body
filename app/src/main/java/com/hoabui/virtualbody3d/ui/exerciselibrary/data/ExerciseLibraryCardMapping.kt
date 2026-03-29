@@ -13,7 +13,7 @@ import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiMo
  */
 fun Exercise.toLibraryCardUiModel(
     context: Context,
-    quickAddedExerciseIds: Set<String>,
+    selectedExerciseId: String?,
 ): GExerciseCardUiModel =
     GExerciseCardUiModel(
         id = id,
@@ -21,7 +21,7 @@ fun Exercise.toLibraryCardUiModel(
         title = name,
         subtitle = libraryCardSubtitle(context),
         badgeText = null,
-        isSelected = id in quickAddedExerciseIds,
+        isSelected = id == selectedExerciseId,
     )
 
 private fun Exercise.libraryCardSubtitle(context: Context): String {

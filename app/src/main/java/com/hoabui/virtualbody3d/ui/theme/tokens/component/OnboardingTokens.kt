@@ -2,8 +2,9 @@ package com.hoabui.virtualbody3d.ui.theme.tokens.component
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveBorderTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveSpacingTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.semantic.gymOnboardingLayoutSemantics
 
 /**
  * Design tokens for onboarding screen: pager indicator dots and primary CTA button.
@@ -24,39 +25,26 @@ data class OnboardingTokens(
     val illustrationStrokeThin: Dp,
     val illustrationStrokeStandard: Dp,
     val illustrationStrokeBold: Dp
-) {
-    companion object {
-        fun default(): OnboardingTokens = OnboardingTokens(
-            dotSize = 8.dp,
-            dotGap = 4.dp,
-            primaryButtonHeight = 56.dp,
-            illustrationBodyWidth = 240.dp,
-            illustrationBodyHeight = 320.dp,
-            illustrationScannerSize = 240.dp,
-            illustrationJournalWidth = 240.dp,
-            illustrationJournalHeight = 120.dp,
-            illustrationBaseUnit = 20.dp,
-            illustrationFineUnit = 5.dp,
-            illustrationStrokeThin = 1.dp,
-            illustrationStrokeStandard = 1.5.dp,
-            illustrationStrokeBold = 2.dp
-        )
-    }
-}
+)
 
-fun gymOnboardingTokens(primitiveSpacing: PrimitiveSpacingTokens): OnboardingTokens =
-    OnboardingTokens(
+fun gymOnboardingTokens(
+    primitiveSpacing: PrimitiveSpacingTokens,
+    border: PrimitiveBorderTokens,
+): OnboardingTokens {
+    val layout = gymOnboardingLayoutSemantics()
+    return OnboardingTokens(
         dotSize = primitiveSpacing.xs,
         dotGap = primitiveSpacing.xxs,
         primaryButtonHeight = primitiveSpacing.xl + primitiveSpacing.lg,
-        illustrationBodyWidth = 240.dp,
-        illustrationBodyHeight = 320.dp,
-        illustrationScannerSize = 240.dp,
-        illustrationJournalWidth = 240.dp,
-        illustrationJournalHeight = 120.dp,
-        illustrationBaseUnit = 20.dp,
-        illustrationFineUnit = 5.dp,
-        illustrationStrokeThin = 1.dp,
-        illustrationStrokeStandard = 1.5.dp,
-        illustrationStrokeBold = 2.dp
+        illustrationBodyWidth = layout.illustrationBodyWidth,
+        illustrationBodyHeight = layout.illustrationBodyHeight,
+        illustrationScannerSize = layout.illustrationScannerSize,
+        illustrationJournalWidth = layout.illustrationJournalWidth,
+        illustrationJournalHeight = layout.illustrationJournalHeight,
+        illustrationBaseUnit = layout.illustrationBaseUnit,
+        illustrationFineUnit = layout.illustrationFineUnit,
+        illustrationStrokeThin = border.hairline,
+        illustrationStrokeStandard = border.thin,
+        illustrationStrokeBold = border.medium
     )
+}

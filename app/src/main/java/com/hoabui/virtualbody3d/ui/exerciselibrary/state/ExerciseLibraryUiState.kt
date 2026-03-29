@@ -7,9 +7,7 @@ import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentSetOf
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -27,7 +25,7 @@ data class ExerciseLibraryUiState(
     val searchQuery: String = "",
     val selectedExerciseCategory: ExerciseCategory? = null,
     val selectedEquipment: EquipmentType? = null,
-    val quickAddedExerciseIds: ImmutableSet<String> = persistentSetOf(),
+    val selectedExerciseId: String? = null,
     /** Global sets/reps applied when confirming the cart (defaults match [com.hoabui.virtualbody3d.ui.addworkout.state.AddWorkoutUiState]). */
     val globalSets: Int = 3,
     val globalReps: Int = 10,

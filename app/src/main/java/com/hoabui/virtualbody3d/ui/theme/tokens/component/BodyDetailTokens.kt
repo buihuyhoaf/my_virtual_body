@@ -2,7 +2,7 @@ package com.hoabui.virtualbody3d.ui.theme.tokens.component
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import com.hoabui.virtualbody3d.ui.theme.tokens.semantic.gymBodyDetailLayoutSemantics
 
 @Immutable
 data class BodyDetailTokens(
@@ -10,5 +10,5 @@ data class BodyDetailTokens(
 )
 
 fun gymBodyDetailTokens(): BodyDetailTokens = BodyDetailTokens(
-    heroHeight = 220.dp
+    heroHeight = gymBodyDetailLayoutSemantics().heroHeight
 )

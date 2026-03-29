@@ -3,11 +3,12 @@ package com.hoabui.virtualbody3d.ui.theme.tokens.component
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.hoabui.virtualbody3d.ui.theme.tokens.ElevationTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveBorderTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveSpacingTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.semantic.gymBodyAnalysisLayoutSemantics
 
-/** Explicit width/height per card size for image+text tiles (no formula — token-only). */
 @Immutable
 data class CardImageWithTextSizeTokens(
     val smallWidth: Dp,
@@ -16,15 +17,10 @@ data class CardImageWithTextSizeTokens(
     val mediumHeight: Dp,
     val largeWidth: Dp,
     val largeHeight: Dp,
-    /** Compact horizontal tile for exercise library (~2.3–2.5 cards visible). */
     val exerciseLibraryWidth: Dp,
     val exerciseLibraryHeight: Dp,
 )
 
-/**
- * Component tokens dedicated to BodyAnalysis screen layout.
- * Keep all screen-specific dimensions centralized here.
- */
 @Immutable
 data class BodyAnalysisTokens(
     val topBarHorizontalPadding: Dp,
@@ -48,9 +44,7 @@ data class BodyAnalysisTokens(
     val bottomBarLabelTopSpacing: Dp,
     val bottomBarIconContainerSize: Dp,
     val bottomBarIconSize: Dp,
-    /** Horizontal capsule behind the selected tab icon (expanded width). */
     val bottomBarSelectionPillWidthExpanded: Dp,
-    /** Capsule height for the floating nav selection indicator. */
     val bottomBarSelectionPillHeight: Dp,
     val dashboardPanelTopRadius: Dp,
     val dashboardPanelHorizontalPadding: Dp,
@@ -87,31 +81,22 @@ data class BodyAnalysisTokens(
     val scoreChipProminentStrokeWidth: Dp,
     val bodyRegionItemWidth: Dp,
     val bodyRegionItemHeight: Dp,
-    /** Sizes for image cards (e.g. exercise tiles); use instead of scaling [bodyRegionItemWidth]/[bodyRegionItemHeight]. */
     val cardImageWithText: CardImageWithTextSizeTokens,
-    /** Top inset between square image and title row on [GImageCard] (home soft-edge). */
     val gImageCardTextSectionTopPadding: Dp,
-    /** Corner radius for home [GImageCard] small tile + matching [AddCard] / image clip. */
     val gImageCardCornerRadius: Dp,
-    /** Horizontal slim chip for [GUpcomingExerciseCard] (home upcoming row). */
     val upcomingExerciseChipWidth: Dp,
     val upcomingExerciseChipHeight: Dp,
-    /** Thumbnail edge length inside the chip. */
     val upcomingExerciseChipImageSize: Dp,
-    /** Corner radius for the chip thumbnail. */
     val upcomingExerciseChipImageCornerRadius: Dp,
-    /** Horizontal padding inside the chip [Row]. */
     val upcomingExerciseChipContentHorizontalPadding: Dp,
     val bodyRegionPlaceholderSize: Dp,
     val supplementCardWidth: Dp,
     val supplementCardHeight: Dp,
     val dashboardCaloriePremiumRingSize: Dp,
     val dashboardCaloriePremiumRingStrokeWidth: Dp,
-    /** Min width for left/right columns flanking the home calorie ring (metrics + deficit). */
     val dashboardCaloriePremiumSideColumnWidth: Dp,
     val timelineItemWidth: Dp,
     val timelineItemSpacing: Dp,
-    /** Square avatar edge length (e.g. xxl + md = 64dp). */
     val timelineAvatarSquareSize: Dp,
     val timelineAvatarCornerRadius: Dp,
     val timelinePlaceholderIconSize: Dp,
@@ -119,164 +104,141 @@ data class BodyAnalysisTokens(
     val timelineLineThickness: Dp,
     val timelineLineOffsetY: Dp,
     val timelineDateSlotHeight: Dp,
-    /** Border width when a timeline page is centered (pager selection). */
     val timelineAvatarSelectedBorderWidth: Dp,
-    /** [GSurface] fill alpha behind the home progress timeline. */
     val timelineRowSurfaceAlpha: Float,
-    /** Scale on centered timeline avatar (layout bounds unchanged). */
     val timelineAvatarSelectedScale: Float,
-    /** Icon size for fat / muscle mini-columns below the weight line. */
     val timelineSecondaryMetricIconSize: Dp,
-    /** Alpha for whole item when page is not centered. */
     val timelineUnselectedItemAlpha: Float,
-    /** [PagerDefaults.flingBehavior] snap threshold for single-page flings. */
     val timelinePagerSnapPositionalThreshold: Float,
-    /** Fixed height for [com.hoabui.virtualbody3d.ui.common_ui.organism.body.GBodyHeroPanel] slim chips. */
     val heroSlimChipHeight: Dp,
     val heroSlimChipPaddingHorizontal: Dp,
     val heroSlimChipIconSize: Dp,
     val heroSlimChipIconTextGap: Dp,
-    /** Tighter [androidx.compose.material3.Typography.labelSmall] on hero chips. */
     val heroSlimChipLabelLetterSpacing: TextUnit,
-    /**
-     * Min height for exercise library sticky header (search + reserved chip row) so
-     * [AnimatedVisibility] does not change LazyColumn measure during scroll.
-     */
     val exerciseLibraryStickySearchHeaderMinHeight: Dp,
-    /** Visual size of the quick-add icon container on library tiles (touch via [minimumInteractiveComponentSize]). */
     val exerciseLibraryQuickAddIconContainerSize: Dp,
-    /** End padding on title row when quick-add overlaps bottom-end so text does not collide. */
     val exerciseLibraryQuickAddTextInset: Dp,
-    /** Fixed width for compact Sets/Reps fields on the library cart bar. */
     val exerciseLibraryCartNumericFieldWidth: Dp,
-    /** Subtle primary wash behind [GImageCard] content when [selectionHighlight] is true. */
+    val exerciseLibrarySelectionBarMinHeight: Dp,
+    val exerciseLibrarySelectionBarAddButtonMaxWidth: Dp,
     val gImageCardSelectedSurfaceTintAlpha: Float,
 )
 
-fun gymBodyAnalysisTokens(spacing: PrimitiveSpacingTokens): BodyAnalysisTokens {
-    val heroSlimChipHeight = 32.dp
-    val heroSlimChipIconTextGap = 4.dp
-    val heroSlimChipPaddingHorizontal = 8.dp
-    val heroSlimChipIconSize = 16.dp
-    val timelineAvatarSize = 64.dp
-    val timelineAvatarCorner = 12.dp
-    val timelineAvatarSelectedBorder = 1.5.dp
-    val timelineWeightLineEstimate = 20.dp
-    /** Icon + gap + bold labelSmall for fat/muscle mini-grid. */
-    val timelineSecondaryBlockEstimate = 28.dp
+fun gymBodyAnalysisTokens(
+    spacing: PrimitiveSpacingTokens,
+    border: PrimitiveBorderTokens,
+    alpha: PrimitiveAlphaTokens,
+    elevation: ElevationTokens,
+): BodyAnalysisTokens {
+    val layout = gymBodyAnalysisLayoutSemantics()
     return BodyAnalysisTokens(
-    topBarHorizontalPadding = spacing.md,
-    topBarVerticalPadding = 10.dp,
-    topBarInnerHorizontalPadding = spacing.xxs,
-    topBarBorderWidth = 1.dp,
-    topBarIconSize = 40.dp,
-    topBarActionElevation = 8.dp,
-    previewModelTopPadding = spacing.xs,
-    scoreChipTopPadding = 28.dp,
-    metricChipFirstRowTopPadding = 84.dp,
-    metricChipSecondRowTopPadding = 140.dp,
-    metricChipSidePadding = spacing.md,
-    previewTrackBottomPadding = spacing.xl,
-    previewTrackMaxWidth = 192.dp,
-    previewTrackHeight = 8.dp,
-    bottomBarBorderWidth = 1.dp,
-    bottomBarItemPadding = spacing.xxs,
-    bottomBarSelectedHorizontalPadding = spacing.xs,
-    bottomBarSelectedVerticalPadding = spacing.xxs,
-    bottomBarLabelTopSpacing = spacing.xxs,
-    // Keep consistent with the existing bottom bar icon container sizing.
-    bottomBarIconContainerSize = 36.dp,
-    // Phosphor Light tab icons — single size for Holistic Vitality nav.
-    bottomBarIconSize = 24.dp,
-    bottomBarSelectionPillWidthExpanded = 56.dp,
-    bottomBarSelectionPillHeight = 36.dp,
-    dashboardPanelTopRadius = spacing.xl,
-    dashboardPanelHorizontalPadding = spacing.md,
-    dashboardPanelTopPadding = spacing.lg,
-    dashboardPanelBottomPadding = spacing.xl,
-    dashboardPanelSectionSpacing = spacing.lg,
-    dashboardHandleWidth = 48.dp,
-    dashboardHandleHeight = 6.dp,
-    dashboardGreetingIconSize = 20.dp,
-    dashboardGreetingIconContainerSize = 40.dp,
-    dashboardCalorieCardPadding = spacing.xs,
-    dashboardCalorieRingSize = 80.dp,
-    dashboardCalorieRingOuterStrokeWidth = spacing.xs,
-    dashboardCalorieRingInnerStrokeWidth = spacing.xxxs,
-    dashboardCalorieRingGap = spacing.xxs,
-    dashboardMealItemWidth = 160.dp,
-    dashboardMealItemImageSize = 64.dp,
-    dashboardSummaryCardPadding = spacing.md,
-    dashboardSummaryCardHeight = 112.dp,
-    dashboardScrollContentBottomSpacing = 88.dp,
-    dashboardFloatingNavHorizontalPadding = spacing.md,
-    dashboardFloatingNavVerticalPadding = spacing.xs,
-    dashboardFloatingNavBottomPadding = spacing.md,
-    metricChipMinWidth = 100.dp,
-    metricChipIconContainerSize = 22.dp,
-    metricChipIconSize = 13.dp,
-    scoreChipMinWidth = 92.dp,
-    scoreChipProminentMinWidth = 108.dp,
-    scoreChipProgressSize = 22.dp,
-    scoreChipProminentProgressSize = 28.dp,
-    scoreChipInnerSize = 12.dp,
-    scoreChipProminentInnerSize = 14.dp,
-    scoreChipStrokeWidth = 4.dp,
-    scoreChipProminentStrokeWidth = 5.dp,
-    bodyRegionItemWidth = 120.dp,
-    bodyRegionItemHeight = 120.dp, // 1.5 × width for fitness-style tile
-    cardImageWithText = CardImageWithTextSizeTokens(
-        smallWidth = 100.dp,
-        smallHeight = 145.dp,
-        mediumWidth = 96.dp,
-        mediumHeight = 141.dp,
-        largeWidth = 120.dp,
-        largeHeight = 165.dp,
-        exerciseLibraryWidth = 140.dp,
-        // 3:2 image ~93.3dp + xxs gap + two text lines + inset (fixed outer height for LazyRow).
-        exerciseLibraryHeight = 158.dp,
-    ),
-    gImageCardTextSectionTopPadding = 6.dp,
-    gImageCardCornerRadius = 18.dp,
-    upcomingExerciseChipWidth = 200.dp,
-    upcomingExerciseChipHeight = 64.dp,
-    upcomingExerciseChipImageSize = 44.dp,
-    upcomingExerciseChipImageCornerRadius = 10.dp,
-    upcomingExerciseChipContentHorizontalPadding = 10.dp,
-    bodyRegionPlaceholderSize = 40.dp,
-    supplementCardWidth = 80.dp,
-    supplementCardHeight = 100.dp,
-    dashboardCaloriePremiumRingSize = 120.dp,
-    dashboardCaloriePremiumRingStrokeWidth = spacing.md,
-    // Slightly wider than [dashboardCalorieRingSize] so metric/deficit text aligns without clipping.
-    dashboardCaloriePremiumSideColumnWidth = 88.dp,
-    // Home timeline: narrow tiles for side-by-side comparison; 64dp avatar for quick scan.
-    timelineItemWidth = 90.dp,
-    timelineItemSpacing = spacing.md,
-    timelineAvatarSquareSize = timelineAvatarSize,
-    timelineAvatarCornerRadius = timelineAvatarCorner,
-    timelinePlaceholderIconSize = spacing.xl,
-    timelineDotSize = spacing.xs,
-    timelineLineThickness = spacing.dividerThickness,
-    timelineAvatarSelectedBorderWidth = timelineAvatarSelectedBorder,
-    timelineRowSurfaceAlpha = 0.2f,
-    timelineAvatarSelectedScale = 1.05f,
-    timelineSecondaryMetricIconSize = 10.dp,
-    timelineUnselectedItemAlpha = 0.5f,
-    timelinePagerSnapPositionalThreshold = 0.4f,
-    timelineDateSlotHeight = spacing.md,
-    // Dot center Y from top of each pager page: date + gaps + avatar + gaps + weight row + gaps + secondary row + gaps + half dot.
-    timelineLineOffsetY = spacing.md + spacing.xxs + timelineAvatarSize + spacing.xxs + timelineWeightLineEstimate + spacing.xxs + timelineSecondaryBlockEstimate + spacing.xxs + spacing.xs / 2f,
-    heroSlimChipHeight = heroSlimChipHeight,
-    heroSlimChipPaddingHorizontal = heroSlimChipPaddingHorizontal,
-    heroSlimChipIconSize = heroSlimChipIconSize,
-    heroSlimChipIconTextGap = heroSlimChipIconTextGap,
-    heroSlimChipLabelLetterSpacing = 0.05.sp,
-    exerciseLibraryStickySearchHeaderMinHeight =
-        spacing.lg + spacing.md + spacing.xs + heroSlimChipHeight + spacing.xxs,
-    exerciseLibraryQuickAddIconContainerSize = heroSlimChipHeight,
-    exerciseLibraryQuickAddTextInset = spacing.xxl + spacing.xs,
-    exerciseLibraryCartNumericFieldWidth = 64.dp,
-    gImageCardSelectedSurfaceTintAlpha = 0.08f,
-)
+        topBarHorizontalPadding = spacing.md,
+        topBarVerticalPadding = layout.topBarVerticalPadding,
+        topBarInnerHorizontalPadding = spacing.xxs,
+        topBarBorderWidth = border.hairline,
+        topBarIconSize = layout.topBarIconSize,
+        topBarActionElevation = elevation.level3,
+        previewModelTopPadding = spacing.xs,
+        scoreChipTopPadding = layout.scoreChipTopPadding,
+        metricChipFirstRowTopPadding = layout.metricChipFirstRowTopPadding,
+        metricChipSecondRowTopPadding = layout.metricChipSecondRowTopPadding,
+        metricChipSidePadding = spacing.md,
+        previewTrackBottomPadding = spacing.xl,
+        previewTrackMaxWidth = layout.previewTrackMaxWidth,
+        previewTrackHeight = spacing.xs,
+        bottomBarBorderWidth = border.hairline,
+        bottomBarItemPadding = spacing.xxs,
+        bottomBarSelectedHorizontalPadding = spacing.xs,
+        bottomBarSelectedVerticalPadding = spacing.xxs,
+        bottomBarLabelTopSpacing = spacing.xxs,
+        bottomBarIconContainerSize = layout.bottomBarIconContainerSize,
+        bottomBarIconSize = layout.bottomBarIconSize,
+        bottomBarSelectionPillWidthExpanded = layout.bottomBarSelectionPillWidthExpanded,
+        bottomBarSelectionPillHeight = layout.bottomBarSelectionPillHeight,
+        dashboardPanelTopRadius = spacing.xl,
+        dashboardPanelHorizontalPadding = spacing.md,
+        dashboardPanelTopPadding = spacing.lg,
+        dashboardPanelBottomPadding = spacing.xl,
+        dashboardPanelSectionSpacing = spacing.lg,
+        dashboardHandleWidth = layout.dashboardHandleWidth,
+        dashboardHandleHeight = layout.dashboardHandleHeight,
+        dashboardGreetingIconSize = layout.dashboardGreetingIconSize,
+        dashboardGreetingIconContainerSize = layout.dashboardGreetingIconContainerSize,
+        dashboardCalorieCardPadding = spacing.xs,
+        dashboardCalorieRingSize = layout.dashboardCalorieRingSize,
+        dashboardCalorieRingOuterStrokeWidth = spacing.xs,
+        dashboardCalorieRingInnerStrokeWidth = spacing.xxxs,
+        dashboardCalorieRingGap = spacing.xxs,
+        dashboardMealItemWidth = layout.dashboardMealItemWidth,
+        dashboardMealItemImageSize = layout.dashboardMealItemImageSize,
+        dashboardSummaryCardPadding = spacing.md,
+        dashboardSummaryCardHeight = layout.dashboardSummaryCardHeight,
+        dashboardScrollContentBottomSpacing = layout.dashboardScrollContentBottomSpacing,
+        dashboardFloatingNavHorizontalPadding = spacing.md,
+        dashboardFloatingNavVerticalPadding = spacing.xs,
+        dashboardFloatingNavBottomPadding = spacing.md,
+        metricChipMinWidth = layout.metricChipMinWidth,
+        metricChipIconContainerSize = layout.metricChipIconContainerSize,
+        metricChipIconSize = layout.metricChipIconSize,
+        scoreChipMinWidth = layout.scoreChipMinWidth,
+        scoreChipProminentMinWidth = layout.scoreChipProminentMinWidth,
+        scoreChipProgressSize = layout.scoreChipProgressSize,
+        scoreChipProminentProgressSize = layout.scoreChipProminentProgressSize,
+        scoreChipInnerSize = layout.scoreChipInnerSize,
+        scoreChipProminentInnerSize = layout.scoreChipProminentInnerSize,
+        scoreChipStrokeWidth = layout.scoreChipStrokeWidth,
+        scoreChipProminentStrokeWidth = layout.scoreChipProminentStrokeWidth,
+        bodyRegionItemWidth = layout.bodyRegionItemWidth,
+        bodyRegionItemHeight = layout.bodyRegionItemHeight,
+        cardImageWithText = CardImageWithTextSizeTokens(
+            smallWidth = layout.cardSmallWidth,
+            smallHeight = layout.cardSmallHeight,
+            mediumWidth = layout.cardMediumWidth,
+            mediumHeight = layout.cardMediumHeight,
+            largeWidth = layout.cardLargeWidth,
+            largeHeight = layout.cardLargeHeight,
+            exerciseLibraryWidth = layout.cardExerciseLibraryWidth,
+            exerciseLibraryHeight = layout.cardExerciseLibraryHeight,
+        ),
+        gImageCardTextSectionTopPadding = layout.gImageCardTextSectionTopPadding,
+        gImageCardCornerRadius = layout.gImageCardCornerRadius,
+        upcomingExerciseChipWidth = layout.upcomingExerciseChipWidth,
+        upcomingExerciseChipHeight = layout.upcomingExerciseChipHeight,
+        upcomingExerciseChipImageSize = layout.upcomingExerciseChipImageSize,
+        upcomingExerciseChipImageCornerRadius = layout.upcomingExerciseChipImageCornerRadius,
+        upcomingExerciseChipContentHorizontalPadding = layout.upcomingExerciseChipContentHorizontalPadding,
+        bodyRegionPlaceholderSize = layout.bodyRegionPlaceholderSize,
+        supplementCardWidth = layout.supplementCardWidth,
+        supplementCardHeight = layout.supplementCardHeight,
+        dashboardCaloriePremiumRingSize = layout.dashboardCaloriePremiumRingSize,
+        dashboardCaloriePremiumRingStrokeWidth = spacing.md,
+        dashboardCaloriePremiumSideColumnWidth = layout.dashboardCaloriePremiumSideColumnWidth,
+        timelineItemWidth = layout.timelineItemWidth,
+        timelineItemSpacing = spacing.md,
+        timelineAvatarSquareSize = layout.timelineAvatarSquareSize,
+        timelineAvatarCornerRadius = layout.timelineAvatarCornerRadius,
+        timelinePlaceholderIconSize = spacing.xl,
+        timelineDotSize = spacing.xs,
+        timelineLineThickness = spacing.dividerThickness,
+        timelineAvatarSelectedBorderWidth = border.thin,
+        timelineRowSurfaceAlpha = alpha.TIMELINE_ROW_SURFACE,
+        timelineAvatarSelectedScale = alpha.TIMELINE_AVATAR_SELECTED_SCALE,
+        timelineSecondaryMetricIconSize = layout.timelineSecondaryMetricIconSize,
+        timelineUnselectedItemAlpha = alpha.TIMELINE_UNSELECTED_ITEM,
+        timelinePagerSnapPositionalThreshold = alpha.TIMELINE_PAGER_SNAP_POSITIONAL_THRESHOLD,
+        timelineDateSlotHeight = spacing.md,
+        timelineLineOffsetY = spacing.md + spacing.xxs + layout.timelineAvatarSquareSize + spacing.xxs + layout.timelineWeightLineEstimate + spacing.xxs + layout.timelineSecondaryBlockEstimate + spacing.xxs + spacing.xs / layout.timelineDotCenterDivisor,
+        heroSlimChipHeight = layout.heroSlimChipHeight,
+        heroSlimChipPaddingHorizontal = layout.heroSlimChipPaddingHorizontal,
+        heroSlimChipIconSize = layout.heroSlimChipIconSize,
+        heroSlimChipIconTextGap = layout.heroSlimChipIconTextGap,
+        heroSlimChipLabelLetterSpacing = layout.heroSlimChipLabelLetterSpacing,
+        exerciseLibraryStickySearchHeaderMinHeight = spacing.lg + spacing.md + spacing.xs + layout.heroSlimChipHeight + spacing.xxs,
+        exerciseLibraryQuickAddIconContainerSize = layout.heroSlimChipHeight,
+        exerciseLibraryQuickAddTextInset = spacing.xxl + spacing.xs,
+        exerciseLibraryCartNumericFieldWidth = layout.exerciseLibraryCartNumericFieldWidth,
+        exerciseLibrarySelectionBarMinHeight = layout.heroSlimChipHeight + layout.heroSlimChipHeight + spacing.md,
+        exerciseLibrarySelectionBarAddButtonMaxWidth = spacing.xl + spacing.xl + spacing.md,
+        gImageCardSelectedSurfaceTintAlpha = alpha.IMAGE_CARD_SELECTED_TINT,
+    )
 }
