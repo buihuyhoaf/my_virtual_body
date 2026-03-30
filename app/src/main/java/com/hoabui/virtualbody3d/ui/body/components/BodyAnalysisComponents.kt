@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.core.extensions.formatMeasurement
 import com.hoabui.virtualbody3d.core.utils.Constants
 import com.hoabui.virtualbody3d.ui.body.data.SupplementUiItem
@@ -319,11 +320,20 @@ fun UpcomingExercisesRow(
                 GUpcomingExerciseCard(
                     model = item.image.toImageModel(resourceProvider),
                     title = item.name,
-                    subtitle = stringResource(
-                        R.string.home_upcoming_chip_subtitle,
-                        item.reps,
-                        item.sets,
-                    ),
+                    subtitle = when (item.measurementMode) {
+                        ExerciseMeasurementMode.Duration -> {
+                            val total = item.durationSeconds ?: 0
+                            val m = total / 60
+                            val s = total % 60
+                            stringResource(R.string.home_upcoming_duration_subtitle, m, s)
+                        }
+                        ExerciseMeasurementMode.Strength ->
+                            stringResource(
+                                R.string.home_upcoming_chip_subtitle,
+                                item.reps,
+                                item.sets,
+                            )
+                    },
                     onClick = {},
                 )
             }

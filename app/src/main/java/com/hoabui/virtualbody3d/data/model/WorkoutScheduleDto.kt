@@ -12,5 +12,7 @@ data class WorkoutScheduleDto(
     val reps: Int,
     val weightKg: Double,
     val restSeconds: Int,
-    val notes: String?
+    val notes: String?,
+    val measurementMode: String = "strength",
+    val durationSeconds: Int? = null,
 )

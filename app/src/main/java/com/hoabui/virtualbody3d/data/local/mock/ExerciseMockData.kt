@@ -128,7 +128,8 @@ object ExerciseMockData {
             primaryMuscles = listOf("Abdominals"),
             secondaryMuscles = listOf("Glutes"),
             equipment = "Bodyweight",
-            safetyNotes = "Avoid lower-back sag."
+            safetyNotes = "Avoid lower-back sag.",
+            measurementMode = "duration",
         ),
         ExerciseDto(
             id = "10",

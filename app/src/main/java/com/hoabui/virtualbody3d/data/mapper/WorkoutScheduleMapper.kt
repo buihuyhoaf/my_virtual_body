@@ -1,6 +1,7 @@
 package com.hoabui.virtualbody3d.data.mapper
 
 import com.hoabui.virtualbody3d.data.model.WorkoutScheduleDto
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
 import java.time.Instant
 import java.time.LocalDateTime
@@ -14,7 +15,9 @@ fun WorkoutSchedule.toDto(): WorkoutScheduleDto = WorkoutScheduleDto(
     reps = reps,
     weightKg = weightKg,
     restSeconds = restSeconds,
-    notes = notes
+    notes = notes,
+    measurementMode = measurementMode.toDtoValue(),
+    durationSeconds = durationSeconds,
 )
 
 fun WorkoutScheduleDto.toDomain(): WorkoutSchedule = WorkoutSchedule(
@@ -25,5 +28,17 @@ fun WorkoutScheduleDto.toDomain(): WorkoutSchedule = WorkoutSchedule(
     reps = reps,
     weightKg = weightKg,
     restSeconds = restSeconds,
-    notes = notes
+    notes = notes,
+    measurementMode = measurementMode.toScheduleMeasurementMode(),
+    durationSeconds = durationSeconds,
 )
+
+private fun ExerciseMeasurementMode.toDtoValue(): String = when (this) {
+    ExerciseMeasurementMode.Strength -> "strength"
+    ExerciseMeasurementMode.Duration -> "duration"
+}
+
+private fun String.toScheduleMeasurementMode(): ExerciseMeasurementMode = when (lowercase()) {
+    "duration" -> ExerciseMeasurementMode.Duration
+    else -> ExerciseMeasurementMode.Strength
+}

@@ -32,6 +32,7 @@
     <string name="home_exercise_badge_new">New</string>
     <string name="home_upcoming_reps_sets">%1$d reps · %2$d sets</string>
     <string name="home_upcoming_chip_subtitle">%1$d reps · %2$d sets</string>
+    <string name="home_upcoming_duration_subtitle">%1$02d:%2$02d</string>
     <string name="analysis_basic_info">Thông tin cơ bản</string>
     <string name="analysis_body_score">Body Score</string>
     <string name="analysis_score_scale">/100</string>
@@ -195,6 +196,9 @@
     <string name="exercise_library_selection_reps_placeholder">Số rep</string>
     <string name="exercise_library_console_sets_placeholder">Sets</string>
     <string name="exercise_library_console_reps_placeholder">Reps</string>
+    <string name="exercise_library_console_minutes_placeholder">Phút</string>
+    <string name="exercise_library_console_seconds_placeholder">Giây</string>
+    <string name="exercise_library_console_timer_cd">Duration timer</string>
     <string name="exercise_library_cart_clear_all">xóa tất cả</string>
     <string name="exercise_library_cart_pick_date_time">Chọn ngày và giờ</string>
     <string name="exercise_library_cart_choose_date">Chọn ngày</string>
@@ -418,6 +422,9 @@
     <string name="add_workout_workout_setup">Thiết lập</string>
     <string name="add_workout_sets">Số hiệp</string>
     <string name="add_workout_reps">Số lần lặp</string>
+    <string name="add_workout_minutes">Phút</string>
+    <string name="add_workout_seconds">Giây</string>
+    <string name="add_workout_duration">Thời lượng</string>
     <string name="add_workout_weight_kg">Tạ (kg)</string>
     <string name="add_workout_rest_seconds">Nghỉ (giây)</string>
     <string name="add_workout_notes">Ghi chú</string>

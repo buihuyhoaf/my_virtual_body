@@ -32,5 +32,7 @@ data class ExerciseDto(
     @SerializedName("sets")
     val sets: Int? = null,
     @SerializedName("reps")
-    val reps: Int? = null
+    val reps: Int? = null,
+    @SerializedName("measurement_mode")
+    val measurementMode: String? = null,
 )

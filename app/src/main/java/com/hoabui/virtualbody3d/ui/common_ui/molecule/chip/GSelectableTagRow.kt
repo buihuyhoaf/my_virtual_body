@@ -39,7 +39,7 @@ data class GTagOption(val id: String, val label: String)
  * Selectable tag row molecule: wrapping [FlowRow] of [GFilterChip]s with an optional section label.
  *
  * Replaces `ExerciseFilterChips` in
- * [com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryComponents]
+ * [com.hoabui.virtualbody3d.ui.exerciselibrary.components.SearchLayer]
  * and all hand-rolled `FlowRow + FilterChip` groups.
  *
  * ### Behavior

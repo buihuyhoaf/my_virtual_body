@@ -22,5 +22,6 @@ data class Exercise(
     val secondaryMuscles: ImmutableList<MuscleGroup> = persistentListOf(),
     val equipment: EquipmentType?,
     val safetyNotes: String,
-    val lastWeightKg: Double? = null
+    val lastWeightKg: Double? = null,
+    val measurementMode: ExerciseMeasurementMode = ExerciseMeasurementMode.Strength,
 )

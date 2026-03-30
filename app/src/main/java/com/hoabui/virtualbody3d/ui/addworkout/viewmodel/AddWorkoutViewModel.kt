@@ -3,7 +3,9 @@ package com.hoabui.virtualbody3d.ui.addworkout.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import com.hoabui.virtualbody3d.core.base.UiState
 import com.hoabui.virtualbody3d.core.base.UiStateViewModel
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
+import com.hoabui.virtualbody3d.domain.model.exercise.normalizeDurationMinutesSeconds
 import com.hoabui.virtualbody3d.ui.addworkout.AddWorkoutEvent
 import com.hoabui.virtualbody3d.ui.addworkout.state.AddWorkoutUiState
 import com.hoabui.virtualbody3d.domain.usecase.AddWorkoutUseCase
@@ -30,10 +32,16 @@ class AddWorkoutViewModel @Inject constructor(
             setLoading()
             getExerciseByIdUseCase(exerciseId).collectLatest { exercise ->
                 if (exercise != null) {
+                    val (initialSets, initialReps) = when (exercise.measurementMode) {
+                        ExerciseMeasurementMode.Strength -> 3 to 10
+                        ExerciseMeasurementMode.Duration -> 0 to 45
+                    }
                     setSuccess(
                         AddWorkoutUiState(
                             exercise = exercise,
-                            weightKg = exercise.lastWeightKg ?: 0.0
+                            sets = initialSets,
+                            reps = initialReps,
+                            weightKg = exercise.lastWeightKg ?: 0.0,
                         )
                     )
                 } else {
@@ -91,15 +99,26 @@ class AddWorkoutViewModel @Inject constructor(
         val exercise = uiState.exercise ?: return
         launchSafely {
             val scheduledAt = LocalDateTime.of(uiState.selectedDate, uiState.selectedTime)
+            val measurementMode = exercise.measurementMode
+            val (sets, reps, durationSeconds) = when (measurementMode) {
+                ExerciseMeasurementMode.Strength -> Triple(uiState.sets, uiState.reps, null)
+                ExerciseMeasurementMode.Duration -> {
+                    val total = normalizeDurationMinutesSeconds(uiState.sets, uiState.reps)
+                    if (total <= 0) return@launchSafely
+                    Triple(1, 0, total)
+                }
+            }
             val schedule = WorkoutSchedule(
                 id = UUID.randomUUID().toString(),
                 exerciseId = exercise.id,
                 scheduledAt = scheduledAt,
-                sets = uiState.sets,
-                reps = uiState.reps,
+                sets = sets,
+                reps = reps,
                 weightKg = uiState.weightKg,
                 restSeconds = uiState.restSeconds,
-                notes = uiState.notes.ifBlank { null }
+                notes = uiState.notes.ifBlank { null },
+                measurementMode = measurementMode,
+                durationSeconds = durationSeconds,
             )
             addWorkoutUseCase(schedule)
             updateSuccess {

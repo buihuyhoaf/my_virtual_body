@@ -7,6 +7,7 @@ import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
 import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.FeedExercise
 import com.hoabui.virtualbody3d.domain.model.exercise.MuscleGroup
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -27,7 +28,8 @@ class ExerciseMapper @Inject constructor(
         secondaryMuscles = dto.secondaryMuscles.orEmpty().mapNotNull { it.toMuscleGroupOrNull() }.toImmutableList(),
         equipment = dto.equipment.orEmpty().toEquipmentTypeOrNull(),
         safetyNotes = dto.safetyNotes.orEmpty(),
-        lastWeightKg = dto.lastWeightKg
+        lastWeightKg = dto.lastWeightKg,
+        measurementMode = dto.measurementMode.toMeasurementMode(),
     )
 
     fun toFeedExercise(dto: ExerciseDto): FeedExercise = FeedExercise(
@@ -36,6 +38,8 @@ class ExerciseMapper @Inject constructor(
         image = dto.toImageSource(),
         sets = dto.sets ?: 0,
         reps = dto.reps ?: 0,
+        measurementMode = dto.measurementMode.toMeasurementMode(),
+        durationSeconds = null,
     )
 
     private fun ExerciseDto.toImageSource(): ImageSource {
@@ -51,6 +55,13 @@ class ExerciseMapper @Inject constructor(
 }
 
 private const val FALLBACK_IMAGE_NAME = "body_unsplash"
+
+private fun String?.toMeasurementMode(): ExerciseMeasurementMode {
+    return when (this?.trim()?.lowercase().orEmpty()) {
+        "duration" -> ExerciseMeasurementMode.Duration
+        else -> ExerciseMeasurementMode.Strength
+    }
+}
 
 private fun String?.toExerciseCategory(): ExerciseCategory {
     val key = this?.trim()?.lowercase().orEmpty()

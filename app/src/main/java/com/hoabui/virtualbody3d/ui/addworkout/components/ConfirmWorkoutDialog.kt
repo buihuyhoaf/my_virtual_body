@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
+import com.hoabui.virtualbody3d.domain.model.exercise.normalizeDurationMinutesSeconds
 import com.hoabui.virtualbody3d.ui.addworkout.state.AddWorkoutUiState
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
@@ -82,6 +84,7 @@ fun ConfirmWorkoutDialog(
                     )
                     GDivider(modifier = Modifier.padding(vertical = token.spacing.xs))
                     ConfirmWorkoutSetupSummary(
+                        measurementMode = exercise.measurementMode,
                         sets = state.sets,
                         reps = state.reps,
                         weightKg = state.weightKg,
@@ -156,6 +159,7 @@ private fun ConfirmScheduleSummary(
 
 @Composable
 private fun ConfirmWorkoutSetupSummary(
+    measurementMode: ExerciseMeasurementMode,
     sets: Int,
     reps: Int,
     weightKg: Double,
@@ -169,14 +173,27 @@ private fun ConfirmWorkoutSetupSummary(
             .padding(vertical = token.spacing.xxs),
         verticalArrangement = Arrangement.spacedBy(token.spacing.xxs)
     ) {
-        GInfoRow(
-            label = stringResource(R.string.add_workout_sets),
-            value = sets.toString(),
-        )
-        GInfoRow(
-            label = stringResource(R.string.add_workout_reps),
-            value = reps.toString(),
-        )
+        when (measurementMode) {
+            ExerciseMeasurementMode.Strength -> {
+                GInfoRow(
+                    label = stringResource(R.string.add_workout_sets),
+                    value = sets.toString(),
+                )
+                GInfoRow(
+                    label = stringResource(R.string.add_workout_reps),
+                    value = reps.toString(),
+                )
+            }
+            ExerciseMeasurementMode.Duration -> {
+                val total = normalizeDurationMinutesSeconds(sets, reps)
+                val m = total / 60
+                val s = total % 60
+                GInfoRow(
+                    label = stringResource(R.string.add_workout_duration),
+                    value = stringResource(R.string.home_upcoming_duration_subtitle, m, s),
+                )
+            }
+        }
         GInfoRow(
             label = stringResource(R.string.add_workout_weight_kg),
             value = "%.1f".format(weightKg),

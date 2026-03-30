@@ -7,7 +7,9 @@ import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
 import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
+import com.hoabui.virtualbody3d.domain.model.exercise.normalizeDurationMinutesSeconds
 import com.hoabui.virtualbody3d.domain.model.exercise.matchesLibrarySearch
 import com.hoabui.virtualbody3d.domain.model.exercise.normalizeExerciseLibraryQuery
 import com.hoabui.virtualbody3d.domain.usecase.AddWorkoutUseCase
@@ -23,6 +25,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -59,9 +62,13 @@ class ExerciseLibraryViewModel @Inject constructor(
             val selectedExercise = selectedId?.let { id ->
                 grouped.values.flatten().find { it.id == id }
             }
+            val measurementById = grouped.values.flatten()
+                .associate { it.id to it.measurementMode }
+                .toImmutableMap()
             filters.copy(
                 sections = sections,
                 selectedExerciseForDetail = selectedExercise,
+                exerciseMeasurementById = measurementById,
             )
         }.onEach { fullState ->
             setSuccess(fullState)
@@ -166,23 +173,49 @@ class ExerciseLibraryViewModel @Inject constructor(
             val scheduledAt = LocalDateTime.of(date, time)
             var scheduledCount = 0
             filters.itemDrafts.forEach { (exerciseId, draft) ->
-                if (draft.sets.isBlank() || draft.reps.isBlank()) return@forEach
                 val ex = exercisesById[exerciseId] ?: return@forEach
-                val sets = draft.sets.trim().toIntOrNull() ?: return@forEach
-                val reps = draft.reps.trim().toIntOrNull() ?: return@forEach
-                if (sets <= 0 || reps <= 0) return@forEach
-                addWorkoutUseCase(
-                    WorkoutSchedule(
-                        id = UUID.randomUUID().toString(),
-                        exerciseId = exerciseId,
-                        scheduledAt = scheduledAt,
-                        sets = sets,
-                        reps = reps,
-                        weightKg = ex.lastWeightKg ?: 0.0,
-                        restSeconds = 90,
-                        notes = null,
-                    ),
-                )
+                when (ex.measurementMode) {
+                    ExerciseMeasurementMode.Strength -> {
+                        if (draft.sets.isBlank() || draft.reps.isBlank()) return@forEach
+                        val sets = draft.sets.trim().toIntOrNull() ?: return@forEach
+                        val reps = draft.reps.trim().toIntOrNull() ?: return@forEach
+                        if (sets <= 0 || reps <= 0) return@forEach
+                        addWorkoutUseCase(
+                            WorkoutSchedule(
+                                id = UUID.randomUUID().toString(),
+                                exerciseId = exerciseId,
+                                scheduledAt = scheduledAt,
+                                sets = sets,
+                                reps = reps,
+                                weightKg = ex.lastWeightKg ?: 0.0,
+                                restSeconds = 90,
+                                notes = null,
+                                measurementMode = ExerciseMeasurementMode.Strength,
+                                durationSeconds = null,
+                            ),
+                        )
+                    }
+                    ExerciseMeasurementMode.Duration -> {
+                        val minutes = draft.sets.trim().toIntOrNull() ?: 0
+                        val seconds = draft.reps.trim().toIntOrNull() ?: 0
+                        val total = normalizeDurationMinutesSeconds(minutes, seconds)
+                        if (total <= 0) return@forEach
+                        addWorkoutUseCase(
+                            WorkoutSchedule(
+                                id = UUID.randomUUID().toString(),
+                                exerciseId = exerciseId,
+                                scheduledAt = scheduledAt,
+                                sets = 1,
+                                reps = 0,
+                                weightKg = ex.lastWeightKg ?: 0.0,
+                                restSeconds = 90,
+                                notes = null,
+                                measurementMode = ExerciseMeasurementMode.Duration,
+                                durationSeconds = total,
+                            ),
+                        )
+                    }
+                }
                 scheduledCount++
             }
             if (scheduledCount == 0) return@launchSafely

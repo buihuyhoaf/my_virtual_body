@@ -1,7 +1,6 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -34,33 +33,54 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
 import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseDetailDialog
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryEmptyState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseSearchBar
-import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseSearchSuggestionChips
+import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySearchLayer
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySelectionBar
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseSection
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
-import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryActions
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel.ExerciseLibraryViewModel
-import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
-import java.time.LocalTime
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+
+private object ExerciseLibraryListContentTypes {
+    const val StickySearch = "exercise_library_sticky_search"
+    const val RegionHeader = "exercise_library_region_header"
+    const val RegionRow = "exercise_library_region_row"
+    const val Empty = "exercise_library_empty"
+}
 
 @Composable
 fun ExerciseLibraryScreen(
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
     onAddToWorkout: (exerciseId: String) -> Unit = {},
-    viewModel: ExerciseLibraryViewModel = hiltViewModel()
+    viewModel: ExerciseLibraryViewModel = hiltViewModel(),
 ) {
     val screenState by viewModel.state.collectAsStateWithLifecycle()
+    val actions = remember(viewModel) {
+        ExerciseLibraryActions(
+            onQueryChange = viewModel::updateSearchQuery,
+            onQuickChipSelect = viewModel::selectQuickChip,
+            onExerciseClick = viewModel::selectExerciseForDetail,
+            onQuickAdd = viewModel::onQuickAdd,
+            onSelectCartItem = viewModel::setActiveCartExercise,
+            onClearCart = viewModel::clearAll,
+            onCartDateSelected = viewModel::updateCartDate,
+            onCartTimeSelected = viewModel::updateCartTime,
+            onActiveDraftChange = viewModel::updateActiveDraft,
+            onConfirmCart = viewModel::confirmCartToWorkout,
+            onClearExerciseDetail = viewModel::clearExerciseDetail,
+        )
+    }
 
     UiStateContent(
         state = screenState,
@@ -68,63 +88,40 @@ fun ExerciseLibraryScreen(
         successContent = { mod, data ->
             val dataRef = rememberUpdatedState(data)
             val addToWorkoutRef = rememberUpdatedState(onAddToWorkout)
-            val onQuickAdd = remember(viewModel) {
-                { exerciseId: String -> viewModel.onQuickAdd(exerciseId) }
-            }
             GScaffold(modifier = mod) {
                 ExerciseLibraryScreenContent(
                     modifier = Modifier.fillMaxSize(),
                     state = data,
-                    onQueryChange = viewModel::updateSearchQuery,
-                    onQuickChipSelect = viewModel::selectQuickChip,
-                    onExerciseClick = viewModel::selectExerciseForDetail,
-                    onQuickAdd = onQuickAdd,
-                    onSelectCartItem = viewModel::setActiveCartExercise,
-                    onClearCart = viewModel::clearAll,
-                    onCartDateSelected = viewModel::updateCartDate,
-                    onCartTimeSelected = viewModel::updateCartTime,
-                    onActiveDraftChange = viewModel::updateActiveDraft,
-                    onConfirmCart = viewModel::confirmCartToWorkout,
+                    actions = actions,
                 )
                 data.selectedExerciseForDetail?.let { exercise ->
-                    val onDetailAdd = remember(exercise.id, viewModel) {
+                    val onDetailAdd = remember(exercise.id, actions, addToWorkoutRef, dataRef) {
                         { ex: Exercise ->
                             val d = dataRef.value
                             val wasInCart = d.itemDrafts.containsKey(ex.id)
-                            viewModel.onQuickAdd(ex.id)
-                            viewModel.clearExerciseDetail()
+                            actions.onQuickAdd(ex.id)
+                            actions.onClearExerciseDetail()
                             if (!wasInCart) addToWorkoutRef.value(ex.id)
                         }
                     }
                     ExerciseDetailDialog(
                         exercise = exercise,
                         onAddClick = onDetailAdd,
-                        onDismiss = viewModel::clearExerciseDetail
+                        onDismiss = actions.onClearExerciseDetail,
                     )
                 }
             }
-        }
+        },
     )
-
 }
 
 @Composable
 fun ExerciseLibraryScreenContent(
     modifier: Modifier = Modifier,
     state: ExerciseLibraryUiState,
-    onQueryChange: (String) -> Unit,
-    onQuickChipSelect: (ExerciseLibraryQuickChip?) -> Unit,
-    onExerciseClick: (String) -> Unit = {},
-    onQuickAdd: (String) -> Unit = {},
-    onSelectCartItem: (String) -> Unit = {},
-    onClearCart: () -> Unit = {},
-    onCartDateSelected: (Long) -> Unit = {},
-    onCartTimeSelected: (LocalTime) -> Unit = {},
-    onActiveDraftChange: (sets: String, reps: String) -> Unit = { _, _ -> },
-    onConfirmCart: () -> Unit = {},
+    actions: ExerciseLibraryActions,
 ) {
     val isSearchFocused = remember { mutableStateOf(false) }
-    val showSuggestionLayer = isSearchFocused.value || state.searchQuery.isNotEmpty()
     val token = GymTheme.token
     val quickAddCd = stringResource(R.string.exercise_quick_add_cd)
     val fadeSpec = tween<Float>(
@@ -132,6 +129,10 @@ fun ExerciseLibraryScreenContent(
         easing = token.motion.easing.standard,
     )
     val slideSpec = tween<IntOffset>(
+        durationMillis = token.motion.duration.standard,
+        easing = token.motion.easing.standard,
+    )
+    val cartEnterSlide = tween<IntOffset>(
         durationMillis = token.motion.duration.standard,
         easing = token.motion.easing.standard,
     )
@@ -165,119 +166,101 @@ fun ExerciseLibraryScreenContent(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = listBottomPadding),
         ) {
-        stickyHeader(key = "exercise_library_search") {
-            Box(
-                modifier = Modifier
-                    .heightIn(min = token.bodyAnalysis.exerciseLibraryStickySearchHeaderMinHeight)
-                    .fillMaxWidth()
-                    .padding(
-                        horizontal = token.spacing.md,
-                        vertical = token.spacing.xs,
-                    ),
+            stickyHeader(
+                key = "exercise_library_search",
+                contentType = ExerciseLibraryListContentTypes.StickySearch,
             ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    ExerciseSearchBar(
-                        query = state.searchQuery,
-                        onQueryChange = onQueryChange,
-                        onSearchFocusChange = onSearchFocusChanged,
-                    )
-                    ExerciseLibrarySuggestionLayer(
-                        showSuggestionLayer = showSuggestionLayer,
+                Box(
+                    modifier = Modifier
+                        .heightIn(min = token.bodyAnalysis.exerciseLibraryStickySearchHeaderMinHeight)
+                        .fillMaxWidth()
+                        .padding(
+                            horizontal = token.spacing.md,
+                            vertical = token.spacing.xs,
+                        ),
+                ) {
+                    ExerciseLibrarySearchLayer(
+                        state = state,
+                        actions = actions,
+                        isSearchFocused = isSearchFocused.value,
+                        onSearchFocusChanged = onSearchFocusChanged,
                         fadeSpec = fadeSpec,
                         slideSpec = slideSpec,
-                        libraryState = state,
-                        onQuickChipSelect = onQuickChipSelect,
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
-        }
-        if (state.sections.isEmpty()) {
-            item(key = "exercise_library_empty") {
-                Box(
-                    modifier = Modifier
-                        .fillParentMaxHeight()
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
+            if (state.sections.isEmpty()) {
+                item(
+                    key = "exercise_library_empty",
+                    contentType = ExerciseLibraryListContentTypes.Empty,
                 ) {
-                    ExerciseLibraryEmptyState(
+                    Box(
                         modifier = Modifier
                             .fillParentMaxHeight()
                             .fillMaxWidth(),
-                    )
-                }
-            }
-        } else {
-            state.sections.forEach { section ->
-                stickyHeader(key = "${section.bodyRegion.name}_header") {
-                    val regionLabel = stringResource(ExerciseDisplayResources.bodyRegionResId(section.bodyRegion))
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(stickyHeaderScrim)
-                            .padding(
-                                horizontal = token.spacing.md,
-                                vertical = token.spacing.xxs,
-                            ),
+                        contentAlignment = Alignment.Center,
                     ) {
-                        GSectionHeader(title = regionLabel)
+                        ExerciseLibraryEmptyState(
+                            modifier = Modifier
+                                .fillParentMaxHeight()
+                                .fillMaxWidth(),
+                        )
                     }
                 }
-                item(
-                    key = "${section.bodyRegion.name}_cards",
-                    contentType = "exercise_section_row",
-                ) {
-                    ExerciseSection(
-                        modifier = Modifier
-                            .padding(horizontal = token.spacing.md),
-                        section = section,
-                        onExerciseClick = onExerciseClick,
-                        onQuickAdd = onQuickAdd,
-                        quickAddContentDescription = quickAddCd,
-                    )
+            } else {
+                state.sections.forEach { section ->
+                    stickyHeader(
+                        key = "${section.bodyRegion.name}_header",
+                        contentType = ExerciseLibraryListContentTypes.RegionHeader,
+                    ) {
+                        val regionLabel =
+                            stringResource(ExerciseDisplayResources.bodyRegionResId(section.bodyRegion))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(stickyHeaderScrim)
+                                .padding(
+                                    horizontal = token.spacing.md,
+                                    vertical = token.spacing.xxs,
+                                ),
+                        ) {
+                            GSectionHeader(title = regionLabel)
+                        }
+                    }
+                    item(
+                        key = "${section.bodyRegion.name}_row",
+                        contentType = ExerciseLibraryListContentTypes.RegionRow,
+                    ) {
+                        ExerciseSection(
+                            modifier = Modifier
+                                .padding(horizontal = token.spacing.md),
+                            section = section,
+                            onExerciseClick = actions.onExerciseClick,
+                            onQuickAdd = actions.onQuickAdd,
+                            quickAddContentDescription = quickAddCd,
+                        )
+                    }
                 }
             }
         }
-        }
-        if (cartVisible) {
-            ExerciseLibrarySelectionBar(
-                libraryState = state,
-                onSelectCartItem = onSelectCartItem,
-                onClearAll = onClearCart,
-                onCartDateSelected = onCartDateSelected,
-                onCartTimeSelected = onCartTimeSelected,
-                onActiveDraftChange = onActiveDraftChange,
-                onConfirm = onConfirmCart,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth(),
-            )
-        }
-    }
-}
-
-@Composable
-private fun ExerciseLibrarySuggestionLayer(
-    showSuggestionLayer: Boolean,
-    fadeSpec: FiniteAnimationSpec<Float>,
-    slideSpec: FiniteAnimationSpec<IntOffset>,
-    libraryState: ExerciseLibraryUiState,
-    onQuickChipSelect: (ExerciseLibraryQuickChip?) -> Unit,
-) {
-    Box(modifier = Modifier.fillMaxWidth()) {
         AnimatedVisibility(
-            visible = showSuggestionLayer,
+            visible = cartVisible,
+            modifier = Modifier.align(Alignment.BottomCenter),
             enter = fadeIn(fadeSpec) + slideInVertically(
-                animationSpec = slideSpec,
-                initialOffsetY = { fullHeight -> -(fullHeight / 2) },
+                animationSpec = cartEnterSlide,
+                initialOffsetY = { it },
             ),
             exit = fadeOut(fadeSpec) + slideOutVertically(
-                animationSpec = slideSpec,
-                targetOffsetY = { fullHeight -> -(fullHeight / 2) },
+                animationSpec = cartEnterSlide,
+                targetOffsetY = { it },
             ),
         ) {
-            ExerciseSearchSuggestionChips(
-                libraryState = libraryState,
-                onQuickChipSelect = onQuickChipSelect,
+            ExerciseLibrarySelectionBar(
+                libraryState = state,
+                actions = actions,
+                modifier = Modifier
+                    .fillMaxWidth(),
             )
         }
     }

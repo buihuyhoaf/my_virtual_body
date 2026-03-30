@@ -5,6 +5,8 @@ import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
 import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
+import com.hoabui.virtualbody3d.domain.model.exercise.normalizeDurationMinutesSeconds
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
@@ -34,15 +36,26 @@ data class ExerciseDraft(
 
 /**
  * `true` when the primary "Thêm" action is allowed: date and time chosen, cart non-empty,
- * and every draft has sets/reps that parse as positive integers.
+ * and every draft is valid for its exercise [ExerciseMeasurementMode] (strength: positive sets/reps;
+ * duration: normalized total seconds > 0).
  */
 fun ExerciseLibraryUiState.isAnchoredAddEnabled(): Boolean {
     if (selectedDate == null || selectedTime == null) return false
     if (itemDrafts.isEmpty()) return false
-    return itemDrafts.values.all { draft ->
-        val sets = draft.sets.trim().toIntOrNull()
-        val reps = draft.reps.trim().toIntOrNull()
-        sets != null && reps != null && sets > 0 && reps > 0
+    return itemDrafts.all { (id, draft) ->
+        val mode = exerciseMeasurementById[id] ?: ExerciseMeasurementMode.Strength
+        when (mode) {
+            ExerciseMeasurementMode.Strength -> {
+                val sets = draft.sets.trim().toIntOrNull()
+                val reps = draft.reps.trim().toIntOrNull()
+                sets != null && reps != null && sets > 0 && reps > 0
+            }
+            ExerciseMeasurementMode.Duration -> {
+                val minutes = draft.sets.trim().toIntOrNull() ?: 0
+                val seconds = draft.reps.trim().toIntOrNull() ?: 0
+                normalizeDurationMinutesSeconds(minutes, seconds) > 0
+            }
+        }
     }
 }
 
@@ -64,6 +77,8 @@ data class ExerciseLibraryUiState(
     val selectedTime: LocalTime? = null,
     val sections: ImmutableList<ExerciseSectionUiItem> = persistentListOf(),
     val selectedExerciseForDetail: Exercise? = null,
+    /** [Exercise.id] → measurement mode from the library catalog (for cart validation and console UI). */
+    val exerciseMeasurementById: ImmutableMap<String, ExerciseMeasurementMode> = persistentMapOf(),
 )
 
 /**

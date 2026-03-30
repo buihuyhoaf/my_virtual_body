@@ -16,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.ui.addworkout.components.BottomActionButtons
 import com.hoabui.virtualbody3d.ui.addworkout.components.ConfirmWorkoutDialog
 import com.hoabui.virtualbody3d.ui.addworkout.components.SuccessOverlay
@@ -141,8 +142,14 @@ private fun AddWorkoutContent(
                             dateValueText = data.selectedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
                             timeValueText = data.selectedTime.format(DateTimeFormatter.ofPattern("HH:mm")),
                             workoutSetupTitle = stringResource(R.string.add_workout_workout_setup),
-                            setsLabel = stringResource(R.string.add_workout_sets),
-                            repsLabel = stringResource(R.string.add_workout_reps),
+                            setsLabel = when (exercise.measurementMode) {
+                                ExerciseMeasurementMode.Strength -> stringResource(R.string.add_workout_sets)
+                                ExerciseMeasurementMode.Duration -> stringResource(R.string.add_workout_minutes)
+                            },
+                            repsLabel = when (exercise.measurementMode) {
+                                ExerciseMeasurementMode.Strength -> stringResource(R.string.add_workout_reps)
+                                ExerciseMeasurementMode.Duration -> stringResource(R.string.add_workout_seconds)
+                            },
                             weightKgLabel = stringResource(R.string.add_workout_weight_kg),
                             restSecondsLabel = stringResource(R.string.add_workout_rest_seconds),
                             notesLabel = stringResource(R.string.add_workout_notes),
@@ -152,6 +159,7 @@ private fun AddWorkoutContent(
                             reps = data.reps,
                             weightKg = data.weightKg,
                             restSeconds = data.restSeconds,
+                            measurementMode = exercise.measurementMode,
                         ),
                         onDateChange = onDateChange,
                         onTimeChange = onTimeChange,

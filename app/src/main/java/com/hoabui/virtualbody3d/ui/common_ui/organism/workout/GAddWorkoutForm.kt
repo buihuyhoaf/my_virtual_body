@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GIconButton
@@ -66,6 +67,7 @@ data class GAddWorkoutFormUiModel(
     val reps: Int,
     val weightKg: Double,
     val restSeconds: Int,
+    val measurementMode: ExerciseMeasurementMode = ExerciseMeasurementMode.Strength,
 )
 
 @Composable
@@ -129,6 +131,7 @@ fun GAddWorkoutForm(
             reps = uiModel.reps,
             weightKg = uiModel.weightKg,
             restSeconds = uiModel.restSeconds,
+            measurementMode = uiModel.measurementMode,
             onSetsChange = onSetsChange,
             onRepsChange = onRepsChange,
             onWeightChange = onWeightChange,
@@ -329,6 +332,7 @@ private fun WorkoutSetupSectionOrganism(
     reps: Int,
     weightKg: Double,
     restSeconds: Int,
+    measurementMode: ExerciseMeasurementMode,
     onSetsChange: (Int) -> Unit,
     onRepsChange: (Int) -> Unit,
     onWeightChange: (Double) -> Unit,
@@ -344,21 +348,25 @@ private fun WorkoutSetupSectionOrganism(
             modifier = Modifier.padding(bottom = token.spacing.xs),
         )
         Column(verticalArrangement = Arrangement.spacedBy(token.spacing.md)) {
+            val firstMin = if (measurementMode == ExerciseMeasurementMode.Strength) 1 else 0
+            val firstMax = if (measurementMode == ExerciseMeasurementMode.Strength) 20 else 180
+            val secondMin = if (measurementMode == ExerciseMeasurementMode.Strength) 1 else 0
+            val secondMax = if (measurementMode == ExerciseMeasurementMode.Strength) 100 else 59
             WorkoutNumberStepperOrganism(
                 modifier = Modifier.fillMaxWidth(),
                 label = setsLabel,
                 value = sets,
                 onValueChange = onSetsChange,
-                minValue = 1,
-                maxValue = 20,
+                minValue = firstMin,
+                maxValue = firstMax,
             )
             WorkoutNumberStepperOrganism(
                 modifier = Modifier.fillMaxWidth(),
                 label = repsLabel,
                 value = reps,
                 onValueChange = onRepsChange,
-                minValue = 1,
-                maxValue = 100,
+                minValue = secondMin,
+                maxValue = secondMax,
             )
             WorkoutWeightStepperOrganism(
                 modifier = Modifier.fillMaxWidth(),
@@ -516,6 +524,7 @@ private fun PreviewGAddWorkoutFormLight() {
                 reps = 10,
                 weightKg = 60.0,
                 restSeconds = 90,
+                measurementMode = ExerciseMeasurementMode.Strength,
             ),
             onDateChange = {},
             onTimeChange = {},
@@ -564,6 +573,7 @@ private fun PreviewGAddWorkoutFormDark() {
                 reps = 5,
                 weightKg = 120.0,
                 restSeconds = 120,
+                measurementMode = ExerciseMeasurementMode.Strength,
             ),
             onDateChange = {},
             onTimeChange = {},
