@@ -25,8 +25,14 @@ navigationCompose = "2.8.9"
 kotlinxSerializationJson = "1.7.3"
 kotlinxCollectionsImmutable = "0.3.8"
 phosphorIcon = "1.0.0"
+coroutinesTest = "1.10.2"
+archCoreTesting = "2.2.0"
+mockk = "1.14.2"
 
 [libraries]
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
+androidx-arch-core-testing = { group = "androidx.arch.core", name = "core-testing", version.ref = "archCoreTesting" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 sceneview = { group = "io.github.sceneview", name = "sceneview", version.ref = "sceneview" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

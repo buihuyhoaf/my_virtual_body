@@ -27,6 +27,14 @@ fun defaultExerciseLibraryCartTime(): LocalTime {
     return LocalTime.now(zone)
 }
 
+/** Shown after cart commit succeeds; cleared when user dismisses the success dialog. */
+@Immutable
+data class AddExerciseSuccessSummary(
+    val exerciseCount: Int,
+    val scheduledDateMillis: Long,
+    val scheduledTime: LocalTime,
+)
+
 /** Per-exercise manual entry while building the library cart ([sets]/[reps] as raw text for empty-friendly UI). */
 @Immutable
 data class ExerciseDraft(
@@ -67,8 +75,16 @@ data class ExerciseLibraryUiState(
     val searchQuery: String = "",
     val selectedExerciseCategory: ExerciseCategory? = null,
     val selectedEquipment: EquipmentType? = null,
-    /** Draft lines keyed by exercise id (cart). Order follows insertion. */
+    /**
+     * Draft lines keyed by exercise id (cart). Source of truth for membership.
+     * Order of items in the bar is [draftOrder], not key iteration order.
+     */
     val itemDrafts: ImmutableMap<String, ExerciseDraft> = persistentMapOf(),
+    /**
+     * Stable left-to-right cart order. Invariant: same multiset of ids as [itemDrafts].keys
+     * (each id exactly once). Kept in sync with [itemDrafts] on every cart mutation in the screen ViewModel.
+     */
+    val draftOrder: ImmutableList<String> = persistentListOf(),
     /** Which cart line is being edited in the console. */
     val activeExerciseId: String? = null,
     /** Start-of-day millis in [ZoneId.systemDefault] when chosen; `null` until user picks a date. */
@@ -79,6 +95,13 @@ data class ExerciseLibraryUiState(
     val selectedExerciseForDetail: Exercise? = null,
     /** [Exercise.id] → measurement mode from the library catalog (for cart validation and console UI). */
     val exerciseMeasurementById: ImmutableMap<String, ExerciseMeasurementMode> = persistentMapOf(),
+    /** When non-null, show add-success confirmation (cart already cleared in the same VM update). */
+    val addExerciseSuccess: AddExerciseSuccessSummary? = null,
+    /**
+     * Session cumulative count of exercises successfully scheduled from this screen (increments on confirm).
+     * Drives workout-plan FAB badge; not reset when clearing the cart.
+     */
+    val workoutPlanFabBadgeCount: Int = 0,
 )
 
 /**

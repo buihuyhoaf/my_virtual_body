@@ -185,6 +185,7 @@
     <string name="exercise_library_empty_message">Thử đổi bộ lọc hoặc từ khóa tìm kiếm.</string>
     <string name="exercise_library_card_subtitle_fallback">—</string>
     <string name="exercise_quick_add_cd">Thêm nhanh vào buổi tập</string>
+    <string name="exercise_library_list_toggle_add_cd">Thêm vào giỏ chọn bài tập</string>
     <string name="exercise_library_cart_sets">Hiệp</string>
     <string name="exercise_library_cart_reps">Lần</string>
     <string name="exercise_library_cart_add">Thêm buổi tập</string>
@@ -200,12 +201,21 @@
     <string name="exercise_library_console_seconds_placeholder">Giây</string>
     <string name="exercise_library_console_timer_cd">Duration timer</string>
     <string name="exercise_library_cart_clear_all">xóa tất cả</string>
+    <string name="exercise_library_cart_remove_item_cd">Xóa khỏi giỏ chọn</string>
     <string name="exercise_library_cart_pick_date_time">Chọn ngày và giờ</string>
     <string name="exercise_library_cart_choose_date">Chọn ngày</string>
     <string name="exercise_library_cart_choose_time">Chọn giờ</string>
     <string name="exercise_library_cart_add_short">Thêm</string>
     <string name="exercise_library_cart_times_separator">×</string>
     <string name="exercise_library_console_times_operator">×</string>
+    <string name="exercise_library_add_success_title">Đã thêm thành công!</string>
+    <string name="exercise_library_add_success_description">Đã thêm %1$d bài tập.\n%2$s · %3$s</string>
+    <string name="exercise_library_add_success_view_plan">Xem kế hoạch tập</string>
+    <string name="exercise_library_add_success_close">Đóng</string>
+    <string name="exercise_library_add_success_icon_cd">Thành công</string>
+    <string name="exercise_library_workout_plan_fab_cd">Kế hoạch tập</string>
+    <string name="exercise_library_workout_plan_fab_badge_max">%d+</string>
+    <string name="exercise_library_workout_plan_stub_toast">Kế hoạch tập — đang phát triển</string>
     <!-- Workout Feed Screen -->
     <string name="workout_feed_title">Workout feed</string>
 

@@ -1,6 +1,7 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel
 
 import android.content.Context
+import android.widget.Toast
 import androidx.lifecycle.viewModelScope
 import com.hoabui.virtualbody3d.core.base.UiStateViewModel
 import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
@@ -12,10 +13,12 @@ import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
 import com.hoabui.virtualbody3d.domain.model.exercise.normalizeDurationMinutesSeconds
 import com.hoabui.virtualbody3d.domain.model.exercise.matchesLibrarySearch
 import com.hoabui.virtualbody3d.domain.model.exercise.normalizeExerciseLibraryQuery
+import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.domain.usecase.AddWorkoutUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetExerciseLibraryUseCase
 import com.hoabui.virtualbody3d.ui.exerciselibrary.ExerciseLibraryQuickChip
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toLibraryCardUiModel
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.AddExerciseSuccessSummary
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseSectionUiItem
@@ -23,9 +26,11 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.state.isAnchoredAddEnabled
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -103,18 +108,85 @@ class ExerciseLibraryViewModel @Inject constructor(
         }
     }
 
-    /** Adds an exercise with an empty draft if new; always sets [ExerciseLibraryUiState.activeExerciseId]. */
-    fun onQuickAdd(exerciseId: String) {
+    /** Main list short-press: add to cart or remove if already selected ([itemDrafts]). */
+    fun toggleExerciseInCartFromList(exerciseId: String) {
         filterState.update { state ->
             val base = state.itemDrafts.toPersistentMap()
-            val nextDrafts = if (exerciseId in base) {
-                base
+            if (exerciseId !in base) {
+                val nextDrafts = base.put(exerciseId, ExerciseDraft())
+                val nextOrder = if (exerciseId in state.draftOrder) {
+                    state.draftOrder
+                } else {
+                    state.draftOrder.toPersistentList().add(exerciseId)
+                }
+                state.copy(
+                    itemDrafts = nextDrafts,
+                    draftOrder = nextOrder,
+                    activeExerciseId = exerciseId,
+                )
             } else {
-                base.put(exerciseId, ExerciseDraft())
+                val nextDrafts = base.remove(exerciseId)
+                val orderBefore = state.draftOrder
+                val nextOrder = state.draftOrder.filter { it != exerciseId }.toPersistentList()
+                val nextActive = resolveActiveExerciseAfterRemoval(
+                    removedId = exerciseId,
+                    previousActive = state.activeExerciseId,
+                    newDrafts = nextDrafts,
+                    orderBeforeRemoval = orderBefore,
+                    newOrder = nextOrder,
+                )
+                state.copy(
+                    itemDrafts = nextDrafts,
+                    draftOrder = nextOrder,
+                    activeExerciseId = nextActive,
+                )
             }
+        }
+    }
+
+    /**
+     * Detail sheet "Add": never removes. Inserts with empty draft if absent, else only focuses.
+     */
+    fun ensureInCartAndFocusFromDetail(exerciseId: String) {
+        filterState.update { state ->
+            val base = state.itemDrafts.toPersistentMap()
+            if (exerciseId !in base) {
+                val nextDrafts = base.put(exerciseId, ExerciseDraft())
+                val nextOrder = if (exerciseId in state.draftOrder) {
+                    state.draftOrder
+                } else {
+                    state.draftOrder.toPersistentList().add(exerciseId)
+                }
+                state.copy(
+                    itemDrafts = nextDrafts,
+                    draftOrder = nextOrder,
+                    activeExerciseId = exerciseId,
+                )
+            } else {
+                state.copy(activeExerciseId = exerciseId)
+            }
+        }
+    }
+
+    /** Cart thumbnail remove ([X]); does not run for thumbnail body (focus only). */
+    fun removeFromCart(exerciseId: String) {
+        filterState.update { state ->
+            if (exerciseId !in state.itemDrafts) return@update state
+            val base = state.itemDrafts.toPersistentMap()
+            val nextDrafts = base.remove(exerciseId)
+            val orderBefore = state.draftOrder
+            val nextOrder = state.draftOrder.filter { it != exerciseId }.toPersistentList()
+            val nextActive = resolveActiveExerciseAfterRemoval(
+                removedId = exerciseId,
+                previousActive = state.activeExerciseId,
+                newDrafts = nextDrafts,
+                orderBeforeRemoval = orderBefore,
+                newOrder = nextOrder,
+            )
             state.copy(
                 itemDrafts = nextDrafts,
-                activeExerciseId = exerciseId,
+                draftOrder = nextOrder,
+                activeExerciseId = nextActive,
             )
         }
     }
@@ -133,9 +205,11 @@ class ExerciseLibraryViewModel @Inject constructor(
         filterState.update {
             it.copy(
                 itemDrafts = persistentMapOf(),
+                draftOrder = persistentListOf(),
                 activeExerciseId = null,
                 selectedDate = null,
                 selectedTime = null,
+                addExerciseSuccess = null,
             )
         }
     }
@@ -219,15 +293,35 @@ class ExerciseLibraryViewModel @Inject constructor(
                 scheduledCount++
             }
             if (scheduledCount == 0) return@launchSafely
+            val summary = AddExerciseSuccessSummary(
+                exerciseCount = scheduledCount,
+                scheduledDateMillis = dateMillis,
+                scheduledTime = time,
+            )
             filterState.update {
                 it.copy(
                     itemDrafts = persistentMapOf(),
+                    draftOrder = persistentListOf(),
                     activeExerciseId = null,
                     selectedDate = null,
                     selectedTime = null,
+                    addExerciseSuccess = summary,
+                    workoutPlanFabBadgeCount = it.workoutPlanFabBadgeCount + scheduledCount,
                 )
             }
         }
+    }
+
+    fun onWorkoutPlanFabClick() {
+        Toast.makeText(
+            appContext,
+            appContext.getString(R.string.exercise_library_workout_plan_stub_toast),
+            Toast.LENGTH_SHORT,
+        ).show()
+    }
+
+    fun dismissAddExerciseSuccess() {
+        filterState.update { it.copy(addExerciseSuccess = null) }
     }
 
     fun selectExerciseForDetail(exerciseId: String) {

@@ -83,6 +83,18 @@ data class BodyAnalysisLayoutSemantics(
     val exerciseLibraryCartThumbnailActiveInset: Dp,
     /** Shared height for compact precision row (fields + primary action). */
     val exerciseLibraryConsolePrecisionRowHeight: Dp,
+    /** Circular workout-plan FAB on Exercise Library (Material-aligned tap target). */
+    val exerciseLibraryWorkoutPlanFabSize: Dp,
+    /** Icon size inside [exerciseLibraryWorkoutPlanFabSize]. */
+    val exerciseLibraryWorkoutPlanFabIconSize: Dp,
+    /** Minimum width/height for numeric badge on workout-plan FAB. */
+    val exerciseLibraryWorkoutPlanFabBadgeMinSize: Dp,
+    /** Visual diameter of circular scrim for list/cart corner sticker actions. */
+    val exerciseLibraryCornerStickerDiameter: Dp,
+    /** Icon glyph size (+ / check / close) inside corner stickers. */
+    val exerciseLibraryCornerActionGlyphSize: Dp,
+    /** Expanded touch target for corner stickers (a11y / scroll safety). */
+    val exerciseLibraryCornerStickerTouchTargetSize: Dp,
 )
 
 fun gymBodyAnalysisLayoutSemantics(): BodyAnalysisLayoutSemantics = BodyAnalysisLayoutSemantics(
@@ -152,10 +164,16 @@ fun gymBodyAnalysisLayoutSemantics(): BodyAnalysisLayoutSemantics = BodyAnalysis
     timelineDotCenterDivisor = 2f,
     exerciseLibraryCartNumericFieldWidth = 60.dp,
     exerciseLibrarySelectionBarTopCornerRadius = 28.dp,
-    exerciseLibraryCartThumbnailSize = 48.dp,
+    exerciseLibraryCartThumbnailSize = 56.dp,
     exerciseLibraryAnchoredConsoleTopBorderWidth = 0.5.dp,
     exerciseLibraryCartThumbnailActiveInset = 4.dp,
     exerciseLibraryConsolePrecisionRowHeight = 52.dp,
+    exerciseLibraryWorkoutPlanFabSize = 56.dp,
+    exerciseLibraryWorkoutPlanFabIconSize = 28.dp,
+    exerciseLibraryWorkoutPlanFabBadgeMinSize = 18.dp,
+    exerciseLibraryCornerStickerDiameter = 30.dp,
+    exerciseLibraryCornerActionGlyphSize = 24.dp,
+    exerciseLibraryCornerStickerTouchTargetSize = 48.dp,
 )
 
 @Immutable

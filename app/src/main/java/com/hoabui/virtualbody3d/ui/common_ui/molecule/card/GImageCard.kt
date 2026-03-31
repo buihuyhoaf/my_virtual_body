@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -20,12 +21,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GIconButton
+import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GIconButtonVariant
 import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
@@ -42,10 +43,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.ui.common_ui.atom.icon.GIcon
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
+import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.CardImageWithTextSizeTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAspectRatioTokens
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -159,7 +163,8 @@ private fun Modifier.pressScale(interactionSource: MutableInteractionSource, sca
  * [CardSize.ExerciseLibraryTile] uses a 3:2 image slot from [PrimitiveAspectRatioTokens].
  * Optional [badge] floats on the image (glass-style when [badgeChrome] is [Holistic]).
  *
- * @param trailingOverlayEnd Optional overlay aligned to the bottom-end of the **whole** card (e.g. library quick-add).
+ * @param trailingOverlayEnd Optional overlay on the **whole** card [BoxScope]; caller sets alignment (e.g. [Alignment.TopEnd] or [Alignment.BottomEnd]).
+ * @param reserveExerciseLibraryTextEndInset When `true` and [cardSize] is [CardSize.ExerciseLibraryTile], reserves right padding on the text row for a **bottom-end** overlay. Use `false` for **top-end** actions so titles use full width.
  *
  * @param selectionHighlight When `true`, uses primary border and subtle elevation for selected state.
  * @param weakSelectionHighlight When `true` (and selection is not strong), uses a softer border/tint for in-cart items.
@@ -177,8 +182,16 @@ fun GImageCard(
     badgeChrome: GImageCardBadgeChrome = GImageCardBadgeChrome.Holistic,
     /** Optional overlay on the image (e.g. bottom-end quick action); drawn above the image, below badge hit-testing order depends on declaration order. */
     imageOverlayEnd: (@Composable BoxScope.() -> Unit)? = null,
+    /** Optional overlay on the image top-trailing corner (e.g. library list toggle). Composed after [badge] so it wins z-order in that corner. */
+    imageOverlayTopEnd: (@Composable BoxScope.() -> Unit)? = null,
+    /**
+     * When `true`, offsets [imageOverlayTopEnd] with [GymTheme.token.spacing.xs] from the image edge.
+     * Set `false` to anchor the overlay flush to the image top-end (sticker / 48dp hit-zone alignment).
+     */
+    imageOverlayTopEndEdgeInset: Boolean = true,
     /** Optional overlay on the full card (library Smart-Add); drawn above text and image. */
     trailingOverlayEnd: (@Composable BoxScope.() -> Unit)? = null,
+    reserveExerciseLibraryTextEndInset: Boolean = false,
     textSectionLeading: (@Composable RowScope.() -> Unit)? = null,
     selectionHighlight: Boolean = false,
     weakSelectionHighlight: Boolean = false,
@@ -248,7 +261,10 @@ fun GImageCard(
                     badge = badge,
                     badgeChrome = badgeChrome,
                     imageOverlayEnd = imageOverlayEnd,
+                    imageOverlayTopEnd = imageOverlayTopEnd,
+                    imageOverlayTopEndEdgeInset = imageOverlayTopEndEdgeInset,
                     trailingOverlayEnd = trailingOverlayEnd,
+                    reserveExerciseLibraryTextEndInset = reserveExerciseLibraryTextEndInset,
                     textSectionLeading = textSectionLeading,
                     selectionHighlight = selectionHighlight,
                     weakSelectionHighlight = weakSelectionHighlight,
@@ -280,7 +296,10 @@ fun GImageCard(
                     badge = badge,
                     badgeChrome = badgeChrome,
                     imageOverlayEnd = imageOverlayEnd,
+                    imageOverlayTopEnd = imageOverlayTopEnd,
+                    imageOverlayTopEndEdgeInset = imageOverlayTopEndEdgeInset,
                     trailingOverlayEnd = trailingOverlayEnd,
+                    reserveExerciseLibraryTextEndInset = reserveExerciseLibraryTextEndInset,
                     textSectionLeading = textSectionLeading,
                     selectionHighlight = selectionHighlight,
                     weakSelectionHighlight = weakSelectionHighlight,
@@ -310,7 +329,10 @@ fun GImageCard(
                     badge = badge,
                     badgeChrome = badgeChrome,
                     imageOverlayEnd = imageOverlayEnd,
+                    imageOverlayTopEnd = imageOverlayTopEnd,
+                    imageOverlayTopEndEdgeInset = imageOverlayTopEndEdgeInset,
                     trailingOverlayEnd = trailingOverlayEnd,
+                    reserveExerciseLibraryTextEndInset = reserveExerciseLibraryTextEndInset,
                     textSectionLeading = textSectionLeading,
                     selectionHighlight = selectionHighlight,
                     weakSelectionHighlight = weakSelectionHighlight,
@@ -334,13 +356,19 @@ private fun GImageCardStack(
     badge: (@Composable BoxScope.() -> Unit)?,
     badgeChrome: GImageCardBadgeChrome,
     imageOverlayEnd: (@Composable BoxScope.() -> Unit)?,
+    imageOverlayTopEnd: (@Composable BoxScope.() -> Unit)?,
+    imageOverlayTopEndEdgeInset: Boolean,
     trailingOverlayEnd: (@Composable BoxScope.() -> Unit)?,
+    reserveExerciseLibraryTextEndInset: Boolean,
     textSectionLeading: (@Composable RowScope.() -> Unit)?,
     selectionHighlight: Boolean,
     weakSelectionHighlight: Boolean,
 ) {
     val token = GymTheme.token
-    val reserveQuickAddEndInset = trailingOverlayEnd != null && cardSize == CardSize.ExerciseLibraryTile
+    val reserveQuickAddEndInset =
+        trailingOverlayEnd != null &&
+            cardSize == CardSize.ExerciseLibraryTile &&
+            reserveExerciseLibraryTextEndInset
     Box(modifier = Modifier.fillMaxSize()) {
         if (selectionHighlight) {
             Box(
@@ -376,6 +404,8 @@ private fun GImageCardStack(
             badge = badge,
             badgeChrome = badgeChrome,
             imageOverlayEnd = imageOverlayEnd,
+            imageOverlayTopEnd = imageOverlayTopEnd,
+            imageOverlayTopEndEdgeInset = imageOverlayTopEndEdgeInset,
             textSectionLeading = textSectionLeading,
             reserveQuickAddEndInset = reserveQuickAddEndInset,
         )
@@ -397,6 +427,8 @@ private fun GImageCardContent(
     badge: (@Composable BoxScope.() -> Unit)?,
     badgeChrome: GImageCardBadgeChrome,
     imageOverlayEnd: (@Composable BoxScope.() -> Unit)?,
+    imageOverlayTopEnd: (@Composable BoxScope.() -> Unit)?,
+    imageOverlayTopEndEdgeInset: Boolean,
     textSectionLeading: (@Composable RowScope.() -> Unit)?,
     reserveQuickAddEndInset: Boolean,
 ) {
@@ -408,12 +440,12 @@ private fun GImageCardContent(
     val subtitleColor = if (isLibraryTile) {
         token.colors.textSecondary
     } else {
-        token.colors.textSecondary.copy(alpha = 0.7f)
+        token.colors.textSecondary.copy(alpha = PrimitiveAlphaTokens.IMAGE_CARD_OVERLAY_MEDIUM)
     }
     val textRowEndPadding = if (reserveQuickAddEndInset) {
         token.bodyAnalysis.exerciseLibraryQuickAddTextInset
     } else {
-        0.dp
+        token.spacing.none
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -441,7 +473,11 @@ private fun GImageCardContent(
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(token.radius.pill))
-                                    .background(token.colors.surface.copy(alpha = 0.7f))
+                                    .background(
+                                        token.colors.surface.copy(
+                                            alpha = PrimitiveAlphaTokens.IMAGE_CARD_OVERLAY_MEDIUM,
+                                        ),
+                                    )
                                     .border(
                                         width = token.borderWidth.hairline,
                                         color = glassBorderColor,
@@ -466,6 +502,19 @@ private fun GImageCardContent(
                         .padding(token.spacing.xs),
                 ) {
                     imageOverlayEnd.invoke(this)
+                }
+            }
+            if (imageOverlayTopEnd != null) {
+                val overlayModifier =
+                    if (imageOverlayTopEndEdgeInset) {
+                        Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(top = token.spacing.xs, end = token.spacing.xs)
+                    } else {
+                        Modifier.align(Alignment.TopEnd)
+                    }
+                Box(modifier = overlayModifier) {
+                    imageOverlayTopEnd.invoke(this)
                 }
             }
         }
@@ -505,6 +554,39 @@ private fun GImageCardContent(
 // ─────────────────────────────────────────────────────────────────────────────
 // Previews
 // ─────────────────────────────────────────────────────────────────────────────
+
+/** Preview-only twin of the exercise library list corner toggle sticker (circular scrim + glyph). */
+@Composable
+private fun PreviewExerciseLibraryListCornerToggleSticker(inCart: Boolean) {
+    val token = GymTheme.token
+    Box(
+        modifier = Modifier
+            .size(token.bodyAnalysis.exerciseLibraryCornerStickerTouchTargetSize)
+            .clickable(role = Role.Button, onClick = {}),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(token.bodyAnalysis.exerciseLibraryCornerStickerDiameter)
+                .clip(CircleShape)
+                .background(
+                    token.colors.surfaceSubtle.copy(alpha = PrimitiveAlphaTokens.SUBTLE_LAYER),
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            GIcon(
+                imageVector = if (inCart) {
+                    ExerciseLibraryPhosphorIcons.listToggleInCart
+                } else {
+                    ExerciseLibraryPhosphorIcons.listToggleNotInCart
+                },
+                contentDescription = null,
+                modifier = Modifier.size(token.bodyAnalysis.exerciseLibraryCornerActionGlyphSize),
+                tint = token.colors.primary,
+            )
+        }
+    }
+}
 
 @Preview(showBackground = true, name = "GImageCard — Selected")
 @Composable
@@ -623,9 +705,85 @@ private fun PreviewNonClickable() {
     }
 }
 
-@Preview(showBackground = true, name = "GImageCard — Library tile + Smart-Add")
+@Preview(showBackground = true, name = "GImageCard — Library tile + top toggle (add)")
 @Composable
-private fun PreviewLibraryTileQuickAdd() {
+private fun PreviewLibraryTileTopToggleAdd() {
+    GymTheme {
+        val token = GymTheme.token
+        Box(modifier = Modifier.padding(token.spacing.md)) {
+            GImageCard(
+                model = R.drawable.body_unsplash,
+                contentDescription = "Bench",
+                firstLineText = "Very long exercise name truncation test",
+                secondLineText = "Chest · Barbell",
+                cardSize = CardSize.ExerciseLibraryTile,
+                imageOverlayTopEnd = {
+                    PreviewExerciseLibraryListCornerToggleSticker(inCart = false)
+                },
+                imageOverlayTopEndEdgeInset = false,
+                reserveExerciseLibraryTextEndInset = false,
+                weakSelectionHighlight = false,
+                onClick = {},
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "GImageCard — Library tile + top toggle (in cart)")
+@Composable
+private fun PreviewLibraryTileTopToggleInCart() {
+    GymTheme {
+        val token = GymTheme.token
+        Box(modifier = Modifier.padding(token.spacing.md)) {
+            GImageCard(
+                model = R.drawable.body_unsplash,
+                contentDescription = "Bench",
+                firstLineText = "Very long exercise name truncation test",
+                secondLineText = "Chest · Barbell",
+                cardSize = CardSize.ExerciseLibraryTile,
+                imageOverlayTopEnd = {
+                    PreviewExerciseLibraryListCornerToggleSticker(inCart = true)
+                },
+                imageOverlayTopEndEdgeInset = false,
+                reserveExerciseLibraryTextEndInset = false,
+                selectionHighlight = true,
+                onClick = {},
+            )
+        }
+    }
+}
+
+@Preview(
+    showBackground = true,
+    name = "GImageCard — Library top toggle (in cart) — Dark",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
+@Composable
+private fun PreviewLibraryTileTopToggleInCartDark() {
+    GymTheme(darkTheme = true) {
+        val token = GymTheme.token
+        Box(modifier = Modifier.padding(token.spacing.md)) {
+            GImageCard(
+                model = R.drawable.body_unsplash,
+                contentDescription = "Bench",
+                firstLineText = "Very long exercise name truncation test",
+                secondLineText = "Chest · Barbell",
+                cardSize = CardSize.ExerciseLibraryTile,
+                imageOverlayTopEnd = {
+                    PreviewExerciseLibraryListCornerToggleSticker(inCart = true)
+                },
+                imageOverlayTopEndEdgeInset = false,
+                reserveExerciseLibraryTextEndInset = false,
+                selectionHighlight = true,
+                onClick = {},
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "GImageCard — Library tile + bottom overlay (legacy inset)")
+@Composable
+private fun PreviewLibraryTileBottomOverlayLegacy() {
     GymTheme {
         val token = GymTheme.token
         Box(modifier = Modifier.padding(token.spacing.md)) {
@@ -639,7 +797,9 @@ private fun PreviewLibraryTileQuickAdd() {
                     Surface(
                         onClick = {},
                         shape = RoundedCornerShape(token.radius.sm),
-                        color = token.colors.surface.copy(alpha = 0.92f),
+                        color = token.colors.surface.copy(
+                            alpha = PrimitiveAlphaTokens.IMAGE_CARD_TRAILING_OVERLAY_SURFACE,
+                        ),
                         shadowElevation = token.elevation.level0,
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
@@ -653,19 +813,16 @@ private fun PreviewLibraryTileQuickAdd() {
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center,
                         ) {
-                            Box(
+                            GIcon(
+                                imageVector = ExerciseLibraryPhosphorIcons.listToggleNotInCart,
+                                contentDescription = null,
                                 modifier = Modifier.size(token.bodyAnalysis.exerciseLibraryQuickAddIconContainerSize),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = null,
-                                    tint = token.colors.primary,
-                                )
-                            }
+                                tint = token.colors.primary,
+                            )
                         }
                     }
                 },
+                reserveExerciseLibraryTextEndInset = true,
                 selectionHighlight = true,
                 onClick = {},
             )

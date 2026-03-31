@@ -17,10 +17,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
@@ -28,13 +24,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.IntOffset
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.chip.GFilterChip
+import com.hoabui.virtualbody3d.ui.common_ui.atom.icon.GIcon
 import com.hoabui.virtualbody3d.ui.common_ui.atom.field.GTextField
 import com.hoabui.virtualbody3d.ui.exerciselibrary.ExerciseLibraryQuickChip
 import com.hoabui.virtualbody3d.ui.exerciselibrary.selectedQuickChip
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryActions
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
+import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
 
 @Composable
 fun ExerciseSearchBar(
@@ -44,11 +44,13 @@ fun ExerciseSearchBar(
     modifier: Modifier = Modifier,
 ) {
     val token = GymTheme.token
-    Surface(
+    GSurface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(token.radius.pill),
         color = token.colors.surface,
         shadowElevation = token.elevation.level1,
+        treatment = GSurfaceTreatment.Flat,
+        border = null,
     ) {
         GTextField(
             value = query,
@@ -62,8 +64,8 @@ fun ExerciseSearchBar(
             placeholderStyle = token.typography.bodyMedium,
             shape = RoundedCornerShape(token.radius.pill),
             leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Search,
+                GIcon(
+                    imageVector = ExerciseLibraryPhosphorIcons.search,
                     contentDescription = null,
                     modifier = Modifier.size(token.spacing.md),
                     tint = token.colors.textSecondary,
@@ -92,13 +94,25 @@ fun ExerciseSearchSuggestionChips(
         ),
     ) {
         items(ExerciseLibraryQuickChip.entries.toList(), key = { it.name }) { chip ->
+            val chipSelected = chip == selected
             GFilterChip(
                 label = stringResource(chip.labelRes),
-                selected = chip == selected,
+                selected = chipSelected,
                 onSelectedChange = { nowSelected ->
                     if (nowSelected) onQuickChipSelect(chip) else onQuickChipSelect(null)
                 },
                 labelStyle = token.typography.labelSmall,
+                leadingIcon = if (chipSelected) {
+                    {
+                        GIcon(
+                            imageVector = ExerciseLibraryPhosphorIcons.filterChipSelected,
+                            contentDescription = null,
+                            modifier = Modifier.size(token.spacing.sm),
+                        )
+                    }
+                } else {
+                    null
+                },
             )
         }
     }

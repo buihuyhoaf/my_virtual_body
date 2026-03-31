@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,7 +39,9 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
+import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.semantic.SemanticColorTokens
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -70,29 +73,30 @@ private fun resolveButtonColors(
     variant: GButtonVariant,
     enabled: Boolean,
     colors: SemanticColorTokens,
-    disabledContainerAlpha: Float,
-    disabledContentAlpha: Float,
-): GButtonColors = when (variant) {
-    GButtonVariant.Primary -> GButtonColors(
-        containerColor = if (enabled) colors.primary
-        else colors.primary.copy(alpha = disabledContainerAlpha),
-        contentColor = if (enabled) colors.onPrimary
-        else colors.onPrimary.copy(alpha = disabledContentAlpha),
-        borderColor = Color.Transparent,
-    )
-    GButtonVariant.Outlined -> GButtonColors(
-        containerColor = Color.Transparent,
-        contentColor = if (enabled) colors.primary
-        else colors.primary.copy(alpha = disabledContentAlpha),
-        borderColor = if (enabled) colors.primary
-        else colors.primary.copy(alpha = disabledContainerAlpha),
-    )
-    GButtonVariant.Ghost -> GButtonColors(
-        containerColor = Color.Transparent,
-        contentColor = if (enabled) colors.primary
-        else colors.primary.copy(alpha = disabledContentAlpha),
-        borderColor = Color.Transparent,
-    )
+): GButtonColors {
+    val disabledAlpha = PrimitiveAlphaTokens.DISABLED
+    return when (variant) {
+        GButtonVariant.Primary -> GButtonColors(
+            containerColor = if (enabled) colors.primary
+            else colors.primary.copy(alpha = disabledAlpha),
+            contentColor = if (enabled) colors.onPrimary
+            else colors.onPrimary.copy(alpha = disabledAlpha),
+            borderColor = Color.Transparent,
+        )
+        GButtonVariant.Outlined -> GButtonColors(
+            containerColor = Color.Transparent,
+            contentColor = if (enabled) colors.primary
+            else colors.primary.copy(alpha = disabledAlpha),
+            borderColor = if (enabled) colors.primary
+            else colors.primary.copy(alpha = disabledAlpha),
+        )
+        GButtonVariant.Ghost -> GButtonColors(
+            containerColor = Color.Transparent,
+            contentColor = if (enabled) colors.primary
+            else colors.primary.copy(alpha = disabledAlpha),
+            borderColor = Color.Transparent,
+        )
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -112,10 +116,11 @@ private fun resolveButtonColors(
  * Pointer interaction is disabled for the duration.
  *
  * ### Icon slots ([leadingIcon] / [trailingIcon])
- * Each slot receives [androidx.compose.material3.LocalContentColor] equal to the
- * resolved `contentColor` (set by [Surface]), so an `Icon` passed in will be tinted
- * correctly without any extra configuration. Each slot is constrained to a
- * [GymTheme.token.button.iconSize] bounding [Box].
+ * Each slot receives [LocalContentColor] from [Surface] (`contentColor`), so
+ * [Icon] and [GText] can tint from the same source. The label passes
+ * [LocalContentColor.current] into [GText] so it does not fall back to
+ * [SemanticColorTokens.textPrimary]. Disabled visuals use
+ * [PrimitiveAlphaTokens.DISABLED] on semantic container/content colors.
  *
  * @param text Button label. Truncated with an ellipsis if too long (single line).
  * @param onClick Callback. Not invoked when [isLoading] or `!`[enabled].
@@ -147,13 +152,12 @@ fun GButton(
         variant = variant,
         enabled = enabled,
         colors = token.colors,
-        disabledContainerAlpha = buttonTokens.disabledContainerAlpha,
-        disabledContentAlpha = buttonTokens.disabledContentAlpha,
     )
-    val contentCol = if (enabled && contentColor != null && variant == GButtonVariant.Ghost) {
-        contentColor
-    } else {
-        resolved.contentColor
+    val contentCol = when {
+        enabled && contentColor != null && variant == GButtonVariant.Ghost -> contentColor
+        !enabled && contentColor != null && variant == GButtonVariant.Ghost ->
+            contentColor.copy(alpha = PrimitiveAlphaTokens.DISABLED)
+        else -> resolved.contentColor
     }
 
     // Crossfade: content ↔ spinner over 150 ms (fast enough to feel snappy)
@@ -174,15 +178,18 @@ fun GButton(
         label = "g_button_spinner_alpha",
     )
 
-    Surface(
+        Surface(
         onClick = onClick,
         modifier = modifier
             .heightIn(min = buttonTokens.height)
             .semantics {
                 role = Role.Button
-                if (isLoading) stateDescription = "Loading"
+                when {
+                    isLoading -> stateDescription = "Loading"
+                    !enabled -> stateDescription = "Disabled"
+                }
             },
-        // Clicks suppressed during loading; visual enabled-state uses the `enabled` flag
+        // Material3 Surface suppresses clicks when false; combine with loading guard
         enabled = enabled && !isLoading,
         shape = RoundedCornerShape(buttonTokens.cornerRadius),
         color = resolved.containerColor,
@@ -242,13 +249,12 @@ fun GButton(
                         leadingIcon()
                     }
                 }
-                Text(
+                GText(
                     text = text,
                     style = token.typography.labelLarge,
+                    color = LocalContentColor.current,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    // No explicit color: inherits LocalContentColor from Surface → correct for
-                    // all enabled/disabled states without any extra CompositionLocalProvider
                 )
                 if (trailingIcon != null) {
                     Box(modifier = Modifier.size(buttonTokens.iconSize)) {

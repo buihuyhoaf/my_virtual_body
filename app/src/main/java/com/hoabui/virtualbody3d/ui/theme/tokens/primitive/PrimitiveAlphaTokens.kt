@@ -10,6 +10,10 @@ object PrimitiveAlphaTokens {
     const val SUBTLE_LAYER: Float = 0.8f
     /** Hero floating chips — glassy fill over [SemanticColorTokens.surfaceOverlay]. */
     const val HERO_CHIP_GLASS_FILL: Float = 0.7f
+    /** Image card: soften secondary line / glass badge fill (non-library subtitle, holistic badge). */
+    const val IMAGE_CARD_OVERLAY_MEDIUM: Float = 0.7f
+    /** Dense overlay surface (e.g. legacy trailing panel on library tile previews). */
+    const val IMAGE_CARD_TRAILING_OVERLAY_SURFACE: Float = 0.92f
     /** Sticky list headers (e.g. exercise library body region) over scrolling content. */
     const val STICKY_HEADER_SCRIM: Float = 0.9f
     /** Inner radial highlight on premium surfaces ([drawBehind], single pass). */

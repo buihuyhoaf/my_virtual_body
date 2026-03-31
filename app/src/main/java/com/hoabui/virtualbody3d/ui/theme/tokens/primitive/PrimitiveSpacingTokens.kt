@@ -10,6 +10,8 @@ import androidx.compose.ui.unit.dp
  */
 @Immutable
 data class PrimitiveSpacingTokens(
+    /** Zero spacing — use instead of raw `0.dp` in token-driven layouts. */
+    val none: Dp,
     val xxxs: Dp,
     val xxs: Dp,
     val xs: Dp,
@@ -25,6 +27,7 @@ data class PrimitiveSpacingTokens(
 ) {
     companion object {
         fun compact(): PrimitiveSpacingTokens = PrimitiveSpacingTokens(
+            none = 0.dp,
             xxxs = 2.dp,
             xxs = 4.dp,
             xs = 8.dp,
@@ -40,6 +43,7 @@ data class PrimitiveSpacingTokens(
         )
 
         fun expanded(): PrimitiveSpacingTokens = PrimitiveSpacingTokens(
+            none = 0.dp,
             xxxs = 2.dp,
             xxs = 6.dp,
             xs = 12.dp,

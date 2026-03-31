@@ -1,7 +1,10 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,16 +23,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material3.ripple
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
@@ -42,17 +39,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
+import com.hoabui.virtualbody3d.ui.common_ui.atom.divider.GDivider
+import com.hoabui.virtualbody3d.ui.common_ui.atom.icon.GIcon
 import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
 import com.hoabui.virtualbody3d.ui.common_ui.atom.field.GTextField
+import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
@@ -64,6 +64,8 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.state.defaultExerciseLibraryC
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.defaultExerciseLibraryCartTime
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.isAnchoredAddEnabled
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
+import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
 import java.time.Instant
 import java.time.LocalTime
@@ -77,6 +79,7 @@ fun CartThumbnailRow(
     cartItems: List<GExerciseCardUiModel>,
     activeExerciseId: String?,
     onSelectCartItem: (String) -> Unit,
+    onRemoveCartItem: (String) -> Unit,
     onClearAll: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -95,17 +98,17 @@ fun CartThumbnailRow(
                 ExerciseLibraryCartThumbnail(
                     item = item,
                     isActive = item.id == activeExerciseId,
-                    onClick = { onSelectCartItem(item.id) },
+                    onSelectCartItem = { onSelectCartItem(item.id) },
+                    onRemoveCartItem = { onRemoveCartItem(item.id) },
                 )
             }
         }
-        GText(
+        GButton(
             text = stringResource(R.string.exercise_library_cart_clear_all),
-            style = token.typography.labelSmall,
-            color = token.colors.error,
-            modifier = Modifier
-                .clickable(onClick = onClearAll)
-                .padding(start = token.spacing.xs),
+            onClick = onClearAll,
+            modifier = Modifier.padding(start = token.spacing.xs),
+            variant = GButtonVariant.Ghost,
+            contentColor = token.colors.error,
         )
     }
 }
@@ -124,66 +127,32 @@ fun CartScheduleRow(
         horizontalArrangement = Arrangement.spacedBy(token.spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Surface(
+        GButton(
+            text = dateButtonLabel,
             onClick = onDatePickClick,
-            shape = RoundedCornerShape(token.radius.pill),
-            color = token.colors.surfaceSubtle,
             modifier = Modifier.weight(1f),
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        horizontal = token.spacing.sm,
-                        vertical = token.spacing.xs,
-                    ),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.CalendarMonth,
+            variant = GButtonVariant.Outlined,
+            leadingIcon = {
+                GIcon(
+                    imageVector = ExerciseLibraryPhosphorIcons.cartScheduleDate,
                     contentDescription = null,
                     modifier = Modifier.size(token.bodyAnalysis.heroSlimChipIconSize),
-                    tint = token.colors.primary,
                 )
-                GText(
-                    text = dateButtonLabel,
-                    style = token.typography.labelMedium,
-                    color = token.colors.textPrimary,
-                    maxLines = 1,
-                )
-            }
-        }
-        Surface(
+            },
+        )
+        GButton(
+            text = timeButtonLabel,
             onClick = onTimePickClick,
-            shape = RoundedCornerShape(token.radius.pill),
-            color = token.colors.surfaceSubtle,
             modifier = Modifier.weight(1f),
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        horizontal = token.spacing.sm,
-                        vertical = token.spacing.xs,
-                    ),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Schedule,
+            variant = GButtonVariant.Outlined,
+            leadingIcon = {
+                GIcon(
+                    imageVector = ExerciseLibraryPhosphorIcons.cartScheduleTime,
                     contentDescription = null,
                     modifier = Modifier.size(token.bodyAnalysis.heroSlimChipIconSize),
-                    tint = token.colors.primary,
                 )
-                GText(
-                    text = timeButtonLabel,
-                    style = token.typography.labelMedium,
-                    color = token.colors.textPrimary,
-                    maxLines = 1,
-                )
-            }
-        }
+            },
+        )
     }
 }
 
@@ -254,8 +223,8 @@ fun CartInputRow(
                     )
                 }
                 ExerciseMeasurementMode.Duration -> {
-                    Icon(
-                        imageVector = Icons.Filled.Timer,
+                    GIcon(
+                        imageVector = ExerciseLibraryPhosphorIcons.cartDurationTimer,
                         contentDescription = stringResource(R.string.exercise_library_console_timer_cd),
                         modifier = Modifier.size(token.bodyAnalysis.heroSlimChipIconSize),
                         tint = token.colors.textSecondary,
@@ -282,27 +251,14 @@ fun CartInputRow(
             )
         }
         Spacer(modifier = Modifier.weight(1f))
-        Surface(
+        GButton(
+            text = stringResource(R.string.exercise_library_cart_add_short),
             onClick = onConfirm,
             modifier = Modifier
                 .height(precisionH)
                 .widthIn(max = addButtonMaxWidth),
             enabled = addEnabled,
-            shape = RoundedCornerShape(token.button.cornerRadius),
-            color = token.colors.primary,
-            contentColor = token.colors.onPrimary,
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                GText(
-                    text = stringResource(R.string.exercise_library_cart_add_short),
-                    style = token.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                    color = token.colors.onPrimary,
-                )
-            }
-        }
+        )
     }
 }
 
@@ -327,11 +283,11 @@ fun ExerciseLibrarySelectionBar(
     }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
-    val cartItems = remember(libraryState.sections, libraryState.itemDrafts) {
+    val cartItems = remember(libraryState.sections, libraryState.draftOrder) {
         val byId = libraryState.sections.asSequence()
             .flatMap { it.items.asSequence() }
             .associateBy { it.id }
-        libraryState.itemDrafts.keys.mapNotNull { byId[it] }
+        libraryState.draftOrder.mapNotNull { byId[it] }
     }
     val chooseDatePlaceholder = stringResource(R.string.exercise_library_cart_choose_date)
     val chooseTimePlaceholder = stringResource(R.string.exercise_library_cart_choose_time)
@@ -353,16 +309,18 @@ fun ExerciseLibrarySelectionBar(
     val addEnabled by remember {
         derivedStateOf { consoleSnapshot.value.isAnchoredAddEnabled() }
     }
-    Surface(
+    GSurface(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = barMin),
         shape = slabShape,
         color = token.colors.surface,
         shadowElevation = token.elevation.level3,
+        treatment = GSurfaceTreatment.Flat,
+        border = null,
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            HorizontalDivider(
+            GDivider(
                 modifier = Modifier.fillMaxWidth(),
                 thickness = dockTopThickness,
                 color = token.colors.borderStrong.copy(alpha = PrimitiveAlphaTokens.MEDIUM),
@@ -383,6 +341,7 @@ fun ExerciseLibrarySelectionBar(
                     cartItems = cartItems,
                     activeExerciseId = libraryState.activeExerciseId,
                     onSelectCartItem = actions.onSelectCartItem,
+                    onRemoveCartItem = actions.onRemoveCartItem,
                     onClearAll = actions.onClearCart,
                 )
                 CartScheduleRow(
@@ -436,7 +395,8 @@ fun ExerciseLibrarySelectionBar(
 private fun ExerciseLibraryCartThumbnail(
     item: GExerciseCardUiModel,
     isActive: Boolean,
-    onClick: () -> Unit,
+    onSelectCartItem: () -> Unit,
+    onRemoveCartItem: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val token = GymTheme.token
@@ -446,27 +406,79 @@ private fun ExerciseLibraryCartThumbnail(
     val activeInset = token.bodyAnalysis.exerciseLibraryCartThumbnailActiveInset
     val borderWidth = if (isActive) token.borderWidth.medium else token.borderWidth.hairline
     val borderColor = if (isActive) token.colors.primary else token.colors.borderSubtle
-    Surface(
-        onClick = onClick,
-        modifier = modifier.size(size),
-        shape = CircleShape,
-        color = token.colors.surface,
-        border = BorderStroke(borderWidth, borderColor),
-    ) {
+    val circularShape = remember(token.radius.pill) { RoundedCornerShape(token.radius.pill) }
+    val touch = token.bodyAnalysis.exerciseLibraryCornerStickerTouchTargetSize
+    Box(modifier = modifier.size(size)) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .then(
-                    if (isActive) Modifier.padding(activeInset) else Modifier,
-                ),
+                .border(BorderStroke(borderWidth, borderColor), circularShape)
+                .clip(circularShape)
+                .background(token.colors.surface),
         ) {
-            AsyncImage(
-                model = coilModel,
-                contentDescription = item.title,
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop,
+                    .then(
+                        if (isActive) Modifier.padding(activeInset) else Modifier,
+                    )
+                    .clip(circularShape),
+            ) {
+                AsyncImage(
+                    model = coilModel,
+                    contentDescription = item.title,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(circularShape)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = ripple(),
+                            onClick = onSelectCartItem,
+                        ),
+                    contentScale = ContentScale.Crop,
+                )
+            }
+        }
+        ExerciseLibraryCartRemoveSticker(
+            onRemove = onRemoveCartItem,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .size(touch),
+        )
+    }
+}
+
+@Composable
+private fun ExerciseLibraryCartRemoveSticker(
+    onRemove: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val token = GymTheme.token
+    val removeCd = stringResource(R.string.exercise_library_cart_remove_item_cd)
+    Box(
+        modifier = modifier
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(bounded = true),
+                role = Role.Button,
+                onClick = onRemove,
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(token.bodyAnalysis.exerciseLibraryCornerStickerDiameter)
+                .clip(CircleShape)
+                .background(
+                    token.colors.surfaceSubtle.copy(alpha = PrimitiveAlphaTokens.SUBTLE_LAYER),
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            GIcon(
+                imageVector = ExerciseLibraryPhosphorIcons.cartRemove,
+                contentDescription = removeCd,
+                modifier = Modifier.size(token.bodyAnalysis.exerciseLibraryCornerActionGlyphSize),
+                tint = token.colors.textPrimary,
             )
         }
     }

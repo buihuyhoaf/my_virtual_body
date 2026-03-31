@@ -3,6 +3,7 @@ package com.hoabui.virtualbody3d.domain.model.exercise
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.isAnchoredAddEnabled
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -46,6 +47,7 @@ class ExerciseDurationTest {
         )
         val state = ExerciseLibraryUiState(
             itemDrafts = drafts,
+            draftOrder = persistentListOf("a", "b"),
             selectedDate = 1L,
             selectedTime = LocalTime.NOON,
             exerciseMeasurementById = modes,
@@ -59,6 +61,7 @@ class ExerciseDurationTest {
         val drafts = persistentMapOf("b" to ExerciseDraft(sets = "0", reps = "0"))
         val state = ExerciseLibraryUiState(
             itemDrafts = drafts,
+            draftOrder = persistentListOf("b"),
             selectedDate = 1L,
             selectedTime = LocalTime.NOON,
             exerciseMeasurementById = modes,

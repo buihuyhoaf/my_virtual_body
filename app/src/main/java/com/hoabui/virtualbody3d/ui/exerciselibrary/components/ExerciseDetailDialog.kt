@@ -12,12 +12,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material3.Icon
 import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
+import com.hoabui.virtualbody3d.ui.common_ui.atom.icon.GIcon
 import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
@@ -39,6 +35,7 @@ import com.hoabui.virtualbody3d.ui.common_ui.image.toImageModel
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.info.GInfoRow
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
+import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
 import coil.compose.AsyncImage
 
 // ----- Small reusable composables -----
@@ -168,7 +165,7 @@ fun ExerciseDetailDialog(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(token.spacing.xxl * 4)
+                            .height(token.bodyDetail.heroHeight)
                             .clip(
                                 RoundedCornerShape(
                                     topStart = token.radius.lg,
@@ -182,7 +179,7 @@ fun ExerciseDetailDialog(
                             contentDescription = null,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(token.spacing.xxl * 4),
+                                .height(token.bodyDetail.heroHeight),
                             contentScale = ContentScale.Crop
                         )
                     }
@@ -206,8 +203,8 @@ fun ExerciseDetailDialog(
                             label = stringResource(R.string.exercise_detail_body_region),
                             value = stringResource(ExerciseDisplayResources.bodyRegionResId(exercise.bodyRegion)),
                             leading = {
-                                Icon(
-                                    imageVector = Icons.Default.Place,
+                                GIcon(
+                                    imageVector = ExerciseLibraryPhosphorIcons.detailBodyRegion,
                                     contentDescription = null,
                                     modifier = Modifier.size(token.spacing.md),
                                     tint = token.colors.textSecondary,
@@ -218,8 +215,8 @@ fun ExerciseDetailDialog(
                             label = stringResource(R.string.exercise_detail_equipment),
                             value = stringResource(ExerciseDisplayResources.equipmentResId(exercise.equipment)),
                             leading = {
-                                Icon(
-                                    imageVector = Icons.Default.Build,
+                                GIcon(
+                                    imageVector = ExerciseLibraryPhosphorIcons.detailEquipment,
                                     contentDescription = null,
                                     modifier = Modifier.size(token.spacing.md),
                                     tint = token.colors.textSecondary,
@@ -234,8 +231,8 @@ fun ExerciseDetailDialog(
                                 label = stringResource(R.string.exercise_detail_primary_muscles),
                                 value = primaryLabels.joinToString(),
                                 leading = {
-                                    Icon(
-                                        imageVector = Icons.Default.FitnessCenter,
+                                    GIcon(
+                                        imageVector = ExerciseLibraryPhosphorIcons.detailCategory,
                                         contentDescription = null,
                                         modifier = Modifier.size(token.spacing.md),
                                         tint = token.colors.textSecondary,
@@ -251,8 +248,8 @@ fun ExerciseDetailDialog(
                                 label = stringResource(R.string.exercise_detail_secondary_muscles),
                                 value = secondaryLabels.joinToString(),
                                 leading = {
-                                    Icon(
-                                        imageVector = Icons.Default.FitnessCenter,
+                                    GIcon(
+                                        imageVector = ExerciseLibraryPhosphorIcons.detailCategory,
                                         contentDescription = null,
                                         modifier = Modifier.size(token.spacing.md),
                                         tint = token.colors.textSecondary,

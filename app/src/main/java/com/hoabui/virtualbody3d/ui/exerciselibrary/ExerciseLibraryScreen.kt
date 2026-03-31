@@ -6,9 +6,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -37,6 +38,8 @@ import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
 import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
+import com.hoabui.virtualbody3d.ui.exerciselibrary.components.AddExerciseSuccessDialog
+import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryWorkoutPlanFab
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseDetailDialog
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryEmptyState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySearchLayer
@@ -71,14 +74,18 @@ fun ExerciseLibraryScreen(
             onQueryChange = viewModel::updateSearchQuery,
             onQuickChipSelect = viewModel::selectQuickChip,
             onExerciseClick = viewModel::selectExerciseForDetail,
-            onQuickAdd = viewModel::onQuickAdd,
+            onLibraryListToggle = viewModel::toggleExerciseInCartFromList,
+            onDetailAddToCart = viewModel::ensureInCartAndFocusFromDetail,
             onSelectCartItem = viewModel::setActiveCartExercise,
+            onRemoveCartItem = viewModel::removeFromCart,
             onClearCart = viewModel::clearAll,
             onCartDateSelected = viewModel::updateCartDate,
             onCartTimeSelected = viewModel::updateCartTime,
             onActiveDraftChange = viewModel::updateActiveDraft,
             onConfirmCart = viewModel::confirmCartToWorkout,
             onClearExerciseDetail = viewModel::clearExerciseDetail,
+            onDismissAddExerciseSuccess = viewModel::dismissAddExerciseSuccess,
+            onOpenWorkoutPlan = viewModel::onWorkoutPlanFabClick,
         )
     }
 
@@ -94,12 +101,19 @@ fun ExerciseLibraryScreen(
                     state = data,
                     actions = actions,
                 )
+                data.addExerciseSuccess?.let { summary ->
+                    AddExerciseSuccessDialog(
+                        summary = summary,
+                        onDismiss = actions.onDismissAddExerciseSuccess,
+                        onViewWorkoutPlan = actions.onOpenWorkoutPlan,
+                    )
+                }
                 data.selectedExerciseForDetail?.let { exercise ->
                     val onDetailAdd = remember(exercise.id, actions, addToWorkoutRef, dataRef) {
                         { ex: Exercise ->
                             val d = dataRef.value
                             val wasInCart = d.itemDrafts.containsKey(ex.id)
-                            actions.onQuickAdd(ex.id)
+                            actions.onDetailAddToCart(ex.id)
                             actions.onClearExerciseDetail()
                             if (!wasInCart) addToWorkoutRef.value(ex.id)
                         }
@@ -123,7 +137,8 @@ fun ExerciseLibraryScreenContent(
 ) {
     val isSearchFocused = remember { mutableStateOf(false) }
     val token = GymTheme.token
-    val quickAddCd = stringResource(R.string.exercise_quick_add_cd)
+    val listToggleAddCd = stringResource(R.string.exercise_library_list_toggle_add_cd)
+    val listToggleRemoveCd = stringResource(R.string.exercise_library_cart_remove_item_cd)
     val fadeSpec = tween<Float>(
         durationMillis = token.motion.duration.standard,
         easing = token.motion.easing.standard,
@@ -158,9 +173,19 @@ fun ExerciseLibraryScreenContent(
     }
     val cartVisible = state.itemDrafts.isNotEmpty()
     val barMinHeight = token.bodyAnalysis.exerciseLibrarySelectionBarMinHeight
-    val listBottomPadding =
-        if (cartVisible) barMinHeight else token.spacing.md
-    Box(modifier = modifier.fillMaxSize()) {
+    val fabSize = token.bodyAnalysis.exerciseLibraryWorkoutPlanFabSize
+    val fabListGutter = token.spacing.md
+    val listBottomPadding: Dp = fabSize + fabListGutter +
+        if (cartVisible) barMinHeight else token.spacing.none
+    val fabBottomPadding by animateDpAsState(
+        targetValue = if (cartVisible) barMinHeight + fabListGutter else fabListGutter,
+        animationSpec = tween(
+            durationMillis = token.motion.duration.standard,
+            easing = token.motion.easing.standard,
+        ),
+        label = "exercise_library_fab_bottom",
+    )
+    Box(modifier = modifier.fillMaxSize().navigationBarsPadding()) {
         LazyColumn(
             state = lazyListState,
             modifier = Modifier.fillMaxSize(),
@@ -236,9 +261,10 @@ fun ExerciseLibraryScreenContent(
                             modifier = Modifier
                                 .padding(horizontal = token.spacing.md),
                             section = section,
-                            onExerciseClick = actions.onExerciseClick,
-                            onQuickAdd = actions.onQuickAdd,
-                            quickAddContentDescription = quickAddCd,
+                            onNavigateDetail = actions.onExerciseClick,
+                            onToggleSelection = actions.onLibraryListToggle,
+                            toggleAddContentDescription = listToggleAddCd,
+                            toggleRemoveContentDescription = listToggleRemoveCd,
                         )
                     }
                 }
@@ -261,6 +287,28 @@ fun ExerciseLibraryScreenContent(
                 actions = actions,
                 modifier = Modifier
                     .fillMaxWidth(),
+            )
+        }
+        AnimatedVisibility(
+            visible = true,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(
+                    end = token.spacing.md,
+                    bottom = fabBottomPadding,
+                ),
+            enter = fadeIn(fadeSpec) + slideInVertically(
+                animationSpec = cartEnterSlide,
+                initialOffsetY = { it / 2 },
+            ),
+            exit = fadeOut(fadeSpec) + slideOutVertically(
+                animationSpec = cartEnterSlide,
+                targetOffsetY = { it / 2 },
+            ),
+        ) {
+            ExerciseLibraryWorkoutPlanFab(
+                badgeCount = state.workoutPlanFabBadgeCount,
+                onClick = actions.onOpenWorkoutPlan,
             )
         }
     }
