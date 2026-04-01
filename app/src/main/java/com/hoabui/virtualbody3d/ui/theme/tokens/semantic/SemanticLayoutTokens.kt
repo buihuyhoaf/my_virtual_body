@@ -95,6 +95,15 @@ data class BodyAnalysisLayoutSemantics(
     val exerciseLibraryCornerActionGlyphSize: Dp,
     /** Expanded touch target for corner stickers (a11y / scroll safety). */
     val exerciseLibraryCornerStickerTouchTargetSize: Dp,
+    /** Visual diameter of the cart-remove "X" badge only; list/tile corner stickers use [exerciseLibraryCornerStickerDiameter]. */
+    val exerciseLibraryCartRemoveStickerVisualDiameter: Dp,
+    /** Glyph size for cart-remove only; list corner actions use [exerciseLibraryCornerActionGlyphSize]. */
+    val exerciseLibraryCartRemoveGlyphSize: Dp,
+    /**
+     * Touch target for anchored cart remove only (TopEnd on [exerciseLibraryCartThumbnailSize]).
+     * Strictly below 28dp so thumbnail center stays selectable; list tiles use [exerciseLibraryCornerStickerTouchTargetSize].
+     */
+    val exerciseLibraryCartRemoveTouchTargetSize: Dp,
 )
 
 fun gymBodyAnalysisLayoutSemantics(): BodyAnalysisLayoutSemantics = BodyAnalysisLayoutSemantics(
@@ -174,6 +183,9 @@ fun gymBodyAnalysisLayoutSemantics(): BodyAnalysisLayoutSemantics = BodyAnalysis
     exerciseLibraryCornerStickerDiameter = 30.dp,
     exerciseLibraryCornerActionGlyphSize = 24.dp,
     exerciseLibraryCornerStickerTouchTargetSize = 48.dp,
+    exerciseLibraryCartRemoveStickerVisualDiameter = 20.dp,
+    exerciseLibraryCartRemoveGlyphSize = 14.dp,
+    exerciseLibraryCartRemoveTouchTargetSize = 27.dp,
 )
 
 @Immutable

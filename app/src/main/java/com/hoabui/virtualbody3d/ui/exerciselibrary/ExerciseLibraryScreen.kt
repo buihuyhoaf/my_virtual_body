@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -185,10 +184,13 @@ fun ExerciseLibraryScreenContent(
         ),
         label = "exercise_library_fab_bottom",
     )
-    Box(modifier = modifier.fillMaxSize().navigationBarsPadding()) {
+    // Navigation bar insets apply to scroll content and FAB only so the cart slab can sit flush with
+    // the window bottom (no dead band between the selection bar and system nav / screen edge).
+    Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(
             state = lazyListState,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize(),
             contentPadding = PaddingValues(bottom = listBottomPadding),
         ) {
             stickyHeader(
@@ -285,8 +287,7 @@ fun ExerciseLibraryScreenContent(
             ExerciseLibrarySelectionBar(
                 libraryState = state,
                 actions = actions,
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
             )
         }
         AnimatedVisibility(

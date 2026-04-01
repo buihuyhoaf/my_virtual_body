@@ -132,6 +132,9 @@ data class BodyAnalysisTokens(
     val exerciseLibraryCornerStickerDiameter: Dp,
     val exerciseLibraryCornerActionGlyphSize: Dp,
     val exerciseLibraryCornerStickerTouchTargetSize: Dp,
+    val exerciseLibraryCartRemoveStickerVisualDiameter: Dp,
+    val exerciseLibraryCartRemoveGlyphSize: Dp,
+    val exerciseLibraryCartRemoveTouchTargetSize: Dp,
     val gImageCardSelectedSurfaceTintAlpha: Float,
     val gImageCardWeakSelectionSurfaceTintAlpha: Float,
 )
@@ -262,6 +265,9 @@ fun gymBodyAnalysisTokens(
         exerciseLibraryCornerStickerDiameter = layout.exerciseLibraryCornerStickerDiameter,
         exerciseLibraryCornerActionGlyphSize = layout.exerciseLibraryCornerActionGlyphSize,
         exerciseLibraryCornerStickerTouchTargetSize = layout.exerciseLibraryCornerStickerTouchTargetSize,
+        exerciseLibraryCartRemoveStickerVisualDiameter = layout.exerciseLibraryCartRemoveStickerVisualDiameter,
+        exerciseLibraryCartRemoveGlyphSize = layout.exerciseLibraryCartRemoveGlyphSize,
+        exerciseLibraryCartRemoveTouchTargetSize = layout.exerciseLibraryCartRemoveTouchTargetSize,
         gImageCardSelectedSurfaceTintAlpha = alpha.IMAGE_CARD_SELECTED_TINT,
         gImageCardWeakSelectionSurfaceTintAlpha = alpha.IMAGE_CARD_WEAK_SELECTION_TINT,
     )

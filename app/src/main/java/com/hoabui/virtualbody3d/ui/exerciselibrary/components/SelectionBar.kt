@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Surface
 import androidx.compose.material3.ripple
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -407,7 +408,7 @@ private fun ExerciseLibraryCartThumbnail(
     val borderWidth = if (isActive) token.borderWidth.medium else token.borderWidth.hairline
     val borderColor = if (isActive) token.colors.primary else token.colors.borderSubtle
     val circularShape = remember(token.radius.pill) { RoundedCornerShape(token.radius.pill) }
-    val touch = token.bodyAnalysis.exerciseLibraryCornerStickerTouchTargetSize
+    val removeTouch = token.bodyAnalysis.exerciseLibraryCartRemoveTouchTargetSize
     Box(modifier = modifier.size(size)) {
         Box(
             modifier = Modifier
@@ -443,7 +444,7 @@ private fun ExerciseLibraryCartThumbnail(
             onRemove = onRemoveCartItem,
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .size(touch),
+                .size(removeTouch),
         )
     }
 }
@@ -455,6 +456,8 @@ private fun ExerciseLibraryCartRemoveSticker(
 ) {
     val token = GymTheme.token
     val removeCd = stringResource(R.string.exercise_library_cart_remove_item_cd)
+    val visualDiameter = token.bodyAnalysis.exerciseLibraryCartRemoveStickerVisualDiameter
+    val glyphSize = token.bodyAnalysis.exerciseLibraryCartRemoveGlyphSize
     Box(
         modifier = modifier
             .clickable(
@@ -465,21 +468,27 @@ private fun ExerciseLibraryCartRemoveSticker(
             ),
         contentAlignment = Alignment.Center,
     ) {
-        Box(
-            modifier = Modifier
-                .size(token.bodyAnalysis.exerciseLibraryCornerStickerDiameter)
-                .clip(CircleShape)
-                .background(
-                    token.colors.surfaceSubtle.copy(alpha = PrimitiveAlphaTokens.SUBTLE_LAYER),
-                ),
-            contentAlignment = Alignment.Center,
+        Surface(
+            modifier = Modifier.size(visualDiameter),
+            shape = CircleShape,
+            color = token.colors.error,
+            border = BorderStroke(
+                token.borderWidth.hairline,
+                token.colors.onError.copy(alpha = PrimitiveAlphaTokens.LOW),
+            ),
+            shadowElevation = token.elevation.level1,
         ) {
-            GIcon(
-                imageVector = ExerciseLibraryPhosphorIcons.cartRemove,
-                contentDescription = removeCd,
-                modifier = Modifier.size(token.bodyAnalysis.exerciseLibraryCornerActionGlyphSize),
-                tint = token.colors.textPrimary,
-            )
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                GIcon(
+                    imageVector = ExerciseLibraryPhosphorIcons.cartRemove,
+                    contentDescription = removeCd,
+                    modifier = Modifier.size(glyphSize),
+                    tint = token.colors.onError,
+                )
+            }
         }
     }
 }
