@@ -19,10 +19,6 @@ data class ExerciseDto(
     val category: String? = null,
     @SerializedName("description")
     val description: String? = null,
-    @SerializedName("primary_muscles")
-    val primaryMuscles: List<String>? = null,
-    @SerializedName("secondary_muscles")
-    val secondaryMuscles: List<String>? = null,
     @SerializedName("equipment")
     val equipment: String? = null,
     @SerializedName("safety_notes")

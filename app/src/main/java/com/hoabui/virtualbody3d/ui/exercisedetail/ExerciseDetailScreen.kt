@@ -11,8 +11,7 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseDetailDial
 @Composable
 fun ExerciseDetailScreen(
     onBack: () -> Unit,
-    onAddToWorkout: (String) -> Unit,
-    viewModel: ExerciseDetailViewModel = hiltViewModel()
+    viewModel: ExerciseDetailViewModel = hiltViewModel(),
 ) {
     val screenState by viewModel.state.collectAsStateWithLifecycle()
     UiStateContent(
@@ -20,9 +19,8 @@ fun ExerciseDetailScreen(
         successContent = { _, exercise ->
             ExerciseDetailDialog(
                 exercise = exercise,
-                onAddClick = { onAddToWorkout(it.id) },
-                onDismiss = onBack
+                onDismiss = onBack,
             )
-        }
+        },
     )
 }

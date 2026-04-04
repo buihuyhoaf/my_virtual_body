@@ -140,6 +140,14 @@ data class BodyAnalysisTokens(
     val exerciseLibraryBookingDateChipHeight: Dp,
     val exerciseLibraryBookingTimeGridCellMinHeight: Dp,
     val exerciseLibraryBookingSectionIconSize: Dp,
+    /** Fixed size for booking strip thumbnails (matches date chip height / 40dp scale); avoids LazyRow remeasure jitter. */
+    val exerciseLibraryBookingStripThumbnailSize: Dp,
+    /** Horizontal gap between strip thumbnail and title column ([BodyAnalysisLayoutSemantics.exerciseLibraryBookingStripImageTextGap]). */
+    val exerciseLibraryBookingStripImageTextGap: Dp,
+    /** Fixed width for each horizontal exercise snapshot card. */
+    val exerciseLibraryBookingStripItemWidth: Dp,
+    /** Max width for the trailing location selector label; ellipsis beyond this. */
+    val exerciseLibraryBookingLocationSelectorMaxWidth: Dp,
     val exerciseLibraryBookingSheetMaxHeightFraction: Float,
     val exerciseLibraryBookingTimeSlotHorizontalMinWidth: Dp,
     val gImageCardSelectedSurfaceTintAlpha: Float,
@@ -282,6 +290,10 @@ fun gymBodyAnalysisTokens(
         exerciseLibraryBookingDateChipHeight = layout.exerciseLibraryBookingDateChipHeight,
         exerciseLibraryBookingTimeGridCellMinHeight = layout.exerciseLibraryBookingTimeGridCellMinHeight,
         exerciseLibraryBookingSectionIconSize = layout.exerciseLibraryBookingSectionIconSize,
+        exerciseLibraryBookingStripThumbnailSize = layout.exerciseLibraryBookingDateChipHeight,
+        exerciseLibraryBookingStripImageTextGap = layout.exerciseLibraryBookingStripImageTextGap,
+        exerciseLibraryBookingStripItemWidth = layout.exerciseLibraryBookingStripItemWidth,
+        exerciseLibraryBookingLocationSelectorMaxWidth = layout.exerciseLibraryBookingLocationSelectorMaxWidth,
         exerciseLibraryBookingSheetMaxHeightFraction = layout.exerciseLibraryBookingSheetMaxHeightFraction,
         exerciseLibraryBookingTimeSlotHorizontalMinWidth = layout.exerciseLibraryBookingTimeSlotHorizontalMinWidth,
         gImageCardSelectedSurfaceTintAlpha = alpha.IMAGE_CARD_SELECTED_TINT,

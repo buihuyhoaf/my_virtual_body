@@ -21,6 +21,8 @@ data class PrimitiveSpacingTokens(
     val xl: Dp,
     val xxl: Dp,
     val xxxl: Dp,
+    /** Tight gap (e.g. booking location label vs selector). */
+    val spacingStep1: Dp,
     val iconMedium: Dp,
     val buttonPrimary: Dp,
     val dividerThickness: Dp
@@ -37,6 +39,7 @@ data class PrimitiveSpacingTokens(
             xl = 32.dp,
             xxl = 48.dp,
             xxxl = 56.dp,
+            spacingStep1 = 2.dp,
             iconMedium = 28.dp,
             buttonPrimary = 72.dp,
             dividerThickness = 1.dp
@@ -53,6 +56,7 @@ data class PrimitiveSpacingTokens(
             xl = 40.dp,
             xxl = 56.dp,
             xxxl = 64.dp,
+            spacingStep1 = 2.dp,
             iconMedium = 32.dp,
             buttonPrimary = 80.dp,
             dividerThickness = 1.dp

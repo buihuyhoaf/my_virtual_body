@@ -47,7 +47,6 @@ import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiMo
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toCoilModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryActions
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.canOpenBooking
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
@@ -74,11 +73,17 @@ fun CartThumbnailRow(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             items(cartItems, key = { it.id }) { item ->
+                val selectHandler = remember(item.id, onSelectCartItem) {
+                    { onSelectCartItem(item.id) }
+                }
+                val removeHandler = remember(item.id, onRemoveCartItem) {
+                    { onRemoveCartItem(item.id) }
+                }
                 ExerciseLibraryCartThumbnail(
                     item = item,
                     isActive = item.id == activeExerciseId,
-                    onSelectCartItem = { onSelectCartItem(item.id) },
-                    onRemoveCartItem = { onRemoveCartItem(item.id) },
+                    onSelectCartItem = selectHandler,
+                    onRemoveCartItem = removeHandler,
                 )
             }
         }
@@ -216,7 +221,7 @@ fun ExerciseLibrarySelectionBar(
     val activeMeasurementMode = libraryState.activeExerciseId?.let { id ->
         libraryState.exerciseMeasurementById[id]
     } ?: ExerciseMeasurementMode.Strength
-    val bookingEnabled = libraryState.canOpenBooking()
+    val bookingEnabled = libraryState.isAddToSessionEnabled
     GSurface(
         modifier = modifier
             .fillMaxWidth()

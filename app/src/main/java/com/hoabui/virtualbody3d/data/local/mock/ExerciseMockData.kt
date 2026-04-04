@@ -12,11 +12,9 @@ object ExerciseMockData {
             localImageName = "body_unsplash",
             bodyRegion = "Chest",
             category = "Strength",
-            description = "Bench press",
-            primaryMuscles = listOf("Pectoralis", "Triceps"),
-            secondaryMuscles = listOf("Deltoids"),
+            description = "1. Nằm trên ghế, mắt thẳng dưới thanh đòn.\n2. Hạ tạ xuống giữa ngực, cùi chỏ tạo góc 45-75 độ.\n3. Đẩy tạ lên và thở ra mạnh.",
             equipment = "Barbell",
-            safetyNotes = "Keep shoulder blades retracted.",
+            safetyNotes = "Giữ bả vai ép sát xuống ghế trong suốt quá trình tập.",
             lastWeightKg = 80.0
         ),
         ExerciseDto(
@@ -26,11 +24,9 @@ object ExerciseMockData {
             localImageName = "body_unsplash",
             bodyRegion = "Chest",
             category = "Strength",
-            description = "Incline dumbbell press",
-            primaryMuscles = listOf("Pectoralis"),
-            secondaryMuscles = listOf("Triceps"),
+            description = "1. Chỉnh ghế dốc 30-45 độ.\n2. Hạ tạ xuống ngang ngực trên, giữ cổ tay thẳng.\n3. Ép ngực đẩy tạ lên cao nhưng không khóa khớp cùi chỏ.",
             equipment = "Dumbbell",
-            safetyNotes = "Avoid flaring elbows.",
+            safetyNotes = "Tránh để cùi chỏ mở quá rộng gây áp lực lên khớp vai.",
             lastWeightKg = 30.0
         ),
         ExerciseDto(
@@ -40,11 +36,9 @@ object ExerciseMockData {
             localImageName = "body_unsplash",
             bodyRegion = "Back",
             category = "Strength",
-            description = "Lat pulldown",
-            primaryMuscles = listOf("LatissimusDorsi"),
-            secondaryMuscles = listOf("Biceps"),
+            description = "1. Ngồi thẳng, tay cầm thanh xà rộng hơn vai.\n2. Kéo thanh xà xuống sát ngực trên, hướng cùi chỏ ra sau.\n3. Thả tạ lên chậm và cảm nhận cơ xô dãn ra.",
             equipment = "Cable",
-            safetyNotes = "Pull with back, not momentum.",
+            safetyNotes = "Dùng cơ lưng để kéo, tránh dùng lực quán tính từ việc ngả người.",
             lastWeightKg = 50.0
         ),
         ExerciseDto(
@@ -54,11 +48,9 @@ object ExerciseMockData {
             localImageName = "body_unsplash",
             bodyRegion = "Back",
             category = "Strength",
-            description = "Seated cable row",
-            primaryMuscles = listOf("LatissimusDorsi", "Biceps"),
-            secondaryMuscles = listOf("Deltoids"),
+            description = "1. Ngồi thẳng lưng, chân đặt vững trên bàn đạp.\n2. Kéo tay cầm về phía bụng dưới, ép chặt xương bả vai.\n3. Giữ lưng cố định, không ngả người quá sâu.",
             equipment = "Cable",
-            safetyNotes = "Keep chest tall.",
+            safetyNotes = "Luôn giữ ngực cao và lưng thẳng.",
             lastWeightKg = 55.0
         ),
         ExerciseDto(
@@ -68,11 +60,9 @@ object ExerciseMockData {
             localImageName = "body_unsplash",
             bodyRegion = "Shoulders",
             category = "Strength",
-            description = "Overhead press",
-            primaryMuscles = listOf("Deltoids", "Triceps"),
-            secondaryMuscles = listOf("Abdominals"),
+            description = "1. Đứng thẳng, tay cầm tạ rộng bằng vai.\n2. Đẩy tạ thẳng lên trên đầu cho đến khi tay thẳng.\n3. Gồng core và mông để giữ cơ thể ổn định.",
             equipment = "Barbell",
-            safetyNotes = "Brace core through the press.",
+            safetyNotes = "Không để lưng dưới bị võng khi đẩy tạ lên cao.",
             lastWeightKg = 45.0
         ),
         ExerciseDto(
@@ -82,11 +72,9 @@ object ExerciseMockData {
             localImageName = "body_unsplash",
             bodyRegion = "Shoulders",
             category = "Strength",
-            description = "Lateral raise",
-            primaryMuscles = listOf("Deltoids"),
-            secondaryMuscles = listOf(),
+            description = "1. Đứng thẳng, tay cầm tạ đơn hai bên hông.\n2. Nâng tạ sang hai bên cho đến khi ngang vai.\n3. Hạ tạ xuống chậm để tối ưu áp lực lên cơ vai giữa.",
             equipment = "Dumbbell",
-            safetyNotes = "Control the eccentric.",
+            safetyNotes = "Kiểm soát nhịp hạ tạ, tránh vung vẩy quá mạnh.",
             lastWeightKg = 12.0
         ),
         ExerciseDto(
@@ -96,11 +84,9 @@ object ExerciseMockData {
             localImageName = "body_unsplash",
             bodyRegion = "Arms",
             category = "Strength",
-            description = "Barbell curl",
-            primaryMuscles = listOf("Biceps"),
-            secondaryMuscles = listOf(),
+            description = "1. Đứng thẳng, lòng bàn tay hướng về phía trước.\n2. Cuộn tạ lên phía vai, giữ cùi chỏ cố định sát sườn.\n3. Thả tạ xuống chậm, không để tạ rơi tự do.",
             equipment = "Barbell",
-            safetyNotes = "Do not swing torso.",
+            safetyNotes = "Không đung đưa thân người để lấy đà.",
             lastWeightKg = 25.0
         ),
         ExerciseDto(
@@ -110,11 +96,9 @@ object ExerciseMockData {
             localImageName = "body_unsplash",
             bodyRegion = "Arms",
             category = "Strength",
-            description = "Triceps pushdown",
-            primaryMuscles = listOf("Triceps"),
-            secondaryMuscles = listOf(),
+            description = "1. Đứng hơi nghiêng người, tay cầm thanh xà hoặc dây cáp.\n2. Đẩy cáp xuống cho đến khi tay thẳng hoàn toàn.\n3. Giữ cùi chỏ cố định, chỉ di chuyển cẳng tay.",
             equipment = "Cable",
-            safetyNotes = "Keep elbows fixed.",
+            safetyNotes = "Giữ cùi chỏ sát thân mình trong suốt hiệp tập.",
             lastWeightKg = 30.0
         ),
         ExerciseDto(
@@ -124,11 +108,9 @@ object ExerciseMockData {
             localImageName = "body_unsplash",
             bodyRegion = "Core",
             category = "Mobility",
-            description = "Plank hold",
-            primaryMuscles = listOf("Abdominals"),
-            secondaryMuscles = listOf("Glutes"),
+            description = "1. Chống cùi chỏ xuống sàn, cơ thể thẳng từ đầu đến gót chân.\n2. Siết chặt cơ bụng và mông.\n3. Duy trì nhịp thở đều đặn trong suốt thời gian giữ.",
             equipment = "Bodyweight",
-            safetyNotes = "Avoid lower-back sag.",
+            safetyNotes = "Tránh để hông bị võng xuống sàn gây đau lưng dưới.",
             measurementMode = "duration",
         ),
         ExerciseDto(
@@ -138,11 +120,9 @@ object ExerciseMockData {
             localImageName = "body_unsplash",
             bodyRegion = "Core",
             category = "Stretching",
-            description = "Russian twist",
-            primaryMuscles = listOf("Abdominals"),
-            secondaryMuscles = listOf(),
+            description = "1. Ngồi hơi ngả người, chân nhấc khỏi sàn.\n2. Xoay thân người sang hai bên, tay chạm sàn hoặc cầm tạ.\n3. Tập trung vào sự co bóp của cơ bụng chéo.",
             equipment = "Bodyweight",
-            safetyNotes = "Move with control."
+            safetyNotes = "Di chuyển có kiểm soát, không xoay quá đà gây ảnh hưởng cột sống."
         ),
         ExerciseDto(
             id = "11",
@@ -151,11 +131,9 @@ object ExerciseMockData {
             localImageName = "body_unsplash",
             bodyRegion = "Legs",
             category = "Strength",
-            description = "Back squat",
-            primaryMuscles = listOf("Quadriceps", "Glutes"),
-            secondaryMuscles = listOf("Hamstrings"),
+            description = "1. Đứng chân rộng bằng vai, mũi chân hướng nhẹ ra ngoài.\n2. Hạ hông xuống như đang ngồi vào ghế, giữ lưng thẳng.\n3. Đạp mạnh gót chân để đứng dậy.",
             equipment = "Barbell",
-            safetyNotes = "Track knees over toes.",
+            safetyNotes = "Luôn để đầu gối hướng theo hướng mũi chân.",
             lastWeightKg = 100.0
         ),
         ExerciseDto(
@@ -165,11 +143,9 @@ object ExerciseMockData {
             localImageName = "body_unsplash",
             bodyRegion = "Legs",
             category = "Strength",
-            description = "Romanian deadlift",
-            primaryMuscles = listOf("Hamstrings", "Glutes"),
-            secondaryMuscles = listOf("Abdominals"),
+            description = "1. Hạ tạ xuống dọc theo chân bằng cách đẩy hông ra sau.\n2. Giữ lưng thẳng, hạ đến khi cảm thấy cơ đùi sau căng mạnh.\n3. Kéo hông về phía trước để đứng dậy.",
             equipment = "Barbell",
-            safetyNotes = "Keep neutral spine.",
+            safetyNotes = "Tuyệt đối không để lưng bị cong khi hạ tạ.",
             lastWeightKg = 90.0
         ),
         ExerciseDto(
@@ -179,11 +155,9 @@ object ExerciseMockData {
             localImageName = "body_unsplash",
             bodyRegion = "Legs",
             category = "Cardio",
-            description = "1. Stand tall.\n2. Jump feet out and raise arms overhead.\n3. Jump back to start.",
-            primaryMuscles = listOf("Quadriceps", "Calves"),
-            secondaryMuscles = listOf("Deltoids"),
+            description = "1. Đứng thẳng, hai tay thả lỏng.\n2. Nhảy bật chân sang hai bên đồng thời vỗ tay trên đầu.\n3. Nhảy thu chân về vị trí ban đầu.",
             equipment = "Bodyweight",
-            safetyNotes = "Land softly on the balls of the feet."
+            safetyNotes = "Tiếp đất nhẹ nhàng bằng mũi chân để bảo vệ khớp gối."
         ),
         ExerciseDto(
             id = "14",
@@ -192,11 +166,9 @@ object ExerciseMockData {
             localImageName = "body_unsplash",
             bodyRegion = "Legs",
             category = "Mobility",
-            description = "1. Lunge forward with elbow to instep.\n2. Rotate and reach to the sky.\n3. Alternate sides.",
-            primaryMuscles = listOf("Glutes", "Hamstrings"),
-            secondaryMuscles = listOf("Abdominals"),
+            description = "1. Bước một chân dài lên phía trước (Lunge).\n2. Đặt tay đối diện xuống sàn, tay còn lại xoay hướng lên trời.\n3. Giữ 2-3 giây rồi thực hiện đổi bên.",
             equipment = "Bodyweight",
-            safetyNotes = "Keep front knee stacked over ankle."
+            safetyNotes = "Giữ đầu gối chân trước thẳng hàng với cổ chân."
         ),
     )
 }

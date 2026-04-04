@@ -1,9 +1,13 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.state
 
+import android.content.Context
 import androidx.compose.runtime.Immutable
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.GymLocation
+import com.hoabui.virtualbody3d.domain.model.exercise.parseCartDurationTotalSecondsForSummary
+import com.hoabui.virtualbody3d.domain.model.exercise.parseCartStrengthSetsRepsForSummary
 import com.hoabui.virtualbody3d.domain.model.exercise.InstantInterval
 import com.hoabui.virtualbody3d.domain.model.exercise.SESSION_BOOKING_GRID_FIRST_SLOT
 import com.hoabui.virtualbody3d.domain.model.exercise.SESSION_BOOKING_GRID_LAST_SLOT
@@ -51,6 +55,8 @@ data class BookingExerciseSummaryUi(
     val title: String,
     val image: ExerciseLibraryCardImage,
     val orderIndex: Int,
+    /** Preformatted at sheet open (sets×reps or duration); empty when draft not displayable. */
+    val parametersSummary: String,
 )
 
 @Immutable
@@ -81,6 +87,9 @@ data class SessionBookingUiModel(
     val timeSlotCells: ImmutableList<TimeSlotCellUiModel>,
     val bookingPeriods: ImmutableList<SessionBookingPeriodUiModel>,
     val periodStartIndex: ImmutableMap<SessionBookingPeriodId, Int>,
+    /** Precomputed in ViewModel: confirm rules + cart draft validity + not confirming. */
+    val isBookingConfirmEnabled: Boolean = false,
+    val selectedLocationDisplayName: String = "",
 )
 
 private val slotLabelFormatter: DateTimeFormatter =
@@ -118,6 +127,7 @@ fun buildSessionBookingUiModel(
     locations: List<GymLocation>,
     busyIntervals: List<InstantInterval>,
     zoneId: ZoneId,
+    isCartDraftValidForConfirm: Boolean,
 ): SessionBookingUiModel {
     val date = Instant.ofEpochMilli(input.selectedDateMillis).atZone(zoneId).toLocalDate()
     val slotStarts = bookingSlotStartsForDay(
@@ -145,13 +155,21 @@ fun buildSessionBookingUiModel(
             selected = selected,
         )
     }
-    return SessionBookingUiModel(
+    val locationDisplay = locations.find { it.id == input.selectedLocationId }?.displayName
+        ?: input.selectedLocationId
+    val baseModel = SessionBookingUiModel(
         input = input,
         locations = locations.toImmutableList(),
         timeSlotCells = cells.toImmutableList(),
         bookingPeriods = periods.toImmutableList(),
         periodStartIndex = computePeriodStartIndices(cells, periods),
+        isBookingConfirmEnabled = false,
+        selectedLocationDisplayName = locationDisplay,
     )
+    val confirm = baseModel.confirmEnabled(zoneId, busyIntervals) &&
+        isCartDraftValidForConfirm &&
+        !input.isConfirming
+    return baseModel.copy(isBookingConfirmEnabled = confirm)
 }
 
 fun ExerciseLibraryUiState.canOpenBooking(): Boolean =
@@ -193,16 +211,57 @@ fun mergeBookingInputWithBusy(
     )
 }
 
+private fun formatBookingExerciseParametersSummary(
+    context: Context,
+    draft: ExerciseDraft,
+    mode: ExerciseMeasurementMode,
+): String =
+    when (mode) {
+        ExerciseMeasurementMode.Strength -> {
+            val pair = parseCartStrengthSetsRepsForSummary(draft.sets, draft.reps) ?: return ""
+            context.getString(
+                R.string.exercise_library_booking_param_strength,
+                pair.first,
+                pair.second,
+            )
+        }
+        ExerciseMeasurementMode.Duration -> {
+            val total = parseCartDurationTotalSecondsForSummary(draft.sets, draft.reps) ?: return ""
+            val minutes = total / 60
+            val seconds = total % 60
+            if (seconds == 0) {
+                context.resources.getQuantityString(
+                    R.plurals.exercise_library_booking_param_duration_minutes,
+                    minutes,
+                    minutes,
+                )
+            } else {
+                context.getString(
+                    R.string.exercise_library_booking_param_duration_min_sec,
+                    minutes,
+                    seconds,
+                )
+            }
+        }
+    }
+
 fun buildBookingExerciseSnapshot(
+    context: Context,
     draftOrder: List<String>,
     exercisesById: Map<String, Exercise>,
+    itemDrafts: ImmutableMap<String, ExerciseDraft>,
+    exerciseMeasurementById: ImmutableMap<String, ExerciseMeasurementMode>,
 ): ImmutableList<BookingExerciseSummaryUi> =
     draftOrder.mapIndexedNotNull { index, id ->
         val ex = exercisesById[id] ?: return@mapIndexedNotNull null
+        val draft = itemDrafts[id] ?: ExerciseDraft()
+        val mode = exerciseMeasurementById[id] ?: ex.measurementMode
+        val parametersSummary = formatBookingExerciseParametersSummary(context, draft, mode)
         BookingExerciseSummaryUi(
             id = ex.id,
             title = ex.name,
             image = ex.image.toExerciseLibraryCardImage(),
             orderIndex = index,
+            parametersSummary = parametersSummary,
         )
     }.toImmutableList()

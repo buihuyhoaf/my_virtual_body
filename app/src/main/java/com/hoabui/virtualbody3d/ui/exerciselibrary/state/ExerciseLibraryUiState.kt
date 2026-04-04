@@ -107,6 +107,8 @@ data class ExerciseLibraryUiState(
     val sessionBooking: SessionBookingUiModel? = null,
     /** Busy intervals for the current booking day/location (for confirm gating). */
     val bookingBusyIntervals: ImmutableList<InstantInterval> = persistentListOf(),
+    /** Precomputed: non-empty valid cart for opening the booking sheet (see [canOpenBooking]). */
+    val isAddToSessionEnabled: Boolean = false,
 )
 
 /**

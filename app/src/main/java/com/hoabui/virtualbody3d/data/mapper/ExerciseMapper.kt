@@ -9,9 +9,7 @@ import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.FeedExercise
-import com.hoabui.virtualbody3d.domain.model.exercise.MuscleGroup
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.collections.immutable.toImmutableList
 import javax.inject.Inject
 
 class ExerciseMapper @Inject constructor(
@@ -24,8 +22,6 @@ class ExerciseMapper @Inject constructor(
         category = dto.category.toExerciseCategory(),
         bodyRegion = dto.bodyRegion.orEmpty().toBodyRegion(),
         description = dto.description.orEmpty(),
-        primaryMuscles = dto.primaryMuscles.orEmpty().mapNotNull { it.toMuscleGroupOrNull() }.toImmutableList(),
-        secondaryMuscles = dto.secondaryMuscles.orEmpty().mapNotNull { it.toMuscleGroupOrNull() }.toImmutableList(),
         equipment = dto.equipment.orEmpty().toEquipmentTypeOrNull(),
         safetyNotes = dto.safetyNotes.orEmpty(),
         lastWeightKg = dto.lastWeightKg,
@@ -74,37 +70,24 @@ private fun String?.toExerciseCategory(): ExerciseCategory {
     }
 }
 
-private fun String.toBodyRegion(): BodyRegion = when (this) {
-    "Chest" -> BodyRegion.Chest
-    "Back" -> BodyRegion.Back
-    "Shoulders" -> BodyRegion.Shoulders
-    "Arms" -> BodyRegion.Arms
-    "Core" -> BodyRegion.Core
-    "Legs" -> BodyRegion.Legs
+private fun String.toBodyRegion(): BodyRegion = when (this.trim()) {
+    "Chest", "CHEST" -> BodyRegion.Chest
+    "Back", "BACK" -> BodyRegion.Back
+    "Shoulders", "SHOULDERS" -> BodyRegion.Shoulders
+    "Arms", "ARMS" -> BodyRegion.Arms
+    "Core", "CORE" -> BodyRegion.Core
+    "Legs", "LEGS" -> BodyRegion.Legs
+    "GLUTES" -> BodyRegion.Legs
     else -> BodyRegion.Chest
 }
 
-private fun String.toMuscleGroupOrNull(): MuscleGroup? = when (this) {
-    "Pectoralis" -> MuscleGroup.Pectoralis
-    "LatissimusDorsi" -> MuscleGroup.LatissimusDorsi
-    "Triceps" -> MuscleGroup.Triceps
-    "Biceps" -> MuscleGroup.Biceps
-    "Deltoids" -> MuscleGroup.Deltoids
-    "Quadriceps" -> MuscleGroup.Quadriceps
-    "Hamstrings" -> MuscleGroup.Hamstrings
-    "Glutes" -> MuscleGroup.Glutes
-    "Abdominals" -> MuscleGroup.Abdominals
-    "Calves" -> MuscleGroup.Calves
-    else -> null
-}
-
-private fun String.toEquipmentTypeOrNull(): EquipmentType? = when (this) {
-    "Barbell" -> EquipmentType.Barbell
-    "Dumbbell" -> EquipmentType.Dumbbell
-    "Machine" -> EquipmentType.Machine
-    "Cable" -> EquipmentType.Cable
-    "Bodyweight" -> EquipmentType.Bodyweight
-    "Kettlebell" -> EquipmentType.Kettlebell
-    "ResistanceBand" -> EquipmentType.ResistanceBand
+private fun String.toEquipmentTypeOrNull(): EquipmentType? = when (this.trim()) {
+    "Barbell", "BARBELL" -> EquipmentType.Barbell
+    "Dumbbell", "DUMBBELL" -> EquipmentType.Dumbbell
+    "Machine", "MACHINE" -> EquipmentType.Machine
+    "Cable", "CABLE" -> EquipmentType.Cable
+    "Bodyweight", "BODYWEIGHT" -> EquipmentType.Bodyweight
+    "Kettlebell", "KETTLEBELL" -> EquipmentType.Kettlebell
+    "ResistanceBand", "RESISTANCEBAND", "RESISTANCE_BAND" -> EquipmentType.ResistanceBand
     else -> null
 }

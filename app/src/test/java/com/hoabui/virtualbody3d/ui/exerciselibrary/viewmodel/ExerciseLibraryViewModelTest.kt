@@ -188,12 +188,53 @@ class ExerciseLibraryViewModelTest {
     }
 
     @Test
+    fun bookingSlotToggle_reusesCachedSections() = runBlocking {
+        val vm = createViewModel()
+        vm.toggleExerciseInCartFromList("ex1")
+        vm.updateActiveDraft("3", "10")
+        vm.openSessionBooking()
+        delay(WAIT_FOR_COMBINE_MS)
+        val beforeSections = vm.successData().sections
+        vm.onBookingSlotToggled(LocalTime.of(10, 0))
+        delay(WAIT_FOR_COMBINE_MS)
+        assertTrue(beforeSections === vm.successData().sections)
+    }
+
+    @Test
+    fun searchQueryChange_rebuildsSections() = runBlocking {
+        val vm = createViewModel()
+        delay(WAIT_FOR_COMBINE_MS)
+        val beforeSections = vm.successData().sections
+        vm.updateSearchQuery("___no_match_xyz___")
+        delay(WAIT_FOR_COMBINE_MS)
+        assertFalse(beforeSections === vm.successData().sections)
+    }
+
+    @Test
+    fun isAddToSessionEnabled_falseWhenCartEmpty() = runBlocking {
+        val vm = createViewModel()
+        delay(WAIT_FOR_COMBINE_MS)
+        assertFalse(vm.successData().isAddToSessionEnabled)
+    }
+
+    @Test
+    fun isAddToSessionEnabled_trueWhenCartValid() = runBlocking {
+        val vm = createViewModel()
+        vm.toggleExerciseInCartFromList("ex1")
+        vm.updateActiveDraft("3", "10")
+        delay(WAIT_FOR_COMBINE_MS)
+        assertTrue(vm.successData().isAddToSessionEnabled)
+    }
+
+    @Test
     fun confirmSessionBooking_success_clearsCartAndSetsSummary() = runBlocking {
         val vm = createViewModel()
         vm.toggleExerciseInCartFromList("ex1")
         vm.updateActiveDraft("3", "10")
         vm.openSessionBooking()
         vm.onBookingSlotToggled(LocalTime.of(10, 0))
+        delay(WAIT_FOR_COMBINE_MS)
+        assertTrue(requireNotNull(vm.successData().sessionBooking).isBookingConfirmEnabled)
         vm.confirmSessionBooking()
         delay(WAIT_FOR_COMBINE_MS)
         val d = vm.successData()

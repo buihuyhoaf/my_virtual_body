@@ -119,6 +119,12 @@ data class BodyAnalysisLayoutSemantics(
     val exerciseLibraryBookingSheetMaxHeightFraction: Float,
     /** Minimum width of each chip in the horizontal 30m time slot row. */
     val exerciseLibraryBookingTimeSlotHorizontalMinWidth: Dp,
+    /** Fixed width of each exercise summary card in the booking strip horizontal list. */
+    val exerciseLibraryBookingStripItemWidth: Dp,
+    /** Horizontal gap between booking strip thumbnail and text column (12dp scale). */
+    val exerciseLibraryBookingStripImageTextGap: Dp,
+    /** Caps trailing gym name width so ellipsis applies without consuming the full row. */
+    val exerciseLibraryBookingLocationSelectorMaxWidth: Dp,
 )
 
 fun gymBodyAnalysisLayoutSemantics(): BodyAnalysisLayoutSemantics = BodyAnalysisLayoutSemantics(
@@ -208,6 +214,9 @@ fun gymBodyAnalysisLayoutSemantics(): BodyAnalysisLayoutSemantics = BodyAnalysis
     exerciseLibraryBookingSectionIconSize = 20.dp,
     exerciseLibraryBookingSheetMaxHeightFraction = 0.5f,
     exerciseLibraryBookingTimeSlotHorizontalMinWidth = 72.dp,
+    exerciseLibraryBookingStripItemWidth = 180.dp,
+    exerciseLibraryBookingStripImageTextGap = 12.dp,
+    exerciseLibraryBookingLocationSelectorMaxWidth = 200.dp,
 )
 
 @Immutable
@@ -288,10 +297,18 @@ fun gymThinkingCardLayoutSemantics(): ThinkingCardLayoutSemantics = ThinkingCard
 @Immutable
 data class BodyDetailLayoutSemantics(
     val heroHeight: Dp,
+    val exerciseDetailIconicTileSize: Dp,
+    /** Max height for exercise detail floating card vs viewport (e.g. 0.7 = 70% of screen). */
+    val exerciseDetailDialogMaxHeightFraction: Float,
+    /** Width fraction for exercise detail card vs parent (e.g. 0.95 = lightweight popup). */
+    val exerciseDetailCardWidthFraction: Float,
 )
 
 fun gymBodyDetailLayoutSemantics(): BodyDetailLayoutSemantics = BodyDetailLayoutSemantics(
     heroHeight = 220.dp,
+    exerciseDetailIconicTileSize = 64.dp,
+    exerciseDetailDialogMaxHeightFraction = 0.7f,
+    exerciseDetailCardWidthFraction = 0.95f,
 )
 
 @Immutable

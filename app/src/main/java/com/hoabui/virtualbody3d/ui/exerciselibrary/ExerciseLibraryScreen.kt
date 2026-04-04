@@ -21,7 +21,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,7 +32,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
 import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
@@ -49,7 +47,6 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseSection
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryActions
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.isCartDraftValidForSessionConfirm
 import com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel.ExerciseLibraryViewModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
@@ -102,8 +99,6 @@ fun ExerciseLibraryScreen(
         state = screenState,
         modifier = modifier,
         successContent = { mod, data ->
-            val dataRef = rememberUpdatedState(data)
-            val addToWorkoutRef = rememberUpdatedState(onAddToWorkout)
             GScaffold(modifier = mod) {
                 ExerciseLibraryScreenContent(
                     modifier = Modifier.fillMaxSize(),
@@ -114,7 +109,6 @@ fun ExerciseLibraryScreen(
                     booking = data.sessionBooking,
                     busyIntervals = data.bookingBusyIntervals,
                     draftCount = data.draftOrder.size,
-                    isCartDraftValid = data.isCartDraftValidForSessionConfirm(),
                     zoneId = ZoneId.systemDefault(),
                     onDismissRequest = actions.onDismissSessionBooking,
                     onDateMillisSelected = actions.onBookingDateSelected,
@@ -138,18 +132,8 @@ fun ExerciseLibraryScreen(
                     )
                 }
                 data.selectedExerciseForDetail?.let { exercise ->
-                    val onDetailAdd = remember(exercise.id, actions, addToWorkoutRef, dataRef) {
-                        { ex: Exercise ->
-                            val d = dataRef.value
-                            val wasInCart = d.itemDrafts.containsKey(ex.id)
-                            actions.onDetailAddToCart(ex.id)
-                            actions.onClearExerciseDetail()
-                            if (!wasInCart) addToWorkoutRef.value(ex.id)
-                        }
-                    }
                     ExerciseDetailDialog(
                         exercise = exercise,
-                        onAddClick = onDetailAdd,
                         onDismiss = actions.onClearExerciseDetail,
                     )
                 }

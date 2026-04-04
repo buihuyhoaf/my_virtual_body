@@ -1,71 +1,122 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.components
 
+import android.content.res.Configuration
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
-import com.hoabui.virtualbody3d.ui.common_ui.atom.icon.GIcon
-import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
-import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
+import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
+import com.hoabui.virtualbody3d.domain.model.common.ImageSource
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
-import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
-import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
-import com.hoabui.virtualbody3d.ui.common_ui.image.toImageModel
-import com.hoabui.virtualbody3d.ui.common_ui.molecule.info.GInfoRow
+import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
+import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
-import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
-import coil.compose.AsyncImage
+
+private const val HeroAspectRatio = 4f / 3f
+
+private fun exerciseDetailTextStyle(base: TextStyle): TextStyle =
+    base.merge(TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)))
 
 // ----- Small reusable composables -----
 
 @Composable
 fun ExerciseBulletList(
     items: List<String>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    bulletColor: Color? = null,
+    textColor: Color? = null,
 ) {
     val token = GymTheme.token
+    val resolvedBullet = bulletColor ?: token.colors.textPrimary
+    val resolvedText = textColor ?: token.colors.textPrimary
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
+        verticalArrangement = Arrangement.spacedBy(token.spacing.sm),
     ) {
         items.forEach { item ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
-                verticalAlignment = Alignment.Top
+                verticalAlignment = Alignment.Top,
             ) {
                 GText(
                     text = "•",
-                    style = token.typography.bodyMedium,
-                    color = token.colors.textPrimary
+                    style = exerciseDetailTextStyle(token.typography.bodyMedium),
+                    color = resolvedBullet,
                 )
                 GText(
                     text = item,
-                    style = token.typography.bodyMedium,
+                    style = exerciseDetailTextStyle(token.typography.bodyMedium),
+                    color = resolvedText,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ExerciseNumberedStepsList(
+    items: List<String>,
+    modifier: Modifier = Modifier,
+) {
+    val token = GymTheme.token
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(token.spacing.sm),
+    ) {
+        items.forEachIndexed { index, step ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
+                verticalAlignment = Alignment.Top,
+            ) {
+                GText(
+                    text = "${index + 1}.",
+                    style = exerciseDetailTextStyle(token.typography.labelSmall),
+                    color = token.colors.textSecondary,
+                )
+                GText(
+                    text = step,
+                    style = exerciseDetailTextStyle(token.typography.bodyMedium),
                     color = token.colors.textPrimary,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
             }
         }
@@ -75,12 +126,16 @@ fun ExerciseBulletList(
 @Composable
 fun SafetyNoteCard(
     notes: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    useWarningAppearance: Boolean = false,
 ) {
     val token = GymTheme.token
     val items = notes.split("\n").map { it.trim() }.filter { it.isNotEmpty() }
-    val backgroundColor = token.colors.surfaceSubtle
-    val padding: Dp = token.spacing.xs
+    val backgroundColor =
+        if (useWarningAppearance) token.colors.warningContainer else token.colors.surfaceSubtle
+    val contentColor =
+        if (useWarningAppearance) token.colors.onWarningContainer else token.colors.textPrimary
+    val padding: Dp = token.spacing.sm
 
     GSurface(
         modifier = modifier.fillMaxWidth(),
@@ -89,22 +144,24 @@ fun SafetyNoteCard(
     ) {
         Column(
             modifier = Modifier.padding(padding),
-            verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
+            verticalArrangement = Arrangement.spacedBy(token.spacing.sm),
         ) {
             if (items.isEmpty()) {
                 GText(
                     text = notes,
-                    style = token.typography.bodyMedium,
-                    color = token.colors.textPrimary
+                    style = exerciseDetailTextStyle(token.typography.bodyMedium),
+                    color = contentColor,
                 )
             } else {
-                ExerciseBulletList(items = items)
+                ExerciseBulletList(
+                    items = items,
+                    bulletColor = contentColor,
+                    textColor = contentColor,
+                )
             }
         }
     }
 }
-
-// ----- Description parsing: numbered steps -> bullet list -----
 
 private fun parseDescriptionSteps(description: String): List<String> {
     return description
@@ -115,198 +172,286 @@ private fun parseDescriptionSteps(description: String): List<String> {
         .filter { it.isNotEmpty() }
 }
 
-// ----- Dialog sub-section label (labelMedium/textSecondary — intentionally different from GSectionHeader) -----
-
 @Composable
 private fun DialogSectionLabel(
     text: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    includeTopSpacing: Boolean = true,
 ) {
     val token = GymTheme.token
+    val top = if (includeTopSpacing) token.spacing.sm else token.spacing.none
     GText(
         text = text,
-        style = token.typography.labelMedium,
+        style = exerciseDetailTextStyle(token.typography.labelMedium),
         color = token.colors.textSecondary,
-        modifier = modifier.padding(bottom = token.spacing.xxs)
+        modifier = modifier.padding(
+            top = top,
+            bottom = token.spacing.xxs,
+        ),
     )
 }
 
-// ----- Main dialog -----
+/**
+ * Symmetric 50/50 zones: body region (“where it hits”) vs equipment (“what to use”).
+ */
+@Composable
+private fun ExerciseDetailIconicRow(
+    targetRegionLabel: String,
+    equipmentLabel: String,
+) {
+    val token = GymTheme.token
+    val tile = token.bodyDetail.exerciseDetailIconicTileSize
+    val shapeMd = RoundedCornerShape(token.radius.md)
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(token.spacing.xs),
+        ) {
+            Image(
+                painter = painterResource(R.drawable.body_unsplash),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(tile)
+                    .clip(shapeMd)
+                    .background(token.colors.surfaceSubtle),
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.Center,
+            )
+            GText(
+                text = targetRegionLabel,
+                style = exerciseDetailTextStyle(token.typography.labelMedium),
+                color = token.colors.textPrimary,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(token.spacing.xs),
+        ) {
+            Image(
+                painter = painterResource(R.drawable.body_unsplash),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(tile)
+                    .clip(shapeMd)
+                    .background(token.colors.surfaceSubtle),
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.Center,
+            )
+            GText(
+                text = equipmentLabel,
+                style = exerciseDetailTextStyle(token.typography.labelMedium),
+                color = token.colors.textPrimary,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
 
 @Composable
 fun ExerciseDetailDialog(
     exercise: Exercise,
-    onAddClick: (Exercise) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     val token = GymTheme.token
     val scrollState = rememberScrollState()
-    val resourceProvider = LocalResourceProvider.current
+    val configuration = LocalConfiguration.current
+    val maxDialogHeight =
+        (configuration.screenHeightDp.toFloat() * token.bodyDetail.exerciseDetailDialogMaxHeightFraction).dp
+    val cardWidthFraction = token.bodyDetail.exerciseDetailCardWidthFraction
+
+    val targetRegionLabel = stringResource(ExerciseDisplayResources.bodyRegionResId(exercise.bodyRegion))
+    val equipmentLabel = stringResource(ExerciseDisplayResources.equipmentResId(exercise.equipment))
 
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
             usePlatformDefaultWidth = false,
             dismissOnBackPress = true,
-            dismissOnClickOutside = true
-        )
+            dismissOnClickOutside = true,
+        ),
     ) {
-        GCard(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(token.spacing.md),
+                .fillMaxSize()
+                .padding(vertical = token.spacing.md),
+            contentAlignment = Alignment.Center,
         ) {
-            Column(
+            GCard(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(scrollState)
+                    .fillMaxWidth(cardWidthFraction)
+                    .heightIn(max = maxDialogHeight),
             ) {
-                    // 1. Exercise hero: image (fixed height) + name below
-                    Box(
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = maxDialogHeight),
+                ) {
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(token.bodyDetail.heroHeight)
-                            .clip(
-                                RoundedCornerShape(
-                                    topStart = token.radius.lg,
-                                    topEnd = token.radius.lg
-                                )
-                            )
-                            .background(token.colors.surfaceSubtle)
+                            .fillMaxHeight(),
                     ) {
-                        AsyncImage(
-                            model = exercise.image.toImageModel(resourceProvider),
-                            contentDescription = null,
+                        // Static header: 4:3 media + title (does not scroll)
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Image(
+                                painter = painterResource(R.drawable.body_unsplash),
+                                contentDescription = stringResource(
+                                    R.string.exercise_detail_hero_image_cd,
+                                    exercise.name,
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(HeroAspectRatio)
+                                    .clip(RoundedCornerShape(token.card.cornerRadius))
+                                    .background(token.colors.surfaceSubtle),
+                                contentScale = ContentScale.Crop,
+                            )
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = token.spacing.md,
+                                        top = token.spacing.md,
+                                        end = token.spacing.md,
+                                        bottom = token.spacing.sm,
+                                    ),
+                            ) {
+                                GText(
+                                    text = exercise.name,
+                                    style = exerciseDetailTextStyle(token.typography.titleLarge),
+                                    color = token.colors.textPrimary,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                        }
+                        // Scrollable body: iconic row, instructions, safety (clipped between anchors)
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .verticalScroll(scrollState)
+                                    .padding(horizontal = token.spacing.md)
+                                    .padding(bottom = token.spacing.md),
+                                verticalArrangement = Arrangement.spacedBy(token.spacing.lg),
+                            ) {
+                                ExerciseDetailIconicRow(
+                                    targetRegionLabel = targetRegionLabel,
+                                    equipmentLabel = equipmentLabel,
+                                )
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(token.spacing.sm),
+                                ) {
+                                    DialogSectionLabel(
+                                        text = stringResource(R.string.exercise_detail_how_to_perform),
+                                        includeTopSpacing = false,
+                                    )
+                                    val steps = parseDescriptionSteps(exercise.description)
+                                    if (steps.isNotEmpty()) {
+                                        ExerciseNumberedStepsList(items = steps)
+                                    } else {
+                                        GText(
+                                            text = exercise.description,
+                                            style = exerciseDetailTextStyle(token.typography.bodyMedium),
+                                            color = token.colors.textPrimary,
+                                        )
+                                    }
+                                }
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(token.spacing.sm),
+                                ) {
+                                    DialogSectionLabel(
+                                        text = stringResource(R.string.exercise_detail_safety_section),
+                                        includeTopSpacing = false,
+                                    )
+                                    SafetyNoteCard(
+                                        notes = exercise.safetyNotes,
+                                        useWarningAppearance = true,
+                                    )
+                                }
+                            }
+                        }
+                        // Sticky footer: last weight + OK
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(token.bodyDetail.heroHeight),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-
-                    Column(
-                        modifier = Modifier.padding(token.spacing.md),
-                        verticalArrangement = Arrangement.spacedBy(token.spacing.md)
-                    ) {
-                    // Exercise name below image
-                    GText(
-                        text = exercise.name,
-                        style = token.typography.titleLarge,
-                        color = token.colors.textPrimary
-                    )
-
-                    // 2. Basic information section
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(token.spacing.xs)
-                    ) {
-                        GInfoRow(
-                            label = stringResource(R.string.exercise_detail_body_region),
-                            value = stringResource(ExerciseDisplayResources.bodyRegionResId(exercise.bodyRegion)),
-                            leading = {
-                                GIcon(
-                                    imageVector = ExerciseLibraryPhosphorIcons.detailBodyRegion,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(token.spacing.md),
-                                    tint = token.colors.textSecondary,
+                                .padding(token.spacing.md),
+                            verticalArrangement = Arrangement.spacedBy(token.spacing.sm),
+                        ) {
+                            exercise.lastWeightKg?.let { kg ->
+                                GText(
+                                    text = stringResource(R.string.exercise_detail_last_weight, kg),
+                                    style = exerciseDetailTextStyle(token.typography.bodySmall),
+                                    color = token.colors.textSecondary,
                                 )
-                            },
-                        )
-                        GInfoRow(
-                            label = stringResource(R.string.exercise_detail_equipment),
-                            value = stringResource(ExerciseDisplayResources.equipmentResId(exercise.equipment)),
-                            leading = {
-                                GIcon(
-                                    imageVector = ExerciseLibraryPhosphorIcons.detailEquipment,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(token.spacing.md),
-                                    tint = token.colors.textSecondary,
-                                )
-                            },
-                        )
-                        if (exercise.primaryMuscles.isNotEmpty()) {
-                            val primaryLabels = exercise.primaryMuscles.map {
-                                stringResource(ExerciseDisplayResources.muscleGroupResId(it))
                             }
-                            GInfoRow(
-                                label = stringResource(R.string.exercise_detail_primary_muscles),
-                                value = primaryLabels.joinToString(),
-                                leading = {
-                                    GIcon(
-                                        imageVector = ExerciseLibraryPhosphorIcons.detailCategory,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(token.spacing.md),
-                                        tint = token.colors.textSecondary,
-                                    )
-                                },
+                            GButton(
+                                text = stringResource(R.string.exercise_detail_ok),
+                                onClick = onDismiss,
+                                modifier = Modifier.fillMaxWidth(),
                             )
                         }
-                        if (exercise.secondaryMuscles.isNotEmpty()) {
-                            val secondaryLabels = exercise.secondaryMuscles.map {
-                                stringResource(ExerciseDisplayResources.muscleGroupResId(it))
-                            }
-                            GInfoRow(
-                                label = stringResource(R.string.exercise_detail_secondary_muscles),
-                                value = secondaryLabels.joinToString(),
-                                leading = {
-                                    GIcon(
-                                        imageVector = ExerciseLibraryPhosphorIcons.detailCategory,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(token.spacing.md),
-                                        tint = token.colors.textSecondary,
-                                    )
-                                },
-                            )
-                        }
-                    }
-
-                    // 3. Description section: "How to perform" as bullet list
-                    DialogSectionLabel(text = stringResource(R.string.exercise_detail_how_to_perform))
-                    val steps = parseDescriptionSteps(exercise.description)
-                    if (steps.isNotEmpty()) {
-                        ExerciseBulletList(items = steps)
-                    } else {
-                        GText(
-                            text = exercise.description,
-                            style = token.typography.bodyMedium,
-                            color = token.colors.textPrimary
-                        )
-                    }
-
-                    // 4. Safety section
-                    DialogSectionLabel(text = stringResource(R.string.exercise_detail_safety_tips))
-                    SafetyNoteCard(notes = exercise.safetyNotes)
-
-                    // 5. Last weight (optional)
-                    exercise.lastWeightKg?.let { kg ->
-                        GText(
-                            text = stringResource(R.string.exercise_detail_last_weight, kg),
-                            style = token.typography.bodySmall,
-                            color = token.colors.textSecondary
-                        )
-                    }
-
-                    // 6. Action buttons
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = token.spacing.xs),
-                        horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        GButton(
-                            text = stringResource(R.string.confirm_image_cancel),
-                            onClick = onDismiss,
-                            modifier = Modifier.weight(1f),
-                            variant = GButtonVariant.Outlined,
-                        )
-                        GButton(
-                            text = stringResource(R.string.exercise_detail_add_exercise),
-                            onClick = { onAddClick(exercise) },
-                            modifier = Modifier.weight(1f),
-                        )
                     }
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true, name = "ExerciseDetailDialog — Light")
+@Composable
+private fun PreviewExerciseDetailDialogLight() {
+    val previewExercise = Exercise(
+        id = "preview",
+        name = "Very long exercise name for preview ellipsis behavior in the knowledge card",
+        image = ImageSource.LocalResource("ic_logo_whitecat"),
+        category = ExerciseCategory.Strength,
+        bodyRegion = BodyRegion.Chest,
+        description = "1. Step one with enough text to wrap\n2. Step two\n3. Step three",
+        equipment = EquipmentType.Barbell,
+        safetyNotes = "Keep core tight.\nStop if sharp pain.",
+        lastWeightKg = 60.0,
+    )
+    GymTheme {
+        ExerciseDetailDialog(exercise = previewExercise, onDismiss = {})
+    }
+}
+
+@Preview(showBackground = true, name = "ExerciseDetailDialog — Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun PreviewExerciseDetailDialogDark() {
+    val previewExercise = Exercise(
+        id = "preview",
+        name = "Barbell bench press",
+        image = ImageSource.LocalResource("ic_logo_whitecat"),
+        category = ExerciseCategory.Strength,
+        bodyRegion = BodyRegion.Chest,
+        description = "Lower with control.\nPress up evenly.",
+        equipment = EquipmentType.Dumbbell,
+        safetyNotes = "Use a spotter for heavy sets.",
+        lastWeightKg = null,
+    )
+    GymTheme(darkTheme = true) {
+        ExerciseDetailDialog(exercise = previewExercise, onDismiss = {})
     }
 }

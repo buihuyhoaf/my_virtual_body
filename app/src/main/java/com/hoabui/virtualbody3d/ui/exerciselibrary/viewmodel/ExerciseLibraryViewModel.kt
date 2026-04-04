@@ -41,12 +41,14 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseSectionUiItem
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.SessionBookingInput
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.buildBookingExerciseSnapshot
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.buildSessionBookingUiModel
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.canOpenBooking
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mergeBookingInputWithBusy
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.defaultExerciseLibraryCartDateMillis
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.isCartDraftValidForSessionConfirm
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
@@ -90,7 +92,37 @@ class ExerciseLibraryViewModel @Inject constructor(
     private val zoneId: ZoneId = ZoneId.systemDefault()
 
     /** Busy intervals for the active booking context (same emission as [ExerciseLibraryUiState.bookingBusyIntervals]). */
-    private var latestBookingBusy: List<InstantInterval> = emptyList()
+    private var latestBookingBusy: ImmutableList<InstantInterval> = persistentListOf()
+
+    private var cachedSections: ImmutableList<ExerciseSectionUiItem> = persistentListOf()
+    private var cachedMeasurementById: ImmutableMap<String, ExerciseMeasurementMode> = persistentMapOf()
+    private var lastSectionRebuildKey: SectionRebuildKey? = null
+
+    private data class SectionRebuildKey(
+        val normalizedQuery: String,
+        val category: ExerciseCategory?,
+        val equipment: EquipmentType?,
+        val cartKeySignature: String,
+        val libraryIdentity: Int,
+    )
+
+    private fun sectionRebuildKey(
+        grouped: Map<BodyRegion, List<Exercise>>,
+        filters: ExerciseLibraryUiState,
+    ): SectionRebuildKey {
+        val cartSig = buildString {
+            filters.itemDrafts.keys.sorted().forEach { append(it).append(',') }
+            append('|')
+            append(filters.activeExerciseId ?: "")
+        }
+        return SectionRebuildKey(
+            normalizedQuery = normalizeExerciseLibraryQuery(filters.searchQuery),
+            category = filters.selectedExerciseCategory,
+            equipment = filters.selectedEquipment,
+            cartKeySignature = cartSig,
+            libraryIdentity = System.identityHashCode(grouped),
+        )
+    }
 
     private val bookingGridSlotStarts: List<LocalTime> = bookingSlotStartsForDay(
         firstSlot = SESSION_BOOKING_GRID_FIRST_SLOT,
@@ -149,15 +181,33 @@ class ExerciseLibraryViewModel @Inject constructor(
                     filters
                 }
             }
-            val sections = buildSections(grouped, filtersForUi)
+            val sectionKey = sectionRebuildKey(grouped, filtersForUi)
+            val sections: ImmutableList<ExerciseSectionUiItem>
+            val measurementById: ImmutableMap<String, ExerciseMeasurementMode>
+            if (sectionKey == lastSectionRebuildKey) {
+                sections = cachedSections
+                measurementById = cachedMeasurementById
+            } else {
+                sections = buildSections(grouped, filtersForUi)
+                measurementById = grouped.values.flatten()
+                    .associate { it.id to it.measurementMode }
+                    .toImmutableMap()
+                cachedSections = sections
+                cachedMeasurementById = measurementById
+                lastSectionRebuildKey = sectionKey
+            }
             val selectedExercise = selectedId?.let { id ->
                 grouped.values.flatten().find { it.id == id }
             }
-            val measurementById = grouped.values.flatten()
-                .associate { it.id to it.measurementMode }
-                .toImmutableMap()
-            val bookingUi = filtersForUi.sessionBookingInput?.let { input ->
-                buildSessionBookingUiModel(input, gymLocs, busy, zoneId)
+            val filtersWithMeasurement = filtersForUi.copy(exerciseMeasurementById = measurementById)
+            val bookingUi = filtersWithMeasurement.sessionBookingInput?.let { input ->
+                buildSessionBookingUiModel(
+                    input,
+                    gymLocs,
+                    busy,
+                    zoneId,
+                    filtersWithMeasurement.isCartDraftValidForSessionConfirm(),
+                )
             }
             filtersForUi.copy(
                 sections = sections,
@@ -165,6 +215,7 @@ class ExerciseLibraryViewModel @Inject constructor(
                 exerciseMeasurementById = measurementById,
                 sessionBooking = bookingUi,
                 bookingBusyIntervals = busy,
+                isAddToSessionEnabled = filtersWithMeasurement.canOpenBooking(),
             )
         }.onEach { fullState ->
             setSuccess(fullState)
@@ -320,7 +371,13 @@ class ExerciseLibraryViewModel @Inject constructor(
     fun openSessionBooking() {
         filterState.update { s ->
             val exercisesById = groupedExercises.value.values.flatten().associateBy { it.id }
-            val snapshot = buildBookingExerciseSnapshot(s.draftOrder, exercisesById)
+            val snapshot = buildBookingExerciseSnapshot(
+                appContext,
+                s.draftOrder,
+                exercisesById,
+                s.itemDrafts,
+                s.exerciseMeasurementById,
+            )
             s.copy(
                 sessionBookingInput = SessionBookingInput(
                     selectedDateMillis = defaultExerciseLibraryCartDateMillis(),

@@ -1,5 +1,6 @@
 package com.hoabui.virtualbody3d.domain.model.exercise
 
+import androidx.compose.runtime.Immutable
 import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -7,6 +8,7 @@ import java.time.temporal.ChronoUnit
 /**
  * Half-open interval [start, end) on the UTC timeline for session overlap checks.
  */
+@Immutable
 data class InstantInterval(
     val start: Instant,
     val end: Instant,

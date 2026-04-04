@@ -87,6 +87,8 @@ data class SpacingTokens(
     val xl: Dp,
     val xxl: Dp,
     val xxxl: Dp,
+    /** Minimal horizontal barrier between inline label and value. */
+    val spacingStep1: Dp,
     /** Leading icons in list rows (from primitive icon scale). */
     val iconMedium: Dp,
     val dividerThickness: Dp
@@ -126,6 +128,7 @@ fun darkGymToken(
         xl = primitiveSpacing.xl,
         xxl = primitiveSpacing.xxl,
         xxxl = primitiveSpacing.xxxl,
+        spacingStep1 = primitiveSpacing.spacingStep1,
         iconMedium = primitiveSpacing.iconMedium,
         dividerThickness = primitiveSpacing.dividerThickness
     ),
@@ -184,6 +187,7 @@ fun lightGymToken(
         xl = primitiveSpacing.xl,
         xxl = primitiveSpacing.xxl,
         xxxl = primitiveSpacing.xxxl,
+        spacingStep1 = primitiveSpacing.spacingStep1,
         iconMedium = primitiveSpacing.iconMedium,
         dividerThickness = primitiveSpacing.dividerThickness
     ),

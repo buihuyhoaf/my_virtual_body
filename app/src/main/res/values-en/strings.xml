@@ -19,6 +19,8 @@
     <string name="exercise_library_booking_confirm">Confirm</string>
     <string name="exercise_library_booking_cancel">Cancel</string>
     <string name="exercise_library_booking_location">Location</string>
+    <string name="exercise_library_booking_param_strength">%1$d × %2$d</string>
+    <string name="exercise_library_booking_param_duration_min_sec">%1$d min %2$d s</string>
     <string name="exercise_library_booking_time">Time window</string>
     <string name="exercise_library_booking_slot_busy">Booked</string>
     <string name="exercise_library_booking_slot_conflict">This time was just taken. Pick another.</string>
@@ -47,4 +49,12 @@
     <string name="exercise_library_add_success_close">Close</string>
     <string name="exercise_library_add_success_icon_cd">Success</string>
     <string name="exercise_library_workout_plan_stub_toast">Workout plan — coming soon</string>
+
+    <!-- Exercise detail knowledge card -->
+    <string name="exercise_detail_how_to_perform">How to perform</string>
+    <string name="exercise_detail_safety_section">Notes</string>
+    <string name="exercise_detail_ok">OK</string>
+    <string name="exercise_detail_hero_image_cd">Exercise illustration for %1$s</string>
+    <string name="exercise_detail_last_weight">Last weight: %1$.0f kg</string>
+    <string name="exercise_library_card_region_equipment">%1$s · %2$s</string>
 </resources>

@@ -184,6 +184,7 @@
     <string name="exercise_library_empty_title">Không tìm thấy bài tập</string>
     <string name="exercise_library_empty_message">Thử đổi bộ lọc hoặc từ khóa tìm kiếm.</string>
     <string name="exercise_library_card_subtitle_fallback">—</string>
+    <string name="exercise_library_card_region_equipment">%1$s · %2$s</string>
     <string name="exercise_quick_add_cd">Thêm nhanh vào buổi tập</string>
     <string name="exercise_library_list_toggle_add_cd">Thêm vào giỏ chọn bài tập</string>
     <string name="exercise_library_cart_sets">Hiệp</string>
@@ -211,6 +212,8 @@
     <string name="exercise_library_booking_confirm">Xác nhận</string>
     <string name="exercise_library_booking_cancel">Hủy</string>
     <string name="exercise_library_booking_location">Địa điểm</string>
+    <string name="exercise_library_booking_param_strength">%1$d × %2$d</string>
+    <string name="exercise_library_booking_param_duration_min_sec">%1$d phút %2$d giây</string>
     <string name="exercise_library_booking_time">Khung giờ</string>
     <string name="exercise_library_booking_slot_busy">Đã có lịch</string>
     <string name="exercise_library_booking_slot_conflict">Khung giờ này vừa được đặt. Chọn thời gian khác.</string>
@@ -254,18 +257,6 @@
     <string name="exercise_region_core">Core</string>
     <string name="exercise_region_legs">Chân</string>
 
-    <!-- Exercise domain: MuscleGroup -->
-    <string name="exercise_muscle_pectoralis">Pectoralis</string>
-    <string name="exercise_muscle_latissimus_dorsi">Latissimus Dorsi</string>
-    <string name="exercise_muscle_triceps">Triceps</string>
-    <string name="exercise_muscle_biceps">Biceps</string>
-    <string name="exercise_muscle_deltoids">Deltoids</string>
-    <string name="exercise_muscle_quadriceps">Quadriceps</string>
-    <string name="exercise_muscle_hamstrings">Hamstrings</string>
-    <string name="exercise_muscle_glutes">Glutes</string>
-    <string name="exercise_muscle_abdominals">Abdominals</string>
-    <string name="exercise_muscle_calves">Calves</string>
-
     <!-- Exercise domain: EquipmentType -->
     <string name="exercise_equipment_barbell">Barbell</string>
     <string name="exercise_equipment_dumbbell">Dumbbell</string>
@@ -278,13 +269,14 @@
 
     <!-- Exercise detail dialog -->
     <string name="exercise_detail_how_to_perform">Cách thực hiện</string>
+    <string name="exercise_detail_safety_section">Lưu ý</string>
+    <string name="exercise_detail_ok">OK</string>
+    <string name="exercise_detail_hero_image_cd">Ảnh minh họa bài tập %1$s</string>
     <string name="exercise_detail_safety_tips">Lưu ý an toàn</string>
     <string name="exercise_detail_add_to_workout_plan">Thêm vào kế hoạch tập</string>
     <string name="exercise_detail_last_weight">Trọng lượng gần nhất: %1$.0f kg</string>
     <string name="exercise_detail_body_region">Vùng cơ</string>
     <string name="exercise_detail_equipment">Thiết bị</string>
-    <string name="exercise_detail_primary_muscles">Cơ chính</string>
-    <string name="exercise_detail_secondary_muscles">Cơ phụ</string>
     <string name="exercise_detail_add_exercise">Thêm bài tập</string>
 
     <!-- Body Tabs -->

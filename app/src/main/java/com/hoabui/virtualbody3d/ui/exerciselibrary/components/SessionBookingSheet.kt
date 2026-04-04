@@ -1,6 +1,5 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.components
 
-import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -11,12 +10,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -31,10 +33,12 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,12 +48,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.AsyncImage
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.domain.model.exercise.GymLocation
 import com.hoabui.virtualbody3d.domain.model.exercise.InstantInterval
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
@@ -59,20 +68,15 @@ import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toCoilModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.BookingExerciseSummaryUi
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.SessionBookingInput
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.SessionBookingPeriodId
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.SessionBookingPeriodUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.SessionBookingUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.TimeSlotCellUiModel
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.buildSessionBookingUiModel
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.confirmEnabled
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -81,13 +85,14 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+private fun sessionBookingSheetTextStyle(base: TextStyle): TextStyle = base.merge(TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)))
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExerciseLibrarySessionBookingSheetHost(
     booking: SessionBookingUiModel?,
-    busyIntervals: List<InstantInterval>,
+    busyIntervals: ImmutableList<InstantInterval>,
     draftCount: Int,
-    isCartDraftValid: Boolean,
     zoneId: ZoneId,
     onDismissRequest: () -> Unit,
     onDateMillisSelected: (Long) -> Unit,
@@ -124,9 +129,7 @@ fun ExerciseLibrarySessionBookingSheetHost(
                     .fillMaxWidth()
                     .heightIn(max = sheetMaxHeight),
                 booking = booking,
-                busyIntervals = busyIntervals,
                 draftCount = draftCount,
-                isCartDraftValid = isCartDraftValid,
                 zoneId = zoneId,
                 onDismissClick = onDismissRequest,
                 onDateMillisSelected = onDateMillisSelected,
@@ -143,9 +146,7 @@ fun ExerciseLibrarySessionBookingSheetHost(
 private fun SessionBookingSheetContent(
     modifier: Modifier = Modifier,
     booking: SessionBookingUiModel,
-    busyIntervals: List<InstantInterval>,
     draftCount: Int,
-    isCartDraftValid: Boolean,
     zoneId: ZoneId,
     onDismissClick: () -> Unit,
     onDateMillisSelected: (Long) -> Unit,
@@ -171,14 +172,24 @@ private fun SessionBookingSheetContent(
         remember(input.selectedDateMillis, zoneId) {
             Instant.ofEpochMilli(input.selectedDateMillis).atZone(zoneId).toLocalDate()
         }
-    val dayHorizon = remember(zoneId) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var resumeKey by remember { mutableIntStateOf(0) }
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                resumeKey++
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    val dayHorizon = remember(zoneId, input.selectedDateMillis, resumeKey) {
         val today = LocalDate.now(zoneId)
         (0 until SESSION_BOOKING_DAY_HORIZON).map { today.plusDays(it.toLong()) }
     }
-    val selectedLocationName = booking.locations.find { it.id == input.selectedLocationId }?.displayName
-        ?: input.selectedLocationId
+    val selectedLocationName = booking.selectedLocationDisplayName
     var locationMenuExpanded by remember { mutableStateOf(false) }
-    val confirmOk = booking.confirmEnabled(zoneId, busyIntervals) && isCartDraftValid && !input.isConfirming
+    val confirmOk = booking.isBookingConfirmEnabled
 
     Column(
         modifier = modifier
@@ -200,7 +211,7 @@ private fun SessionBookingSheetContent(
         if (input.showSlotConflict) {
             GText(
                 text = stringResource(R.string.exercise_library_booking_slot_conflict),
-                style = token.typography.bodySmall,
+                style = sessionBookingSheetTextStyle(token.typography.bodySmall),
                 color = token.colors.error,
             )
         }
@@ -211,8 +222,6 @@ private fun SessionBookingSheetContent(
         )
         BookingExerciseSnapshotRow(
             exercises = input.bookingExerciseSnapshot,
-            imageSize = token.bodyAnalysis.exerciseLibraryCartThumbnailSize,
-            imageCorner = token.bodyAnalysis.upcomingExerciseChipImageCornerRadius,
         )
         BookingSectionLabel(
             icon = ExerciseLibraryPhosphorIcons.bookingCalendar,
@@ -224,50 +233,71 @@ private fun SessionBookingSheetContent(
             modifier = Modifier.fillMaxWidth(),
         ) {
             items(dayHorizon, key = { it.toString() }) { day ->
-                val millis = day.atStartOfDay(zoneId).toInstant().toEpochMilli()
-                val selected = day == selectedLocalDate
-                BookingDateChip(
-                    dayOfWeek = shortDayFmt.format(day),
-                    dayOfMonth = day.dayOfMonth.toString(),
-                    selected = selected,
-                    minWidth = chipMinW,
-                    height = chipH,
-                    onClick = { onDateMillisSelected(millis) },
+                BookingDateChipItem(
+                    day = day,
+                    selectedLocalDate = selectedLocalDate,
+                    zoneId = zoneId,
+                    shortDayFmt = shortDayFmt,
+                    chipMinW = chipMinW,
+                    chipH = chipH,
+                    onDateMillisSelected = onDateMillisSelected,
                 )
             }
         }
-        BookingSectionLabel(
-            icon = ExerciseLibraryPhosphorIcons.bookingMapPin,
-            label = stringResource(R.string.exercise_library_booking_location),
-            iconSize = sectionIcon,
-        )
         Box(modifier = Modifier.fillMaxWidth()) {
-            GSurface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(token.radius.md))
-                    .clickable { locationMenuExpanded = true },
-                color = token.colors.surfaceSubtle,
-                shadowElevation = token.elevation.level0,
-                treatment = GSurfaceTreatment.Flat,
-                border = null,
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Row(
+                    modifier = Modifier.wrapContentWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
+                ) {
+                    GIcon(
+                        imageVector = ExerciseLibraryPhosphorIcons.bookingMapPin,
+                        contentDescription = null,
+                        modifier = Modifier.size(sectionIcon),
+                        tint = token.colors.textSecondary,
+                    )
+                    GText(
+                        text = stringResource(R.string.exercise_library_booking_location),
+                        style = sessionBookingSheetTextStyle(token.typography.labelLarge),
+                        color = token.colors.textPrimary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                Spacer(modifier = Modifier.width(token.spacing.spacingStep1))
+                Spacer(modifier = Modifier.weight(1f))
+                GSurface(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
+                        .widthIn(max = token.bodyAnalysis.exerciseLibraryBookingLocationSelectorMaxWidth)
+                        .wrapContentWidth(align = Alignment.End)
+                        .clip(RoundedCornerShape(token.radius.md))
+                        .clickable { locationMenuExpanded = true },
+                    color = token.colors.surfaceSubtle,
+                    shadowElevation = token.elevation.level0,
+                    treatment = GSurfaceTreatment.Flat,
+                    border = null,
+                ) {
+                    Row(
+                        modifier = Modifier.padding(
                             horizontal = token.spacing.sm,
                             vertical = token.spacing.sm,
                         ),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(token.spacing.sm),
-                ) {
-                    GText(
-                        text = selectedLocationName,
-                        style = token.typography.labelLarge,
-                        color = token.colors.textPrimary,
-                        modifier = Modifier.weight(1f),
-                    )
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End,
+                    ) {
+                        GText(
+                            text = selectedLocationName,
+                            style = sessionBookingSheetTextStyle(token.typography.labelLarge),
+                            color = token.colors.textPrimary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.End,
+                        )
+                    }
                 }
             }
             DropdownMenu(
@@ -279,7 +309,7 @@ private fun SessionBookingSheetContent(
                         text = {
                             GText(
                                 text = loc.displayName,
-                                style = token.typography.bodyLarge,
+                                style = sessionBookingSheetTextStyle(token.typography.bodyLarge),
                                 color = token.colors.textPrimary,
                             )
                         },
@@ -325,11 +355,11 @@ private fun SessionBookingSheetContent(
                 items = booking.timeSlotCells,
                 key = { it.slotStart.toString() },
             ) { cell ->
-                TimeSlotHorizontalCell(
+                TimeSlotGridItem(
                     cell = cell,
                     minHeight = gridCellMinH,
                     minWidth = slotChipMinW,
-                    onClick = { onSlotToggled(cell.slotStart) },
+                    onSlotToggled = onSlotToggled,
                 )
             }
         }
@@ -356,37 +386,56 @@ private fun SessionBookingSheetContent(
 @Composable
 private fun BookingExerciseSnapshotRow(
     exercises: ImmutableList<BookingExerciseSummaryUi>,
-    imageSize: Dp,
-    imageCorner: Dp,
 ) {
     val token = GymTheme.token
     val resourceProvider = LocalResourceProvider.current
-    val shape = RoundedCornerShape(imageCorner)
+    val thumb = token.bodyAnalysis.exerciseLibraryBookingStripThumbnailSize
+    val gap = token.bodyAnalysis.exerciseLibraryBookingStripImageTextGap
+    val itemW = token.bodyAnalysis.exerciseLibraryBookingStripItemWidth
+    val shape = RoundedCornerShape(token.bodyAnalysis.upcomingExerciseChipImageCornerRadius)
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(token.spacing.sm),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        items(exercises, key = { it.id }) { ex ->
-            Column(
-                modifier = Modifier.widthIn(max = token.bodyAnalysis.upcomingExerciseChipWidth),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(token.spacing.xxs),
+        items(
+            items = exercises,
+            key = { it.id },
+        ) { ex ->
+            Row(
+                modifier = Modifier.width(itemW),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 AsyncImage(
                     model = ex.image.toCoilModel(resourceProvider),
-                    contentDescription = null,
+                    contentDescription = ex.title,
                     modifier = Modifier
-                        .size(imageSize)
+                        .size(thumb)
                         .clip(shape)
                         .background(token.colors.surfaceSubtle),
                     contentScale = ContentScale.Crop,
                 )
-                GText(
-                    text = ex.title,
-                    style = token.typography.labelSmall,
-                    color = token.colors.textSecondary,
-                    maxLines = 1,
-                )
+                Spacer(modifier = Modifier.width(gap))
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(token.spacing.xxs),
+                ) {
+                    GText(
+                        text = ex.title,
+                        style = sessionBookingSheetTextStyle(token.typography.labelLarge),
+                        color = token.colors.textPrimary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    if (ex.parametersSummary.isNotEmpty()) {
+                        GText(
+                            text = ex.parametersSummary,
+                            style = sessionBookingSheetTextStyle(token.typography.labelSmall),
+                            color = token.colors.textSecondary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
             }
         }
     }
@@ -440,12 +489,12 @@ private fun BookingSheetHeaderRow(
         Column(modifier = Modifier.weight(1f)) {
             GText(
                 text = title,
-                style = token.typography.titleMedium,
+                style = sessionBookingSheetTextStyle(token.typography.titleMedium),
                 color = token.colors.textPrimary,
             )
             GText(
                 text = subtitle,
-                style = token.typography.bodySmall,
+                style = sessionBookingSheetTextStyle(token.typography.bodySmall),
                 color = token.colors.textSecondary,
             )
         }
@@ -489,10 +538,55 @@ private fun BookingSectionLabel(
         )
         GText(
             text = label,
-            style = token.typography.labelLarge,
+            style = sessionBookingSheetTextStyle(token.typography.labelLarge),
             color = token.colors.textPrimary,
         )
     }
+}
+
+@Composable
+private fun BookingDateChipItem(
+    day: LocalDate,
+    selectedLocalDate: LocalDate,
+    zoneId: ZoneId,
+    shortDayFmt: DateTimeFormatter,
+    chipMinW: Dp,
+    chipH: Dp,
+    onDateMillisSelected: (Long) -> Unit,
+) {
+    val millis = remember(day, zoneId) {
+        day.atStartOfDay(zoneId).toInstant().toEpochMilli()
+    }
+    val onClick = remember(day, zoneId, onDateMillisSelected) {
+        { onDateMillisSelected(millis) }
+    }
+    val selected = day == selectedLocalDate
+    BookingDateChip(
+        dayOfWeek = shortDayFmt.format(day),
+        dayOfMonth = day.dayOfMonth.toString(),
+        selected = selected,
+        minWidth = chipMinW,
+        height = chipH,
+        onClick = onClick,
+    )
+}
+
+@Composable
+private fun TimeSlotGridItem(
+    cell: TimeSlotCellUiModel,
+    minHeight: Dp,
+    minWidth: Dp,
+    onSlotToggled: (LocalTime) -> Unit,
+) {
+    val click = remember(cell.slotStart, onSlotToggled) {
+        { onSlotToggled(cell.slotStart) }
+    }
+    TimeSlotHorizontalCell(
+        cell = cell,
+        minHeight = minHeight,
+        minWidth = minWidth,
+        onClick = click,
+    )
 }
 
 @Composable
@@ -529,12 +623,12 @@ private fun BookingDateChip(
     ) {
         GText(
             text = dayOfWeek,
-            style = token.typography.labelSmall,
+            style = sessionBookingSheetTextStyle(token.typography.labelSmall),
             color = fg,
         )
         GText(
             text = dayOfMonth,
-            style = token.typography.titleSmall,
+            style = sessionBookingSheetTextStyle(token.typography.titleSmall),
             color = fg,
         )
     }
@@ -590,82 +684,9 @@ private fun TimeSlotHorizontalCell(
     ) {
         GText(
             text = labelText,
-            style = token.typography.labelSmall,
+            style = sessionBookingSheetTextStyle(token.typography.labelSmall),
             color = fg,
         )
     }
 }
 
-@Preview(showBackground = true, name = "SessionBookingSheet — Light")
-@Composable
-private fun PreviewSessionBookingLight() {
-    val zone = ZoneId.systemDefault()
-    val today = LocalDate.now(zone)
-    val dateMillis = today.atStartOfDay(zone).toInstant().toEpochMilli()
-    val input = SessionBookingInput(
-        selectedDateMillis = dateMillis,
-        selectedLocationId = "default",
-        selectedSlotStarts = persistentSetOf(LocalTime.of(10, 0)),
-        bookingExerciseSnapshot = persistentListOf(),
-        longSessionAcknowledged = false,
-        pendingLongSessionWarning = false,
-        isConfirming = false,
-        showSlotConflict = false,
-    )
-    val locations = listOf(GymLocation(id = "default", displayName = "Default gym"))
-    val booking = buildSessionBookingUiModel(input, locations, busyIntervals = emptyList(), zoneId = zone)
-    GymTheme {
-        SessionBookingSheetContent(
-            booking = booking,
-            busyIntervals = persistentListOf(),
-            draftCount = 2,
-            isCartDraftValid = true,
-            zoneId = zone,
-            onDismissClick = {},
-            onDateMillisSelected = {},
-            onLocationSelected = {},
-            onSlotToggled = {},
-            onClearTimeSelection = {},
-            onConfirm = {},
-        )
-    }
-}
-
-@Preview(
-    showBackground = true,
-    name = "SessionBookingSheet — Dark",
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-)
-@Composable
-private fun PreviewSessionBookingDark() {
-    val zone = ZoneId.systemDefault()
-    val today = LocalDate.now(zone)
-    val dateMillis = today.atStartOfDay(zone).toInstant().toEpochMilli()
-    val input = SessionBookingInput(
-        selectedDateMillis = dateMillis,
-        selectedLocationId = "default",
-        selectedSlotStarts = persistentSetOf(LocalTime.of(10, 0)),
-        bookingExerciseSnapshot = persistentListOf(),
-        longSessionAcknowledged = false,
-        pendingLongSessionWarning = false,
-        isConfirming = false,
-        showSlotConflict = false,
-    )
-    val locations = listOf(GymLocation(id = "default", displayName = "Default gym"))
-    val booking = buildSessionBookingUiModel(input, locations, busyIntervals = emptyList(), zoneId = zone)
-    GymTheme(darkTheme = true) {
-        SessionBookingSheetContent(
-            booking = booking,
-            busyIntervals = persistentListOf(),
-            draftCount = 2,
-            isCartDraftValid = true,
-            zoneId = zone,
-            onDismissClick = {},
-            onDateMillisSelected = {},
-            onLocationSelected = {},
-            onSlotToggled = {},
-            onClearTimeSelection = {},
-            onConfirm = {},
-        )
-    }
-}

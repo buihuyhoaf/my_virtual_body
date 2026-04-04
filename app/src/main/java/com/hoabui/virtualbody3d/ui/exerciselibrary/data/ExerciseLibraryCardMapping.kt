@@ -29,13 +29,10 @@ fun Exercise.toLibraryCardUiModel(
 }
 
 private fun Exercise.libraryCardSubtitle(context: Context): String {
-    if (primaryMuscles.isNotEmpty()) {
-        return primaryMuscles.take(2).joinToString { muscle ->
-            context.getString(ExerciseDisplayResources.muscleGroupResId(muscle))
-        }
-    }
+    val region = context.getString(ExerciseDisplayResources.bodyRegionResId(bodyRegion))
     if (equipment != null) {
-        return context.getString(ExerciseDisplayResources.equipmentResId(equipment))
+        val equip = context.getString(ExerciseDisplayResources.equipmentResId(equipment))
+        return context.getString(R.string.exercise_library_card_region_equipment, region, equip)
     }
-    return context.getString(R.string.exercise_library_card_subtitle_fallback)
+    return region
 }

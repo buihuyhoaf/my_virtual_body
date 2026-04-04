@@ -129,9 +129,6 @@ fun AppNavGraph(
         ) {
             ExerciseDetailScreen(
                 onBack = { navController.popBackStack() },
-                onAddToWorkout = { exerciseId ->
-                    navController.navigate(AddWorkoutRoute(exerciseId))
-                }
             )
         }
         composable<AddWorkoutRoute> {

@@ -8,4 +8,8 @@
         <item quantity="one">%d bài tập</item>
         <item quantity="other">%d bài tập</item>
     </plurals>
+    <plurals name="exercise_library_booking_param_duration_minutes">
+        <item quantity="one">%d phút</item>
+        <item quantity="other">%d phút</item>
+    </plurals>
 </resources>

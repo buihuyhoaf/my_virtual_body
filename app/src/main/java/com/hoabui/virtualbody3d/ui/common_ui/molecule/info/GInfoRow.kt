@@ -28,7 +28,7 @@ import com.hoabui.virtualbody3d.ui.theme.GymTheme
 /**
  * Info row molecule: optional leading slot, a label, an expandable value, and an optional trailing slot.
  *
- * Replaces `ExerciseInfoRow` in [com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseDetailDialog]
+ * Shared label/value row for settings and info surfaces.
  * and all hand-rolled label/value pairs scattered across Body Analysis and Profile feature cards.
  *
  * ### Layout

@@ -6,9 +6,18 @@ import com.hoabui.virtualbody3d.ui.theme.tokens.semantic.gymBodyDetailLayoutSema
 
 @Immutable
 data class BodyDetailTokens(
-    val heroHeight: Dp
+    val heroHeight: Dp,
+    val exerciseDetailIconicTileSize: Dp,
+    val exerciseDetailDialogMaxHeightFraction: Float,
+    val exerciseDetailCardWidthFraction: Float,
 )
 
-fun gymBodyDetailTokens(): BodyDetailTokens = BodyDetailTokens(
-    heroHeight = gymBodyDetailLayoutSemantics().heroHeight
-)
+fun gymBodyDetailTokens(): BodyDetailTokens {
+    val layout = gymBodyDetailLayoutSemantics()
+    return BodyDetailTokens(
+        heroHeight = layout.heroHeight,
+        exerciseDetailIconicTileSize = layout.exerciseDetailIconicTileSize,
+        exerciseDetailDialogMaxHeightFraction = layout.exerciseDetailDialogMaxHeightFraction,
+        exerciseDetailCardWidthFraction = layout.exerciseDetailCardWidthFraction,
+    )
+}
