@@ -18,4 +18,6 @@ class WorkoutScheduleLocalDataSource @Inject constructor() {
         storage[dto.id] = dto
         _schedules.value = storage.values.toList()
     }
+
+    suspend fun getAll(): List<WorkoutScheduleDto> = storage.values.toList()
 }

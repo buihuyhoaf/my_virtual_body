@@ -36,6 +36,8 @@ fun GDialog(
     title: String,
     modifier: Modifier = Modifier,
     description: String? = null,
+    /** When non-null, replaces the plain [description] [GText] (e.g. multi-line receipt layout). */
+    descriptionContent: (@Composable () -> Unit)? = null,
     icon: @Composable (() -> Unit)? = null,
     buttons: @Composable ColumnScope.() -> Unit,
     properties: DialogProperties = DialogProperties(
@@ -78,7 +80,10 @@ fun GDialog(
                     style = token.typography.headlineSmall,
                     textAlign = TextAlign.Center,
                 )
-                if (description != null) {
+                if (descriptionContent != null) {
+                    Spacer(modifier = Modifier.height(token.spacing.sm))
+                    descriptionContent()
+                } else if (description != null) {
                     Spacer(modifier = Modifier.height(token.spacing.sm))
                     GText(
                         text = description,

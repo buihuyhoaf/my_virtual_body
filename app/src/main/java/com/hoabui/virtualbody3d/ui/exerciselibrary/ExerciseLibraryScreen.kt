@@ -42,16 +42,20 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryWor
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseDetailDialog
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryEmptyState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySearchLayer
+import com.hoabui.virtualbody3d.ui.exerciselibrary.components.LongSessionWarningDialog
+import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySessionBookingSheetHost
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySelectionBar
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseSection
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryActions
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.isCartDraftValidForSessionConfirm
 import com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel.ExerciseLibraryViewModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import java.time.ZoneId
 
 private object ExerciseLibraryListContentTypes {
     const val StickySearch = "exercise_library_sticky_search"
@@ -78,10 +82,16 @@ fun ExerciseLibraryScreen(
             onSelectCartItem = viewModel::setActiveCartExercise,
             onRemoveCartItem = viewModel::removeFromCart,
             onClearCart = viewModel::clearAll,
-            onCartDateSelected = viewModel::updateCartDate,
-            onCartTimeSelected = viewModel::updateCartTime,
             onActiveDraftChange = viewModel::updateActiveDraft,
-            onConfirmCart = viewModel::confirmCartToWorkout,
+            onAddToSession = viewModel::openSessionBooking,
+            onDismissSessionBooking = viewModel::dismissSessionBooking,
+            onBookingDateSelected = viewModel::onBookingDateSelected,
+            onBookingLocationSelected = viewModel::onBookingLocationSelected,
+            onBookingSlotToggled = viewModel::onBookingSlotToggled,
+            onBookingClearTimeSelection = viewModel::onBookingClearTimeSelection,
+            onConfirmSessionBooking = viewModel::confirmSessionBooking,
+            onLongSessionEdit = viewModel::onLongSessionEdit,
+            onLongSessionProceedAnyway = viewModel::onLongSessionProceedAnyway,
             onClearExerciseDetail = viewModel::clearExerciseDetail,
             onDismissAddExerciseSuccess = viewModel::dismissAddExerciseSuccess,
             onOpenWorkoutPlan = viewModel::onWorkoutPlanFabClick,
@@ -100,6 +110,26 @@ fun ExerciseLibraryScreen(
                     state = data,
                     actions = actions,
                 )
+                ExerciseLibrarySessionBookingSheetHost(
+                    booking = data.sessionBooking,
+                    busyIntervals = data.bookingBusyIntervals,
+                    draftCount = data.draftOrder.size,
+                    isCartDraftValid = data.isCartDraftValidForSessionConfirm(),
+                    zoneId = ZoneId.systemDefault(),
+                    onDismissRequest = actions.onDismissSessionBooking,
+                    onDateMillisSelected = actions.onBookingDateSelected,
+                    onLocationSelected = actions.onBookingLocationSelected,
+                    onSlotToggled = actions.onBookingSlotToggled,
+                    onClearTimeSelection = actions.onBookingClearTimeSelection,
+                    onConfirm = actions.onConfirmSessionBooking,
+                )
+                if (data.sessionBookingInput?.pendingLongSessionWarning == true) {
+                    LongSessionWarningDialog(
+                        onDismissRequest = actions.onLongSessionEdit,
+                        onEditSession = actions.onLongSessionEdit,
+                        onProceedAnyway = actions.onLongSessionProceedAnyway,
+                    )
+                }
                 data.addExerciseSuccess?.let { summary ->
                     AddExerciseSuccessDialog(
                         summary = summary,

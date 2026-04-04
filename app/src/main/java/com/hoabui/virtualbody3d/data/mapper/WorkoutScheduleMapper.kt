@@ -18,6 +18,8 @@ fun WorkoutSchedule.toDto(): WorkoutScheduleDto = WorkoutScheduleDto(
     notes = notes,
     measurementMode = measurementMode.toDtoValue(),
     durationSeconds = durationSeconds,
+    sessionId = sessionId,
+    locationId = locationId,
 )
 
 fun WorkoutScheduleDto.toDomain(): WorkoutSchedule = WorkoutSchedule(
@@ -31,6 +33,8 @@ fun WorkoutScheduleDto.toDomain(): WorkoutSchedule = WorkoutSchedule(
     notes = notes,
     measurementMode = measurementMode.toScheduleMeasurementMode(),
     durationSeconds = durationSeconds,
+    sessionId = sessionId,
+    locationId = locationId,
 )
 
 private fun ExerciseMeasurementMode.toDtoValue(): String = when (this) {

@@ -104,6 +104,21 @@ data class BodyAnalysisLayoutSemantics(
      * Strictly below 28dp so thumbnail center stays selectable; list tiles use [exerciseLibraryCornerStickerTouchTargetSize].
      */
     val exerciseLibraryCartRemoveTouchTargetSize: Dp,
+    /** Booking sheet top corner radius (modal). */
+    val exerciseLibraryBookingSheetTopCornerRadius: Dp,
+    /** Minimum touch width of a day chip in session booking. */
+    val exerciseLibraryBookingDateChipMinWidth: Dp,
+    val exerciseLibraryBookingDateChipHeight: Dp,
+    /** Time grid cell min height (30-minute row). */
+    val exerciseLibraryBookingTimeGridCellMinHeight: Dp,
+    /** Leading icon size in booking section headers. */
+    val exerciseLibraryBookingSectionIconSize: Dp,
+    /**
+     * Max fraction of available height for session booking sheet content (~half-screen modal).
+     */
+    val exerciseLibraryBookingSheetMaxHeightFraction: Float,
+    /** Minimum width of each chip in the horizontal 30m time slot row. */
+    val exerciseLibraryBookingTimeSlotHorizontalMinWidth: Dp,
 )
 
 fun gymBodyAnalysisLayoutSemantics(): BodyAnalysisLayoutSemantics = BodyAnalysisLayoutSemantics(
@@ -186,6 +201,13 @@ fun gymBodyAnalysisLayoutSemantics(): BodyAnalysisLayoutSemantics = BodyAnalysis
     exerciseLibraryCartRemoveStickerVisualDiameter = 20.dp,
     exerciseLibraryCartRemoveGlyphSize = 14.dp,
     exerciseLibraryCartRemoveTouchTargetSize = 27.dp,
+    exerciseLibraryBookingSheetTopCornerRadius = 16.dp,
+    exerciseLibraryBookingDateChipMinWidth = 52.dp,
+    exerciseLibraryBookingDateChipHeight = 40.dp,
+    exerciseLibraryBookingTimeGridCellMinHeight = 48.dp,
+    exerciseLibraryBookingSectionIconSize = 20.dp,
+    exerciseLibraryBookingSheetMaxHeightFraction = 0.5f,
+    exerciseLibraryBookingTimeSlotHorizontalMinWidth = 72.dp,
 )
 
 @Immutable

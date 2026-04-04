@@ -17,4 +17,8 @@ data class WorkoutSchedule(
     val measurementMode: ExerciseMeasurementMode = ExerciseMeasurementMode.Strength,
     /** Total work duration in seconds when [measurementMode] is [ExerciseMeasurementMode.Duration]; null for strength. */
     val durationSeconds: Int? = null,
+    /** When set, this row belongs to an aggregated [WorkoutSession] and must not be counted again for busy slots. */
+    val sessionId: String? = null,
+    /** Facility used for conflict detection; legacy rows use [DEFAULT_SESSION_LOCATION_ID]. */
+    val locationId: String = DEFAULT_SESSION_LOCATION_ID,
 )

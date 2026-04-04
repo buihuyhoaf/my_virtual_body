@@ -6,17 +6,19 @@ import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
+import com.hoabui.virtualbody3d.domain.model.exercise.InstantInterval
 import com.hoabui.virtualbody3d.domain.model.exercise.normalizeDurationMinutesSeconds
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 
-/** Epoch millis at start of today in the system default zone (picker default when schedule is unset). */
+/** Epoch millis at start of today in the system default zone (default booking date). */
 fun defaultExerciseLibraryCartDateMillis(): Long {
     val zone = ZoneId.systemDefault()
     return LocalDate.now(zone).atStartOfDay(zone).toInstant().toEpochMilli()
@@ -30,9 +32,13 @@ fun defaultExerciseLibraryCartTime(): LocalTime {
 /** Shown after cart commit succeeds; cleared when user dismisses the success dialog. */
 @Immutable
 data class AddExerciseSuccessSummary(
-    val exerciseCount: Int,
+    val sessionStartInstant: Instant,
+    val sessionEndInstant: Instant,
     val scheduledDateMillis: Long,
-    val scheduledTime: LocalTime,
+    val exerciseCount: Int,
+    /** First exercise in cart order for "Squat and N others"; null/blank → generic count-only line in UI. */
+    val primaryExerciseTitle: String?,
+    val locationDisplayName: String,
 )
 
 /** Per-exercise manual entry while building the library cart ([sets]/[reps] as raw text for empty-friendly UI). */
@@ -43,12 +49,10 @@ data class ExerciseDraft(
 )
 
 /**
- * `true` when the primary "Thêm" action is allowed: date and time chosen, cart non-empty,
- * and every draft is valid for its exercise [ExerciseMeasurementMode] (strength: positive sets/reps;
+ * `true` when every cart draft is valid for booking confirm (strength: positive sets/reps;
  * duration: normalized total seconds > 0).
  */
-fun ExerciseLibraryUiState.isAnchoredAddEnabled(): Boolean {
-    if (selectedDate == null || selectedTime == null) return false
+fun ExerciseLibraryUiState.isCartDraftValidForSessionConfirm(): Boolean {
     if (itemDrafts.isEmpty()) return false
     return itemDrafts.all { (id, draft) ->
         val mode = exerciseMeasurementById[id] ?: ExerciseMeasurementMode.Strength
@@ -87,10 +91,6 @@ data class ExerciseLibraryUiState(
     val draftOrder: ImmutableList<String> = persistentListOf(),
     /** Which cart line is being edited in the console. */
     val activeExerciseId: String? = null,
-    /** Start-of-day millis in [ZoneId.systemDefault] when chosen; `null` until user picks a date. */
-    val selectedDate: Long? = null,
-    /** Clock time when chosen; `null` until user picks a time. */
-    val selectedTime: LocalTime? = null,
     val sections: ImmutableList<ExerciseSectionUiItem> = persistentListOf(),
     val selectedExerciseForDetail: Exercise? = null,
     /** [Exercise.id] → measurement mode from the library catalog (for cart validation and console UI). */
@@ -102,6 +102,11 @@ data class ExerciseLibraryUiState(
      * Drives workout-plan FAB badge; not reset when clearing the cart.
      */
     val workoutPlanFabBadgeCount: Int = 0,
+    /** Mutable booking fields; null when sheet closed. [sessionBooking] is derived in the ViewModel combine. */
+    val sessionBookingInput: SessionBookingInput? = null,
+    val sessionBooking: SessionBookingUiModel? = null,
+    /** Busy intervals for the current booking day/location (for confirm gating). */
+    val bookingBusyIntervals: ImmutableList<InstantInterval> = persistentListOf(),
 )
 
 /**

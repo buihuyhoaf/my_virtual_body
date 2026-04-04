@@ -135,6 +135,13 @@ data class BodyAnalysisTokens(
     val exerciseLibraryCartRemoveStickerVisualDiameter: Dp,
     val exerciseLibraryCartRemoveGlyphSize: Dp,
     val exerciseLibraryCartRemoveTouchTargetSize: Dp,
+    val exerciseLibraryBookingSheetTopCornerRadius: Dp,
+    val exerciseLibraryBookingDateChipMinWidth: Dp,
+    val exerciseLibraryBookingDateChipHeight: Dp,
+    val exerciseLibraryBookingTimeGridCellMinHeight: Dp,
+    val exerciseLibraryBookingSectionIconSize: Dp,
+    val exerciseLibraryBookingSheetMaxHeightFraction: Float,
+    val exerciseLibraryBookingTimeSlotHorizontalMinWidth: Dp,
     val gImageCardSelectedSurfaceTintAlpha: Float,
     val gImageCardWeakSelectionSurfaceTintAlpha: Float,
 )
@@ -253,7 +260,9 @@ fun gymBodyAnalysisTokens(
         exerciseLibraryQuickAddTextInset = spacing.xxl + spacing.xs,
         exerciseLibrarySelectionBarTopCornerRadius = layout.exerciseLibrarySelectionBarTopCornerRadius,
         exerciseLibraryCartNumericFieldWidth = layout.exerciseLibraryCartNumericFieldWidth,
-        exerciseLibrarySelectionBarMinHeight = layout.exerciseLibraryCartThumbnailSize + layout.heroSlimChipHeight * 2 + spacing.md * 3,
+        exerciseLibrarySelectionBarMinHeight = layout.exerciseLibraryCartThumbnailSize +
+            layout.exerciseLibraryConsolePrecisionRowHeight * 2 +
+            spacing.sm * 2 + spacing.md * 2,
         exerciseLibrarySelectionBarAddButtonMaxWidth = spacing.xl + spacing.xl + spacing.md,
         exerciseLibraryCartThumbnailSize = layout.exerciseLibraryCartThumbnailSize,
         exerciseLibraryAnchoredConsoleTopBorderWidth = layout.exerciseLibraryAnchoredConsoleTopBorderWidth,
@@ -268,6 +277,13 @@ fun gymBodyAnalysisTokens(
         exerciseLibraryCartRemoveStickerVisualDiameter = layout.exerciseLibraryCartRemoveStickerVisualDiameter,
         exerciseLibraryCartRemoveGlyphSize = layout.exerciseLibraryCartRemoveGlyphSize,
         exerciseLibraryCartRemoveTouchTargetSize = layout.exerciseLibraryCartRemoveTouchTargetSize,
+        exerciseLibraryBookingSheetTopCornerRadius = layout.exerciseLibraryBookingSheetTopCornerRadius,
+        exerciseLibraryBookingDateChipMinWidth = layout.exerciseLibraryBookingDateChipMinWidth,
+        exerciseLibraryBookingDateChipHeight = layout.exerciseLibraryBookingDateChipHeight,
+        exerciseLibraryBookingTimeGridCellMinHeight = layout.exerciseLibraryBookingTimeGridCellMinHeight,
+        exerciseLibraryBookingSectionIconSize = layout.exerciseLibraryBookingSectionIconSize,
+        exerciseLibraryBookingSheetMaxHeightFraction = layout.exerciseLibraryBookingSheetMaxHeightFraction,
+        exerciseLibraryBookingTimeSlotHorizontalMinWidth = layout.exerciseLibraryBookingTimeSlotHorizontalMinWidth,
         gImageCardSelectedSurfaceTintAlpha = alpha.IMAGE_CARD_SELECTED_TINT,
         gImageCardWeakSelectionSurfaceTintAlpha = alpha.IMAGE_CARD_WEAK_SELECTION_TINT,
     )

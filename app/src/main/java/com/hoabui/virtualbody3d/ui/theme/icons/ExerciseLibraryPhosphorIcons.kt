@@ -22,6 +22,10 @@ object ExerciseLibraryPhosphorIcons {
     val listToggleNotInCart: ImageVector get() = PhosphorIcons.Regular.Plus
     val listToggleInCart: ImageVector get() = PhosphorIcons.Fill.CheckCircle
     val cartRemove: ImageVector get() = PhosphorIcons.Regular.X
+    val bookingSheetClose: ImageVector get() = PhosphorIcons.Regular.X
+    val bookingCalendar: ImageVector get() = PhosphorIcons.Regular.Calendar
+    val bookingClock: ImageVector get() = PhosphorIcons.Regular.Clock
+    val bookingMapPin: ImageVector get() = PhosphorIcons.Fill.MapPin
     val search: ImageVector get() = PhosphorIcons.Regular.MagnifyingGlass
     val cartScheduleDate: ImageVector get() = PhosphorIcons.Regular.Calendar
     val cartScheduleTime: ImageVector get() = PhosphorIcons.Regular.Clock

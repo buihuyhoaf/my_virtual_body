@@ -15,4 +15,7 @@ data class WorkoutScheduleDto(
     val notes: String?,
     val measurementMode: String = "strength",
     val durationSeconds: Int? = null,
+    val sessionId: String? = null,
+    /** Must match [com.hoabui.virtualbody3d.domain.model.exercise.DEFAULT_SESSION_LOCATION_ID] for legacy rows. */
+    val locationId: String = "default",
 )

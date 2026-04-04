@@ -15,6 +15,7 @@ import com.hoabui.virtualbody3d.data.repository.ResourceProviderImpl
 import com.hoabui.virtualbody3d.data.repository.SupplementRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.UserInfoRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.WorkoutFeedRepositoryImpl
+import com.hoabui.virtualbody3d.data.repository.WorkoutSessionRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.WorkoutScheduleRepositoryImpl
 import com.hoabui.virtualbody3d.domain.repository.AuthRepository
 import com.hoabui.virtualbody3d.domain.repository.BaselineRepository
@@ -31,6 +32,7 @@ import com.hoabui.virtualbody3d.domain.repository.ResourceProvider
 import com.hoabui.virtualbody3d.domain.repository.SupplementRepository
 import com.hoabui.virtualbody3d.domain.repository.UserInfoRepository
 import com.hoabui.virtualbody3d.domain.repository.WorkoutFeedRepository
+import com.hoabui.virtualbody3d.domain.repository.WorkoutSessionRepository
 import com.hoabui.virtualbody3d.domain.repository.WorkoutScheduleRepository
 import dagger.Binds
 import dagger.Module
@@ -131,6 +133,12 @@ abstract class RepositoryModule {
     abstract fun bindWorkoutScheduleRepository(
         workoutScheduleRepositoryImpl: WorkoutScheduleRepositoryImpl
     ): WorkoutScheduleRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindWorkoutSessionRepository(
+        workoutSessionRepositoryImpl: WorkoutSessionRepositoryImpl
+    ): WorkoutSessionRepository
 
     @Binds
     @Singleton

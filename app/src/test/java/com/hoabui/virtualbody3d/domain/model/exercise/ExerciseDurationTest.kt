@@ -2,14 +2,13 @@ package com.hoabui.virtualbody3d.domain.model.exercise
 
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.isAnchoredAddEnabled
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.isCartDraftValidForSessionConfirm
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.time.LocalTime
 
 class ExerciseDurationTest {
 
@@ -36,7 +35,7 @@ class ExerciseDurationTest {
     }
 
     @Test
-    fun isAnchoredAddEnabled_mixedCartStrengthAndDuration() {
+    fun isCartDraftValid_mixedCartStrengthAndDuration() {
         val modes = persistentMapOf(
             "a" to ExerciseMeasurementMode.Strength,
             "b" to ExerciseMeasurementMode.Duration,
@@ -48,24 +47,20 @@ class ExerciseDurationTest {
         val state = ExerciseLibraryUiState(
             itemDrafts = drafts,
             draftOrder = persistentListOf("a", "b"),
-            selectedDate = 1L,
-            selectedTime = LocalTime.NOON,
             exerciseMeasurementById = modes,
         )
-        assertTrue(state.isAnchoredAddEnabled())
+        assertTrue(state.isCartDraftValidForSessionConfirm())
     }
 
     @Test
-    fun isAnchoredAddEnabled_durationZeroTotal_disabled() {
+    fun isCartDraftValid_durationZeroTotal_disabled() {
         val modes = persistentMapOf("b" to ExerciseMeasurementMode.Duration)
         val drafts = persistentMapOf("b" to ExerciseDraft(sets = "0", reps = "0"))
         val state = ExerciseLibraryUiState(
             itemDrafts = drafts,
             draftOrder = persistentListOf("b"),
-            selectedDate = 1L,
-            selectedTime = LocalTime.NOON,
             exerciseMeasurementById = modes,
         )
-        assertFalse(state.isAnchoredAddEnabled())
+        assertFalse(state.isCartDraftValidForSessionConfirm())
     }
 }
