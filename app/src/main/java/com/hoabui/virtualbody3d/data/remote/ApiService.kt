@@ -7,7 +7,7 @@ import retrofit2.http.POST
 
 /**
  * Base Retrofit API service contract.
- * Add shared or sample endpoints here; feature-specific APIs (e.g. InitialSetupApi) live in separate interfaces.
+ * Add shared or sample endpoints here; feature-specific APIs can live in separate interfaces.
  */
 interface ApiService {
 
@@ -16,12 +16,6 @@ interface ApiService {
      */
     @GET("health")
     suspend fun health(): Response<Unit>
-
-    /**
-     * Gửi kết quả Initial Setup lên backend khi user hoàn thành flow.
-     */
-    @POST("initial-setup")
-    suspend fun submitInitialSetup(@Body body: InitialSetupRequestDto): Response<Unit>
 
     /**
      * Gửi thông tin đăng nhập lên backend.

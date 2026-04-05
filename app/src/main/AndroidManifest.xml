@@ -33,16 +33,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.MyVirtualBody">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="myvirtualbody"
-                    android:host="exercise" />
-            </intent-filter>
-        </activity>
+            android:theme="@style/Theme.MyVirtualBody" />
     </application>
 
 </manifest>

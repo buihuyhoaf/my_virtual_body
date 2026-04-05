@@ -17,9 +17,4 @@ class ExerciseRepositoryImpl @Inject constructor(
 
     override fun getAllExercises(): Flow<List<Exercise>> =
         localDataSource.getAllExercises().map { list -> list.map(exerciseMapper::toDomain) }
-
-    override fun getExerciseById(id: String): Flow<Exercise?> =
-        localDataSource.getAllExercises().map { list ->
-            list.find { it.id == id }?.let(exerciseMapper::toDomain)
-        }
 }

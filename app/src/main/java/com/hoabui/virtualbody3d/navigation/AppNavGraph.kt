@@ -10,85 +10,50 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
-import com.hoabui.virtualbody3d.ui.addworkout.AddWorkoutScreen
 import com.hoabui.virtualbody3d.ui.body.screen.BodyDetailAnalystScreen
 import com.hoabui.virtualbody3d.ui.body.screen.BodyRegionDetailScreen
 import com.hoabui.virtualbody3d.ui.body.screen.HomeScreen
-import com.hoabui.virtualbody3d.ui.createbaseline.CreateBaselineScreen
-import com.hoabui.virtualbody3d.ui.exercisedetail.ExerciseDetailScreen
 import com.hoabui.virtualbody3d.ui.exerciselibrary.ExerciseLibraryScreen
-import com.hoabui.virtualbody3d.ui.initialsetup.InitialSetupScreen
 import com.hoabui.virtualbody3d.ui.login.LoginScreen
 import com.hoabui.virtualbody3d.ui.mealcapture.MealCaptureScreen
 import com.hoabui.virtualbody3d.ui.messages.MessageDetailScreen
 import com.hoabui.virtualbody3d.ui.messages.MessagesScreen
-import com.hoabui.virtualbody3d.ui.onboarding.OnboardingScreen
 import com.hoabui.virtualbody3d.ui.profile.ProfileScreen
-import com.hoabui.virtualbody3d.ui.scanresult.BodyScanResultScreen
-import com.hoabui.virtualbody3d.ui.workoutfeed.WorkoutFeedScreen
 
 @Composable
 fun AppNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     startDestination: Any,
-    onOnboardingCompleted: () -> Unit
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination,
         modifier = modifier
     ) {
-        composable<OnboardingRoute> {
-            OnboardingScreen(
-                onComplete = {
-                    onOnboardingCompleted()
-                    navController.navigate(LoginRoute) {
-                        popUpTo<OnboardingRoute> { inclusive = true }
-                    }
-                }
-            )
-        }
         composable<LoginRoute> {
             LoginScreen(
                 onSignIn = { _, _ ->
-                    navController.navigate(InitialSetupRoute) {
+                    navController.navigate(HomeRoute) {
                         popUpTo<LoginRoute> { inclusive = true }
                     }
                 },
                 onForgotPassword = { },
                 onSignUp = {
-                    navController.navigate(InitialSetupRoute) {
+                    navController.navigate(HomeRoute) {
                         popUpTo<LoginRoute> { inclusive = true }
                     }
                 },
                 onSignInWithGoogle = {
-                    navController.navigate(InitialSetupRoute) {
+                    navController.navigate(HomeRoute) {
                         popUpTo<LoginRoute> { inclusive = true }
                     }
                 },
                 onSignInWithApple = {
-                    navController.navigate(InitialSetupRoute) {
+                    navController.navigate(HomeRoute) {
                         popUpTo<LoginRoute> { inclusive = true }
                     }
-                }
-            )
-        }
-        composable<InitialSetupRoute> {
-            InitialSetupScreen(
-                onComplete = {
-                    navController.navigate(CreateBaselineRoute) {
-                        popUpTo<InitialSetupRoute> { inclusive = true }
-                    }
-                }
-            )
-        }
-        composable<CreateBaselineRoute> {
-            CreateBaselineScreen(
-                onNavigateToScanResult = {
-                    navController.navigate(BodyScanResultRoute)
                 }
             )
         }
@@ -115,26 +80,6 @@ fun AppNavGraph(
         composable<ExerciseLibraryRoute> {
             ExerciseLibraryScreen(
                 onBack = { navController.popBackStack() },
-                onAddToWorkout = { exerciseId ->
-                    navController.navigate(AddWorkoutRoute(exerciseId))
-                }
-            )
-        }
-        composable<ExerciseDetailRoute>(
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "myvirtualbody://exercise/{exerciseId}"
-                }
-            )
-        ) {
-            ExerciseDetailScreen(
-                onBack = { navController.popBackStack() },
-            )
-        }
-        composable<AddWorkoutRoute> {
-            AddWorkoutScreen(
-                onSaved = { navController.popBackStack() },
-                onCancel = { navController.popBackStack() }
             )
         }
         composable<AddRoute> {
@@ -158,9 +103,6 @@ fun AppNavGraph(
         composable<CenfitCoachRoute> {
             ExerciseLibraryScreen(
                 onBack = { navController.popBackStack() },
-                onAddToWorkout = { exerciseId ->
-                    navController.navigate(AddWorkoutRoute(exerciseId))
-                }
             )
         }
         composable<ProfileRoute> {
@@ -171,22 +113,6 @@ fun AppNavGraph(
                 onLogout = {
                     navController.navigate(LoginRoute) {
                         popUpTo(navController.graph.id) { inclusive = true }
-                    }
-                }
-            )
-        }
-        composable<BodyScanResultRoute> {
-            BodyScanResultScreen(
-                onBeginClick = {
-                    navController.navigate(HomeRoute) {
-                        popUpTo<BodyScanResultRoute> { inclusive = true }
-                    }
-                },
-                onBackClick = {
-                    if (!navController.popBackStack()) {
-                        navController.navigate(HomeRoute) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
                     }
                 }
             )

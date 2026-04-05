@@ -68,7 +68,7 @@ class CameraCaptureViewModel @Inject constructor(
         _hasNavigatedToScanResult.value = false
     }
 
-    /** Call when user returns from BodyScanResult so UI shows camera again (state was still ReviewExtracted). */
+    /** Call when user returns from a fullscreen destination so UI shows camera again (state was still ReviewExtracted). */
     fun resetToCameraAfterReturnFromScanResult() {
         Log.d(TAG, "[ACTION] resetToCameraAfterReturnFromScanResult")
         _pendingReviewFile.value = null

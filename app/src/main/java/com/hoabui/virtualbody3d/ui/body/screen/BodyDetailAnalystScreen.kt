@@ -24,7 +24,7 @@ import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 /**
  * Body detail analyst screen. Placeholder content for now.
- * Navigated from HeroSection "Chi tiết" chip on Home.
+ * Navigated from the home body section.
  */
 @Composable
 fun BodyDetailAnalystScreen(

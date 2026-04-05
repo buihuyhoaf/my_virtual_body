@@ -8,7 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.hoabui.virtualbody3d.R
 
 private sealed class TopBarConfig {
     data object None : TopBarConfig()
@@ -20,16 +19,11 @@ fun AppScaffoldLayout(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     startDestination: Any,
-    onOnboardingCompleted: () -> Unit
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
     val showBars = currentDestination != null &&
-        !currentDestination.hasRoute(OnboardingRoute::class) &&
-        !currentDestination.hasRoute(LoginRoute::class) &&
-        !currentDestination.hasRoute(InitialSetupRoute::class) &&
-        !currentDestination.hasRoute(CreateBaselineRoute::class) &&
-        !currentDestination.hasRoute(BodyScanResultRoute::class)
+        !currentDestination.hasRoute(LoginRoute::class)
 
     val showBottomBar = showBars && (
         currentDestination?.hasRoute(HomeRoute::class) == true ||
@@ -72,8 +66,6 @@ fun AppScaffoldLayout(
             modifier = Modifier.padding(innerPadding),
             navController = navController,
             startDestination = startDestination,
-            onOnboardingCompleted = onOnboardingCompleted
         )
     }
 }
-

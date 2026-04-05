@@ -6,27 +6,21 @@ import androidx.compose.ui.unit.Dp
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.BodyAnalysisTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.BodyDetailTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.ButtonTokens
-import com.hoabui.virtualbody3d.ui.theme.tokens.component.CalendarTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.CameraTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.CardTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.ChatTokens
-import com.hoabui.virtualbody3d.ui.theme.tokens.component.CreateBaselineTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.ControlPanelTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.LoginTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.MealTokens
-import com.hoabui.virtualbody3d.ui.theme.tokens.component.OnboardingTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.SliderTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.StatusPopupTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.SurfaceTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.ThinkingCardTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymBodyDetailTokens
-import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymCalendarTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymCameraTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymChatTokens
-import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymCreateBaselineTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymLoginTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymMealTokens
-import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymOnboardingTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymBodyAnalysisTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymButtonTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymCardTokens
@@ -64,10 +58,7 @@ data class GymToken(
     val slider: SliderTokens,
     val controlPanel: ControlPanelTokens,
     val bodyAnalysis: BodyAnalysisTokens,
-    val calendar: CalendarTokens,
-    val onboarding: OnboardingTokens,
     val login: LoginTokens,
-    val createBaseline: CreateBaselineTokens,
     val camera: CameraTokens,
     val statusPopup: StatusPopupTokens,
     val thinkingCard: ThinkingCardTokens,
@@ -150,10 +141,7 @@ fun darkGymToken(
     slider = gymSliderTokens(primitiveSpacing),
     controlPanel = gymControlPanelTokens(primitiveSpacing),
     bodyAnalysis = gymBodyAnalysisTokens(primitiveSpacing, primitiveBorder, primitiveAlpha, elevation),
-    calendar = gymCalendarTokens(colors, primitiveSpacing, primitiveBorder),
-    onboarding = gymOnboardingTokens(primitiveSpacing, primitiveBorder),
     login = gymLoginTokens(primitiveSpacing, primitiveRadius),
-    createBaseline = gymCreateBaselineTokens(primitiveSpacing, primitiveColors, primitiveBorder, primitiveAlpha),
     camera = gymCameraTokens(primitiveSpacing),
     statusPopup = gymStatusPopupTokens(primitiveSpacing, primitiveRadius, primitiveBorder),
     thinkingCard = gymThinkingCardTokens(primitiveSpacing, primitiveRadius, elevation, primitiveAlpha),
@@ -209,10 +197,7 @@ fun lightGymToken(
     slider = gymSliderTokens(primitiveSpacing),
     controlPanel = gymControlPanelTokens(primitiveSpacing),
     bodyAnalysis = gymBodyAnalysisTokens(primitiveSpacing, primitiveBorder, primitiveAlpha, elevation),
-    calendar = gymCalendarTokens(colors, primitiveSpacing, primitiveBorder),
-    onboarding = gymOnboardingTokens(primitiveSpacing, primitiveBorder),
     login = gymLoginTokens(primitiveSpacing, primitiveRadius),
-    createBaseline = gymCreateBaselineTokens(primitiveSpacing, primitiveColors, primitiveBorder, primitiveAlpha),
     camera = gymCameraTokens(primitiveSpacing),
     statusPopup = gymStatusPopupTokens(primitiveSpacing, primitiveRadius, primitiveBorder),
     thinkingCard = gymThinkingCardTokens(primitiveSpacing, primitiveRadius, elevation, primitiveAlpha),

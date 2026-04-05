@@ -5,5 +5,4 @@ import kotlinx.coroutines.flow.Flow
 
 interface ExerciseRepository {
     fun getAllExercises(): Flow<List<Exercise>>
-    fun getExerciseById(id: String): Flow<Exercise?>
 }

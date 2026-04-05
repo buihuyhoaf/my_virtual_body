@@ -36,7 +36,7 @@ abstract class UiStateViewModel<T, E : Any> : ViewModel() {
 
     /**
      * Updates the Success data when current state is Success. No-op when Loading or Error.
-     * Use for form screens that mutate content (e.g. Login, InitialSetup).
+     * Use for form screens that mutate content (e.g. Login).
      */
     protected fun updateSuccess(block: T.() -> T) {
         when (val s = _state.value) {

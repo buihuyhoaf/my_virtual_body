@@ -19,7 +19,9 @@ data class CameraTokens(
     /** Border width of primary button ring. */
     val primaryButtonBorderWidth: Dp,
     /** Icon size for send (confirm) action in review state. */
-    val sendIconSize: Dp
+    val sendIconSize: Dp,
+    /** Aspect ratio for placeholder frame when live preview is hidden (e.g. processing). */
+    val placeholderViewfinderAspectRatio: Float
 )
 
 fun gymCameraTokens(primitiveSpacing: PrimitiveSpacingTokens): CameraTokens = CameraTokens(
@@ -27,5 +29,7 @@ fun gymCameraTokens(primitiveSpacing: PrimitiveSpacingTokens): CameraTokens = Ca
     secondaryIconSize = primitiveSpacing.iconMedium,
     primaryButtonSize = primitiveSpacing.buttonPrimary,
     primaryButtonBorderWidth = primitiveSpacing.xxs,
-    sendIconSize = primitiveSpacing.xl
+    sendIconSize = primitiveSpacing.xl,
+    /** Matches former create-baseline viewfinder semantics (1 : √2). */
+    placeholderViewfinderAspectRatio = 1f / 1.414f
 )

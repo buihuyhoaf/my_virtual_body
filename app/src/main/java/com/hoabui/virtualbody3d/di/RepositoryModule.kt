@@ -4,7 +4,6 @@ import com.hoabui.virtualbody3d.data.repository.AuthRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.BaselineRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.BodyNutritionSummaryRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.BodyScanResultRepositoryImpl
-import com.hoabui.virtualbody3d.data.repository.InitialSetupRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.ExercisesRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.MealRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.MessageRepositoryImpl
@@ -14,14 +13,12 @@ import com.hoabui.virtualbody3d.data.repository.ExerciseRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.ResourceProviderImpl
 import com.hoabui.virtualbody3d.data.repository.SupplementRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.UserInfoRepositoryImpl
-import com.hoabui.virtualbody3d.data.repository.WorkoutFeedRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.WorkoutSessionRepositoryImpl
 import com.hoabui.virtualbody3d.data.repository.WorkoutScheduleRepositoryImpl
 import com.hoabui.virtualbody3d.domain.repository.AuthRepository
 import com.hoabui.virtualbody3d.domain.repository.BaselineRepository
 import com.hoabui.virtualbody3d.domain.repository.BodyNutritionSummaryRepository
 import com.hoabui.virtualbody3d.domain.repository.BodyScanResultRepository
-import com.hoabui.virtualbody3d.domain.repository.InitialSetupRepository
 import com.hoabui.virtualbody3d.domain.repository.ExercisesRepository
 import com.hoabui.virtualbody3d.domain.repository.MealRepository
 import com.hoabui.virtualbody3d.domain.repository.MessageRepository
@@ -31,7 +28,6 @@ import com.hoabui.virtualbody3d.domain.repository.ExerciseRepository
 import com.hoabui.virtualbody3d.domain.repository.ResourceProvider
 import com.hoabui.virtualbody3d.domain.repository.SupplementRepository
 import com.hoabui.virtualbody3d.domain.repository.UserInfoRepository
-import com.hoabui.virtualbody3d.domain.repository.WorkoutFeedRepository
 import com.hoabui.virtualbody3d.domain.repository.WorkoutSessionRepository
 import com.hoabui.virtualbody3d.domain.repository.WorkoutScheduleRepository
 import dagger.Binds
@@ -61,12 +57,6 @@ abstract class RepositoryModule {
     abstract fun bindBodyNutritionSummaryRepository(
         bodyNutritionSummaryRepository: BodyNutritionSummaryRepositoryImpl
     ): BodyNutritionSummaryRepository
-
-    @Binds
-    @Singleton
-    abstract fun bindInitialSetupRepository(
-        initialSetupRepositoryImpl: InitialSetupRepositoryImpl
-    ): InitialSetupRepository
 
     @Binds
     @Singleton
@@ -121,12 +111,6 @@ abstract class RepositoryModule {
     abstract fun bindExerciseRepository(
         exerciseRepositoryImpl: ExerciseRepositoryImpl
     ): ExerciseRepository
-
-    @Binds
-    @Singleton
-    abstract fun bindWorkoutFeedRepository(
-        workoutFeedRepositoryImpl: WorkoutFeedRepositoryImpl
-    ): WorkoutFeedRepository
 
     @Binds
     @Singleton

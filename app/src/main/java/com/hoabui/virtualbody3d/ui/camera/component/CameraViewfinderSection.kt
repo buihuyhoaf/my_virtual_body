@@ -28,10 +28,11 @@ fun CameraViewfinderSection(
     useBackCamera: Boolean? = null,
     onSwitchCamera: (() -> Unit)? = null
 ) {
-    val createBaseline = token.createBaseline
+    val cameraTokens = token.camera
     val radius = token.radius
     val colors = token.colors
-    val cameraAspectRatio = if (showCamera) 9f / 16f else createBaseline.viewfinderAspectRatio
+    val cameraAspectRatio =
+        if (showCamera) 9f / 16f else cameraTokens.placeholderViewfinderAspectRatio
 
     Box(
         modifier = modifier

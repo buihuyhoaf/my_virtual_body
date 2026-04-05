@@ -30,8 +30,4 @@ object PrimitiveAlphaTokens {
     const val IMAGE_CARD_SELECTED_TINT = 0.08f
     /** Weaker in-cart (non-active) tint on exercise library tiles. */
     const val IMAGE_CARD_WEAK_SELECTION_TINT = 0.04f
-    const val CREATE_BASELINE_INSTRUCTION_BG = 0.1f
-    const val CREATE_BASELINE_VIEWFINDER_BORDER = 0.3f
-    const val CREATE_BASELINE_GUIDE_BORDER = 0.4f
-    const val CREATE_BASELINE_GRADIENT_END = 0.05f
 }

@@ -1,6 +1,5 @@
 package com.hoabui.virtualbody3d
 
-import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,7 +10,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.hoabui.virtualbody3d.core.utils.Constants
 import com.hoabui.virtualbody3d.domain.repository.ResourceProvider
 import com.hoabui.virtualbody3d.navigation.AppDestination
 import com.hoabui.virtualbody3d.navigation.AppNavigationRoot
@@ -27,9 +25,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-    @Inject
-    lateinit var sharedPreferences: SharedPreferences
 
     @Inject
     lateinit var bodyModelProvider: BodyModelProvider
@@ -53,30 +48,13 @@ class MainActivity : ComponentActivity() {
                     LaunchedEffect(Unit) {
                         delay(SPLASH_DURATION_MS)
                         showSplash = false
-                        // Tạm thời luôn vào Home. Sau này bỏ comment và xóa dòng startDestination = Home.route
-                        // để dùng lại logic: đã onboarding -> Login, chưa -> Onboarding.
                         startDestination = AppDestination.Home.route
-//                        startDestination =
-//                            if (sharedPreferences.getBoolean(
-//                                    Constants.KEY_ONBOARDING_COMPLETED,
-//                                    false
-//                                )
-//                            ) {
-//                                AppDestination.Login.route
-//                            } else {
-//                                AppDestination.Onboarding.route
-//                            }
                     }
 
                     when {
                         showSplash -> SplashScreen()
                         else -> AppNavigationRoot(
                             startDestination = startDestination,
-                            onOnboardingCompleted = {
-                                sharedPreferences.edit()
-                                    .putBoolean(Constants.KEY_ONBOARDING_COMPLETED, true)
-                                    .apply()
-                            }
                         )
                     }
                 }

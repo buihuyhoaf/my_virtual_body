@@ -220,27 +220,6 @@ fun gymBodyAnalysisLayoutSemantics(): BodyAnalysisLayoutSemantics = BodyAnalysis
 )
 
 @Immutable
-data class OnboardingLayoutSemantics(
-    val illustrationBodyWidth: Dp,
-    val illustrationBodyHeight: Dp,
-    val illustrationScannerSize: Dp,
-    val illustrationJournalWidth: Dp,
-    val illustrationJournalHeight: Dp,
-    val illustrationBaseUnit: Dp,
-    val illustrationFineUnit: Dp,
-)
-
-fun gymOnboardingLayoutSemantics(): OnboardingLayoutSemantics = OnboardingLayoutSemantics(
-    illustrationBodyWidth = 240.dp,
-    illustrationBodyHeight = 320.dp,
-    illustrationScannerSize = 240.dp,
-    illustrationJournalWidth = 240.dp,
-    illustrationJournalHeight = 120.dp,
-    illustrationBaseUnit = 20.dp,
-    illustrationFineUnit = 5.dp,
-)
-
-@Immutable
 data class MealLayoutSemantics(
     val cardWidth: Dp,
     val imageSize: Dp,
@@ -259,19 +238,6 @@ fun gymMealLayoutSemantics(): MealLayoutSemantics = MealLayoutSemantics(
     nutritionSummaryRingStrokeWidth = 6.dp,
     nutritionSummarySnapshotSize = 38.dp,
     nutritionSummarySnapshotOverlap = 12.dp,
-)
-
-@Immutable
-data class CalendarLayoutSemantics(
-    val dayItemImageSize: Dp,
-    val panelBottomPadding: Dp,
-    val panelOffsetY: Dp,
-)
-
-fun gymCalendarLayoutSemantics(): CalendarLayoutSemantics = CalendarLayoutSemantics(
-    dayItemImageSize = 34.dp,
-    panelBottomPadding = 14.dp,
-    panelOffsetY = (-12).dp,
 )
 
 @Immutable
@@ -320,19 +286,4 @@ data class SurfaceEffectSemantics(
 fun gymSurfaceEffectSemantics(): SurfaceEffectSemantics = SurfaceEffectSemantics(
     innerRadialRadiusFraction = 1.18f,
     innerRadialCenterYFraction = -0.38f,
-)
-
-@Immutable
-data class CreateBaselineVisualSemantics(
-    val viewfinderAspectRatio: Float,
-    val cornerStrokeWidth: Dp,
-    val dashedBorderDashLength: Float,
-    val dashedBorderGapLength: Float,
-)
-
-fun gymCreateBaselineVisualSemantics(): CreateBaselineVisualSemantics = CreateBaselineVisualSemantics(
-    viewfinderAspectRatio = 1f / 1.414f,
-    cornerStrokeWidth = 4.dp,
-    dashedBorderDashLength = 20f,
-    dashedBorderGapLength = 10f,
 )
