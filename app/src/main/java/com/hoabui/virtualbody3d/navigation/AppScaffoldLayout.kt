@@ -25,23 +25,20 @@ fun AppScaffoldLayout(
     val showBars = currentDestination != null &&
         !currentDestination.hasRoute(LoginRoute::class)
 
-    val showBottomBar = showBars && (
-        currentDestination?.hasRoute(HomeRoute::class) == true ||
-            currentDestination?.hasRoute(MessagesRoute::class) == true ||
-            currentDestination?.hasRoute(CenfitCoachRoute::class) == true ||
-            currentDestination?.hasRoute(MealCaptureRoute::class) == true ||
-            currentDestination?.hasRoute(ProfileRoute::class) == true ||
-            currentDestination?.hasRoute(BodyDetailAnalystRoute::class) == true
-        )
+    val showBottomBar = showBars && (currentDestination.hasRoute(HomeRoute::class)
+            || currentDestination.hasRoute(CenfitCoachRoute::class)
+            || currentDestination.hasRoute(MealCaptureRoute::class)
+            || currentDestination.hasRoute(ProfileRoute::class)
+            || currentDestination.hasRoute(BodyDetailAnalystRoute::class)
+            || currentDestination.hasRoute(WorkoutCalendarRoute::class))
 
     val topBarConfig = when {
         !showBars -> TopBarConfig.None
-        currentDestination?.hasRoute(HomeRoute::class) == true -> TopBarConfig.Home
-        currentDestination?.hasRoute(MessagesRoute::class) == true -> TopBarConfig.Home
-        currentDestination?.hasRoute(ProfileRoute::class) == true -> TopBarConfig.Home
-        currentDestination?.hasRoute(CenfitCoachRoute::class) == true -> TopBarConfig.Home
-        currentDestination?.hasRoute(MealCaptureRoute::class) == true -> TopBarConfig.Home
-        currentDestination?.hasRoute(AddRoute::class) == true -> TopBarConfig.Home
+        currentDestination.hasRoute(HomeRoute::class) -> TopBarConfig.Home
+        currentDestination.hasRoute(ProfileRoute::class) -> TopBarConfig.Home
+        currentDestination.hasRoute(CenfitCoachRoute::class) -> TopBarConfig.Home
+        currentDestination.hasRoute(MealCaptureRoute::class) -> TopBarConfig.Home
+        currentDestination.hasRoute(AddRoute::class) -> TopBarConfig.Home
         else -> TopBarConfig.None
     }
 
@@ -52,7 +49,6 @@ fun AppScaffoldLayout(
                 TopBarConfig.Home -> {
                     AppTopBar(onNotificationClick = {})
                 }
-
                 TopBarConfig.None -> Unit
             }
         },

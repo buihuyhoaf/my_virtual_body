@@ -15,12 +15,6 @@ data object AddRoute
 data object MealCaptureRoute
 
 @Serializable
-data object MessagesRoute
-
-@Serializable
-data class MessageDetailRoute(val messageId: String)
-
-@Serializable
 data object CenfitCoachRoute
 
 @Serializable
@@ -34,3 +28,6 @@ data class BodyRegionDetailRoute(val region: String)
 
 @Serializable
 data object ExerciseLibraryRoute
+
+@Serializable
+data object WorkoutCalendarRoute

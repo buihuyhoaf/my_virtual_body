@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -60,6 +62,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.AsyncImage
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.domain.model.exercise.InstantInterval
+import com.hoabui.virtualbody3d.domain.model.exercise.SlotDensityTier
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
 import com.hoabui.virtualbody3d.ui.common_ui.atom.icon.GIcon
@@ -644,28 +647,32 @@ private fun TimeSlotHorizontalCell(
     val token = GymTheme.token
     val shape = RoundedCornerShape(token.radius.sm)
     val selected = cell.selected
+    val hasDensity = cell.densityTier != SlotDensityTier.Empty
     val bg = when {
         selected -> token.colors.primarySoft
-        cell.busy || !cell.enabled -> token.colors.surfaceSubtle
+        cell.overCapacity && !selected -> token.colors.warningContainer
+        hasDensity && !selected -> token.colors.surfaceSubtle
         else -> token.colors.surface
     }
-    val fg = when {
+    val timeFg = when {
         selected -> token.colors.onPrimaryContainer
-        cell.busy || !cell.enabled -> token.colors.textMuted
+        cell.overCapacity && !selected -> token.colors.warning
+        !cell.toggleEnabled && !selected -> token.colors.textSecondary
         else -> token.colors.textPrimary
     }
-    val labelText = if (cell.busy && !selected) {
-        "${cell.label} · ${stringResource(R.string.exercise_library_booking_slot_busy)}"
-    } else {
-        cell.label
+    val summaryFg = when {
+        selected -> token.colors.onPrimaryContainer
+        cell.overCapacity && !selected -> token.colors.warning
+        else -> token.colors.textSecondary
     }
-    val borderColor = if (selected) {
-        token.colors.primary
-    } else {
-        token.colors.borderSubtle
+    val borderColor = when {
+        selected -> token.colors.primary
+        cell.overCapacity -> token.colors.warning
+        else -> token.colors.borderSubtle
     }
     val borderMod = Modifier.border(BorderStroke(token.borderWidth.thin, borderColor), shape)
-    Box(
+    val utilFill = cell.utilizationRatio.coerceIn(0f, 1f)
+    Column(
         modifier = Modifier
             .widthIn(min = minWidth)
             .heightIn(min = minHeight)
@@ -673,20 +680,52 @@ private fun TimeSlotHorizontalCell(
             .clip(shape)
             .background(bg)
             .clickable(
-                enabled = cell.enabled,
+                enabled = cell.toggleEnabled,
                 interactionSource = remember { MutableInteractionSource() },
                 indication = ripple(),
                 role = Role.Button,
                 onClick = onClick,
             )
             .padding(token.spacing.xs),
-        contentAlignment = Alignment.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
+        if (hasDensity) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(token.borderWidth.medium)
+                    .clip(RoundedCornerShape(token.radius.pill))
+                    .background(token.colors.borderSubtle),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(utilFill)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(token.radius.pill))
+                        .background(
+                            if (cell.overCapacity) token.colors.warning else token.colors.primarySoft,
+                        ),
+                )
+            }
+        }
         GText(
-            text = labelText,
+            text = cell.label,
             style = sessionBookingSheetTextStyle(token.typography.labelSmall),
-            color = fg,
+            color = timeFg,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
+        if (cell.summaryLabel.isNotEmpty()) {
+            GText(
+                text = cell.summaryLabel,
+                style = sessionBookingSheetTextStyle(token.typography.labelSmall),
+                color = summaryFg,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+            )
+        }
     }
 }
 

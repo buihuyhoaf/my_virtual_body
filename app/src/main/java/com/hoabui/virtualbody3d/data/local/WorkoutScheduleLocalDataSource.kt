@@ -1,23 +1,28 @@
 package com.hoabui.virtualbody3d.data.local
 
-import com.hoabui.virtualbody3d.data.model.WorkoutScheduleDto
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import java.util.concurrent.ConcurrentHashMap
+import com.hoabui.virtualbody3d.data.local.db.WorkoutScheduleDao
+import com.hoabui.virtualbody3d.data.local.db.WorkoutScheduleEntity
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.Flow
 
+/**
+ * Local persistence for workout schedules. Wraps [WorkoutScheduleDao] so repositories
+ * depend on this type rather than Room DAOs directly.
+ */
 @Singleton
-class WorkoutScheduleLocalDataSource @Inject constructor() {
+class WorkoutScheduleLocalDataSource @Inject constructor(
+    private val dao: WorkoutScheduleDao,
+) {
+    fun observeAllSchedules(): Flow<List<WorkoutScheduleEntity>> = dao.observeAllSchedules()
 
-    private val storage = ConcurrentHashMap<String, WorkoutScheduleDto>()
-    private val _schedules = MutableStateFlow(storage.values.toList())
-    val schedules = _schedules.asStateFlow()
+    fun observeSchedulesInRange(startDay: Long, endDay: Long): Flow<List<WorkoutScheduleEntity>> =
+        dao.observeSchedulesInRange(startDay, endDay)
 
-    suspend fun save(dto: WorkoutScheduleDto) {
-        storage[dto.id] = dto
-        _schedules.value = storage.values.toList()
-    }
+    suspend fun getAllSchedules(): List<WorkoutScheduleEntity> = dao.getAllSchedules()
 
-    suspend fun getAll(): List<WorkoutScheduleDto> = storage.values.toList()
+    suspend fun upsert(entity: WorkoutScheduleEntity) = dao.upsert(entity)
+
+    suspend fun updateStatus(id: Long, status: String, now: Long): Int =
+        dao.updateStatus(id, status, now)
 }

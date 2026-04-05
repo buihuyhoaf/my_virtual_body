@@ -64,8 +64,7 @@ private object ExerciseLibraryListContentTypes {
 @Composable
 fun ExerciseLibraryScreen(
     modifier: Modifier = Modifier,
-    onBack: () -> Unit,
-    onAddToWorkout: (exerciseId: String) -> Unit = {},
+    onOpenWorkoutPlan: () -> Unit,
     viewModel: ExerciseLibraryViewModel = hiltViewModel(),
 ) {
     val screenState by viewModel.state.collectAsStateWithLifecycle()
@@ -91,7 +90,7 @@ fun ExerciseLibraryScreen(
             onLongSessionProceedAnyway = viewModel::onLongSessionProceedAnyway,
             onClearExerciseDetail = viewModel::clearExerciseDetail,
             onDismissAddExerciseSuccess = viewModel::dismissAddExerciseSuccess,
-            onOpenWorkoutPlan = viewModel::onWorkoutPlanFabClick,
+            onOpenWorkoutPlan = onOpenWorkoutPlan,
         )
     }
 

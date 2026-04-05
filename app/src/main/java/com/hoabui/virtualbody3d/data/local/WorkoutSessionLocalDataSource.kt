@@ -1,23 +1,37 @@
 package com.hoabui.virtualbody3d.data.local
 
+import com.hoabui.virtualbody3d.data.local.db.WorkoutSessionDao
+import com.hoabui.virtualbody3d.data.mapper.toDto
+import com.hoabui.virtualbody3d.data.mapper.toEntity
 import com.hoabui.virtualbody3d.data.model.WorkoutSessionDto
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import java.util.concurrent.ConcurrentHashMap
+import com.hoabui.virtualbody3d.di.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
+import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class WorkoutSessionLocalDataSource @Inject constructor() {
+class WorkoutSessionLocalDataSource @Inject constructor(
+    private val workoutSessionDao: WorkoutSessionDao,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+) {
 
-    private val storage = ConcurrentHashMap<String, WorkoutSessionDto>()
-    private val _sessions = MutableStateFlow(storage.values.toList())
-    val sessions = _sessions.asStateFlow()
+    fun observeSessionDtos(): Flow<List<WorkoutSessionDto>> =
+        workoutSessionDao.observeAllSessions()
+            .map { entities -> entities.map { it.toDto() } }
+            .flowOn(ioDispatcher)
 
-    suspend fun save(dto: WorkoutSessionDto) {
-        storage[dto.id] = dto
-        _sessions.value = storage.values.toList()
+    suspend fun getAllDtos(): List<WorkoutSessionDto> = withContext(ioDispatcher) {
+        workoutSessionDao.getAllSessions().map { it.toDto() }
     }
 
-    suspend fun getAll(): List<WorkoutSessionDto> = storage.values.toList()
+    suspend fun insertSession(dto: WorkoutSessionDto, zoneId: ZoneId) {
+        withContext(ioDispatcher) {
+            workoutSessionDao.insertSession(dto.toEntity(zoneId))
+        }
+    }
 }

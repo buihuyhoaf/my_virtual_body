@@ -28,6 +28,9 @@ interface WorkoutSessionRepository {
         locationId: String,
     ): Flow<List<InstantInterval>>
 
+    /** All stored workout sessions (timeline aggregate rows). */
+    fun observeWorkoutSessions(): Flow<List<WorkoutSession>>
+
     fun observeGymLocations(): Flow<List<GymLocation>>
 
     /** Idempotent: merges legacy schedules without [sessionId] into sessions once. */

@@ -5,27 +5,15 @@ import com.hoabui.virtualbody3d.domain.repository.BodyNutritionSummaryRepository
 import com.hoabui.virtualbody3d.domain.repository.BodyScanResultRepository
 import com.hoabui.virtualbody3d.domain.repository.MealRepository
 import com.hoabui.virtualbody3d.domain.repository.ProgressTimelineRepository
-import com.hoabui.virtualbody3d.domain.repository.PromoBannerRepository
-import com.hoabui.virtualbody3d.domain.repository.MessageRepository
-import com.hoabui.virtualbody3d.domain.repository.UserInfoRepository
 import com.hoabui.virtualbody3d.domain.usecase.AnalyzeMealImageUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetMealDaysUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetMealsByDayUseCase
-import com.hoabui.virtualbody3d.domain.repository.ExerciseRepository
 import com.hoabui.virtualbody3d.domain.repository.ExercisesRepository
-import com.hoabui.virtualbody3d.domain.repository.SupplementRepository
 import com.hoabui.virtualbody3d.domain.usecase.GetBodyDataUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetExerciseLibraryUseCase
-import com.hoabui.virtualbody3d.domain.usecase.GetExercisesByDayUseCase
-import com.hoabui.virtualbody3d.domain.usecase.GetExercisesUseCase
-import com.hoabui.virtualbody3d.domain.usecase.GetSupplementsUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetCaloriesTodayUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetProgressTimelineUseCase
-import com.hoabui.virtualbody3d.domain.usecase.GetPromoBannersUseCase
 import com.hoabui.virtualbody3d.domain.usecase.LoginUseCase
-import com.hoabui.virtualbody3d.domain.usecase.GetMessageThreadsUseCase
-import com.hoabui.virtualbody3d.domain.usecase.GetMessageDetailUseCase
-import com.hoabui.virtualbody3d.domain.usecase.GetUserInfoUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -57,38 +45,10 @@ object UseCaseModule {
     }
 
     @Provides
-    fun provideGetPromoBannersUseCase(
-        promoBannerRepository: PromoBannerRepository
-    ): GetPromoBannersUseCase {
-        return GetPromoBannersUseCase(promoBannerRepository)
-    }
-
-    @Provides
     fun provideGetProgressTimelineUseCase(
         progressTimelineRepository: ProgressTimelineRepository
     ): GetProgressTimelineUseCase {
         return GetProgressTimelineUseCase(progressTimelineRepository)
-    }
-
-    @Provides
-    fun provideGetMessageThreadsUseCase(
-        messageRepository: MessageRepository
-    ): GetMessageThreadsUseCase {
-        return GetMessageThreadsUseCase(messageRepository)
-    }
-
-    @Provides
-    fun provideGetMessageDetailUseCase(
-        messageRepository: MessageRepository
-    ): GetMessageDetailUseCase {
-        return GetMessageDetailUseCase(messageRepository)
-    }
-
-    @Provides
-    fun provideGetChatUserUseCase(
-        userInfoRepository: UserInfoRepository
-    ): GetUserInfoUseCase {
-        return GetUserInfoUseCase(userInfoRepository)
     }
 
     @Provides
@@ -113,30 +73,9 @@ object UseCaseModule {
     }
 
     @Provides
-    fun provideGetExercisesUseCase(
-        exercisesRepository: ExercisesRepository
-    ): GetExercisesUseCase {
-        return GetExercisesUseCase(exercisesRepository)
-    }
-
-    @Provides
-    fun provideGetExercisesByDayUseCase(
-        exercisesRepository: ExercisesRepository
-    ): GetExercisesByDayUseCase {
-        return GetExercisesByDayUseCase(exercisesRepository)
-    }
-
-    @Provides
-    fun provideGetSupplementsUseCase(
-        supplementRepository: SupplementRepository
-    ): GetSupplementsUseCase {
-        return GetSupplementsUseCase(supplementRepository)
-    }
-
-    @Provides
     fun provideGetExerciseLibraryUseCase(
-        exerciseRepository: ExerciseRepository
+        exercisesRepository: ExercisesRepository
     ): GetExerciseLibraryUseCase {
-        return GetExerciseLibraryUseCase(exerciseRepository)
+        return GetExerciseLibraryUseCase(exercisesRepository)
     }
 }

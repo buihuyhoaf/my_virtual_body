@@ -53,9 +53,9 @@ enum class GTopBarVariant { Solid, Transparent }
 /**
  * Standardised top-bar molecule for the Gym design system.
  *
- * Centralises three patterns that are currently copy-pasted across five screens
+ * Centralises three patterns that are currently copy-pasted across four screens
  * (`ExerciseLibraryScreen`, `BodyRegionDetailScreen`,
- * `BodyDetailAnalystScreen`, `MessageDetailScreen`):
+ * `BodyDetailAnalystScreen`, `WorkoutCalendarScreen`):
  *  - Status-bar window inset handling
  *  - Navigation icon slot (back arrow by default when provided)
  *  - Actions slot (trailing icon buttons)

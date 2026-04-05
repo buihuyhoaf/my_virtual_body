@@ -6,11 +6,13 @@ import com.hoabui.virtualbody3d.domain.model.body.ProgressSnapshot
 import com.hoabui.virtualbody3d.domain.repository.ProgressTimelineRepository
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 @Singleton
 class ProgressTimelineRepositoryImpl @Inject constructor(
     private val localDataSource: ProgressTimelineLocalDataSource
 ) : ProgressTimelineRepository {
-    override fun getSnapshots(): List<ProgressSnapshot> =
-        localDataSource.getSnapshots().toDomain()
+    override fun observeSnapshots(): Flow<List<ProgressSnapshot>> =
+        localDataSource.observeSnapshots().map { it.toDomain() }
 }

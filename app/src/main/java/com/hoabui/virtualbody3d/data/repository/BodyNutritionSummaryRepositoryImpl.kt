@@ -6,12 +6,13 @@ import com.hoabui.virtualbody3d.domain.model.nutrition.NutritionSummary
 import com.hoabui.virtualbody3d.domain.repository.BodyNutritionSummaryRepository
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 @Singleton
 class BodyNutritionSummaryRepositoryImpl @Inject constructor(
     private val localDataSource: NutritionSummaryLocalDataSource
 ) : BodyNutritionSummaryRepository {
-    override fun getNutritionSummary(): NutritionSummary {
-        return localDataSource.getNutritionSummary().toDomain()
-    }
+    override fun observeNutritionSummary(): Flow<NutritionSummary> =
+        localDataSource.observeNutritionSummary().map { it.toDomain() }
 }

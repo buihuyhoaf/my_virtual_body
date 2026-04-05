@@ -5,7 +5,6 @@ import com.adamglin.PhosphorIcons
 import com.adamglin.phosphoricons.Light
 import com.adamglin.phosphoricons.light.Barbell
 import com.adamglin.phosphoricons.light.Camera
-import com.adamglin.phosphoricons.light.ChatCircleText
 import com.adamglin.phosphoricons.light.House
 import com.adamglin.phosphoricons.light.User
 import com.hoabui.virtualbody3d.R
@@ -30,12 +29,6 @@ sealed class AppDestination(
         R.string.tab_meal_capture,
         bottomBarIcon = PhosphorIcons.Light.Camera,
     )
-    data object Messages : AppDestination(
-        MessagesRoute,
-        R.string.tab_messages,
-        bottomBarIcon = PhosphorIcons.Light.ChatCircleText,
-    )
-    data class MessageDetail(val messageId: String) : AppDestination(MessageDetailRoute(messageId), R.string.tab_messages, R.drawable.envelope)
     data object CenfitCoach : AppDestination(
         CenfitCoachRoute,
         R.string.tab_cenfit_coach,
@@ -59,7 +52,6 @@ sealed class AppDestination(
             Home,
             CenfitCoach,
             MealCapture,
-            Messages,
             Profile
         )
     }

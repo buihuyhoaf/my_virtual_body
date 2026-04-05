@@ -8,7 +8,6 @@ import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
-import com.hoabui.virtualbody3d.domain.model.exercise.FeedExercise
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -26,16 +25,6 @@ class ExerciseMapper @Inject constructor(
         safetyNotes = dto.safetyNotes.orEmpty(),
         lastWeightKg = dto.lastWeightKg,
         measurementMode = dto.measurementMode.toMeasurementMode(),
-    )
-
-    fun toFeedExercise(dto: ExerciseDto): FeedExercise = FeedExercise(
-        id = dto.id.orEmpty(),
-        name = dto.name.orEmpty(),
-        image = dto.toImageSource(),
-        sets = dto.sets ?: 0,
-        reps = dto.reps ?: 0,
-        measurementMode = dto.measurementMode.toMeasurementMode(),
-        durationSeconds = null,
     )
 
     private fun ExerciseDto.toImageSource(): ImageSource {

@@ -28,8 +28,13 @@ phosphorIcon = "1.0.0"
 coroutinesTest = "1.10.2"
 archCoreTesting = "2.2.0"
 mockk = "1.14.2"
+room = "2.7.0"
 
 [libraries]
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 androidx-arch-core-testing = { group = "androidx.arch.core", name = "core-testing", version.ref = "archCoreTesting" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }

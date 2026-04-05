@@ -8,17 +8,16 @@ import com.hoabui.virtualbody3d.ui.theme.tokens.component.BodyDetailTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.ButtonTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.CameraTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.CardTokens
-import com.hoabui.virtualbody3d.ui.theme.tokens.component.ChatTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.ControlPanelTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.LoginTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.MealTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.SliderTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.StatusPopupTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.SurfaceTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.WorkoutCalendarTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.ThinkingCardTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymBodyDetailTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymCameraTokens
-import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymChatTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymLoginTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymMealTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymBodyAnalysisTokens
@@ -29,6 +28,7 @@ import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymSliderTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymStatusPopupTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymSurfaceTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymThinkingCardTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymWorkoutCalendarTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveBorderTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveColorTokens
@@ -54,7 +54,6 @@ data class GymToken(
     val surface: SurfaceTokens,
     val button: ButtonTokens,
     val card: CardTokens,
-    val chat: ChatTokens,
     val slider: SliderTokens,
     val controlPanel: ControlPanelTokens,
     val bodyAnalysis: BodyAnalysisTokens,
@@ -63,7 +62,8 @@ data class GymToken(
     val statusPopup: StatusPopupTokens,
     val thinkingCard: ThinkingCardTokens,
     val meal: MealTokens,
-    val bodyDetail: BodyDetailTokens
+    val bodyDetail: BodyDetailTokens,
+    val workoutCalendar: WorkoutCalendarTokens,
 )
 
 @Immutable
@@ -137,7 +137,6 @@ fun darkGymToken(
     surface = gymSurfaceTokens(elevation),
     button = gymButtonTokens(primitiveSpacing, primitiveRadius, primitiveBorder, primitiveAlpha),
     card = gymCardTokens(primitiveSpacing, primitiveRadius, elevation),
-    chat = gymChatTokens(primitiveSpacing),
     slider = gymSliderTokens(primitiveSpacing),
     controlPanel = gymControlPanelTokens(primitiveSpacing),
     bodyAnalysis = gymBodyAnalysisTokens(primitiveSpacing, primitiveBorder, primitiveAlpha, elevation),
@@ -146,7 +145,13 @@ fun darkGymToken(
     statusPopup = gymStatusPopupTokens(primitiveSpacing, primitiveRadius, primitiveBorder),
     thinkingCard = gymThinkingCardTokens(primitiveSpacing, primitiveRadius, elevation, primitiveAlpha),
     meal = gymMealTokens(primitiveSpacing),
-    bodyDetail = gymBodyDetailTokens()
+    bodyDetail = gymBodyDetailTokens(),
+    workoutCalendar = gymWorkoutCalendarTokens(
+        primitiveSpacing,
+        primitiveRadius,
+        primitiveBorder,
+        elevation
+    ),
     )
 }
 
@@ -193,7 +198,6 @@ fun lightGymToken(
     surface = gymSurfaceTokens(elevation),
     button = gymButtonTokens(primitiveSpacing, primitiveRadius, primitiveBorder, primitiveAlpha),
     card = gymCardTokens(primitiveSpacing, primitiveRadius, elevation),
-    chat = gymChatTokens(primitiveSpacing),
     slider = gymSliderTokens(primitiveSpacing),
     controlPanel = gymControlPanelTokens(primitiveSpacing),
     bodyAnalysis = gymBodyAnalysisTokens(primitiveSpacing, primitiveBorder, primitiveAlpha, elevation),
@@ -202,6 +206,12 @@ fun lightGymToken(
     statusPopup = gymStatusPopupTokens(primitiveSpacing, primitiveRadius, primitiveBorder),
     thinkingCard = gymThinkingCardTokens(primitiveSpacing, primitiveRadius, elevation, primitiveAlpha),
     meal = gymMealTokens(primitiveSpacing),
-    bodyDetail = gymBodyDetailTokens()
+    bodyDetail = gymBodyDetailTokens(),
+    workoutCalendar = gymWorkoutCalendarTokens(
+        primitiveSpacing,
+        primitiveRadius,
+        primitiveBorder,
+        elevation
+    ),
     )
 }

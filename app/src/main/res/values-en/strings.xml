@@ -57,4 +57,23 @@
     <string name="exercise_detail_hero_image_cd">Exercise illustration for %1$s</string>
     <string name="exercise_detail_last_weight">Last weight: %1$.0f kg</string>
     <string name="exercise_library_card_region_equipment">%1$s · %2$s</string>
+
+    <!-- Workout calendar -->
+    <string name="workout_calendar_title">Workout plan</string>
+    <string name="workout_calendar_empty_day">No exercises scheduled for this day.</string>
+    <string name="workout_calendar_prev_month_cd">Previous month</string>
+    <string name="workout_calendar_next_month_cd">Next month</string>
+    <string name="workout_calendar_weekday_mo">Mo</string>
+    <string name="workout_calendar_weekday_tu">Tu</string>
+    <string name="workout_calendar_weekday_we">We</string>
+    <string name="workout_calendar_weekday_th">Th</string>
+    <string name="workout_calendar_weekday_fr">Fr</string>
+    <string name="workout_calendar_weekday_sa">Sa</string>
+    <string name="workout_calendar_weekday_su">Su</string>
+    <string name="workout_execution_scheduled">Scheduled</string>
+    <string name="workout_execution_completed">Completed</string>
+    <string name="workout_execution_missed">Missed</string>
+    <string name="workout_execution_skipped">Skipped</string>
+    <string name="workout_calendar_metrics_strength">%1$d × %2$d</string>
+    <string name="workout_calendar_metrics_duration">%1$d min</string>
 </resources>

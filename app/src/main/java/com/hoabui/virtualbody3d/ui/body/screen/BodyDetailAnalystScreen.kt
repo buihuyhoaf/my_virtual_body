@@ -4,21 +4,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.ui.body.viewmodel.BodyViewModel
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBar
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBarBackIcon
 import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
-import com.hoabui.virtualbody3d.ui.body.viewmodel.BodyViewModel
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 

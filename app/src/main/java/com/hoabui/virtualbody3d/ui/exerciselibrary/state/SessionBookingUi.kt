@@ -1,6 +1,7 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.state
 
 import android.content.Context
+import android.content.res.Resources
 import androidx.compose.runtime.Immutable
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
@@ -19,6 +20,8 @@ import com.hoabui.virtualbody3d.domain.model.exercise.instantIntervalFromStart
 import com.hoabui.virtualbody3d.domain.model.exercise.isContiguousThirtyMinuteChain
 import com.hoabui.virtualbody3d.domain.model.exercise.isIntervalFreeForBooking
 import com.hoabui.virtualbody3d.domain.model.exercise.isThirtyMinuteSlotFree
+import com.hoabui.virtualbody3d.domain.model.exercise.SlotDensityKernel
+import com.hoabui.virtualbody3d.domain.model.exercise.SlotDensityTier
 import com.hoabui.virtualbody3d.domain.model.exercise.pruneSelectionAgainstBusy
 import com.hoabui.virtualbody3d.domain.model.exercise.proposedSessionIntervalFromSlotStart
 import com.hoabui.virtualbody3d.domain.model.exercise.proposedVariableSessionInterval
@@ -75,9 +78,16 @@ data class SessionBookingInput(
 data class TimeSlotCellUiModel(
     val slotStart: LocalTime,
     val label: String,
-    val enabled: Boolean,
-    val busy: Boolean,
+    /** Whether the slot can be toggled in the grid (strict wall-time availability for new block). */
+    val toggleEnabled: Boolean,
+    /** Existing session overlaps this 30m bucket (density / summary still shown). */
+    val overlapsExistingSession: Boolean,
     val selected: Boolean,
+    val densityTier: SlotDensityTier,
+    val overCapacity: Boolean,
+    /** Preformatted summary; empty when no activities in bucket. */
+    val summaryLabel: String,
+    val utilizationRatio: Float,
 )
 
 @Immutable
@@ -122,12 +132,23 @@ private fun computePeriodStartIndices(
         p.id to if (idx < 0) cells.lastIndex.coerceAtLeast(0) else idx
     }.toImmutableMap()
 
+private fun formatSlotSummaryLabel(resources: Resources, kernel: SlotDensityKernel): String {
+    if (kernel.totalPlannedMinutes <= 0) return ""
+    return resources.getQuantityString(
+        R.plurals.exercise_booking_slot_minutes_total,
+        kernel.totalPlannedMinutes,
+        kernel.totalPlannedMinutes,
+    )
+}
+
 fun buildSessionBookingUiModel(
     input: SessionBookingInput,
     locations: List<GymLocation>,
     busyIntervals: List<InstantInterval>,
     zoneId: ZoneId,
     isCartDraftValidForConfirm: Boolean,
+    resources: Resources,
+    slotDensityKernels: List<SlotDensityKernel>,
 ): SessionBookingUiModel {
     val date = Instant.ofEpochMilli(input.selectedDateMillis).atZone(zoneId).toLocalDate()
     val slotStarts = bookingSlotStartsForDay(
@@ -135,6 +156,10 @@ fun buildSessionBookingUiModel(
         lastSlot = SESSION_BOOKING_GRID_LAST_SLOT,
         slotStepMinutes = SESSION_BOOKING_SLOT_STEP_MINUTES,
     )
+    require(slotDensityKernels.size == slotStarts.size) {
+        "slotDensityKernels must align with grid (${slotDensityKernels.size} != ${slotStarts.size})"
+    }
+    val kernelBySlot = slotDensityKernels.associateBy { it.slotStart }
     val periods = defaultBookingPeriods()
     val cells = slotStarts.map { slot ->
         val slotInstant = proposedSessionIntervalFromSlotStart(
@@ -147,12 +172,18 @@ fun buildSessionBookingUiModel(
         val overlapsBusy = busyIntervals.any { thirtyMin.overlaps(it) }
         val thirtyFree = isThirtyMinuteSlotFree(date, slot, zoneId, busyIntervals)
         val selected = slot in input.selectedSlotStarts
+        val kernel = kernelBySlot[slot]
+            ?: error("missing SlotDensityKernel for $slot")
         TimeSlotCellUiModel(
             slotStart = slot,
             label = slotLabelFormatter.format(slot),
-            enabled = thirtyFree,
-            busy = overlapsBusy,
+            toggleEnabled = thirtyFree,
+            overlapsExistingSession = overlapsBusy,
             selected = selected,
+            densityTier = kernel.densityTier,
+            overCapacity = kernel.overCapacity,
+            summaryLabel = formatSlotSummaryLabel(resources, kernel),
+            utilizationRatio = kernel.utilizationRatio,
         )
     }
     val locationDisplay = locations.find { it.id == input.selectedLocationId }?.displayName

@@ -6,7 +6,10 @@ import java.time.LocalDateTime
  * Domain model for a scheduled workout entry (exercise + time + sets/reps or duration + weight/rest).
  */
 data class WorkoutSchedule(
+    /** Stable client-generated id (UUID); maps to Room [clientId]. */
     val id: String,
+    /** Room row id when loaded from DB; null for new rows before insert. */
+    val rowId: Long? = null,
     val exerciseId: String,
     val scheduledAt: LocalDateTime,
     val sets: Int,
@@ -21,4 +24,5 @@ data class WorkoutSchedule(
     val sessionId: String? = null,
     /** Facility used for conflict detection; legacy rows use [DEFAULT_SESSION_LOCATION_ID]. */
     val locationId: String = DEFAULT_SESSION_LOCATION_ID,
+    val executionStatus: WorkoutExecutionStatus = WorkoutExecutionStatus.Scheduled,
 )

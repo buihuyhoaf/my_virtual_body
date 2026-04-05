@@ -4,13 +4,11 @@ import com.hoabui.virtualbody3d.domain.model.body.BodyScanResult
 import com.hoabui.virtualbody3d.domain.repository.BodyScanResultRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 
 /** Use case lấy dữ liệu body (một nguồn: tổng quan + báo cáo scan). */
 class GetBodyDataUseCase @Inject constructor(
     private val bodyRepository: BodyScanResultRepository
 ) {
-    operator fun invoke(): Flow<BodyScanResult> = flow {
-        emit(bodyRepository.getBodyData())
-    }
+    operator fun invoke(): Flow<BodyScanResult> =
+        bodyRepository.observeBodyData()
 }

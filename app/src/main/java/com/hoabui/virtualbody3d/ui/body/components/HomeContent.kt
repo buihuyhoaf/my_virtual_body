@@ -54,7 +54,6 @@ fun HomeContent(
     selectedProgressIndex: Int,
     onProgressTimelineIndexSelected: (Int) -> Unit = {},
     onViewBodyDetailClick: () -> Unit = {},
-    onNavigateToExerciseLibrary: () -> Unit,
 ) {
     val token = GymTheme.token
     val contentHeight = LocalConfiguration.current.screenHeightDp.dp

@@ -52,7 +52,7 @@ fun GHeaderBlock(
 private fun PreviewGHeaderBlockLight() {
     GymTheme {
         GHeaderBlock(
-            title = "Messages",
+            title = "Today",
             subtitle = "You’re all caught up.",
         )
     }

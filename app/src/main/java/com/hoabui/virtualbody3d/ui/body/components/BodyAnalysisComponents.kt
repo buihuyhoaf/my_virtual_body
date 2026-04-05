@@ -5,8 +5,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,24 +21,18 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -51,7 +43,6 @@ import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.core.extensions.formatMeasurement
 import com.hoabui.virtualbody3d.core.utils.Constants
-import com.hoabui.virtualbody3d.ui.body.data.SupplementUiItem
 import com.hoabui.virtualbody3d.ui.body.data.UpcomingWorkoutUiItem
 import com.hoabui.virtualbody3d.ui.body.screen.BodyModelPreview
 import com.hoabui.virtualbody3d.ui.body.screen.BodyScoreChip
@@ -60,10 +51,7 @@ import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
 import com.hoabui.virtualbody3d.ui.body.state.BodyUiState
 import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
 import com.hoabui.virtualbody3d.ui.common_ui.image.toImageModel
-import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.CardSize
-import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCard
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GUpcomingExerciseCard
-import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.cardDimensions
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
 import com.hoabui.virtualbody3d.ui.mealcapture.MealPageUiModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
@@ -176,7 +164,7 @@ private fun BodyProgressMetricItem(
 }
 
 /**
- * Shared section with title and horizontal LazyRow. Use for IncommingExercisesRow and SupplementsRow.
+ * Shared section with title and horizontal LazyRow.
  * Reduces spacing between section title and row content (xs) for a tighter block.
  */
 @Composable
@@ -256,103 +244,6 @@ fun UpcomingExercisesRow(
         }
     }
 }
-
-
-@Composable
-private fun AddCard(
-    modifier: Modifier = Modifier,
-    cardSize: CardSize = CardSize.Medium,
-    onClick: () -> Unit = {}
-) {
-    val token = GymTheme.token
-    val bodyToken = token.bodyAnalysis
-    val (cardWidth, cardHeight) = bodyToken.cardImageWithText.cardDimensions(cardSize)
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale = if (isPressed) 0.97f else 1f
-    val cardCorner = when (cardSize) {
-        CardSize.Small -> bodyToken.gImageCardCornerRadius
-        CardSize.Medium, CardSize.Large, CardSize.ExerciseLibraryTile -> token.radius.lg
-    }
-    val imageCorner = RoundedCornerShape(bodyToken.gImageCardCornerRadius)
-    val addCardBorder = BorderStroke(
-        token.borderWidth.hairline,
-        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-    )
-    Card(
-        modifier = modifier
-            .width(cardWidth)
-            .height(cardHeight)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            ),
-        shape = RoundedCornerShape(cardCorner),
-        colors = CardDefaults.cardColors(containerColor = token.colors.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = token.elevation.level0),
-        border = addCardBorder
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(cardWidth)
-                    .clip(imageCorner),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    tint = token.colors.primary,
-                    modifier = Modifier.size(token.spacing.xl)
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            )
-        }
-    }
-}
-
-/**
- * Horizontal row of supplement cards for the home dashboard.
- * Reuses [SectionHorizontalRow] so layout matches [IncommingExercisesRow].
- */
-@Composable
-fun SupplementsRow(
-    modifier: Modifier = Modifier,
-    supplements: List<SupplementUiItem>
-) {
-    SectionHorizontalRow(titleResId = R.string.home_section_supplements, modifier = modifier) {
-        items(
-            items = supplements,
-            key = { "${it.name}-${it.nutrient}" }
-        ) { item ->
-            GImageCard(
-                model = item.imageResId,
-                contentDescription = item.name,
-                firstLineText = item.name,
-                secondLineText = item.nutrient,
-                cardSize = CardSize.Large,
-                onClick = {},
-            )
-        }
-        item(key = "add_supplements") {
-            AddCard(cardSize = CardSize.Large, onClick = {})
-        }
-    }
-}
-
 
 @Composable
 fun StaticHeroSection(

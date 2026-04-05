@@ -16,6 +16,7 @@ import com.hoabui.virtualbody3d.domain.usecase.GetExerciseLibraryUseCase
 import com.hoabui.virtualbody3d.domain.usecase.MigrateLegacyWorkoutSchedulesUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveBusyIntervalsUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveGymLocationsUseCase
+import com.hoabui.virtualbody3d.domain.usecase.ObserveWorkoutSchedulesUseCase
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import io.mockk.coEvery
 import io.mockk.every
@@ -91,8 +92,21 @@ class ExerciseLibraryViewModelTest {
         }
         val migrate = mockk<MigrateLegacyWorkoutSchedulesUseCase>()
         coEvery { migrate(any()) } returns Unit
+        val workoutSchedules = mockk<ObserveWorkoutSchedulesUseCase>()
+        every { workoutSchedules() } returns flow {
+            emit(emptyList())
+            awaitCancellation()
+        }
         val context = mockk<Context>(relaxed = true)
-        return ExerciseLibraryViewModel(getLibrary, book, locations, busy, migrate, context)
+        return ExerciseLibraryViewModel(
+            getLibrary,
+            book,
+            locations,
+            busy,
+            workoutSchedules,
+            migrate,
+            context,
+        )
     }
 
     private fun ExerciseLibraryViewModel.successData(): ExerciseLibraryUiState {

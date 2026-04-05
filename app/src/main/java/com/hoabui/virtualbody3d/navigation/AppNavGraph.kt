@@ -15,10 +15,9 @@ import com.hoabui.virtualbody3d.ui.body.screen.BodyDetailAnalystScreen
 import com.hoabui.virtualbody3d.ui.body.screen.BodyRegionDetailScreen
 import com.hoabui.virtualbody3d.ui.body.screen.HomeScreen
 import com.hoabui.virtualbody3d.ui.exerciselibrary.ExerciseLibraryScreen
+import com.hoabui.virtualbody3d.ui.workoutcalendar.WorkoutCalendarScreen
 import com.hoabui.virtualbody3d.ui.login.LoginScreen
 import com.hoabui.virtualbody3d.ui.mealcapture.MealCaptureScreen
-import com.hoabui.virtualbody3d.ui.messages.MessageDetailScreen
-import com.hoabui.virtualbody3d.ui.messages.MessagesScreen
 import com.hoabui.virtualbody3d.ui.profile.ProfileScreen
 
 @Composable
@@ -62,9 +61,6 @@ fun AppNavGraph(
                 onViewBodyDetailClick = {
                     navController.navigate(BodyDetailAnalystRoute)
                 },
-                onNavigateToExerciseLibrary = {
-                    navController.navigate(ExerciseLibraryRoute)
-                }
             )
         }
         composable<BodyRegionDetailRoute> { backStackEntry ->
@@ -79,6 +75,11 @@ fun AppNavGraph(
         }
         composable<ExerciseLibraryRoute> {
             ExerciseLibraryScreen(
+                onOpenWorkoutPlan = { navController.navigate(WorkoutCalendarRoute) },
+            )
+        }
+        composable<WorkoutCalendarRoute> {
+            WorkoutCalendarScreen(
                 onBack = { navController.popBackStack() },
             )
         }
@@ -88,21 +89,9 @@ fun AppNavGraph(
         composable<MealCaptureRoute> {
             MealCaptureScreen()
         }
-        composable<MessagesRoute> {
-            MessagesScreen(
-                onMessageClick = { message ->
-                    navController.navigate(MessageDetailRoute(message.id))
-                }
-            )
-        }
-        composable<MessageDetailRoute> {
-            MessageDetailScreen(
-                onBack = { navController.popBackStack() }
-            )
-        }
         composable<CenfitCoachRoute> {
             ExerciseLibraryScreen(
-                onBack = { navController.popBackStack() },
+                onOpenWorkoutPlan = { navController.navigate(WorkoutCalendarRoute) },
             )
         }
         composable<ProfileRoute> {

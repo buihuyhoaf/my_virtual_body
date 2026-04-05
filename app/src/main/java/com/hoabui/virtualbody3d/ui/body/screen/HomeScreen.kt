@@ -15,7 +15,6 @@ import com.hoabui.virtualbody3d.ui.mealcapture.MealsViewModel
 @Composable
 fun HomeScreen(
     onViewBodyDetailClick: () -> Unit = {},
-    onNavigateToExerciseLibrary: () -> Unit = {},
     viewModel: BodyViewModel = hiltViewModel(),
     exercisesViewModel: ExercisesViewModel = hiltViewModel(),
     mealsViewModel: MealsViewModel = hiltViewModel(),
@@ -38,7 +37,6 @@ fun HomeScreen(
                 selectedProgressIndex = data.selectedProgressIndex,
                 onProgressTimelineIndexSelected = viewModel::onProgressTimelineIndexSelected,
                 onViewBodyDetailClick = onViewBodyDetailClick,
-                onNavigateToExerciseLibrary = onNavigateToExerciseLibrary,
             )
         }
     )

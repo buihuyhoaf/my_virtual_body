@@ -1,7 +1,6 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel
 
 import android.content.Context
-import android.widget.Toast
 import androidx.lifecycle.viewModelScope
 import com.hoabui.virtualbody3d.core.base.UiStateViewModel
 import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
@@ -10,9 +9,13 @@ import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
+import com.hoabui.virtualbody3d.domain.model.exercise.GymLocation
 import com.hoabui.virtualbody3d.domain.model.exercise.InstantInterval
 import com.hoabui.virtualbody3d.domain.model.exercise.SessionExerciseLine
+import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSession
+import com.hoabui.virtualbody3d.domain.model.exercise.estimatedPlannedMinutesForSessionLine
+import com.hoabui.virtualbody3d.domain.model.exercise.projectBookingSlotDensityKernels
 import com.hoabui.virtualbody3d.domain.model.exercise.bookingSlotStartsForDay
 import com.hoabui.virtualbody3d.domain.model.exercise.computeNextSlotSelectionAfterToggle
 import com.hoabui.virtualbody3d.domain.model.exercise.isContiguousThirtyMinuteChain
@@ -29,6 +32,7 @@ import com.hoabui.virtualbody3d.domain.usecase.GetExerciseLibraryUseCase
 import com.hoabui.virtualbody3d.domain.usecase.MigrateLegacyWorkoutSchedulesUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveBusyIntervalsUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveGymLocationsUseCase
+import com.hoabui.virtualbody3d.domain.usecase.ObserveWorkoutSchedulesUseCase
 import com.hoabui.virtualbody3d.domain.model.exercise.SESSION_BOOKING_GRID_FIRST_SLOT
 import com.hoabui.virtualbody3d.domain.model.exercise.SESSION_BOOKING_GRID_LAST_SLOT
 import com.hoabui.virtualbody3d.domain.model.exercise.SESSION_BOOKING_SLOT_STEP_MINUTES
@@ -69,6 +73,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.time.Instant
 import java.time.LocalTime
 import java.time.ZoneId
@@ -82,9 +88,12 @@ class ExerciseLibraryViewModel @Inject constructor(
     private val bookWorkoutSessionUseCase: BookWorkoutSessionUseCase,
     private val observeGymLocationsUseCase: ObserveGymLocationsUseCase,
     private val observeBusyIntervalsUseCase: ObserveBusyIntervalsUseCase,
+    private val observeWorkoutSchedulesUseCase: ObserveWorkoutSchedulesUseCase,
     private val migrateLegacyWorkoutSchedulesUseCase: MigrateLegacyWorkoutSchedulesUseCase,
     @ApplicationContext private val appContext: Context,
 ) : UiStateViewModel<ExerciseLibraryUiState, Unit>() {
+
+    private val confirmBookingMutex = Mutex()
 
     private val groupedExercises = MutableStateFlow<Map<BodyRegion, List<Exercise>>>(emptyMap())
     private val filterState = MutableStateFlow(ExerciseLibraryUiState())
@@ -155,6 +164,7 @@ class ExerciseLibraryViewModel @Inject constructor(
             }
         }
 
+        val workoutSchedulesFlow = observeWorkoutSchedulesUseCase()
         combine(
             groupedExercises,
             filterState,
@@ -162,6 +172,19 @@ class ExerciseLibraryViewModel @Inject constructor(
             gymLocationsFlow,
             bookingBusyFlow,
         ) { grouped, filters, selectedId, gymLocs, busy ->
+            ExerciseLibraryViewModelCombineCore(
+                grouped = grouped,
+                filters = filters,
+                detailExerciseId = selectedId,
+                gymLocations = gymLocs,
+                busy = busy,
+            )
+        }.combine(workoutSchedulesFlow) { core, schedules ->
+            val grouped = core.grouped
+            val filters = core.filters
+            val selectedId = core.detailExerciseId
+            val gymLocs = core.gymLocations
+            val busy = core.busy
             latestBookingBusy = busy
             val bookingIn = filters.sessionBookingInput
             val filtersForUi = if (bookingIn == null) {
@@ -200,13 +223,34 @@ class ExerciseLibraryViewModel @Inject constructor(
                 grouped.values.flatten().find { it.id == id }
             }
             val filtersWithMeasurement = filtersForUi.copy(exerciseMeasurementById = measurementById)
+            val exercisesById = grouped.values.flatten().associateBy { it.id }
             val bookingUi = filtersWithMeasurement.sessionBookingInput?.let { input ->
+                val date = Instant.ofEpochMilli(input.selectedDateMillis).atZone(zoneId).toLocalDate()
+                val locId = input.selectedLocationId
+                val daySchedules: List<WorkoutSchedule> = schedules.filter { sch ->
+                    sch.locationId == locId &&
+                        sch.scheduledAt.atZone(zoneId).toLocalDate() == date
+                }
+                val draftLines = buildSessionExerciseLinesFromCart(filtersWithMeasurement, exercisesById)
+                val draftMinutes = draftLines.sumOf { estimatedPlannedMinutesForSessionLine(it) }
+                val anchor = input.selectedSlotStarts.minOrNull()
+                val densityKernels = projectBookingSlotDensityKernels(
+                    date = date,
+                    zoneId = zoneId,
+                    locationId = locId,
+                    slotStarts = bookingGridSlotStarts,
+                    schedules = daySchedules,
+                    draftTotalMinutes = draftMinutes,
+                    draftAnchorSlot = anchor,
+                )
                 buildSessionBookingUiModel(
                     input,
                     gymLocs,
                     busy,
                     zoneId,
                     filtersWithMeasurement.isCartDraftValidForSessionConfirm(),
+                    appContext.resources,
+                    densityKernels,
                 )
             }
             filtersForUi.copy(
@@ -484,160 +528,111 @@ class ExerciseLibraryViewModel @Inject constructor(
 
     fun confirmSessionBooking() {
         launchSafely {
-            val filters = filterState.value
-            val input = filters.sessionBookingInput ?: return@launchSafely
-            if (input.selectedSlotStarts.isEmpty()) return@launchSafely
-            if (!filters.isCartDraftValidForSessionConfirm()) return@launchSafely
-            val date = Instant.ofEpochMilli(input.selectedDateMillis).atZone(zoneId).toLocalDate()
-            val orderedSlots = input.selectedSlotStarts.sorted()
-            if (!isContiguousThirtyMinuteChain(orderedSlots)) return@launchSafely
-            val minSlot = orderedSlots.first()
-            val maxSlot = orderedSlots.last()
-            val proposedInterval = proposedVariableSessionInterval(
-                date = date,
-                minSlot = minSlot,
-                maxSlot = maxSlot,
-                zoneId = zoneId,
-            )
-            if (!isIntervalFreeForBooking(proposedInterval, latestBookingBusy)) return@launchSafely
-            if (shouldWarnLongSession(input.selectedSlotStarts.size) && !input.longSessionAcknowledged) {
-                filterState.update { s ->
-                    val inp = s.sessionBookingInput ?: return@update s
-                    s.copy(sessionBookingInput = inp.copy(pendingLongSessionWarning = true))
-                }
-                return@launchSafely
-            }
-
-            filterState.update { s ->
-                val inp = s.sessionBookingInput ?: return@update s
-                s.copy(
-                    sessionBookingInput = inp.copy(
-                        isConfirming = true,
-                        showSlotConflict = false,
-                        pendingLongSessionWarning = false,
-                    ),
+            confirmBookingMutex.withLock {
+                val filters = filterState.value
+                val input = filters.sessionBookingInput ?: return@withLock
+                if (input.isConfirming) return@withLock
+                if (input.selectedSlotStarts.isEmpty()) return@withLock
+                if (!filters.isCartDraftValidForSessionConfirm()) return@withLock
+                val date = Instant.ofEpochMilli(input.selectedDateMillis).atZone(zoneId).toLocalDate()
+                val orderedSlots = input.selectedSlotStarts.sorted()
+                if (!isContiguousThirtyMinuteChain(orderedSlots)) return@withLock
+                val minSlot = orderedSlots.first()
+                val maxSlot = orderedSlots.last()
+                val proposedInterval = proposedVariableSessionInterval(
+                    date = date,
+                    minSlot = minSlot,
+                    maxSlot = maxSlot,
+                    zoneId = zoneId,
                 )
-            }
-
-            val exercisesById = groupedExercises.value.values.flatten().associateBy { it.id }
-            val session = WorkoutSession(
-                id = UUID.randomUUID().toString(),
-                startInstant = proposedInterval.start,
-                endInstant = proposedInterval.end,
-                locationId = input.selectedLocationId,
-            )
-            val order = filters.draftOrder
-            val lines = mutableListOf<SessionExerciseLine>()
-            for ((idx, exerciseId) in order.withIndex()) {
-                val draft = filters.itemDrafts[exerciseId] ?: continue
-                val ex = exercisesById[exerciseId] ?: continue
-                when (ex.measurementMode) {
-                    ExerciseMeasurementMode.Strength -> {
-                        val sets = draft.sets.trim().toIntOrNull() ?: continue
-                        val reps = draft.reps.trim().toIntOrNull() ?: continue
-                        if (sets <= 0 || reps <= 0) continue
-                        lines.add(
-                            SessionExerciseLine(
-                                exerciseId = exerciseId,
-                                sets = sets,
-                                reps = reps,
-                                weightKg = ex.lastWeightKg ?: 0.0,
-                                restSeconds = 90,
-                                notes = null,
-                                measurementMode = ExerciseMeasurementMode.Strength,
-                                durationSeconds = null,
-                                orderIndex = idx,
-                            ),
-                        )
-                    }
-                    ExerciseMeasurementMode.Duration -> {
-                        val minutes = draft.sets.trim().toIntOrNull() ?: 0
-                        val seconds = draft.reps.trim().toIntOrNull() ?: 0
-                        val total = normalizeDurationMinutesSeconds(minutes, seconds)
-                        if (total <= 0) continue
-                        lines.add(
-                            SessionExerciseLine(
-                                exerciseId = exerciseId,
-                                sets = 1,
-                                reps = 0,
-                                weightKg = ex.lastWeightKg ?: 0.0,
-                                restSeconds = 90,
-                                notes = null,
-                                measurementMode = ExerciseMeasurementMode.Duration,
-                                durationSeconds = total,
-                                orderIndex = idx,
-                            ),
-                        )
-                    }
-                }
-            }
-            if (lines.isEmpty()) {
-                filterState.update { s ->
-                    val inp = s.sessionBookingInput ?: return@update s
-                    s.copy(sessionBookingInput = inp.copy(isConfirming = false))
-                }
-                return@launchSafely
-            }
-
-            when (val result = bookWorkoutSessionUseCase(session, lines, zoneId)) {
-                BookWorkoutSessionResult.Conflict -> {
+                if (!isIntervalFreeForBooking(proposedInterval, latestBookingBusy)) return@withLock
+                if (shouldWarnLongSession(input.selectedSlotStarts.size) && !input.longSessionAcknowledged) {
                     filterState.update { s ->
                         val inp = s.sessionBookingInput ?: return@update s
-                        s.copy(
-                            sessionBookingInput = inp.copy(
-                                isConfirming = false,
-                                showSlotConflict = true,
-                            ),
-                        )
+                        s.copy(sessionBookingInput = inp.copy(pendingLongSessionWarning = true))
                     }
+                    return@withLock
                 }
-                BookWorkoutSessionResult.InvalidDraft -> {
+
+                filterState.update { s ->
+                    val inp = s.sessionBookingInput ?: return@update s
+                    s.copy(
+                        sessionBookingInput = inp.copy(
+                            isConfirming = true,
+                            showSlotConflict = false,
+                            pendingLongSessionWarning = false,
+                        ),
+                    )
+                }
+
+                val exercisesById = groupedExercises.value.values.flatten().associateBy { it.id }
+                val session = WorkoutSession(
+                    id = UUID.randomUUID().toString(),
+                    startInstant = proposedInterval.start,
+                    endInstant = proposedInterval.end,
+                    locationId = input.selectedLocationId,
+                )
+                val lines = buildSessionExerciseLinesFromCart(filters, exercisesById)
+                if (lines.isEmpty()) {
                     filterState.update { s ->
                         val inp = s.sessionBookingInput ?: return@update s
                         s.copy(sessionBookingInput = inp.copy(isConfirming = false))
                     }
+                    return@withLock
                 }
-                is BookWorkoutSessionResult.Success -> {
-                    val snap = filterState.value
-                    val bookingInput = snap.sessionBookingInput ?: input
-                    val locLabel = snap.sessionBooking?.locations
-                        ?.find { it.id == bookingInput.selectedLocationId }?.displayName
-                        ?: bookingInput.selectedLocationId
-                    val firstId = snap.draftOrder.firstOrNull()
-                    val primaryTitle = firstId?.let { id ->
-                        bookingInput.bookingExerciseSnapshot.find { it.id == id }?.title
-                            ?.takeIf { it.isNotBlank() }
-                            ?: exercisesById[id]?.name?.takeIf { it.isNotBlank() }
+
+                when (val result = bookWorkoutSessionUseCase(session, lines, zoneId)) {
+                    BookWorkoutSessionResult.Conflict -> {
+                        filterState.update { s ->
+                            val inp = s.sessionBookingInput ?: return@update s
+                            s.copy(
+                                sessionBookingInput = inp.copy(
+                                    isConfirming = false,
+                                    showSlotConflict = true,
+                                ),
+                            )
+                        }
                     }
-                    val summary = AddExerciseSuccessSummary(
-                        sessionStartInstant = session.startInstant,
-                        sessionEndInstant = session.endInstant,
-                        scheduledDateMillis = bookingInput.selectedDateMillis,
-                        exerciseCount = result.scheduledCount,
-                        primaryExerciseTitle = primaryTitle,
-                        locationDisplayName = locLabel,
-                    )
-                    filterState.update {
-                        it.copy(
-                            itemDrafts = persistentMapOf(),
-                            draftOrder = persistentListOf(),
-                            activeExerciseId = null,
-                            sessionBookingInput = null,
-                            addExerciseSuccess = summary,
-                            workoutPlanFabBadgeCount = it.workoutPlanFabBadgeCount + result.scheduledCount,
+                    BookWorkoutSessionResult.InvalidDraft -> {
+                        filterState.update { s ->
+                            val inp = s.sessionBookingInput ?: return@update s
+                            s.copy(sessionBookingInput = inp.copy(isConfirming = false))
+                        }
+                    }
+                    is BookWorkoutSessionResult.Success -> {
+                        val snap = filterState.value
+                        val bookingInput = snap.sessionBookingInput ?: input
+                        val locLabel = snap.sessionBooking?.locations
+                            ?.find { it.id == bookingInput.selectedLocationId }?.displayName
+                            ?: bookingInput.selectedLocationId
+                        val firstId = snap.draftOrder.firstOrNull()
+                        val primaryTitle = firstId?.let { id ->
+                            bookingInput.bookingExerciseSnapshot.find { it.id == id }?.title
+                                ?.takeIf { it.isNotBlank() }
+                                ?: exercisesById[id]?.name?.takeIf { it.isNotBlank() }
+                        }
+                        val summary = AddExerciseSuccessSummary(
+                            sessionStartInstant = session.startInstant,
+                            sessionEndInstant = session.endInstant,
+                            scheduledDateMillis = bookingInput.selectedDateMillis,
+                            exerciseCount = result.scheduledCount,
+                            primaryExerciseTitle = primaryTitle,
+                            locationDisplayName = locLabel,
                         )
+                        filterState.update {
+                            it.copy(
+                                itemDrafts = persistentMapOf(),
+                                draftOrder = persistentListOf(),
+                                activeExerciseId = null,
+                                sessionBookingInput = null,
+                                addExerciseSuccess = summary,
+                                workoutPlanFabBadgeCount = it.workoutPlanFabBadgeCount + result.scheduledCount,
+                            )
+                        }
                     }
                 }
             }
         }
-    }
-
-    fun onWorkoutPlanFabClick() {
-        Toast.makeText(
-            appContext,
-            appContext.getString(R.string.exercise_library_workout_plan_stub_toast),
-            Toast.LENGTH_SHORT,
-        ).show()
     }
 
     fun dismissAddExerciseSuccess() {
@@ -650,6 +645,57 @@ class ExerciseLibraryViewModel @Inject constructor(
 
     fun clearExerciseDetail() {
         detailExerciseId.value = null
+    }
+
+    private fun buildSessionExerciseLinesFromCart(
+        filters: ExerciseLibraryUiState,
+        exercisesById: Map<String, Exercise>,
+    ): List<SessionExerciseLine> {
+        val lines = mutableListOf<SessionExerciseLine>()
+        for ((idx, exerciseId) in filters.draftOrder.withIndex()) {
+            val draft = filters.itemDrafts[exerciseId] ?: continue
+            val ex = exercisesById[exerciseId] ?: continue
+            when (ex.measurementMode) {
+                ExerciseMeasurementMode.Strength -> {
+                    val sets = draft.sets.trim().toIntOrNull() ?: continue
+                    val reps = draft.reps.trim().toIntOrNull() ?: continue
+                    if (sets <= 0 || reps <= 0) continue
+                    lines.add(
+                        SessionExerciseLine(
+                            exerciseId = exerciseId,
+                            sets = sets,
+                            reps = reps,
+                            weightKg = ex.lastWeightKg ?: 0.0,
+                            restSeconds = 90,
+                            notes = null,
+                            measurementMode = ExerciseMeasurementMode.Strength,
+                            durationSeconds = null,
+                            orderIndex = idx,
+                        ),
+                    )
+                }
+                ExerciseMeasurementMode.Duration -> {
+                    val minutes = draft.sets.trim().toIntOrNull() ?: 0
+                    val seconds = draft.reps.trim().toIntOrNull() ?: 0
+                    val total = normalizeDurationMinutesSeconds(minutes, seconds)
+                    if (total <= 0) continue
+                    lines.add(
+                        SessionExerciseLine(
+                            exerciseId = exerciseId,
+                            sets = 1,
+                            reps = 0,
+                            weightKg = ex.lastWeightKg ?: 0.0,
+                            restSeconds = 90,
+                            notes = null,
+                            measurementMode = ExerciseMeasurementMode.Duration,
+                            durationSeconds = total,
+                            orderIndex = idx,
+                        ),
+                    )
+                }
+            }
+        }
+        return lines
     }
 
     private fun buildSections(
@@ -676,3 +722,11 @@ class ExerciseLibraryViewModel @Inject constructor(
         }.toImmutableList()
     }
 }
+
+private data class ExerciseLibraryViewModelCombineCore(
+    val grouped: Map<BodyRegion, List<Exercise>>,
+    val filters: ExerciseLibraryUiState,
+    val detailExerciseId: String?,
+    val gymLocations: ImmutableList<GymLocation>,
+    val busy: ImmutableList<InstantInterval>,
+)
