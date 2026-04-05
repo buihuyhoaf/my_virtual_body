@@ -68,19 +68,28 @@ fun ExerciseLibraryScreen(
     viewModel: ExerciseLibraryViewModel = hiltViewModel(),
 ) {
     val screenState by viewModel.state.collectAsStateWithLifecycle()
-    val actions = remember(viewModel) {
+    val actions = remember(viewModel, onOpenWorkoutPlan) {
         ExerciseLibraryActions(
             onQueryChange = viewModel::updateSearchQuery,
             onQuickChipSelect = viewModel::selectQuickChip,
-            onExerciseClick = viewModel::selectExerciseForDetail,
+            onExerciseClick = { exerciseId ->
+                viewModel.dismissAddExerciseSuccess()
+                viewModel.selectExerciseForDetail(exerciseId)
+            },
             onLibraryListToggle = viewModel::toggleExerciseInCartFromList,
             onDetailAddToCart = viewModel::ensureInCartAndFocusFromDetail,
             onSelectCartItem = viewModel::setActiveCartExercise,
             onRemoveCartItem = viewModel::removeFromCart,
             onClearCart = viewModel::clearAll,
             onActiveDraftChange = viewModel::updateActiveDraft,
-            onAddToSession = viewModel::openSessionBooking,
-            onDismissSessionBooking = viewModel::dismissSessionBooking,
+            onAddToSession = {
+                viewModel.dismissAddExerciseSuccess()
+                viewModel.openSessionBooking()
+            },
+            onDismissSessionBooking = {
+                viewModel.dismissAddExerciseSuccess()
+                viewModel.dismissSessionBooking()
+            },
             onBookingDateSelected = viewModel::onBookingDateSelected,
             onBookingLocationSelected = viewModel::onBookingLocationSelected,
             onBookingSlotToggled = viewModel::onBookingSlotToggled,
@@ -90,7 +99,10 @@ fun ExerciseLibraryScreen(
             onLongSessionProceedAnyway = viewModel::onLongSessionProceedAnyway,
             onClearExerciseDetail = viewModel::clearExerciseDetail,
             onDismissAddExerciseSuccess = viewModel::dismissAddExerciseSuccess,
-            onOpenWorkoutPlan = onOpenWorkoutPlan,
+            onOpenWorkoutPlan = {
+                viewModel.dismissAddExerciseSuccess()
+                onOpenWorkoutPlan()
+            },
         )
     }
 
@@ -106,7 +118,6 @@ fun ExerciseLibraryScreen(
                 )
                 ExerciseLibrarySessionBookingSheetHost(
                     booking = data.sessionBooking,
-                    busyIntervals = data.bookingBusyIntervals,
                     draftCount = data.draftOrder.size,
                     zoneId = ZoneId.systemDefault(),
                     onDismissRequest = actions.onDismissSessionBooking,

@@ -25,4 +25,7 @@ data class WorkoutSchedule(
     /** Facility used for conflict detection; legacy rows use [DEFAULT_SESSION_LOCATION_ID]. */
     val locationId: String = DEFAULT_SESSION_LOCATION_ID,
     val executionStatus: WorkoutExecutionStatus = WorkoutExecutionStatus.Scheduled,
+    /** Denormalized snapshot from catalog at booking; see [toScheduleImageSnapshot]. */
+    val exerciseImageResUrl: String? = null,
+    val exerciseLocalImageName: String? = null,
 )

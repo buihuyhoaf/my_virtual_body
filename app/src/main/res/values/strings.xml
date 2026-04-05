@@ -478,4 +478,12 @@
     <string name="workout_execution_skipped">Bỏ qua</string>
     <string name="workout_calendar_metrics_strength">%1$d × %2$d</string>
     <string name="workout_calendar_metrics_duration">%1$d phút</string>
+    <string name="workout_calendar_swipe_delete">Xóa</string>
+    <string name="workout_calendar_delete_confirm_title">Xóa bài tập?</string>
+    <string name="workout_calendar_delete_confirm_message">Xóa \"%1$s\" khỏi lịch cho %2$s?</string>
+    <string name="workout_calendar_delete_cancel">Hủy</string>
+    <string name="workout_calendar_delete_confirm">Xóa</string>
+    <string name="workout_calendar_delete_undo_snackbar">Đã xóa bài tập.</string>
+    <string name="workout_calendar_undo">Hoàn tác</string>
+    <string name="workout_calendar_delete_failed">Không xóa được. Thử lại.</string>
 </resources>

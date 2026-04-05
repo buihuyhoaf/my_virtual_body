@@ -3,6 +3,9 @@ package com.hoabui.virtualbody3d.core.utils
 object Constants {
     const val PREFS_NAME = "virtual_body_prefs"
 
+    /** One-time discoverability for workout calendar swipe-to-delete. */
+    const val PREF_WORKOUT_CALENDAR_SWIPE_HINT_SEEN = "workout_calendar_swipe_hint_seen"
+
     /** Base URL for API backend. Change when deploying to production. */
     const val API_BASE_URL = "https://api.example.com/"
 

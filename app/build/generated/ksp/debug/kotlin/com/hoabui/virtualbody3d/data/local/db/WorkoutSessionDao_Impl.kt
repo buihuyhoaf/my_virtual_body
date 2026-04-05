@@ -4,6 +4,7 @@ import androidx.room.EntityInsertAdapter
 import androidx.room.RoomDatabase
 import androidx.room.coroutines.createFlow
 import androidx.room.util.getColumnIndexOrThrow
+import androidx.room.util.getTotalChangedRows
 import androidx.room.util.performSuspending
 import androidx.sqlite.SQLiteStatement
 import javax.`annotation`.processing.Generated
@@ -110,6 +111,57 @@ public class WorkoutSessionDao_Impl(
           _result.add(_item)
         }
         _result
+      } finally {
+        _stmt.close()
+      }
+    }
+  }
+
+  public override suspend fun getById(sessionId: String): WorkoutSessionEntity? {
+    val _sql: String = "SELECT * FROM workout_sessions WHERE id = ? LIMIT 1"
+    return performSuspending(__db, true, false) { _connection ->
+      val _stmt: SQLiteStatement = _connection.prepare(_sql)
+      try {
+        var _argIndex: Int = 1
+        _stmt.bindText(_argIndex, sessionId)
+        val _columnIndexOfId: Int = getColumnIndexOrThrow(_stmt, "id")
+        val _columnIndexOfLocationId: Int = getColumnIndexOrThrow(_stmt, "locationId")
+        val _columnIndexOfStartEpochMillis: Int = getColumnIndexOrThrow(_stmt, "startEpochMillis")
+        val _columnIndexOfEndEpochMillis: Int = getColumnIndexOrThrow(_stmt, "endEpochMillis")
+        val _columnIndexOfDayKey: Int = getColumnIndexOrThrow(_stmt, "dayKey")
+        val _result: WorkoutSessionEntity?
+        if (_stmt.step()) {
+          val _tmpId: String
+          _tmpId = _stmt.getText(_columnIndexOfId)
+          val _tmpLocationId: String
+          _tmpLocationId = _stmt.getText(_columnIndexOfLocationId)
+          val _tmpStartEpochMillis: Long
+          _tmpStartEpochMillis = _stmt.getLong(_columnIndexOfStartEpochMillis)
+          val _tmpEndEpochMillis: Long
+          _tmpEndEpochMillis = _stmt.getLong(_columnIndexOfEndEpochMillis)
+          val _tmpDayKey: Long
+          _tmpDayKey = _stmt.getLong(_columnIndexOfDayKey)
+          _result =
+              WorkoutSessionEntity(_tmpId,_tmpLocationId,_tmpStartEpochMillis,_tmpEndEpochMillis,_tmpDayKey)
+        } else {
+          _result = null
+        }
+        _result
+      } finally {
+        _stmt.close()
+      }
+    }
+  }
+
+  public override suspend fun deleteById(sessionId: String): Int {
+    val _sql: String = "DELETE FROM workout_sessions WHERE id = ?"
+    return performSuspending(__db, false, true) { _connection ->
+      val _stmt: SQLiteStatement = _connection.prepare(_sql)
+      try {
+        var _argIndex: Int = 1
+        _stmt.bindText(_argIndex, sessionId)
+        _stmt.step()
+        getTotalChangedRows(_connection)
       } finally {
         _stmt.close()
       }

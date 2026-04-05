@@ -48,6 +48,17 @@ data class WorkoutCalendarTokens(
     val exerciseItemInnerPadding: Dp,
     val exerciseRowTitleToMetricsGap: Dp,
     val exerciseRowMetricsToStatusGap: Dp,
+    /** Leading thumbnail in day exercise list (aligned with library row scale). */
+    val exerciseRowThumbnailSize: Dp,
+    val exerciseRowThumbnailToTextGap: Dp,
+    /** Horizontal width of revealed delete track (anchored swipe). */
+    val swipeDeleteTrackWidth: Dp,
+    /** Icon size on delete underlay (primitive icon scale). */
+    val swipeDeleteIconSize: Dp,
+    /** Gap between delete icon and label on underlay. */
+    val swipeDeleteIconLabelGap: Dp,
+    /** Fraction of [swipeDeleteTrackWidth] for one-time list nudge (~peek). */
+    val swipeDeleteNudgeFraction: Float,
     val sectionSurfaceElevation: Dp,
 )
 
@@ -77,6 +88,12 @@ fun gymWorkoutCalendarTokens(
         exerciseItemInnerPadding = spacing.md,
         exerciseRowTitleToMetricsGap = spacing.xxxs,
         exerciseRowMetricsToStatusGap = spacing.xxs,
+        exerciseRowThumbnailSize = spacing.xxl,
+        exerciseRowThumbnailToTextGap = spacing.sm,
+        swipeDeleteTrackWidth = spacing.xxxl,
+        swipeDeleteIconSize = spacing.iconMedium,
+        swipeDeleteIconLabelGap = spacing.xs,
+        swipeDeleteNudgeFraction = 0.28f,
         sectionSurfaceElevation = elevation.level0,
     )
 }

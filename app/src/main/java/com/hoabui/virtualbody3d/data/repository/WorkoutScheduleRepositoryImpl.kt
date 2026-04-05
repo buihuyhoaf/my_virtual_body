@@ -2,14 +2,18 @@ package com.hoabui.virtualbody3d.data.repository
 
 import android.util.Log
 import com.hoabui.virtualbody3d.BuildConfig
+import androidx.room.withTransaction
 import com.hoabui.virtualbody3d.data.local.WorkoutScheduleLocalDataSource
+import com.hoabui.virtualbody3d.data.local.db.VirtualBodyDatabase
 import com.hoabui.virtualbody3d.data.local.db.WORKOUT_DB_TRACE_LOG_TAG
 import com.hoabui.virtualbody3d.data.mapper.toDomain
 import com.hoabui.virtualbody3d.data.mapper.toEntity
+import com.hoabui.virtualbody3d.data.mapper.toDto
 import com.hoabui.virtualbody3d.data.mapper.toStorageString
 import com.hoabui.virtualbody3d.data.local.db.formatEpochDayRangeForLog
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutExecutionStatus
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
+import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutScheduleDeleteResult
 import com.hoabui.virtualbody3d.domain.repository.WorkoutScheduleRepository
 import com.hoabui.virtualbody3d.di.IoDispatcher
 import java.time.ZoneId
@@ -24,8 +28,11 @@ import kotlinx.coroutines.withContext
 @Singleton
 class WorkoutScheduleRepositoryImpl @Inject constructor(
     private val localDataSource: WorkoutScheduleLocalDataSource,
+    private val database: VirtualBodyDatabase,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : WorkoutScheduleRepository {
+
+    private val sessionDao get() = database.workoutSessionDao()
 
     /** Wall-clock zone used when mapping stored instants to [WorkoutSchedule.scheduledAt]. */
     private val mappingZoneId: ZoneId = ZoneId.systemDefault()
@@ -115,6 +122,43 @@ class WorkoutScheduleRepositoryImpl @Inject constructor(
                     "updateStatus failed id=$rowId status=${status.toStorageString()}",
                     t,
                 )
+                throw t
+            }
+        }
+    }
+
+    override suspend fun deleteWorkoutScheduleByRowId(rowId: Long): WorkoutScheduleDeleteResult? =
+        withContext(ioDispatcher) {
+            try {
+                localDataSource.deleteScheduleByRowIdWithSessionCleanup(rowId)?.let { (entity, removedSession) ->
+                    WorkoutScheduleDeleteResult(
+                        schedule = entity.toDomain(mappingZoneId),
+                        removedSession = removedSession?.toDomain(),
+                    )
+                }
+            } catch (t: Throwable) {
+                Log.e(WORKOUT_DB_TRACE_LOG_TAG, "deleteByRowId failed id=$rowId", t)
+                throw t
+            }
+        }
+
+    override suspend fun restoreWorkoutScheduleDelete(result: WorkoutScheduleDeleteResult, planZoneId: ZoneId) {
+        withContext(ioDispatcher) {
+            try {
+                val now = System.currentTimeMillis()
+                database.withTransaction {
+                    result.removedSession?.let { session ->
+                        sessionDao.insertSession(session.toDto().toEntity(planZoneId))
+                    }
+                    localDataSource.upsert(
+                        result.schedule.copy(rowId = null).toEntity(planZoneId, now),
+                    )
+                }
+                if (BuildConfig.DEBUG) {
+                    Log.d(WORKOUT_DB_TRACE_LOG_TAG, "restore delete ok clientId=${result.schedule.id}")
+                }
+            } catch (t: Throwable) {
+                Log.e(WORKOUT_DB_TRACE_LOG_TAG, "restore delete failed clientId=${result.schedule.id}", t)
                 throw t
             }
         }

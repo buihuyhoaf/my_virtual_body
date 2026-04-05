@@ -21,6 +21,8 @@ fun WorkoutSchedule.toDto(): WorkoutScheduleDto = WorkoutScheduleDto(
     durationSeconds = durationSeconds,
     sessionId = sessionId,
     locationId = locationId,
+    exerciseImageResUrl = exerciseImageResUrl,
+    exerciseLocalImageName = exerciseLocalImageName,
 )
 
 fun WorkoutScheduleDto.toDomain(): WorkoutSchedule = WorkoutSchedule(
@@ -38,6 +40,8 @@ fun WorkoutScheduleDto.toDomain(): WorkoutSchedule = WorkoutSchedule(
     sessionId = sessionId,
     locationId = locationId,
     executionStatus = WorkoutExecutionStatus.Scheduled,
+    exerciseImageResUrl = exerciseImageResUrl,
+    exerciseLocalImageName = exerciseLocalImageName,
 )
 
 private fun ExerciseMeasurementMode.toDtoValue(): String = when (this) {

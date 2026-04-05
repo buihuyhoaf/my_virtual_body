@@ -18,4 +18,6 @@ data class WorkoutScheduleDto(
     val sessionId: String? = null,
     /** Must match [com.hoabui.virtualbody3d.domain.model.exercise.DEFAULT_SESSION_LOCATION_ID] for legacy rows. */
     val locationId: String = "default",
+    val exerciseImageResUrl: String? = null,
+    val exerciseLocalImageName: String? = null,
 )

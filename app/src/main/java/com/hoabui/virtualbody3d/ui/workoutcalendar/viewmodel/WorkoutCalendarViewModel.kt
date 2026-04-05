@@ -1,11 +1,16 @@
 package com.hoabui.virtualbody3d.ui.workoutcalendar.viewmodel
 
+import android.content.SharedPreferences
 import androidx.lifecycle.viewModelScope
 import com.hoabui.virtualbody3d.core.base.UiStateViewModel
+import com.hoabui.virtualbody3d.core.utils.Constants
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarDaySummary
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarExerciseLine
+import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutScheduleDeleteResult
+import com.hoabui.virtualbody3d.domain.usecase.DeleteWorkoutScheduleUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveWorkoutCalendarDayDetailUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveWorkoutCalendarMonthSummariesUseCase
+import com.hoabui.virtualbody3d.domain.usecase.RestoreWorkoutScheduleDeleteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import java.time.LocalDate
@@ -25,9 +30,21 @@ data class WorkoutCalendarContent(
     val dayLines: List<WorkoutCalendarExerciseLine>,
 )
 
-/** Reserved for one-shot UI events; none yet. */
+data class WorkoutCalendarDeleteDialogState(
+    val rowId: Long,
+    val exerciseName: String,
+)
+
 sealed interface WorkoutCalendarEvent {
     data object None : WorkoutCalendarEvent
+
+    /** Show snackbar with undo; strings come from UI [stringResource]. */
+    data object ScheduleDeletedShowUndoSnackbar : WorkoutCalendarEvent
+
+    /** Row was already gone or could not be removed; UI shows a localized short message. */
+    data object DeleteScheduleFailed : WorkoutCalendarEvent
+
+    data class TransientMessage(val message: String) : WorkoutCalendarEvent
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -35,12 +52,31 @@ sealed interface WorkoutCalendarEvent {
 class WorkoutCalendarViewModel @Inject constructor(
     private val observeMonthSummaries: ObserveWorkoutCalendarMonthSummariesUseCase,
     private val observeDayDetail: ObserveWorkoutCalendarDayDetailUseCase,
+    private val deleteWorkoutSchedule: DeleteWorkoutScheduleUseCase,
+    private val restoreWorkoutScheduleDelete: RestoreWorkoutScheduleDeleteUseCase,
+    private val sharedPreferences: SharedPreferences,
 ) : UiStateViewModel<WorkoutCalendarContent, WorkoutCalendarEvent>() {
 
     private val zoneId: ZoneId = ZoneId.systemDefault()
     private val today: LocalDate = LocalDate.now(zoneId)
     private val _visibleMonth = MutableStateFlow(YearMonth.from(today))
     private val _selectedDate = MutableStateFlow(today)
+
+    private val _openSwipeRowId = MutableStateFlow<Long?>(null)
+    val openSwipeRowId = _openSwipeRowId.asStateFlow()
+
+    private val _deleteDialog = MutableStateFlow<WorkoutCalendarDeleteDialogState?>(null)
+    val deleteDialog = _deleteDialog.asStateFlow()
+
+    private val _swipeHintSeen = MutableStateFlow(
+        sharedPreferences.getBoolean(Constants.PREF_WORKOUT_CALENDAR_SWIPE_HINT_SEEN, false),
+    )
+    val swipeHintSeen = _swipeHintSeen.asStateFlow()
+
+    private val _pendingSwipeCloseRowId = MutableStateFlow<Long?>(null)
+    val pendingSwipeCloseRowId = _pendingSwipeCloseRowId.asStateFlow()
+
+    private var pendingUndoDelete: WorkoutScheduleDeleteResult? = null
 
     val visibleMonthState = _visibleMonth.asStateFlow()
     val selectedDateState = _selectedDate.asStateFlow()
@@ -80,5 +116,78 @@ class WorkoutCalendarViewModel @Inject constructor(
         if (monthOfDay != _visibleMonth.value) {
             _visibleMonth.value = monthOfDay
         }
+    }
+
+    fun onSwipeRowOpened(rowId: Long) {
+        val previous = _openSwipeRowId.value
+        if (previous != null && previous != rowId) {
+            _pendingSwipeCloseRowId.value = previous
+        }
+        _openSwipeRowId.value = rowId
+    }
+
+    fun onSwipeRowSettledClosed(rowId: Long) {
+        if (_openSwipeRowId.value == rowId) {
+            _openSwipeRowId.value = null
+        }
+    }
+
+    fun consumePendingSwipeCloseRow(rowId: Long) {
+        if (_pendingSwipeCloseRowId.value == rowId) {
+            _pendingSwipeCloseRowId.value = null
+        }
+    }
+
+    fun onDeleteAffordanceClicked(rowId: Long, exerciseName: String) {
+        _deleteDialog.value = WorkoutCalendarDeleteDialogState(rowId = rowId, exerciseName = exerciseName)
+    }
+
+    fun onDeleteDialogDismiss() {
+        val rowId = _deleteDialog.value?.rowId
+        _deleteDialog.value = null
+        if (rowId != null) {
+            _pendingSwipeCloseRowId.value = rowId
+        }
+    }
+
+    fun onDeleteConfirmed() {
+        val state = _deleteDialog.value ?: return
+        val rowId = state.rowId
+        _deleteDialog.value = null
+        _openSwipeRowId.value = null
+        launchSafely {
+            val deleted = deleteWorkoutSchedule(rowId)
+            if (deleted != null) {
+                pendingUndoDelete = deleted
+                sendEvent(WorkoutCalendarEvent.ScheduleDeletedShowUndoSnackbar)
+            } else {
+                sendEvent(WorkoutCalendarEvent.DeleteScheduleFailed)
+            }
+        }
+    }
+
+    fun undoLastDelete() {
+        val snapshot = pendingUndoDelete ?: return
+        pendingUndoDelete = null
+        launchSafely {
+            restoreWorkoutScheduleDelete(snapshot, zoneId)
+        }
+    }
+
+    fun clearPendingUndoWithoutRestore() {
+        pendingUndoDelete = null
+    }
+
+    fun markSwipeHintSeen() {
+        sharedPreferences.edit().putBoolean(Constants.PREF_WORKOUT_CALENDAR_SWIPE_HINT_SEEN, true).apply()
+        _swipeHintSeen.value = true
+    }
+
+    override fun onError(throwable: Throwable) {
+        sendEvent(
+            WorkoutCalendarEvent.TransientMessage(
+                throwable.message ?: "Unknown error",
+            ),
+        )
     }
 }

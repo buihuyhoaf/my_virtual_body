@@ -121,6 +121,8 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
                             durationSeconds = line.durationSeconds,
                             sessionId = session.id,
                             locationId = session.locationId,
+                            exerciseImageResUrl = line.exerciseImageResUrl,
+                            exerciseLocalImageName = line.exerciseLocalImageName,
                         ).toEntity(zoneId, now)
                         workoutScheduleLocalDataSource.upsert(entity)
                     }

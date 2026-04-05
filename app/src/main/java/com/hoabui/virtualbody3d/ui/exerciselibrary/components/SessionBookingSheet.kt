@@ -94,7 +94,6 @@ private fun sessionBookingSheetTextStyle(base: TextStyle): TextStyle = base.merg
 @Composable
 fun ExerciseLibrarySessionBookingSheetHost(
     booking: SessionBookingUiModel?,
-    busyIntervals: ImmutableList<InstantInterval>,
     draftCount: Int,
     zoneId: ZoneId,
     onDismissRequest: () -> Unit,
@@ -657,13 +656,7 @@ private fun TimeSlotHorizontalCell(
     val timeFg = when {
         selected -> token.colors.onPrimaryContainer
         cell.overCapacity && !selected -> token.colors.warning
-        !cell.toggleEnabled && !selected -> token.colors.textSecondary
         else -> token.colors.textPrimary
-    }
-    val summaryFg = when {
-        selected -> token.colors.onPrimaryContainer
-        cell.overCapacity && !selected -> token.colors.warning
-        else -> token.colors.textSecondary
     }
     val borderColor = when {
         selected -> token.colors.primary
@@ -680,7 +673,6 @@ private fun TimeSlotHorizontalCell(
             .clip(shape)
             .background(bg)
             .clickable(
-                enabled = cell.toggleEnabled,
                 interactionSource = remember { MutableInteractionSource() },
                 indication = ripple(),
                 role = Role.Button,
@@ -716,16 +708,6 @@ private fun TimeSlotHorizontalCell(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
-        if (cell.summaryLabel.isNotEmpty()) {
-            GText(
-                text = cell.summaryLabel,
-                style = sessionBookingSheetTextStyle(token.typography.labelSmall),
-                color = summaryFg,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center,
-            )
-        }
     }
 }
 

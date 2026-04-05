@@ -1,6 +1,7 @@
 package com.hoabui.virtualbody3d.domain.usecase
 
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarExerciseLine
+import com.hoabui.virtualbody3d.domain.model.calendar.resolveWorkoutCalendarLineImage
 import com.hoabui.virtualbody3d.domain.repository.ExercisesRepository
 import com.hoabui.virtualbody3d.domain.repository.WorkoutScheduleRepository
 import java.time.LocalDate
@@ -19,19 +20,25 @@ class ObserveWorkoutCalendarDayDetailUseCase @Inject constructor(
             workoutScheduleRepository.observeSchedulesInDayRange(dayKey, dayKey),
             exercisesRepository.getAllExercises(),
         ) { schedules, exercises ->
-            val nameById = exercises.associate { it.id to it.name }
+            val exerciseById = exercises.associateBy { it.id }
             schedules.mapNotNull { sch ->
                 val rowId = sch.rowId ?: return@mapNotNull null
+                val catalog = exerciseById[sch.exerciseId]
                 WorkoutCalendarExerciseLine(
                     rowId = rowId,
                     exerciseId = sch.exerciseId,
-                    exerciseDisplayName = nameById[sch.exerciseId] ?: sch.exerciseId,
+                    exerciseDisplayName = catalog?.name ?: sch.exerciseId,
                     sets = sch.sets,
                     reps = sch.reps,
                     durationSeconds = sch.durationSeconds,
                     measurementMode = sch.measurementMode,
                     executionStatus = sch.executionStatus,
                     sessionId = sch.sessionId,
+                    image = resolveWorkoutCalendarLineImage(
+                        exerciseLocalImageName = sch.exerciseLocalImageName,
+                        exerciseImageResUrl = sch.exerciseImageResUrl,
+                        catalogExercise = catalog,
+                    ),
                 )
             }
         }

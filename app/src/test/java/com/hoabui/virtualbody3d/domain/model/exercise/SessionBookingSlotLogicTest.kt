@@ -102,4 +102,29 @@ class SessionBookingSlotLogicTest {
             next,
         )
     }
+
+    @Test
+    fun computeNextSlotSelection_tapMiddleOfMultiSlot_clearsAll() {
+        val zone = java.time.ZoneId.of("UTC")
+        val date = java.time.LocalDate.of(2026, 6, 1)
+        val grid = bookingSlotStartsForDay(
+            LocalTime.of(5, 0),
+            LocalTime.of(21, 30),
+            30L,
+        )
+        val current = setOf(
+            LocalTime.of(9, 0),
+            LocalTime.of(9, 30),
+            LocalTime.of(10, 0),
+        )
+        val next = computeNextSlotSelectionAfterToggle(
+            current = current,
+            tapped = LocalTime.of(9, 30),
+            busyIntervals = emptyList(),
+            date = date,
+            zoneId = zone,
+            gridSlotStarts = grid,
+        )
+        assertTrue(next!!.isEmpty())
+    }
 }

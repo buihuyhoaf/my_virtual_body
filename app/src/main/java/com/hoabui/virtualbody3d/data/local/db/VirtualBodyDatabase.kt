@@ -12,7 +12,7 @@ import androidx.room.RoomDatabase
         NutritionSummaryEntity::class,
         BodyScanResultEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 abstract class VirtualBodyDatabase : RoomDatabase() {

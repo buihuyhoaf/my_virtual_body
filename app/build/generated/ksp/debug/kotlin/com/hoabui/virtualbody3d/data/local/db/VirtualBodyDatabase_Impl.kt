@@ -52,10 +52,10 @@ public class VirtualBodyDatabase_Impl : VirtualBodyDatabase() {
   }
 
   protected override fun createOpenDelegate(): RoomOpenDelegate {
-    val _openDelegate: RoomOpenDelegate = object : RoomOpenDelegate(3,
-        "87611988a7a8dca7c058802736d82c9a", "f25084981cefa79e635b0ebdea6ed65e") {
+    val _openDelegate: RoomOpenDelegate = object : RoomOpenDelegate(4,
+        "46786169db7f6bf3142c1414558d61dd", "de9f67cebf612041b66e9cc4f60c6f99") {
       public override fun createAllTables(connection: SQLiteConnection) {
-        connection.execSQL("CREATE TABLE IF NOT EXISTS `workout_schedules` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clientId` TEXT NOT NULL, `dayKey` INTEGER NOT NULL, `exerciseId` TEXT NOT NULL, `sessionId` TEXT, `scheduledAtEpochMillis` INTEGER NOT NULL, `sets` INTEGER NOT NULL, `reps` INTEGER NOT NULL, `weightKg` REAL NOT NULL, `restSeconds` INTEGER NOT NULL, `notes` TEXT, `measurementMode` TEXT NOT NULL, `durationSeconds` INTEGER, `locationId` TEXT NOT NULL, `executionStatus` TEXT NOT NULL, `createdAtEpochMillis` INTEGER NOT NULL, `updatedAtEpochMillis` INTEGER NOT NULL)")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `workout_schedules` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clientId` TEXT NOT NULL, `dayKey` INTEGER NOT NULL, `exerciseId` TEXT NOT NULL, `sessionId` TEXT, `scheduledAtEpochMillis` INTEGER NOT NULL, `sets` INTEGER NOT NULL, `reps` INTEGER NOT NULL, `weightKg` REAL NOT NULL, `restSeconds` INTEGER NOT NULL, `notes` TEXT, `measurementMode` TEXT NOT NULL, `durationSeconds` INTEGER, `locationId` TEXT NOT NULL, `executionStatus` TEXT NOT NULL, `createdAtEpochMillis` INTEGER NOT NULL, `updatedAtEpochMillis` INTEGER NOT NULL, `exercise_image_res_url` TEXT, `exercise_local_image_name` TEXT)")
         connection.execSQL("CREATE INDEX IF NOT EXISTS `index_workout_schedules_dayKey` ON `workout_schedules` (`dayKey`)")
         connection.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_workout_schedules_clientId` ON `workout_schedules` (`clientId`)")
         connection.execSQL("CREATE TABLE IF NOT EXISTS `workout_sessions` (`id` TEXT NOT NULL, `locationId` TEXT NOT NULL, `startEpochMillis` INTEGER NOT NULL, `endEpochMillis` INTEGER NOT NULL, `dayKey` INTEGER NOT NULL, PRIMARY KEY(`id`))")
@@ -67,7 +67,7 @@ public class VirtualBodyDatabase_Impl : VirtualBodyDatabase() {
         connection.execSQL("CREATE TABLE IF NOT EXISTS `nutrition_summary` (`id` INTEGER NOT NULL, `intake` INTEGER NOT NULL, `burned` INTEGER NOT NULL, `goal` INTEGER NOT NULL, PRIMARY KEY(`id`))")
         connection.execSQL("CREATE TABLE IF NOT EXISTS `body_scan_results` (`id` INTEGER NOT NULL, `payload_json` TEXT NOT NULL, PRIMARY KEY(`id`))")
         connection.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)")
-        connection.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '87611988a7a8dca7c058802736d82c9a')")
+        connection.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '46786169db7f6bf3142c1414558d61dd')")
       }
 
       public override fun dropAllTables(connection: SQLiteConnection) {
@@ -132,6 +132,12 @@ public class VirtualBodyDatabase_Impl : VirtualBodyDatabase() {
             TableInfo.CREATED_FROM_ENTITY))
         _columnsWorkoutSchedules.put("updatedAtEpochMillis",
             TableInfo.Column("updatedAtEpochMillis", "INTEGER", true, 0, null,
+            TableInfo.CREATED_FROM_ENTITY))
+        _columnsWorkoutSchedules.put("exercise_image_res_url",
+            TableInfo.Column("exercise_image_res_url", "TEXT", false, 0, null,
+            TableInfo.CREATED_FROM_ENTITY))
+        _columnsWorkoutSchedules.put("exercise_local_image_name",
+            TableInfo.Column("exercise_local_image_name", "TEXT", false, 0, null,
             TableInfo.CREATED_FROM_ENTITY))
         val _foreignKeysWorkoutSchedules: MutableSet<TableInfo.ForeignKey> = mutableSetOf()
         val _indicesWorkoutSchedules: MutableSet<TableInfo.Index> = mutableSetOf()

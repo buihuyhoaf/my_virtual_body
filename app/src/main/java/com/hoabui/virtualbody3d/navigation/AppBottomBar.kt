@@ -30,6 +30,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -38,6 +39,24 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.hoabui.virtualbody3d.core.extensions.rememberBottomBarItemState
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.GymToken
+
+/**
+ * [WorkoutCalendarRoute] / [ExerciseLibraryRoute] are siblings of [CenfitCoachRoute] in the nav graph
+ * (stacked on top of the coach tab), so they do not appear in hierarchy under [CenfitCoachRoute].
+ * Map them to the coach bottom bar item when computing selection.
+ */
+private fun isBottomBarTabSelected(
+    destination: AppDestination,
+    current: NavDestination?,
+): Boolean {
+    if (current == null) return false
+    if (current.hierarchy.any { it.hasRoute(destination.route::class) }) return true
+    if (destination == AppDestination.CenfitCoach) {
+        return current.hasRoute(WorkoutCalendarRoute::class) ||
+            current.hasRoute(ExerciseLibraryRoute::class)
+    }
+    return false
+}
 
 @Composable
 private fun RowScope.BottomBarItem(
@@ -144,9 +163,7 @@ fun AppBottomBar(
         ) {
             AppDestination.bottomBarDestinations.forEach { destination ->
                 val tabIcon = destination.bottomBarIcon ?: return@forEach
-                val selected = currentDestination
-                    ?.hierarchy
-                    ?.any { it.hasRoute(destination.route::class) } == true
+                val selected = isBottomBarTabSelected(destination, currentDestination)
                 BottomBarItem(
                     destination = destination,
                     icon = tabIcon,

@@ -12,8 +12,4 @@
         <item quantity="one">%d min</item>
         <item quantity="other">%d min</item>
     </plurals>
-    <plurals name="exercise_booking_slot_minutes_total">
-        <item quantity="one">%d min total</item>
-        <item quantity="other">%d min total</item>
-    </plurals>
 </resources>

@@ -1,5 +1,6 @@
 package com.hoabui.virtualbody3d.data.local.db
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -31,4 +32,9 @@ data class WorkoutScheduleEntity(
     val executionStatus: String,
     val createdAtEpochMillis: Long,
     val updatedAtEpochMillis: Long,
+    /** Snapshot at booking: network URL or content/file URI string for Coil. */
+    @ColumnInfo(name = "exercise_image_res_url")
+    val exerciseImageResUrl: String? = null,
+    @ColumnInfo(name = "exercise_local_image_name")
+    val exerciseLocalImageName: String? = null,
 )

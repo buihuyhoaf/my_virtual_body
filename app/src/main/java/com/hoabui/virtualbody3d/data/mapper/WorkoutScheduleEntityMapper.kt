@@ -23,6 +23,8 @@ internal fun WorkoutScheduleEntity.toDomain(planZoneId: ZoneId): WorkoutSchedule
     sessionId = sessionId,
     locationId = locationId,
     executionStatus = executionStatus.toExecutionStatus(),
+    exerciseImageResUrl = exerciseImageResUrl,
+    exerciseLocalImageName = exerciseLocalImageName,
 )
 
 internal fun WorkoutSchedule.toEntity(planZoneId: ZoneId, nowMillis: Long): WorkoutScheduleEntity {
@@ -46,6 +48,8 @@ internal fun WorkoutSchedule.toEntity(planZoneId: ZoneId, nowMillis: Long): Work
         executionStatus = executionStatus.toEntityValue(),
         createdAtEpochMillis = created,
         updatedAtEpochMillis = nowMillis,
+        exerciseImageResUrl = exerciseImageResUrl,
+        exerciseLocalImageName = exerciseLocalImageName,
     )
 }
 

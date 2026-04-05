@@ -29,6 +29,15 @@ interface WorkoutScheduleDao {
     @Query("SELECT * FROM workout_schedules WHERE clientId = :clientId LIMIT 1")
     suspend fun findByClientId(clientId: String): WorkoutScheduleEntity?
 
+    @Query("SELECT * FROM workout_schedules WHERE id = :rowId LIMIT 1")
+    suspend fun getByRowId(rowId: Long): WorkoutScheduleEntity?
+
+    @Query("DELETE FROM workout_schedules WHERE id = :rowId")
+    suspend fun deleteByRowId(rowId: Long): Int
+
+    @Query("SELECT COUNT(*) FROM workout_schedules WHERE sessionId = :sessionId")
+    suspend fun countSchedulesForSessionId(sessionId: String): Int
+
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(entity: WorkoutScheduleEntity): Long
 

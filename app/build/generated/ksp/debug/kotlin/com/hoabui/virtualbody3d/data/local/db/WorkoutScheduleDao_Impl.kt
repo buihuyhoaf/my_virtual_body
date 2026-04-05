@@ -38,7 +38,7 @@ public class WorkoutScheduleDao_Impl(
     this.__insertAdapterOfWorkoutScheduleEntity = object :
         EntityInsertAdapter<WorkoutScheduleEntity>() {
       protected override fun createQuery(): String =
-          "INSERT OR ABORT INTO `workout_schedules` (`id`,`clientId`,`dayKey`,`exerciseId`,`sessionId`,`scheduledAtEpochMillis`,`sets`,`reps`,`weightKg`,`restSeconds`,`notes`,`measurementMode`,`durationSeconds`,`locationId`,`executionStatus`,`createdAtEpochMillis`,`updatedAtEpochMillis`) VALUES (nullif(?, 0),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+          "INSERT OR ABORT INTO `workout_schedules` (`id`,`clientId`,`dayKey`,`exerciseId`,`sessionId`,`scheduledAtEpochMillis`,`sets`,`reps`,`weightKg`,`restSeconds`,`notes`,`measurementMode`,`durationSeconds`,`locationId`,`executionStatus`,`createdAtEpochMillis`,`updatedAtEpochMillis`,`exercise_image_res_url`,`exercise_local_image_name`) VALUES (nullif(?, 0),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
 
       protected override fun bind(statement: SQLiteStatement, entity: WorkoutScheduleEntity) {
         statement.bindLong(1, entity.id)
@@ -73,12 +73,24 @@ public class WorkoutScheduleDao_Impl(
         statement.bindText(15, entity.executionStatus)
         statement.bindLong(16, entity.createdAtEpochMillis)
         statement.bindLong(17, entity.updatedAtEpochMillis)
+        val _tmpExerciseImageResUrl: String? = entity.exerciseImageResUrl
+        if (_tmpExerciseImageResUrl == null) {
+          statement.bindNull(18)
+        } else {
+          statement.bindText(18, _tmpExerciseImageResUrl)
+        }
+        val _tmpExerciseLocalImageName: String? = entity.exerciseLocalImageName
+        if (_tmpExerciseLocalImageName == null) {
+          statement.bindNull(19)
+        } else {
+          statement.bindText(19, _tmpExerciseLocalImageName)
+        }
       }
     }
     this.__updateAdapterOfWorkoutScheduleEntity = object :
         EntityDeleteOrUpdateAdapter<WorkoutScheduleEntity>() {
       protected override fun createQuery(): String =
-          "UPDATE OR ABORT `workout_schedules` SET `id` = ?,`clientId` = ?,`dayKey` = ?,`exerciseId` = ?,`sessionId` = ?,`scheduledAtEpochMillis` = ?,`sets` = ?,`reps` = ?,`weightKg` = ?,`restSeconds` = ?,`notes` = ?,`measurementMode` = ?,`durationSeconds` = ?,`locationId` = ?,`executionStatus` = ?,`createdAtEpochMillis` = ?,`updatedAtEpochMillis` = ? WHERE `id` = ?"
+          "UPDATE OR ABORT `workout_schedules` SET `id` = ?,`clientId` = ?,`dayKey` = ?,`exerciseId` = ?,`sessionId` = ?,`scheduledAtEpochMillis` = ?,`sets` = ?,`reps` = ?,`weightKg` = ?,`restSeconds` = ?,`notes` = ?,`measurementMode` = ?,`durationSeconds` = ?,`locationId` = ?,`executionStatus` = ?,`createdAtEpochMillis` = ?,`updatedAtEpochMillis` = ?,`exercise_image_res_url` = ?,`exercise_local_image_name` = ? WHERE `id` = ?"
 
       protected override fun bind(statement: SQLiteStatement, entity: WorkoutScheduleEntity) {
         statement.bindLong(1, entity.id)
@@ -113,7 +125,19 @@ public class WorkoutScheduleDao_Impl(
         statement.bindText(15, entity.executionStatus)
         statement.bindLong(16, entity.createdAtEpochMillis)
         statement.bindLong(17, entity.updatedAtEpochMillis)
-        statement.bindLong(18, entity.id)
+        val _tmpExerciseImageResUrl: String? = entity.exerciseImageResUrl
+        if (_tmpExerciseImageResUrl == null) {
+          statement.bindNull(18)
+        } else {
+          statement.bindText(18, _tmpExerciseImageResUrl)
+        }
+        val _tmpExerciseLocalImageName: String? = entity.exerciseLocalImageName
+        if (_tmpExerciseLocalImageName == null) {
+          statement.bindNull(19)
+        } else {
+          statement.bindText(19, _tmpExerciseLocalImageName)
+        }
+        statement.bindLong(20, entity.id)
       }
     }
   }
@@ -171,6 +195,10 @@ public class WorkoutScheduleDao_Impl(
             "createdAtEpochMillis")
         val _columnIndexOfUpdatedAtEpochMillis: Int = getColumnIndexOrThrow(_stmt,
             "updatedAtEpochMillis")
+        val _columnIndexOfExerciseImageResUrl: Int = getColumnIndexOrThrow(_stmt,
+            "exercise_image_res_url")
+        val _columnIndexOfExerciseLocalImageName: Int = getColumnIndexOrThrow(_stmt,
+            "exercise_local_image_name")
         val _result: MutableList<WorkoutScheduleEntity> = mutableListOf()
         while (_stmt.step()) {
           val _item: WorkoutScheduleEntity
@@ -220,8 +248,20 @@ public class WorkoutScheduleDao_Impl(
           _tmpCreatedAtEpochMillis = _stmt.getLong(_columnIndexOfCreatedAtEpochMillis)
           val _tmpUpdatedAtEpochMillis: Long
           _tmpUpdatedAtEpochMillis = _stmt.getLong(_columnIndexOfUpdatedAtEpochMillis)
+          val _tmpExerciseImageResUrl: String?
+          if (_stmt.isNull(_columnIndexOfExerciseImageResUrl)) {
+            _tmpExerciseImageResUrl = null
+          } else {
+            _tmpExerciseImageResUrl = _stmt.getText(_columnIndexOfExerciseImageResUrl)
+          }
+          val _tmpExerciseLocalImageName: String?
+          if (_stmt.isNull(_columnIndexOfExerciseLocalImageName)) {
+            _tmpExerciseLocalImageName = null
+          } else {
+            _tmpExerciseLocalImageName = _stmt.getText(_columnIndexOfExerciseLocalImageName)
+          }
           _item =
-              WorkoutScheduleEntity(_tmpId,_tmpClientId,_tmpDayKey,_tmpExerciseId,_tmpSessionId,_tmpScheduledAtEpochMillis,_tmpSets,_tmpReps,_tmpWeightKg,_tmpRestSeconds,_tmpNotes,_tmpMeasurementMode,_tmpDurationSeconds,_tmpLocationId,_tmpExecutionStatus,_tmpCreatedAtEpochMillis,_tmpUpdatedAtEpochMillis)
+              WorkoutScheduleEntity(_tmpId,_tmpClientId,_tmpDayKey,_tmpExerciseId,_tmpSessionId,_tmpScheduledAtEpochMillis,_tmpSets,_tmpReps,_tmpWeightKg,_tmpRestSeconds,_tmpNotes,_tmpMeasurementMode,_tmpDurationSeconds,_tmpLocationId,_tmpExecutionStatus,_tmpCreatedAtEpochMillis,_tmpUpdatedAtEpochMillis,_tmpExerciseImageResUrl,_tmpExerciseLocalImageName)
           _result.add(_item)
         }
         _result
@@ -256,6 +296,10 @@ public class WorkoutScheduleDao_Impl(
             "createdAtEpochMillis")
         val _columnIndexOfUpdatedAtEpochMillis: Int = getColumnIndexOrThrow(_stmt,
             "updatedAtEpochMillis")
+        val _columnIndexOfExerciseImageResUrl: Int = getColumnIndexOrThrow(_stmt,
+            "exercise_image_res_url")
+        val _columnIndexOfExerciseLocalImageName: Int = getColumnIndexOrThrow(_stmt,
+            "exercise_local_image_name")
         val _result: MutableList<WorkoutScheduleEntity> = mutableListOf()
         while (_stmt.step()) {
           val _item: WorkoutScheduleEntity
@@ -305,8 +349,20 @@ public class WorkoutScheduleDao_Impl(
           _tmpCreatedAtEpochMillis = _stmt.getLong(_columnIndexOfCreatedAtEpochMillis)
           val _tmpUpdatedAtEpochMillis: Long
           _tmpUpdatedAtEpochMillis = _stmt.getLong(_columnIndexOfUpdatedAtEpochMillis)
+          val _tmpExerciseImageResUrl: String?
+          if (_stmt.isNull(_columnIndexOfExerciseImageResUrl)) {
+            _tmpExerciseImageResUrl = null
+          } else {
+            _tmpExerciseImageResUrl = _stmt.getText(_columnIndexOfExerciseImageResUrl)
+          }
+          val _tmpExerciseLocalImageName: String?
+          if (_stmt.isNull(_columnIndexOfExerciseLocalImageName)) {
+            _tmpExerciseLocalImageName = null
+          } else {
+            _tmpExerciseLocalImageName = _stmt.getText(_columnIndexOfExerciseLocalImageName)
+          }
           _item =
-              WorkoutScheduleEntity(_tmpId,_tmpClientId,_tmpDayKey,_tmpExerciseId,_tmpSessionId,_tmpScheduledAtEpochMillis,_tmpSets,_tmpReps,_tmpWeightKg,_tmpRestSeconds,_tmpNotes,_tmpMeasurementMode,_tmpDurationSeconds,_tmpLocationId,_tmpExecutionStatus,_tmpCreatedAtEpochMillis,_tmpUpdatedAtEpochMillis)
+              WorkoutScheduleEntity(_tmpId,_tmpClientId,_tmpDayKey,_tmpExerciseId,_tmpSessionId,_tmpScheduledAtEpochMillis,_tmpSets,_tmpReps,_tmpWeightKg,_tmpRestSeconds,_tmpNotes,_tmpMeasurementMode,_tmpDurationSeconds,_tmpLocationId,_tmpExecutionStatus,_tmpCreatedAtEpochMillis,_tmpUpdatedAtEpochMillis,_tmpExerciseImageResUrl,_tmpExerciseLocalImageName)
           _result.add(_item)
         }
         _result
@@ -341,6 +397,10 @@ public class WorkoutScheduleDao_Impl(
             "createdAtEpochMillis")
         val _columnIndexOfUpdatedAtEpochMillis: Int = getColumnIndexOrThrow(_stmt,
             "updatedAtEpochMillis")
+        val _columnIndexOfExerciseImageResUrl: Int = getColumnIndexOrThrow(_stmt,
+            "exercise_image_res_url")
+        val _columnIndexOfExerciseLocalImageName: Int = getColumnIndexOrThrow(_stmt,
+            "exercise_local_image_name")
         val _result: MutableList<WorkoutScheduleEntity> = mutableListOf()
         while (_stmt.step()) {
           val _item: WorkoutScheduleEntity
@@ -390,8 +450,20 @@ public class WorkoutScheduleDao_Impl(
           _tmpCreatedAtEpochMillis = _stmt.getLong(_columnIndexOfCreatedAtEpochMillis)
           val _tmpUpdatedAtEpochMillis: Long
           _tmpUpdatedAtEpochMillis = _stmt.getLong(_columnIndexOfUpdatedAtEpochMillis)
+          val _tmpExerciseImageResUrl: String?
+          if (_stmt.isNull(_columnIndexOfExerciseImageResUrl)) {
+            _tmpExerciseImageResUrl = null
+          } else {
+            _tmpExerciseImageResUrl = _stmt.getText(_columnIndexOfExerciseImageResUrl)
+          }
+          val _tmpExerciseLocalImageName: String?
+          if (_stmt.isNull(_columnIndexOfExerciseLocalImageName)) {
+            _tmpExerciseLocalImageName = null
+          } else {
+            _tmpExerciseLocalImageName = _stmt.getText(_columnIndexOfExerciseLocalImageName)
+          }
           _item =
-              WorkoutScheduleEntity(_tmpId,_tmpClientId,_tmpDayKey,_tmpExerciseId,_tmpSessionId,_tmpScheduledAtEpochMillis,_tmpSets,_tmpReps,_tmpWeightKg,_tmpRestSeconds,_tmpNotes,_tmpMeasurementMode,_tmpDurationSeconds,_tmpLocationId,_tmpExecutionStatus,_tmpCreatedAtEpochMillis,_tmpUpdatedAtEpochMillis)
+              WorkoutScheduleEntity(_tmpId,_tmpClientId,_tmpDayKey,_tmpExerciseId,_tmpSessionId,_tmpScheduledAtEpochMillis,_tmpSets,_tmpReps,_tmpWeightKg,_tmpRestSeconds,_tmpNotes,_tmpMeasurementMode,_tmpDurationSeconds,_tmpLocationId,_tmpExecutionStatus,_tmpCreatedAtEpochMillis,_tmpUpdatedAtEpochMillis,_tmpExerciseImageResUrl,_tmpExerciseLocalImageName)
           _result.add(_item)
         }
         _result
@@ -428,6 +500,10 @@ public class WorkoutScheduleDao_Impl(
             "createdAtEpochMillis")
         val _columnIndexOfUpdatedAtEpochMillis: Int = getColumnIndexOrThrow(_stmt,
             "updatedAtEpochMillis")
+        val _columnIndexOfExerciseImageResUrl: Int = getColumnIndexOrThrow(_stmt,
+            "exercise_image_res_url")
+        val _columnIndexOfExerciseLocalImageName: Int = getColumnIndexOrThrow(_stmt,
+            "exercise_local_image_name")
         val _result: WorkoutScheduleEntity?
         if (_stmt.step()) {
           val _tmpId: Long
@@ -476,12 +552,164 @@ public class WorkoutScheduleDao_Impl(
           _tmpCreatedAtEpochMillis = _stmt.getLong(_columnIndexOfCreatedAtEpochMillis)
           val _tmpUpdatedAtEpochMillis: Long
           _tmpUpdatedAtEpochMillis = _stmt.getLong(_columnIndexOfUpdatedAtEpochMillis)
+          val _tmpExerciseImageResUrl: String?
+          if (_stmt.isNull(_columnIndexOfExerciseImageResUrl)) {
+            _tmpExerciseImageResUrl = null
+          } else {
+            _tmpExerciseImageResUrl = _stmt.getText(_columnIndexOfExerciseImageResUrl)
+          }
+          val _tmpExerciseLocalImageName: String?
+          if (_stmt.isNull(_columnIndexOfExerciseLocalImageName)) {
+            _tmpExerciseLocalImageName = null
+          } else {
+            _tmpExerciseLocalImageName = _stmt.getText(_columnIndexOfExerciseLocalImageName)
+          }
           _result =
-              WorkoutScheduleEntity(_tmpId,_tmpClientId,_tmpDayKey,_tmpExerciseId,_tmpSessionId,_tmpScheduledAtEpochMillis,_tmpSets,_tmpReps,_tmpWeightKg,_tmpRestSeconds,_tmpNotes,_tmpMeasurementMode,_tmpDurationSeconds,_tmpLocationId,_tmpExecutionStatus,_tmpCreatedAtEpochMillis,_tmpUpdatedAtEpochMillis)
+              WorkoutScheduleEntity(_tmpId,_tmpClientId,_tmpDayKey,_tmpExerciseId,_tmpSessionId,_tmpScheduledAtEpochMillis,_tmpSets,_tmpReps,_tmpWeightKg,_tmpRestSeconds,_tmpNotes,_tmpMeasurementMode,_tmpDurationSeconds,_tmpLocationId,_tmpExecutionStatus,_tmpCreatedAtEpochMillis,_tmpUpdatedAtEpochMillis,_tmpExerciseImageResUrl,_tmpExerciseLocalImageName)
         } else {
           _result = null
         }
         _result
+      } finally {
+        _stmt.close()
+      }
+    }
+  }
+
+  public override suspend fun getByRowId(rowId: Long): WorkoutScheduleEntity? {
+    val _sql: String = "SELECT * FROM workout_schedules WHERE id = ? LIMIT 1"
+    return performSuspending(__db, true, false) { _connection ->
+      val _stmt: SQLiteStatement = _connection.prepare(_sql)
+      try {
+        var _argIndex: Int = 1
+        _stmt.bindLong(_argIndex, rowId)
+        val _columnIndexOfId: Int = getColumnIndexOrThrow(_stmt, "id")
+        val _columnIndexOfClientId: Int = getColumnIndexOrThrow(_stmt, "clientId")
+        val _columnIndexOfDayKey: Int = getColumnIndexOrThrow(_stmt, "dayKey")
+        val _columnIndexOfExerciseId: Int = getColumnIndexOrThrow(_stmt, "exerciseId")
+        val _columnIndexOfSessionId: Int = getColumnIndexOrThrow(_stmt, "sessionId")
+        val _columnIndexOfScheduledAtEpochMillis: Int = getColumnIndexOrThrow(_stmt,
+            "scheduledAtEpochMillis")
+        val _columnIndexOfSets: Int = getColumnIndexOrThrow(_stmt, "sets")
+        val _columnIndexOfReps: Int = getColumnIndexOrThrow(_stmt, "reps")
+        val _columnIndexOfWeightKg: Int = getColumnIndexOrThrow(_stmt, "weightKg")
+        val _columnIndexOfRestSeconds: Int = getColumnIndexOrThrow(_stmt, "restSeconds")
+        val _columnIndexOfNotes: Int = getColumnIndexOrThrow(_stmt, "notes")
+        val _columnIndexOfMeasurementMode: Int = getColumnIndexOrThrow(_stmt, "measurementMode")
+        val _columnIndexOfDurationSeconds: Int = getColumnIndexOrThrow(_stmt, "durationSeconds")
+        val _columnIndexOfLocationId: Int = getColumnIndexOrThrow(_stmt, "locationId")
+        val _columnIndexOfExecutionStatus: Int = getColumnIndexOrThrow(_stmt, "executionStatus")
+        val _columnIndexOfCreatedAtEpochMillis: Int = getColumnIndexOrThrow(_stmt,
+            "createdAtEpochMillis")
+        val _columnIndexOfUpdatedAtEpochMillis: Int = getColumnIndexOrThrow(_stmt,
+            "updatedAtEpochMillis")
+        val _columnIndexOfExerciseImageResUrl: Int = getColumnIndexOrThrow(_stmt,
+            "exercise_image_res_url")
+        val _columnIndexOfExerciseLocalImageName: Int = getColumnIndexOrThrow(_stmt,
+            "exercise_local_image_name")
+        val _result: WorkoutScheduleEntity?
+        if (_stmt.step()) {
+          val _tmpId: Long
+          _tmpId = _stmt.getLong(_columnIndexOfId)
+          val _tmpClientId: String
+          _tmpClientId = _stmt.getText(_columnIndexOfClientId)
+          val _tmpDayKey: Long
+          _tmpDayKey = _stmt.getLong(_columnIndexOfDayKey)
+          val _tmpExerciseId: String
+          _tmpExerciseId = _stmt.getText(_columnIndexOfExerciseId)
+          val _tmpSessionId: String?
+          if (_stmt.isNull(_columnIndexOfSessionId)) {
+            _tmpSessionId = null
+          } else {
+            _tmpSessionId = _stmt.getText(_columnIndexOfSessionId)
+          }
+          val _tmpScheduledAtEpochMillis: Long
+          _tmpScheduledAtEpochMillis = _stmt.getLong(_columnIndexOfScheduledAtEpochMillis)
+          val _tmpSets: Int
+          _tmpSets = _stmt.getLong(_columnIndexOfSets).toInt()
+          val _tmpReps: Int
+          _tmpReps = _stmt.getLong(_columnIndexOfReps).toInt()
+          val _tmpWeightKg: Double
+          _tmpWeightKg = _stmt.getDouble(_columnIndexOfWeightKg)
+          val _tmpRestSeconds: Int
+          _tmpRestSeconds = _stmt.getLong(_columnIndexOfRestSeconds).toInt()
+          val _tmpNotes: String?
+          if (_stmt.isNull(_columnIndexOfNotes)) {
+            _tmpNotes = null
+          } else {
+            _tmpNotes = _stmt.getText(_columnIndexOfNotes)
+          }
+          val _tmpMeasurementMode: String
+          _tmpMeasurementMode = _stmt.getText(_columnIndexOfMeasurementMode)
+          val _tmpDurationSeconds: Int?
+          if (_stmt.isNull(_columnIndexOfDurationSeconds)) {
+            _tmpDurationSeconds = null
+          } else {
+            _tmpDurationSeconds = _stmt.getLong(_columnIndexOfDurationSeconds).toInt()
+          }
+          val _tmpLocationId: String
+          _tmpLocationId = _stmt.getText(_columnIndexOfLocationId)
+          val _tmpExecutionStatus: String
+          _tmpExecutionStatus = _stmt.getText(_columnIndexOfExecutionStatus)
+          val _tmpCreatedAtEpochMillis: Long
+          _tmpCreatedAtEpochMillis = _stmt.getLong(_columnIndexOfCreatedAtEpochMillis)
+          val _tmpUpdatedAtEpochMillis: Long
+          _tmpUpdatedAtEpochMillis = _stmt.getLong(_columnIndexOfUpdatedAtEpochMillis)
+          val _tmpExerciseImageResUrl: String?
+          if (_stmt.isNull(_columnIndexOfExerciseImageResUrl)) {
+            _tmpExerciseImageResUrl = null
+          } else {
+            _tmpExerciseImageResUrl = _stmt.getText(_columnIndexOfExerciseImageResUrl)
+          }
+          val _tmpExerciseLocalImageName: String?
+          if (_stmt.isNull(_columnIndexOfExerciseLocalImageName)) {
+            _tmpExerciseLocalImageName = null
+          } else {
+            _tmpExerciseLocalImageName = _stmt.getText(_columnIndexOfExerciseLocalImageName)
+          }
+          _result =
+              WorkoutScheduleEntity(_tmpId,_tmpClientId,_tmpDayKey,_tmpExerciseId,_tmpSessionId,_tmpScheduledAtEpochMillis,_tmpSets,_tmpReps,_tmpWeightKg,_tmpRestSeconds,_tmpNotes,_tmpMeasurementMode,_tmpDurationSeconds,_tmpLocationId,_tmpExecutionStatus,_tmpCreatedAtEpochMillis,_tmpUpdatedAtEpochMillis,_tmpExerciseImageResUrl,_tmpExerciseLocalImageName)
+        } else {
+          _result = null
+        }
+        _result
+      } finally {
+        _stmt.close()
+      }
+    }
+  }
+
+  public override suspend fun countSchedulesForSessionId(sessionId: String): Int {
+    val _sql: String = "SELECT COUNT(*) FROM workout_schedules WHERE sessionId = ?"
+    return performSuspending(__db, true, false) { _connection ->
+      val _stmt: SQLiteStatement = _connection.prepare(_sql)
+      try {
+        var _argIndex: Int = 1
+        _stmt.bindText(_argIndex, sessionId)
+        val _result: Int
+        if (_stmt.step()) {
+          val _tmp: Int
+          _tmp = _stmt.getLong(0).toInt()
+          _result = _tmp
+        } else {
+          _result = 0
+        }
+        _result
+      } finally {
+        _stmt.close()
+      }
+    }
+  }
+
+  public override suspend fun deleteByRowId(rowId: Long): Int {
+    val _sql: String = "DELETE FROM workout_schedules WHERE id = ?"
+    return performSuspending(__db, false, true) { _connection ->
+      val _stmt: SQLiteStatement = _connection.prepare(_sql)
+      try {
+        var _argIndex: Int = 1
+        _stmt.bindLong(_argIndex, rowId)
+        _stmt.step()
+        getTotalChangedRows(_connection)
       } finally {
         _stmt.close()
       }

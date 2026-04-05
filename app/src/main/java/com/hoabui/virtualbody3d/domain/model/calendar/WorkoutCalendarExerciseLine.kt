@@ -1,6 +1,7 @@
 package com.hoabui.virtualbody3d.domain.model.calendar
 
 import androidx.compose.runtime.Immutable
+import com.hoabui.virtualbody3d.domain.model.common.ImageSource
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutExecutionStatus
 
@@ -17,6 +18,7 @@ data class WorkoutCalendarExerciseLine(
     val measurementMode: ExerciseMeasurementMode,
     val executionStatus: WorkoutExecutionStatus,
     val sessionId: String?,
+    val image: ImageSource,
 )
 
 /**
@@ -28,6 +30,7 @@ data class WorkoutCalendarExerciseLineUiModel(
     val title: String,
     val metricsLabel: String,
     val statusLabel: String,
+    val image: ImageSource,
 )
 
 /**
@@ -41,4 +44,5 @@ fun WorkoutCalendarExerciseLine.toUiModel(
     title = exerciseDisplayName,
     metricsLabel = metricsLabel,
     statusLabel = statusLabel,
+    image = image,
 )

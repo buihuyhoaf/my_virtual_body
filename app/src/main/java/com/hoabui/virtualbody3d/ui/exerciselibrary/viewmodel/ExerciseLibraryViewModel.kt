@@ -12,6 +12,7 @@ import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.GymLocation
 import com.hoabui.virtualbody3d.domain.model.exercise.InstantInterval
 import com.hoabui.virtualbody3d.domain.model.exercise.SessionExerciseLine
+import com.hoabui.virtualbody3d.domain.model.exercise.toScheduleImageSnapshot
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSession
 import com.hoabui.virtualbody3d.domain.model.exercise.estimatedPlannedMinutesForSessionLine
@@ -100,7 +101,7 @@ class ExerciseLibraryViewModel @Inject constructor(
     private val detailExerciseId = MutableStateFlow<String?>(null)
     private val zoneId: ZoneId = ZoneId.systemDefault()
 
-    /** Busy intervals for the active booking context (same emission as [ExerciseLibraryUiState.bookingBusyIntervals]). */
+    /** Busy intervals for booking (toggle/confirm/prune); not surfaced on individual slot cells. */
     private var latestBookingBusy: ImmutableList<InstantInterval> = persistentListOf()
 
     private var cachedSections: ImmutableList<ExerciseSectionUiItem> = persistentListOf()
@@ -249,7 +250,6 @@ class ExerciseLibraryViewModel @Inject constructor(
                     busy,
                     zoneId,
                     filtersWithMeasurement.isCartDraftValidForSessionConfirm(),
-                    appContext.resources,
                     densityKernels,
                 )
             }
@@ -258,7 +258,6 @@ class ExerciseLibraryViewModel @Inject constructor(
                 selectedExerciseForDetail = selectedExercise,
                 exerciseMeasurementById = measurementById,
                 sessionBooking = bookingUi,
-                bookingBusyIntervals = busy,
                 isAddToSessionEnabled = filtersWithMeasurement.canOpenBooking(),
             )
         }.onEach { fullState ->
@@ -660,6 +659,7 @@ class ExerciseLibraryViewModel @Inject constructor(
                     val sets = draft.sets.trim().toIntOrNull() ?: continue
                     val reps = draft.reps.trim().toIntOrNull() ?: continue
                     if (sets <= 0 || reps <= 0) continue
+                    val (snapUrl, snapLocal) = ex.image.toScheduleImageSnapshot()
                     lines.add(
                         SessionExerciseLine(
                             exerciseId = exerciseId,
@@ -671,6 +671,8 @@ class ExerciseLibraryViewModel @Inject constructor(
                             measurementMode = ExerciseMeasurementMode.Strength,
                             durationSeconds = null,
                             orderIndex = idx,
+                            exerciseImageResUrl = snapUrl,
+                            exerciseLocalImageName = snapLocal,
                         ),
                     )
                 }
@@ -679,6 +681,7 @@ class ExerciseLibraryViewModel @Inject constructor(
                     val seconds = draft.reps.trim().toIntOrNull() ?: 0
                     val total = normalizeDurationMinutesSeconds(minutes, seconds)
                     if (total <= 0) continue
+                    val (snapUrl, snapLocal) = ex.image.toScheduleImageSnapshot()
                     lines.add(
                         SessionExerciseLine(
                             exerciseId = exerciseId,
@@ -690,6 +693,8 @@ class ExerciseLibraryViewModel @Inject constructor(
                             measurementMode = ExerciseMeasurementMode.Duration,
                             durationSeconds = total,
                             orderIndex = idx,
+                            exerciseImageResUrl = snapUrl,
+                            exerciseLocalImageName = snapLocal,
                         ),
                     )
                 }

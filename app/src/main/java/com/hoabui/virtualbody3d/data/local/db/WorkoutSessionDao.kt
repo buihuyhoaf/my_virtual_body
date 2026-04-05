@@ -15,6 +15,12 @@ interface WorkoutSessionDao {
     @Query("SELECT * FROM workout_sessions ORDER BY startEpochMillis ASC")
     suspend fun getAllSessions(): List<WorkoutSessionEntity>
 
+    @Query("SELECT * FROM workout_sessions WHERE id = :sessionId LIMIT 1")
+    suspend fun getById(sessionId: String): WorkoutSessionEntity?
+
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertSession(entity: WorkoutSessionEntity)
+
+    @Query("DELETE FROM workout_sessions WHERE id = :sessionId")
+    suspend fun deleteById(sessionId: String): Int
 }

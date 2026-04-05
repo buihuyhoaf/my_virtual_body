@@ -1,7 +1,6 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.state
 
 import android.content.Context
-import android.content.res.Resources
 import androidx.compose.runtime.Immutable
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
@@ -16,14 +15,11 @@ import com.hoabui.virtualbody3d.domain.model.exercise.SESSION_BOOKING_PERIOD_AFT
 import com.hoabui.virtualbody3d.domain.model.exercise.SESSION_BOOKING_PERIOD_MIDDAY_START
 import com.hoabui.virtualbody3d.domain.model.exercise.SESSION_BOOKING_SLOT_STEP_MINUTES
 import com.hoabui.virtualbody3d.domain.model.exercise.bookingSlotStartsForDay
-import com.hoabui.virtualbody3d.domain.model.exercise.instantIntervalFromStart
 import com.hoabui.virtualbody3d.domain.model.exercise.isContiguousThirtyMinuteChain
 import com.hoabui.virtualbody3d.domain.model.exercise.isIntervalFreeForBooking
-import com.hoabui.virtualbody3d.domain.model.exercise.isThirtyMinuteSlotFree
 import com.hoabui.virtualbody3d.domain.model.exercise.SlotDensityKernel
 import com.hoabui.virtualbody3d.domain.model.exercise.SlotDensityTier
 import com.hoabui.virtualbody3d.domain.model.exercise.pruneSelectionAgainstBusy
-import com.hoabui.virtualbody3d.domain.model.exercise.proposedSessionIntervalFromSlotStart
 import com.hoabui.virtualbody3d.domain.model.exercise.proposedVariableSessionInterval
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.ExerciseLibraryCardImage
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toExerciseLibraryCardImage
@@ -78,15 +74,9 @@ data class SessionBookingInput(
 data class TimeSlotCellUiModel(
     val slotStart: LocalTime,
     val label: String,
-    /** Whether the slot can be toggled in the grid (strict wall-time availability for new block). */
-    val toggleEnabled: Boolean,
-    /** Existing session overlaps this 30m bucket (density / summary still shown). */
-    val overlapsExistingSession: Boolean,
     val selected: Boolean,
     val densityTier: SlotDensityTier,
     val overCapacity: Boolean,
-    /** Preformatted summary; empty when no activities in bucket. */
-    val summaryLabel: String,
     val utilizationRatio: Float,
 )
 
@@ -132,25 +122,14 @@ private fun computePeriodStartIndices(
         p.id to if (idx < 0) cells.lastIndex.coerceAtLeast(0) else idx
     }.toImmutableMap()
 
-private fun formatSlotSummaryLabel(resources: Resources, kernel: SlotDensityKernel): String {
-    if (kernel.totalPlannedMinutes <= 0) return ""
-    return resources.getQuantityString(
-        R.plurals.exercise_booking_slot_minutes_total,
-        kernel.totalPlannedMinutes,
-        kernel.totalPlannedMinutes,
-    )
-}
-
 fun buildSessionBookingUiModel(
     input: SessionBookingInput,
     locations: List<GymLocation>,
     busyIntervals: List<InstantInterval>,
     zoneId: ZoneId,
     isCartDraftValidForConfirm: Boolean,
-    resources: Resources,
     slotDensityKernels: List<SlotDensityKernel>,
 ): SessionBookingUiModel {
-    val date = Instant.ofEpochMilli(input.selectedDateMillis).atZone(zoneId).toLocalDate()
     val slotStarts = bookingSlotStartsForDay(
         firstSlot = SESSION_BOOKING_GRID_FIRST_SLOT,
         lastSlot = SESSION_BOOKING_GRID_LAST_SLOT,
@@ -162,27 +141,15 @@ fun buildSessionBookingUiModel(
     val kernelBySlot = slotDensityKernels.associateBy { it.slotStart }
     val periods = defaultBookingPeriods()
     val cells = slotStarts.map { slot ->
-        val slotInstant = proposedSessionIntervalFromSlotStart(
-            date = date,
-            slotStart = slot,
-            zoneId = zoneId,
-            sessionDurationMinutes = SESSION_BOOKING_SLOT_STEP_MINUTES,
-        ).start
-        val thirtyMin = instantIntervalFromStart(slotInstant, SESSION_BOOKING_SLOT_STEP_MINUTES)
-        val overlapsBusy = busyIntervals.any { thirtyMin.overlaps(it) }
-        val thirtyFree = isThirtyMinuteSlotFree(date, slot, zoneId, busyIntervals)
         val selected = slot in input.selectedSlotStarts
         val kernel = kernelBySlot[slot]
             ?: error("missing SlotDensityKernel for $slot")
         TimeSlotCellUiModel(
             slotStart = slot,
             label = slotLabelFormatter.format(slot),
-            toggleEnabled = thirtyFree,
-            overlapsExistingSession = overlapsBusy,
             selected = selected,
             densityTier = kernel.densityTier,
             overCapacity = kernel.overCapacity,
-            summaryLabel = formatSlotSummaryLabel(resources, kernel),
             utilizationRatio = kernel.utilizationRatio,
         )
     }

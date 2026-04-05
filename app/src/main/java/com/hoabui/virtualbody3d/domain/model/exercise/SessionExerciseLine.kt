@@ -13,4 +13,6 @@ data class SessionExerciseLine(
     val measurementMode: ExerciseMeasurementMode,
     val durationSeconds: Int?,
     val orderIndex: Int,
+    val exerciseImageResUrl: String? = null,
+    val exerciseLocalImageName: String? = null,
 )

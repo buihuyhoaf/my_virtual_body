@@ -119,7 +119,11 @@ fun computeNextSlotSelectionAfterToggle(
                 if (currMin.isAfter(nextMax)) return emptySet()
                 return contiguousSlotStartsInRange(currMin, nextMax).toSet()
             }
-            else -> return null
+            else -> {
+                // Tapped a selected slot that is not an edge: clear the whole block (edge-only shrink
+                // is undiscoverable; returning null made the cell feel "stuck" selected).
+                return emptySet()
+            }
         }
     }
     val newMin = if (tapped.isBefore(currMin)) tapped else currMin

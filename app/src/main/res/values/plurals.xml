@@ -12,8 +12,4 @@
         <item quantity="one">%d phút</item>
         <item quantity="other">%d phút</item>
     </plurals>
-    <plurals name="exercise_booking_slot_minutes_total">
-        <item quantity="one">%d phút tổng</item>
-        <item quantity="other">%d phút tổng</item>
-    </plurals>
 </resources>

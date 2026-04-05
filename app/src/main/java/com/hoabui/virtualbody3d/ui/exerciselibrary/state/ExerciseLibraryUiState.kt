@@ -6,7 +6,6 @@ import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
-import com.hoabui.virtualbody3d.domain.model.exercise.InstantInterval
 import com.hoabui.virtualbody3d.domain.model.exercise.normalizeDurationMinutesSeconds
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
 import kotlinx.collections.immutable.ImmutableList
@@ -105,8 +104,6 @@ data class ExerciseLibraryUiState(
     /** Mutable booking fields; null when sheet closed. [sessionBooking] is derived in the ViewModel combine. */
     val sessionBookingInput: SessionBookingInput? = null,
     val sessionBooking: SessionBookingUiModel? = null,
-    /** Busy intervals for the current booking day/location (for confirm gating). */
-    val bookingBusyIntervals: ImmutableList<InstantInterval> = persistentListOf(),
     /** Precomputed: non-empty valid cart for opening the booking sheet (see [canOpenBooking]). */
     val isAddToSessionEnabled: Boolean = false,
 )

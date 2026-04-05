@@ -31,3 +31,10 @@ fun migration2To3(databaseSeeder: DatabaseSeeder): Migration =
             databaseSeeder.seedCatalogAfterVersion2Upgrade(db)
         }
     }
+
+val MIGRATION_3_4: Migration = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE workout_schedules ADD COLUMN exercise_image_res_url TEXT")
+        db.execSQL("ALTER TABLE workout_schedules ADD COLUMN exercise_local_image_name TEXT")
+    }
+}

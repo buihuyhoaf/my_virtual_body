@@ -6,6 +6,7 @@ import com.google.gson.Gson
 import com.hoabui.virtualbody3d.data.local.db.BodyScanResultDao
 import com.hoabui.virtualbody3d.data.local.db.ExerciseDao
 import com.hoabui.virtualbody3d.data.local.db.MIGRATION_1_2
+import com.hoabui.virtualbody3d.data.local.db.MIGRATION_3_4
 import com.hoabui.virtualbody3d.data.local.db.migration2To3
 import com.hoabui.virtualbody3d.data.local.db.NutritionSummaryDao
 import com.hoabui.virtualbody3d.data.local.db.ProgressTimelineDao
@@ -37,7 +38,7 @@ object DatabaseModule {
             VirtualBodyDatabase::class.java,
             DB_NAME,
         )
-            .addMigrations(MIGRATION_1_2, migration2To3(databaseSeeder))
+            .addMigrations(MIGRATION_1_2, migration2To3(databaseSeeder), MIGRATION_3_4)
             .addCallback(databaseSeeder.roomCallback())
             .build()
 
