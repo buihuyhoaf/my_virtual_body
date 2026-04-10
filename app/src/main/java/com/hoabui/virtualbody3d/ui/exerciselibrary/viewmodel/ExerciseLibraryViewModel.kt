@@ -36,6 +36,7 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.presentation.exerciseLibraryS
 import com.hoabui.virtualbody3d.ui.exerciselibrary.presentation.mergeExerciseLibraryPresentation
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mapper.ExerciseLibraryUiMapper
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryCartState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibraryIntent
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibrarySideEffect
@@ -52,6 +53,7 @@ import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -105,8 +107,7 @@ class ExerciseLibraryViewModel @Inject constructor(
         slotStepMinutes = SESSION_BOOKING_SLOT_STEP_MINUTES,
     )
 
-    val cartDraftFlow: StateFlow<ExerciseLibraryUiState> = filterState.asStateFlow()
-
+    val cartStateFlow: Flow<LibraryCartState> = filterState.map { it.cart }.distinctUntilChanged()
     /**
      * Domain exercise index for booking kernels and detail mapping; not part of [ExerciseLibraryUiState].
      * Updated only from [GetExerciseLibraryUseCase] alongside [ExerciseLibraryUpdate.CatalogLoaded].
