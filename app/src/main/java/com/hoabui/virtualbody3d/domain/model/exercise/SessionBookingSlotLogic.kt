@@ -1,19 +1,9 @@
 package com.hoabui.virtualbody3d.domain.model.exercise
 
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
-
-/**
- * Returns true if the half-open **[proposedStart, proposedEnd)** does not overlap any busy interval
- * (half-open) for the same location.
- */
-fun isIntervalFreeForBooking(
-    proposed: InstantInterval,
-    busyIntervals: List<InstantInterval>,
-): Boolean = busyIntervals.none { proposed.overlaps(it) }
 
 /**
  * Builds wall-clock slot starts for one local day from [firstSlot] inclusive through [lastSlot] inclusive,
@@ -48,19 +38,6 @@ fun thirtyMinuteIntervalAtSlot(
     return instantIntervalFromStart(start, SESSION_BOOKING_SLOT_STEP_MINUTES)
 }
 
-/**
- * True if the **30-minute** row starting at [slotStart] does not overlap any busy interval.
- */
-fun isThirtyMinuteSlotFree(
-    date: LocalDate,
-    slotStart: LocalTime,
-    zoneId: ZoneId,
-    busyIntervals: List<InstantInterval>,
-): Boolean {
-    val proposed = thirtyMinuteIntervalAtSlot(date, slotStart, zoneId)
-    return isIntervalFreeForBooking(proposed, busyIntervals)
-}
-
 /** Every 30m slot from [minSlot] through [maxSlot] inclusive (same rules as [bookingSlotStartsForDay]). */
 fun contiguousSlotStartsInRange(
     minSlot: LocalTime,
@@ -71,65 +48,45 @@ fun contiguousSlotStartsInRange(
     slotStepMinutes = SESSION_BOOKING_SLOT_STEP_MINUTES,
 )
 
-/** True when every 30m row in the inclusive range is free (used for expand / auto-fill validation). */
-fun isContiguousThirtyMinuteRangeFree(
-    date: LocalDate,
-    zoneId: ZoneId,
-    minSlot: LocalTime,
-    maxSlot: LocalTime,
-    busyIntervals: List<InstantInterval>,
-): Boolean {
-    for (slot in contiguousSlotStartsInRange(minSlot, maxSlot)) {
-        if (!isThirtyMinuteSlotFree(date, slot, zoneId, busyIntervals)) return false
-    }
-    return true
-}
-
 /**
- * Next selection after user taps [tapped] on the booking grid (see Lead spec: single-slot clear,
- * edge shrink, expand + auto-fill). Returns `null` when the tap is a no-op or rejected.
+ * Next selection after user taps [tapped] on the booking grid (**anchor & pivot**).
+ *
+ * Let `currMin` / `currMax` be the min/max of the current contiguous selection.
+ *
+ * - **Scenario 3 — tap before start** (`tapped < currMin`): reset to provisional `{tapped}`.
+ * - **Scenario 2 — tap after end** (`tapped > currMax`): extend to `[currMin, tapped]` (all contiguous slots).
+ * - **Scenario 1 — tap inside** (`currMin <= tapped <= currMax`): shorten to `[currMin, tapped]` (discard slots after `tapped`).
+ *   Tapping the current end is a no-op on multi-slot selection.
+ *
+ * **Single slot:** tap same cell again clears; tap before resets; tap after extends.
+ *
+ * Returns `null` when [tapped] is not on the grid; `emptySet()` when the chain is invalid or selection clears.
  */
 fun computeNextSlotSelectionAfterToggle(
     current: Set<LocalTime>,
     tapped: LocalTime,
-    busyIntervals: List<InstantInterval>,
-    date: LocalDate,
-    zoneId: ZoneId,
     gridSlotStarts: List<LocalTime>,
 ): Set<LocalTime>? {
     if (tapped !in gridSlotStarts) return null
     if (current.isEmpty()) {
-        if (!isThirtyMinuteSlotFree(date, tapped, zoneId, busyIntervals)) return null
         return setOf(tapped)
     }
     val ordered = current.sorted()
     if (!isContiguousThirtyMinuteChain(ordered)) return emptySet()
     val currMin = ordered.first()
     val currMax = ordered.last()
-    if (currMin == currMax && tapped == currMin) return emptySet()
-    if (tapped in current) {
-        when (tapped) {
-            currMin -> {
-                val nextMin = currMin.plusMinutes(SESSION_BOOKING_SLOT_STEP_MINUTES)
-                if (nextMin.isAfter(currMax)) return emptySet()
-                return contiguousSlotStartsInRange(nextMin, currMax).toSet()
-            }
-            currMax -> {
-                val nextMax = currMax.minusMinutes(SESSION_BOOKING_SLOT_STEP_MINUTES)
-                if (currMin.isAfter(nextMax)) return emptySet()
-                return contiguousSlotStartsInRange(currMin, nextMax).toSet()
-            }
-            else -> {
-                // Tapped a selected slot that is not an edge: clear the whole block (edge-only shrink
-                // is undiscoverable; returning null made the cell feel "stuck" selected).
-                return emptySet()
-            }
-        }
+
+    if (currMin == currMax) {
+        if (tapped == currMin) return emptySet()
+        if (tapped.isBefore(currMin)) return setOf(tapped)
+        return contiguousSlotStartsInRange(currMin, tapped).toSet()
     }
-    val newMin = if (tapped.isBefore(currMin)) tapped else currMin
-    val newMax = if (tapped.isAfter(currMax)) tapped else currMax
-    if (!isContiguousThirtyMinuteRangeFree(date, zoneId, newMin, newMax, busyIntervals)) return null
-    return contiguousSlotStartsInRange(newMin, newMax).toSet()
+
+    if (tapped.isBefore(currMin)) return setOf(tapped)
+    if (tapped.isAfter(currMax)) {
+        return contiguousSlotStartsInRange(currMin, tapped).toSet()
+    }
+    return contiguousSlotStartsInRange(currMin, tapped).toSet()
 }
 
 /**
@@ -145,25 +102,6 @@ fun isContiguousThirtyMinuteChain(sortedSlots: List<LocalTime>): Boolean {
         expected = expected.plusMinutes(step)
     }
     return true
-}
-
-/**
- * If any selected slot overlaps [busyIntervals], returns an empty set (Lead default).
- * Otherwise returns [selectedSlotStarts] unchanged (only valid when the set is a contiguous chain).
- */
-fun pruneSelectionAgainstBusy(
-    selectedSlotStarts: Set<LocalTime>,
-    busyIntervals: List<InstantInterval>,
-    date: LocalDate,
-    zoneId: ZoneId,
-): Set<LocalTime> {
-    if (selectedSlotStarts.isEmpty()) return emptySet()
-    val ordered = selectedSlotStarts.sorted()
-    if (!isContiguousThirtyMinuteChain(ordered)) return emptySet()
-    for (slot in ordered) {
-        if (!isThirtyMinuteSlotFree(date, slot, zoneId, busyIntervals)) return emptySet()
-    }
-    return selectedSlotStarts
 }
 
 /** Proposed workout session **[minSlot, maxSlot + 30m)** in [zoneId] (half-open). */
@@ -198,23 +136,4 @@ fun proposedSessionIntervalFromSlotStart(
     val zdtStart = ZonedDateTime.of(date, slotStart, zoneId)
     val start = zdtStart.toInstant()
     return instantIntervalFromStart(start, sessionDurationMinutes)
-}
-
-/**
- * Legacy: true if the **60-minute** window from [slotStart] is free.
- * Prefer [isThirtyMinuteSlotFree] for per-cell booking UI.
- */
-fun isStartSlotSelectable(
-    date: LocalDate,
-    slotStart: LocalTime,
-    zoneId: ZoneId,
-    busyIntervals: List<InstantInterval>,
-): Boolean {
-    val proposed = proposedSessionIntervalFromSlotStart(
-        date = date,
-        slotStart = slotStart,
-        zoneId = zoneId,
-        sessionDurationMinutes = SESSION_BOOKING_DURATION_MINUTES,
-    )
-    return isIntervalFreeForBooking(proposed, busyIntervals)
 }

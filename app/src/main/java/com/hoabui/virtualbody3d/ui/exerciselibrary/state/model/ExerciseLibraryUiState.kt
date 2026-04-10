@@ -13,4 +13,5 @@ data class ExerciseLibraryUiState(
     val libraryList: ExerciseLibraryListProjectionState = ExerciseLibraryListProjectionState(),
     val sessionBooking: SessionBookingSheetState = SessionBookingSheetState(),
     val chrome: LibraryChromeState = LibraryChromeState(),
+    val monthlySummary: LibraryMonthlySummaryState = LibraryMonthlySummaryState.Loading,
 )

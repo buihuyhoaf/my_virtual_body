@@ -31,5 +31,5 @@ data class ExerciseLibraryActions(
     val onLongSessionProceedAnyway: () -> Unit,
     val onClearExerciseDetail: () -> Unit,
     val onDismissAddExerciseSuccess: () -> Unit,
-    val onOpenWorkoutPlan: () -> Unit,
+    val onNavigateToWorkoutCalendar: () -> Unit,
 )

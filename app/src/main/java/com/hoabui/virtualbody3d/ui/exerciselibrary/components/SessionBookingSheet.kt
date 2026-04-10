@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
@@ -62,7 +61,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.AsyncImage
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.domain.model.exercise.InstantInterval
-import com.hoabui.virtualbody3d.domain.model.exercise.SlotDensityTier
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
 import com.hoabui.virtualbody3d.ui.common_ui.atom.icon.GIcon
@@ -75,6 +73,7 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingPer
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingPeriodUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.TimeSlotCellUiModel
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.TimeSlotSelectionRangeRole
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
@@ -644,27 +643,53 @@ private fun TimeSlotHorizontalCell(
     onClick: () -> Unit,
 ) {
     val token = GymTheme.token
-    val shape = RoundedCornerShape(token.radius.sm)
+    val corner = token.radius.sm
+    val flatCorner = token.spacing.none
     val selected = cell.selected
-    val hasDensity = cell.densityTier != SlotDensityTier.Empty
+    val shape = when {
+        !selected -> RoundedCornerShape(corner)
+        cell.rangeRole == TimeSlotSelectionRangeRole.Single -> RoundedCornerShape(corner)
+        cell.rangeRole == TimeSlotSelectionRangeRole.RangeStart ->
+            RoundedCornerShape(
+                topStart = corner,
+                bottomStart = corner,
+                topEnd = flatCorner,
+                bottomEnd = flatCorner,
+            )
+        cell.rangeRole == TimeSlotSelectionRangeRole.RangeEnd ->
+            RoundedCornerShape(
+                topEnd = corner,
+                bottomEnd = corner,
+                topStart = flatCorner,
+                bottomStart = flatCorner,
+            )
+        cell.rangeRole == TimeSlotSelectionRangeRole.RangeMiddle -> RoundedCornerShape(flatCorner)
+        else -> RoundedCornerShape(corner)
+    }
     val bg = when {
+        selected && cell.rangeRole == TimeSlotSelectionRangeRole.RangeMiddle ->
+            token.colors.secondaryContainer
         selected -> token.colors.primarySoft
-        cell.overCapacity && !selected -> token.colors.warningContainer
-        hasDensity && !selected -> token.colors.surfaceSubtle
         else -> token.colors.surface
     }
     val timeFg = when {
+        selected && cell.rangeRole == TimeSlotSelectionRangeRole.RangeMiddle ->
+            token.colors.onSecondaryContainer
         selected -> token.colors.onPrimaryContainer
-        cell.overCapacity && !selected -> token.colors.warning
         else -> token.colors.textPrimary
     }
     val borderColor = when {
-        selected -> token.colors.primary
-        cell.overCapacity -> token.colors.warning
-        else -> token.colors.borderSubtle
+        !selected -> token.colors.borderSubtle
+        cell.rangeRole == TimeSlotSelectionRangeRole.RangeEnd -> token.colors.secondary
+        cell.rangeRole == TimeSlotSelectionRangeRole.RangeMiddle -> token.colors.borderSubtle
+        else -> token.colors.primary
     }
-    val borderMod = Modifier.border(BorderStroke(token.borderWidth.thin, borderColor), shape)
-    val utilFill = cell.utilizationRatio.coerceIn(0f, 1f)
+    val borderMod =
+        if (selected && cell.rangeRole == TimeSlotSelectionRangeRole.RangeMiddle) {
+            Modifier
+        } else {
+            Modifier.border(BorderStroke(token.borderWidth.thin, borderColor), shape)
+        }
     Column(
         modifier = Modifier
             .widthIn(min = minWidth)
@@ -682,25 +707,6 @@ private fun TimeSlotHorizontalCell(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        if (hasDensity) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(token.borderWidth.medium)
-                    .clip(RoundedCornerShape(token.radius.pill))
-                    .background(token.colors.borderSubtle),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(utilFill)
-                        .fillMaxHeight()
-                        .clip(RoundedCornerShape(token.radius.pill))
-                        .background(
-                            if (cell.overCapacity) token.colors.warning else token.colors.primarySoft,
-                        ),
-                )
-            }
-        }
         GText(
             text = cell.label,
             style = sessionBookingSheetTextStyle(token.typography.labelSmall),

@@ -46,6 +46,11 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
+        }
+    }
     sourceSets {
         getByName("androidTest") {
             assets.srcDir("$projectDir/schemas")

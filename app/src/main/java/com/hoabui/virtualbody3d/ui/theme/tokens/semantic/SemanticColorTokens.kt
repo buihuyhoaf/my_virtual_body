@@ -86,7 +86,13 @@ data class SemanticColorTokens(
     /** Body region chip: Core */
     val bodyRegionCore: Color,
     /** Body region chip: Legs */
-    val bodyRegionLegs: Color
+    val bodyRegionLegs: Color,
+    /** Exercise library monthly summary: workout-day count digit (vitality / mint). */
+    val exerciseLibraryMonthlySummaryWorkoutCount: Color,
+    /** Exercise library monthly summary: rest-day count digit (recovery / calm). */
+    val exerciseLibraryMonthlySummaryRestCount: Color,
+    /** Bordered highlight around the exercise library monthly summary card (mint / primary tint). */
+    val exerciseLibraryMonthlySummaryCardBorder: Color,
 )
 
 fun lightSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens {
@@ -157,7 +163,10 @@ fun lightSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens {
         bodyRegionShoulders = Color(0xFFEA580C),
         bodyRegionArms = Color(0xFF7C3AED),
         bodyRegionCore = Color(0xFF059669),
-        bodyRegionLegs = Color(0xFF0D9488)
+        bodyRegionLegs = Color(0xFF0D9488),
+        exerciseLibraryMonthlySummaryWorkoutCount = Color(0xFF15803D),
+        exerciseLibraryMonthlySummaryRestCount = Color(0xFF1D4ED8),
+        exerciseLibraryMonthlySummaryCardBorder = primitive.primary.copy(alpha = PrimitiveAlphaTokens.MEDIUM),
     )
 }
 
@@ -229,6 +238,9 @@ fun darkSemanticColors(primitive: PrimitiveColorTokens): SemanticColorTokens {
         bodyRegionShoulders = Color(0xFFEA580C),
         bodyRegionArms = Color(0xFF7C3AED),
         bodyRegionCore = Color(0xFF059669),
-        bodyRegionLegs = Color(0xFF0D9488)
+        bodyRegionLegs = Color(0xFF0D9488),
+        exerciseLibraryMonthlySummaryWorkoutCount = Color(0xFF86EFAC),
+        exerciseLibraryMonthlySummaryRestCount = Color(0xFF93C5FD),
+        exerciseLibraryMonthlySummaryCardBorder = primitive.primaryDark.copy(alpha = PrimitiveAlphaTokens.MEDIUM),
     )
 }

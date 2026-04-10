@@ -38,6 +38,9 @@ interface WorkoutScheduleDao {
     @Query("SELECT COUNT(*) FROM workout_schedules WHERE sessionId = :sessionId")
     suspend fun countSchedulesForSessionId(sessionId: String): Int
 
+    @Query("SELECT DISTINCT exerciseId FROM workout_schedules WHERE sessionId = :sessionId")
+    suspend fun listDistinctExerciseIdsForSession(sessionId: String): List<String>
+
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(entity: WorkoutScheduleEntity): Long
 

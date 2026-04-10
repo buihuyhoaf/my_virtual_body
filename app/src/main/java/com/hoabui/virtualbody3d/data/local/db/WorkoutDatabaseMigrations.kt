@@ -38,3 +38,14 @@ val MIGRATION_3_4: Migration = object : Migration(3, 4) {
         db.execSQL("ALTER TABLE workout_schedules ADD COLUMN exercise_local_image_name TEXT")
     }
 }
+
+val MIGRATION_4_5: Migration = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE INDEX IF NOT EXISTS `index_workout_sessions_location_day_start_end`
+            ON `workout_sessions` (`locationId`, `dayKey`, `startEpochMillis`, `endEpochMillis`)
+            """.trimIndent(),
+        )
+    }
+}

@@ -1,12 +1,9 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel
 
-import com.hoabui.virtualbody3d.domain.usecase.BuildLibraryBookingDensityKernelsUseCase
-import com.hoabui.virtualbody3d.domain.usecase.CalculateBookingDensityUseCase
 import com.hoabui.virtualbody3d.domain.usecase.CanConfirmLibrarySessionBookingUseCase
 import com.hoabui.virtualbody3d.domain.usecase.CanOpenExerciseLibrarySessionBookingUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ResolveNextSlotSelectionAfterToggleUseCase
 import com.hoabui.virtualbody3d.domain.usecase.SessionBookingConfirmationWorkflow
-import com.hoabui.virtualbody3d.domain.usecase.SyncSessionBookingWithBusyUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ToggleExerciseInCartUseCase
 import com.hoabui.virtualbody3d.domain.usecase.UpdateExerciseDraftUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ValidateSessionBookingUseCase
@@ -31,9 +28,9 @@ import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.common.ImageSource
 import com.hoabui.virtualbody3d.domain.usecase.GetExerciseLibraryUseCase
 import com.hoabui.virtualbody3d.domain.usecase.MigrateLegacyWorkoutSchedulesUseCase
-import com.hoabui.virtualbody3d.domain.usecase.ObserveBusyIntervalsUseCase
+import com.hoabui.virtualbody3d.domain.model.calendar.ExerciseLibraryMonthlySummary
+import com.hoabui.virtualbody3d.domain.usecase.ObserveExerciseLibraryMonthlySummaryUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveGymLocationsUseCase
-import com.hoabui.virtualbody3d.domain.usecase.ObserveWorkoutSchedulesUseCase
 import android.content.Context
 import com.hoabui.virtualbody3d.domain.model.exercise.GymLocation
 import kotlinx.coroutines.Dispatchers
@@ -45,6 +42,7 @@ import kotlinx.coroutines.test.setMain
 import io.mockk.coEvery
 import org.junit.After
 import org.junit.Before
+import java.time.YearMonth
 
 /**
  * Smoke check: search-only intents do not invoke the booking workflow ([SessionBookingConfirmationWorkflow.run]).
@@ -87,16 +85,17 @@ class ExerciseLibraryReducerDispatchTest {
             emit(listOf(GymLocation(id = "default", displayName = "Default")))
             awaitCancellation()
         }
-        val busy = mockk<ObserveBusyIntervalsUseCase>()
-        every { busy(any(), any(), any()) } returns flow {
-            emit(emptyList())
-            awaitCancellation()
-        }
         val migrate = mockk<MigrateLegacyWorkoutSchedulesUseCase>()
         coEvery { migrate(any()) } returns Unit
-        val workoutSchedules = mockk<ObserveWorkoutSchedulesUseCase>()
-        every { workoutSchedules() } returns flow {
-            emit(emptyList())
+        val observeMonthlySummary = mockk<ObserveExerciseLibraryMonthlySummaryUseCase>()
+        every { observeMonthlySummary(any(), any()) } returns flow {
+            emit(
+                ExerciseLibraryMonthlySummary(
+                    yearMonth = YearMonth.of(2020, 1),
+                    workoutDayCount = 0,
+                    restDayCount = 31,
+                ),
+            )
             awaitCancellation()
         }
         val appContext = mockk<Context>(relaxed = true)
@@ -112,17 +111,14 @@ class ExerciseLibraryReducerDispatchTest {
             getLibrary,
             workflow,
             locations,
-            busy,
-            workoutSchedules,
+            observeMonthlySummary,
             migrate,
             mapper,
             catalogMapper,
             reducer,
             ToggleExerciseInCartUseCase(),
             UpdateExerciseDraftUseCase(),
-            BuildLibraryBookingDensityKernelsUseCase(CalculateBookingDensityUseCase()),
             CanConfirmLibrarySessionBookingUseCase(ValidateSessionBookingUseCase()),
-            SyncSessionBookingWithBusyUseCase(),
             ResolveNextSlotSelectionAfterToggleUseCase(),
         )
         vm.updateSearchQuery("bench")

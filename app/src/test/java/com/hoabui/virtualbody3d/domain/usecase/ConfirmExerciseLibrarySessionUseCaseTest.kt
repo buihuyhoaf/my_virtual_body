@@ -5,10 +5,10 @@ import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.LibraryCartDraft
 import com.hoabui.virtualbody3d.domain.model.exercise.LibraryExerciseLineDraft
 import com.hoabui.virtualbody3d.domain.model.exercise.PendingSessionBooking
+import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSession
 import com.hoabui.virtualbody3d.domain.repository.BookWorkoutSessionResult
 import io.mockk.coEvery
 import io.mockk.mockk
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -40,7 +40,6 @@ class ConfirmExerciseLibrarySessionUseCaseTest {
             sampleCart,
             measurementById,
             emptyMap(),
-            persistentListOf(),
             emptyMap(),
             zoneId,
             "Gym",
@@ -51,9 +50,15 @@ class ConfirmExerciseLibrarySessionUseCaseTest {
     @Test
     fun commit_success_mapsRepositoryResult() {
         val book = mockk<BookWorkoutSessionUseCase>()
-        coEvery { book(any(), any(), any()) } returns BookWorkoutSessionResult.Success(2)
+        val resolved = WorkoutSession(
+            id = "resolved-id",
+            startInstant = java.time.Instant.EPOCH,
+            endInstant = java.time.Instant.EPOCH.plusSeconds(3600),
+            locationId = "loc",
+        )
+        coEvery { book(any(), any(), any()) } returns BookWorkoutSessionResult.Success(2, resolved)
         val useCase = ConfirmExerciseLibrarySessionUseCase(book, ValidateSessionBookingUseCase())
-        val session = com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSession(
+        val session = WorkoutSession(
             id = "s1",
             startInstant = java.time.Instant.EPOCH,
             endInstant = java.time.Instant.EPOCH.plusSeconds(3600),
@@ -73,6 +78,7 @@ class ConfirmExerciseLibrarySessionUseCaseTest {
         val s = r as CommitLibrarySessionBookingResult.Success
         assertEquals(2, s.scheduledCount)
         assertEquals(2, s.incrementFabBadgeBy)
+        assertEquals("resolved-id", s.session.id)
         assertEquals("Squat", s.primaryExerciseTitle)
         assertEquals("West", s.locationDisplayName)
     }

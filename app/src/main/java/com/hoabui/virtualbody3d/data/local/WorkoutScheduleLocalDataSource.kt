@@ -28,6 +28,9 @@ class WorkoutScheduleLocalDataSource @Inject constructor(
 
     suspend fun upsert(entity: WorkoutScheduleEntity) = scheduleDao.upsert(entity)
 
+    suspend fun listDistinctExerciseIdsForSession(sessionId: String): List<String> =
+        scheduleDao.listDistinctExerciseIdsForSession(sessionId)
+
     suspend fun updateStatus(id: Long, status: String, now: Long): Int =
         scheduleDao.updateStatus(id, status, now)
 

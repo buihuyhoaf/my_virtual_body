@@ -2,7 +2,6 @@ package com.hoabui.virtualbody3d.domain.usecase
 
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
-import com.hoabui.virtualbody3d.domain.model.exercise.InstantInterval
 import com.hoabui.virtualbody3d.domain.model.exercise.LibraryCartDraft
 import com.hoabui.virtualbody3d.domain.model.exercise.PendingSessionBooking
 import com.hoabui.virtualbody3d.domain.model.exercise.SessionExerciseLine
@@ -11,7 +10,6 @@ import com.hoabui.virtualbody3d.domain.model.exercise.buildSessionExerciseLinesF
 import com.hoabui.virtualbody3d.domain.model.exercise.proposedVariableSessionInterval
 import com.hoabui.virtualbody3d.domain.model.exercise.shouldWarnLongSession
 import com.hoabui.virtualbody3d.domain.repository.BookWorkoutSessionResult
-import kotlinx.collections.immutable.ImmutableList
 import java.time.Instant
 import java.time.ZoneId
 import java.util.UUID
@@ -56,7 +54,6 @@ class ConfirmExerciseLibrarySessionUseCase @Inject constructor(
         cart: LibraryCartDraft,
         exerciseMeasurementById: Map<String, ExerciseMeasurementMode>,
         exerciseSnapshotTitlesById: Map<String, String>,
-        busyIntervals: ImmutableList<InstantInterval>,
         exercisesById: Map<String, Exercise>,
         zoneId: ZoneId,
         locationDisplayName: String,
@@ -67,7 +64,6 @@ class ConfirmExerciseLibrarySessionUseCase @Inject constructor(
                 selectedDateMillis = pending.selectedDateMillis,
                 cart = cart,
                 exerciseMeasurementById = exerciseMeasurementById,
-                busyIntervals = busyIntervals,
                 zoneId = zoneId,
                 isConfirming = pending.isConfirming,
             )
@@ -130,7 +126,7 @@ class ConfirmExerciseLibrarySessionUseCase @Inject constructor(
             BookWorkoutSessionResult.InvalidDraft -> CommitLibrarySessionBookingResult.InvalidDraft
             is BookWorkoutSessionResult.Success -> CommitLibrarySessionBookingResult.Success(
                 scheduledCount = result.scheduledCount,
-                session = session,
+                session = result.resolvedSession,
                 scheduledDateMillis = scheduledDateMillis,
                 primaryExerciseTitle = primaryExerciseTitle,
                 locationDisplayName = locationDisplayName,

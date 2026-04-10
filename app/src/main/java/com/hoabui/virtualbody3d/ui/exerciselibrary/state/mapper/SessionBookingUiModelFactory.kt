@@ -7,12 +7,12 @@ import com.hoabui.virtualbody3d.domain.model.exercise.SESSION_BOOKING_GRID_LAST_
 import com.hoabui.virtualbody3d.domain.model.exercise.SESSION_BOOKING_PERIOD_AFTERNOON_START
 import com.hoabui.virtualbody3d.domain.model.exercise.SESSION_BOOKING_PERIOD_MIDDAY_START
 import com.hoabui.virtualbody3d.domain.model.exercise.SESSION_BOOKING_SLOT_STEP_MINUTES
-import com.hoabui.virtualbody3d.domain.model.exercise.SlotDensityKernel
 import com.hoabui.virtualbody3d.domain.model.exercise.bookingSlotStartsForDay
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingInput
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingPeriodId
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingPeriodUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingUiModel
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.TimeSlotSelectionRangeRole
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.TimeSlotCellUiModel
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList
@@ -54,7 +54,6 @@ private fun computePeriodStartIndices(
 fun buildSessionBookingUiModel(
     input: SessionBookingInput,
     locations: List<GymLocation>,
-    slotDensityKernels: List<SlotDensityKernel>,
     isBookingConfirmEnabled: Boolean,
 ): SessionBookingUiModel {
     val slotStarts = bookingSlotStartsForDay(
@@ -62,22 +61,24 @@ fun buildSessionBookingUiModel(
         lastSlot = SESSION_BOOKING_GRID_LAST_SLOT,
         slotStepMinutes = SESSION_BOOKING_SLOT_STEP_MINUTES,
     )
-    require(slotDensityKernels.size == slotStarts.size) {
-        "slotDensityKernels must align with grid (${slotDensityKernels.size} != ${slotStarts.size})"
-    }
-    val kernelBySlot = slotDensityKernels.associateBy { it.slotStart }
     val periods = defaultBookingPeriods()
+    val orderedSelected = input.selectedSlotStarts.sorted()
+    val rangeRoleForSlot: (LocalTime) -> TimeSlotSelectionRangeRole = { slot ->
+        when {
+            slot !in input.selectedSlotStarts -> TimeSlotSelectionRangeRole.None
+            orderedSelected.size == 1 -> TimeSlotSelectionRangeRole.Single
+            slot == orderedSelected.first() -> TimeSlotSelectionRangeRole.RangeStart
+            slot == orderedSelected.last() -> TimeSlotSelectionRangeRole.RangeEnd
+            else -> TimeSlotSelectionRangeRole.RangeMiddle
+        }
+    }
     val cells = slotStarts.map { slot ->
         val selected = slot in input.selectedSlotStarts
-        val kernel = kernelBySlot[slot]
-            ?: error("missing SlotDensityKernel for $slot")
         TimeSlotCellUiModel(
             slotStart = slot,
             label = slotLabelFormatter.format(slot),
             selected = selected,
-            densityTier = kernel.densityTier,
-            overCapacity = kernel.overCapacity,
-            utilizationRatio = kernel.utilizationRatio,
+            rangeRole = if (selected) rangeRoleForSlot(slot) else TimeSlotSelectionRangeRole.None,
         )
     }
     val locationDisplay = locations.find { it.id == input.selectedLocationId }?.displayName

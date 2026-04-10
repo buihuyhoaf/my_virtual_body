@@ -2,12 +2,10 @@ package com.hoabui.virtualbody3d.domain.usecase
 
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
-import com.hoabui.virtualbody3d.domain.model.exercise.InstantInterval
 import com.hoabui.virtualbody3d.domain.model.exercise.LibraryCartDraft
 import com.hoabui.virtualbody3d.domain.model.exercise.PendingSessionBooking
 import java.time.ZoneId
 import javax.inject.Inject
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -19,7 +17,6 @@ data class SessionBookingWorkflowInput(
     val cart: LibraryCartDraft,
     val exerciseMeasurementById: Map<String, ExerciseMeasurementMode>,
     val exerciseSnapshotTitlesById: Map<String, String>,
-    val busyIntervals: ImmutableList<InstantInterval>,
     val exercisesById: Map<String, Exercise>,
     val zoneId: ZoneId,
     val locationDisplayName: String,
@@ -53,7 +50,6 @@ class SessionBookingConfirmationWorkflow @Inject constructor(
                 cart = input.cart,
                 exerciseMeasurementById = input.exerciseMeasurementById,
                 exerciseSnapshotTitlesById = input.exerciseSnapshotTitlesById,
-                busyIntervals = input.busyIntervals,
                 exercisesById = input.exercisesById,
                 zoneId = input.zoneId,
                 locationDisplayName = input.locationDisplayName,

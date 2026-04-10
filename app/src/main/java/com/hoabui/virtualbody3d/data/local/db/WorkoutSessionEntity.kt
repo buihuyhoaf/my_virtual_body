@@ -9,6 +9,10 @@ import androidx.room.PrimaryKey
     indices = [
         Index("dayKey"),
         Index(value = ["locationId", "dayKey"]),
+        Index(
+            value = ["locationId", "dayKey", "startEpochMillis", "endEpochMillis"],
+            name = "index_workout_sessions_location_day_start_end",
+        ),
     ],
 )
 data class WorkoutSessionEntity(

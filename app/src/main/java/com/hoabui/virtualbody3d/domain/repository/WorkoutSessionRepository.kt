@@ -1,15 +1,19 @@
 package com.hoabui.virtualbody3d.domain.repository
 
 import com.hoabui.virtualbody3d.domain.model.exercise.GymLocation
-import com.hoabui.virtualbody3d.domain.model.exercise.InstantInterval
 import com.hoabui.virtualbody3d.domain.model.exercise.SessionExerciseLine
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSession
 import kotlinx.coroutines.flow.Flow
-import java.time.LocalDate
 import java.time.ZoneId
 
 sealed class BookWorkoutSessionResult {
-    data class Success(val scheduledCount: Int) : BookWorkoutSessionResult()
+    /**
+     * @param resolvedSession Session row actually written or merged (id matches DB after find-or-create).
+     */
+    data class Success(
+        val scheduledCount: Int,
+        val resolvedSession: WorkoutSession,
+    ) : BookWorkoutSessionResult()
     data object Conflict : BookWorkoutSessionResult()
     data object InvalidDraft : BookWorkoutSessionResult()
 }
@@ -21,12 +25,6 @@ interface WorkoutSessionRepository {
         lines: List<SessionExerciseLine>,
         zoneId: ZoneId,
     ): BookWorkoutSessionResult
-
-    fun observeBusyIntervals(
-        date: LocalDate,
-        zoneId: ZoneId,
-        locationId: String,
-    ): Flow<List<InstantInterval>>
 
     /** All stored workout sessions (timeline aggregate rows). */
     fun observeWorkoutSessions(): Flow<List<WorkoutSession>>

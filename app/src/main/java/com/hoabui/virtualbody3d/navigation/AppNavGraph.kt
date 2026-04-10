@@ -75,7 +75,7 @@ fun AppNavGraph(
         }
         composable<ExerciseLibraryRoute> {
             ExerciseLibraryScreen(
-                onOpenWorkoutPlan = { navController.navigate(WorkoutCalendarRoute) },
+                onNavigateToWorkoutCalendar = { navController.navigate(WorkoutCalendarRoute) },
             )
         }
         composable<WorkoutCalendarRoute> {
@@ -91,7 +91,7 @@ fun AppNavGraph(
         }
         composable<CenfitCoachRoute> {
             ExerciseLibraryScreen(
-                onOpenWorkoutPlan = { navController.navigate(WorkoutCalendarRoute) },
+                onNavigateToWorkoutCalendar = { navController.navigate(WorkoutCalendarRoute) },
             )
         }
         composable<ProfileRoute> {

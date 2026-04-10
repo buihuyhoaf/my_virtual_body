@@ -30,7 +30,6 @@ object ExerciseLibraryPhosphorIcons {
     val cartScheduleDate: ImageVector get() = PhosphorIcons.Regular.Calendar
     val cartScheduleTime: ImageVector get() = PhosphorIcons.Regular.Clock
     val cartDurationTimer: ImageVector get() = PhosphorIcons.Regular.Timer
-    val workoutPlanFab: ImageVector get() = PhosphorIcons.Regular.Calendar
     val addSuccess: ImageVector get() = PhosphorIcons.Fill.CheckCircle
     val detailBodyRegion: ImageVector get() = PhosphorIcons.Fill.MapPin
     val detailEquipment: ImageVector get() = PhosphorIcons.Fill.Wrench

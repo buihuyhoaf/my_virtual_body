@@ -36,4 +36,5 @@ internal fun mergeExerciseLibraryPresentation(
             isAddToSessionEnabled = library.isAddToSessionEnabled,
         ),
         sessionBooking = base.sessionBooking.copy(uiModel = sessionBookingUiModel),
+        monthlySummary = base.monthlySummary,
     )

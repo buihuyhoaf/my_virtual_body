@@ -6,9 +6,6 @@ import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.DEFAULT_SESSION_LOCATION_ID
 import com.hoabui.virtualbody3d.domain.model.exercise.GymLocation
-import com.hoabui.virtualbody3d.domain.model.exercise.InstantInterval
-import com.hoabui.virtualbody3d.domain.model.exercise.SlotDensityKernel
-import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
 import com.hoabui.virtualbody3d.domain.model.exercise.normalizeExerciseLibraryQuery
 import com.hoabui.virtualbody3d.domain.usecase.CanOpenExerciseLibrarySessionBookingUseCase
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.matchesLibrarySearch
@@ -28,7 +25,6 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingInp
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.defaultExerciseLibraryCartDateMillis
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.time.ZoneId
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.PersistentMap
@@ -123,31 +119,23 @@ class ExerciseLibraryUiMapper @Inject constructor(
     fun mapBookingPresentation(
         filtersWithMeasurement: ExerciseLibraryUiState,
         gymLocations: ImmutableList<GymLocation>,
-        busy: ImmutableList<InstantInterval>,
-        schedules: ImmutableList<WorkoutSchedule>,
-        zoneId: ZoneId,
-        slotDensityKernels: List<SlotDensityKernel>,
         isBookingConfirmEnabled: Boolean,
     ): SessionBookingUiModel? {
-        val input = filtersWithMeasurement.sessionBooking.input ?: run {
+        filtersWithMeasurement.sessionBooking.input ?: run {
             lastBookingPresentationKey = null
             cachedBookingUi = null
             return null
         }
         val bookingKey = exerciseLibraryBookingPresentationKey(
             filtersWithMeasurement = filtersWithMeasurement,
-            busy = busy,
-            schedulesVersion = schedules,
             gymLocationsVersion = gymLocations,
-            zoneId = zoneId,
         )
         if (bookingKey == lastBookingPresentationKey) {
             return cachedBookingUi
         }
         val bookingUi = buildSessionBookingUiModel(
-            input = input,
+            input = filtersWithMeasurement.sessionBooking.input!!,
             locations = gymLocations,
-            slotDensityKernels = slotDensityKernels,
             isBookingConfirmEnabled = isBookingConfirmEnabled,
         )
         lastBookingPresentationKey = bookingKey

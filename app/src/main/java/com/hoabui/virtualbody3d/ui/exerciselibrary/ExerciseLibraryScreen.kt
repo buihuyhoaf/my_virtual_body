@@ -6,13 +6,14 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -27,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,9 +36,9 @@ import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
 import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.AddExerciseSuccessDialog
-import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryWorkoutPlanFab
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseDetailDialog
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryEmptyState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryMonthlySummaryCard
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySearchLayer
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.LongSessionWarningDialog
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySessionBookingSheetHost
@@ -55,7 +55,6 @@ import kotlinx.coroutines.flow.filter
 import java.time.ZoneId
 
 private object ExerciseLibraryListContentTypes {
-    const val StickySearch = "exercise_library_sticky_search"
     const val RegionHeader = "exercise_library_region_header"
     const val RegionRow = "exercise_library_region_row"
     const val Empty = "exercise_library_empty"
@@ -64,11 +63,11 @@ private object ExerciseLibraryListContentTypes {
 @Composable
 fun ExerciseLibraryScreen(
     modifier: Modifier = Modifier,
-    onOpenWorkoutPlan: () -> Unit,
+    onNavigateToWorkoutCalendar: () -> Unit,
     viewModel: ExerciseLibraryViewModel = hiltViewModel(),
 ) {
     val screenState by viewModel.state.collectAsStateWithLifecycle()
-    val actions = remember(viewModel, onOpenWorkoutPlan) {
+    val actions = remember(viewModel, onNavigateToWorkoutCalendar) {
         ExerciseLibraryActions(
             onQueryChange = viewModel::updateSearchQuery,
             onQuickChipSelect = viewModel::selectQuickChip,
@@ -99,9 +98,9 @@ fun ExerciseLibraryScreen(
             onLongSessionProceedAnyway = viewModel::onLongSessionProceedAnyway,
             onClearExerciseDetail = viewModel::clearExerciseDetail,
             onDismissAddExerciseSuccess = viewModel::dismissAddExerciseSuccess,
-            onOpenWorkoutPlan = {
+            onNavigateToWorkoutCalendar = {
                 viewModel.dismissAddExerciseSuccess()
-                onOpenWorkoutPlan()
+                onNavigateToWorkoutCalendar()
             },
         )
     }
@@ -138,7 +137,7 @@ fun ExerciseLibraryScreen(
                     AddExerciseSuccessDialog(
                         summary = summary,
                         onDismiss = actions.onDismissAddExerciseSuccess,
-                        onViewWorkoutPlan = actions.onOpenWorkoutPlan,
+                        onViewWorkoutPlan = actions.onNavigateToWorkoutCalendar,
                     )
                 }
                 data.libraryList.selectedExerciseForDetail?.let { detail ->
@@ -196,102 +195,97 @@ fun ExerciseLibraryScreenContent(
     }
     val cartVisible = state.cart.itemDrafts.isNotEmpty()
     val barMinHeight = token.bodyAnalysis.exerciseLibrarySelectionBarMinHeight
-    val fabSize = token.bodyAnalysis.exerciseLibraryWorkoutPlanFabSize
-    val fabListGutter = token.spacing.md
-    val listBottomPadding: Dp = fabSize + fabListGutter +
-        if (cartVisible) barMinHeight else token.spacing.none
-    val fabBottomPadding by animateDpAsState(
-        targetValue = if (cartVisible) barMinHeight + fabListGutter else fabListGutter,
-        animationSpec = tween(
-            durationMillis = token.motion.duration.standard,
-            easing = token.motion.easing.standard,
-        ),
-        label = "exercise_library_fab_bottom",
-    )
-    // Navigation bar insets apply to scroll content and FAB only so the cart slab can sit flush with
-    // the window bottom (no dead band between the selection bar and system nav / screen edge).
+    val listBottomPadding = if (cartVisible) barMinHeight else token.spacing.none
+    val bodyTok = token.bodyAnalysis
     Box(modifier = modifier.fillMaxSize()) {
-        LazyColumn(
-            state = lazyListState,
-            modifier = Modifier
-                .fillMaxSize(),
-            contentPadding = PaddingValues(bottom = listBottomPadding),
-        ) {
-            stickyHeader(
-                key = "exercise_library_search",
-                contentType = ExerciseLibraryListContentTypes.StickySearch,
+        Column(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = token.spacing.md,
+                        vertical = token.spacing.xs,
+                    ),
             ) {
-                Box(
-                    modifier = Modifier
-                        .heightIn(min = token.bodyAnalysis.exerciseLibraryStickySearchHeaderMinHeight)
-                        .fillMaxWidth()
-                        .padding(
-                            horizontal = token.spacing.md,
-                            vertical = token.spacing.xs,
-                        ),
-                ) {
-                    ExerciseLibrarySearchLayer(
-                        state = state,
-                        actions = actions,
-                        isSearchFocused = isSearchFocused.value,
-                        onSearchFocusChanged = onSearchFocusChanged,
-                        fadeSpec = fadeSpec,
-                        slideSpec = slideSpec,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
+                ExerciseLibrarySearchLayer(
+                    state = state,
+                    actions = actions,
+                    isSearchFocused = isSearchFocused.value,
+                    onSearchFocusChanged = onSearchFocusChanged,
+                    fadeSpec = fadeSpec,
+                    slideSpec = slideSpec,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(modifier = Modifier.height(bodyTok.exerciseLibrarySearchToSummaryGap))
+                ExerciseLibraryMonthlySummaryCard(
+                    state = state.monthlySummary,
+                    onClick = actions.onNavigateToWorkoutCalendar,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
-            if (state.libraryList.sections.isEmpty()) {
-                item(
-                    key = "exercise_library_empty",
-                    contentType = ExerciseLibraryListContentTypes.Empty,
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+            ) {
+                LazyColumn(
+                    state = lazyListState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = listBottomPadding),
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillParentMaxHeight()
-                            .fillMaxWidth(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        ExerciseLibraryEmptyState(
-                            modifier = Modifier
-                                .fillParentMaxHeight()
-                                .fillMaxWidth(),
-                        )
-                    }
-                }
-            } else {
-                state.libraryList.sections.forEach { section ->
-                    stickyHeader(
-                        key = "${section.bodyRegion.name}_header",
-                        contentType = ExerciseLibraryListContentTypes.RegionHeader,
-                    ) {
-                        val regionLabel =
-                            stringResource(ExerciseDisplayResources.bodyRegionResId(section.bodyRegion))
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(stickyHeaderScrim)
-                                .padding(
-                                    horizontal = token.spacing.md,
-                                    vertical = token.spacing.xxs,
-                                ),
+                    if (state.libraryList.sections.isEmpty()) {
+                        item(
+                            key = "exercise_library_empty",
+                            contentType = ExerciseLibraryListContentTypes.Empty,
                         ) {
-                            GSectionHeader(title = regionLabel)
+                            Box(
+                                modifier = Modifier
+                                    .fillParentMaxHeight()
+                                    .fillMaxWidth(),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                ExerciseLibraryEmptyState(
+                                    modifier = Modifier
+                                        .fillParentMaxHeight()
+                                        .fillMaxWidth(),
+                                )
+                            }
                         }
-                    }
-                    item(
-                        key = "${section.bodyRegion.name}_row",
-                        contentType = ExerciseLibraryListContentTypes.RegionRow,
-                    ) {
-                        ExerciseSection(
-                            modifier = Modifier
-                                .padding(horizontal = token.spacing.md),
-                            section = section,
-                            onNavigateDetail = actions.onExerciseClick,
-                            onToggleSelection = actions.onLibraryListToggle,
-                            toggleAddContentDescription = listToggleAddCd,
-                            toggleRemoveContentDescription = listToggleRemoveCd,
-                        )
+                    } else {
+                        state.libraryList.sections.forEach { section ->
+                            stickyHeader(
+                                key = "${section.bodyRegion.name}_header",
+                                contentType = ExerciseLibraryListContentTypes.RegionHeader,
+                            ) {
+                                val regionLabel =
+                                    stringResource(ExerciseDisplayResources.bodyRegionResId(section.bodyRegion))
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(stickyHeaderScrim)
+                                        .padding(
+                                            horizontal = token.spacing.md,
+                                            vertical = token.spacing.xxs,
+                                        ),
+                                ) {
+                                    GSectionHeader(title = regionLabel)
+                                }
+                            }
+                            item(
+                                key = "${section.bodyRegion.name}_row",
+                                contentType = ExerciseLibraryListContentTypes.RegionRow,
+                            ) {
+                                ExerciseSection(
+                                    modifier = Modifier
+                                        .padding(horizontal = token.spacing.md),
+                                    section = section,
+                                    onNavigateDetail = actions.onExerciseClick,
+                                    onToggleSelection = actions.onLibraryListToggle,
+                                    toggleAddContentDescription = listToggleAddCd,
+                                    toggleRemoveContentDescription = listToggleRemoveCd,
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -312,28 +306,6 @@ fun ExerciseLibraryScreenContent(
                 libraryState = state,
                 actions = actions,
                 modifier = Modifier.fillMaxWidth(),
-            )
-        }
-        AnimatedVisibility(
-            visible = true,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(
-                    end = token.spacing.md,
-                    bottom = fabBottomPadding,
-                ),
-            enter = fadeIn(fadeSpec) + slideInVertically(
-                animationSpec = cartEnterSlide,
-                initialOffsetY = { it / 2 },
-            ),
-            exit = fadeOut(fadeSpec) + slideOutVertically(
-                animationSpec = cartEnterSlide,
-                targetOffsetY = { it / 2 },
-            ),
-        ) {
-            ExerciseLibraryWorkoutPlanFab(
-                badgeCount = state.chrome.workoutPlanFabBadgeCount,
-                onClick = actions.onOpenWorkoutPlan,
             )
         }
     }

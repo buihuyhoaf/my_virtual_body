@@ -10,7 +10,6 @@ import com.hoabui.virtualbody3d.domain.repository.BookWorkoutSessionResult
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -28,7 +27,7 @@ class SessionBookingConfirmationWorkflowTest {
     fun run_noOp_emitsPreparingThenNoOp() = runBlocking {
         val confirm = mockk<ConfirmExerciseLibrarySessionUseCase>()
         every {
-            confirm.prepare(any(), any(), any(), any(), any(), any(), any(), any())
+            confirm.prepare(any(), any(), any(), any(), any(), any(), any())
         } returns PrepareLibrarySessionConfirmResult.NoOp
         val wf = SessionBookingConfirmationWorkflow(confirm)
         val input = minimalInput()
@@ -46,7 +45,7 @@ class SessionBookingConfirmationWorkflowTest {
     fun run_longSession_emitsAwaitingAck() = runBlocking {
         val confirm = mockk<ConfirmExerciseLibrarySessionUseCase>()
         every {
-            confirm.prepare(any(), any(), any(), any(), any(), any(), any(), any())
+            confirm.prepare(any(), any(), any(), any(), any(), any(), any())
         } returns PrepareLibrarySessionConfirmResult.LongSessionAcknowledgementRequired
         val wf = SessionBookingConfirmationWorkflow(confirm)
         val events = wf.run(minimalInput()).toList()
@@ -76,7 +75,7 @@ class SessionBookingConfirmationWorkflowTest {
         )
         val confirm = mockk<ConfirmExerciseLibrarySessionUseCase>()
         every {
-            confirm.prepare(any(), any(), any(), any(), any(), any(), any(), any())
+            confirm.prepare(any(), any(), any(), any(), any(), any(), any())
         } returns ready
         coEvery {
             confirm.commit(any(), any(), any(), any(), any(), any())
@@ -113,7 +112,6 @@ class SessionBookingConfirmationWorkflowTest {
             ),
             exerciseMeasurementById = mapOf("ex1" to ExerciseMeasurementMode.Strength),
             exerciseSnapshotTitlesById = emptyMap(),
-            busyIntervals = persistentListOf(),
             exercisesById = emptyMap(),
             zoneId = zoneId,
             locationDisplayName = "Gym",

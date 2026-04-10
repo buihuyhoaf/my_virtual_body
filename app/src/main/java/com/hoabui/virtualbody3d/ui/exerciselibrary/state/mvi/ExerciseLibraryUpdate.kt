@@ -3,6 +3,7 @@ package com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseLibraryCartSnapshot
 import com.hoabui.virtualbody3d.domain.usecase.CommitLibrarySessionBookingResult
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryCatalogState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryMonthlySummaryState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingInput
 import java.time.LocalTime
 
@@ -19,6 +20,8 @@ sealed interface ExerciseLibraryUpdate {
     data class CartFromDomain(val snapshot: ExerciseLibraryCartSnapshot) : ExerciseLibraryUpdate
 
     data class CatalogLoaded(val catalog: ExerciseLibraryCatalogState) : ExerciseLibraryUpdate
+
+    data class MonthlySummaryLoaded(val summary: LibraryMonthlySummaryState) : ExerciseLibraryUpdate
 
     data class SessionBookingOpened(val input: SessionBookingInput) : ExerciseLibraryUpdate
 

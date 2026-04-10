@@ -701,6 +701,26 @@ public class WorkoutScheduleDao_Impl(
     }
   }
 
+  public override suspend fun listDistinctExerciseIdsForSession(sessionId: String): List<String> {
+    val _sql: String = "SELECT DISTINCT exerciseId FROM workout_schedules WHERE sessionId = ?"
+    return performSuspending(__db, true, false) { _connection ->
+      val _stmt: SQLiteStatement = _connection.prepare(_sql)
+      try {
+        var _argIndex: Int = 1
+        _stmt.bindText(_argIndex, sessionId)
+        val _result: MutableList<String> = mutableListOf()
+        while (_stmt.step()) {
+          val _item: String
+          _item = _stmt.getText(0)
+          _result.add(_item)
+        }
+        _result
+      } finally {
+        _stmt.close()
+      }
+    }
+  }
+
   public override suspend fun deleteByRowId(rowId: Long): Int {
     val _sql: String = "DELETE FROM workout_schedules WHERE id = ?"
     return performSuspending(__db, false, true) { _connection ->

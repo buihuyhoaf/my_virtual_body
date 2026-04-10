@@ -1,7 +1,6 @@
 package com.hoabui.virtualbody3d.domain.usecase
 
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
-import com.hoabui.virtualbody3d.domain.model.exercise.InstantInterval
 import com.hoabui.virtualbody3d.domain.model.exercise.LibraryCartDraft
 import java.time.LocalTime
 import java.time.ZoneId
@@ -19,7 +18,6 @@ class CanConfirmLibrarySessionBookingUseCase @Inject constructor(
         selectedDateMillis: Long,
         cart: LibraryCartDraft,
         exerciseMeasurementById: Map<String, ExerciseMeasurementMode>,
-        busyIntervals: List<InstantInterval>,
         zoneId: ZoneId,
         isConfirming: Boolean,
     ): Boolean = validateSessionBookingUseCase.canEnableConfirm(
@@ -28,7 +26,6 @@ class CanConfirmLibrarySessionBookingUseCase @Inject constructor(
         selectedDateMillis = selectedDateMillis,
         cart = cart,
         exerciseMeasurementById = exerciseMeasurementById,
-        busyIntervals = busyIntervals,
         zoneId = zoneId,
         isConfirming = isConfirming,
     )

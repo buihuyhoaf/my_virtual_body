@@ -18,6 +18,23 @@ interface WorkoutSessionDao {
     @Query("SELECT * FROM workout_sessions WHERE id = :sessionId LIMIT 1")
     suspend fun getById(sessionId: String): WorkoutSessionEntity?
 
+    @Query(
+        """
+        SELECT * FROM workout_sessions
+        WHERE locationId = :locationId
+          AND dayKey = :dayKey
+          AND startEpochMillis = :startEpochMillis
+          AND endEpochMillis = :endEpochMillis
+        LIMIT 1
+        """,
+    )
+    suspend fun findByLocationDayAndInterval(
+        locationId: String,
+        dayKey: Long,
+        startEpochMillis: Long,
+        endEpochMillis: Long,
+    ): WorkoutSessionEntity?
+
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertSession(entity: WorkoutSessionEntity)
 

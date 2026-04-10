@@ -171,6 +171,12 @@
 
     <!-- Exercise Library Screen -->
     <string name="exercise_library_title">Tất cả bài tập</string>
+    <string name="exercise_library_monthly_summary_workout_label">Tập luyện</string>
+    <string name="exercise_library_monthly_summary_rest_label">Nghỉ ngơi</string>
+    <string name="exercise_library_monthly_summary_separator"> · </string>
+    <string name="exercise_library_monthly_summary_nav_cd">Xem lịch tập trong tháng</string>
+    <string name="exercise_library_monthly_summary_loading_cd">Đang tải tóm tắt tháng</string>
+    <string name="exercise_library_monthly_summary_error">Không tải được tóm tắt tháng</string>
     <string name="exercise_library_search_hint">Tìm bài tập</string>
     <string name="exercise_library_filter_all">Tất cả</string>
     <string name="exercise_library_last_weight">%1$.0f kg</string>

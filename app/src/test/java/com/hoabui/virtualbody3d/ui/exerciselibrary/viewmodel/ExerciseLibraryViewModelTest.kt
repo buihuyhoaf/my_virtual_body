@@ -15,17 +15,14 @@ import com.hoabui.virtualbody3d.domain.usecase.CommitLibrarySessionBookingResult
 import com.hoabui.virtualbody3d.domain.usecase.ConfirmExerciseLibrarySessionUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetExerciseLibraryUseCase
 import com.hoabui.virtualbody3d.domain.usecase.MigrateLegacyWorkoutSchedulesUseCase
-import com.hoabui.virtualbody3d.domain.usecase.ObserveBusyIntervalsUseCase
+import com.hoabui.virtualbody3d.domain.model.calendar.ExerciseLibraryMonthlySummary
+import com.hoabui.virtualbody3d.domain.usecase.ObserveExerciseLibraryMonthlySummaryUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveGymLocationsUseCase
-import com.hoabui.virtualbody3d.domain.usecase.ObserveWorkoutSchedulesUseCase
 import com.hoabui.virtualbody3d.domain.usecase.PrepareLibrarySessionConfirmResult
-import com.hoabui.virtualbody3d.domain.usecase.BuildLibraryBookingDensityKernelsUseCase
-import com.hoabui.virtualbody3d.domain.usecase.CalculateBookingDensityUseCase
 import com.hoabui.virtualbody3d.domain.usecase.CanConfirmLibrarySessionBookingUseCase
 import com.hoabui.virtualbody3d.domain.usecase.CanOpenExerciseLibrarySessionBookingUseCase
 import com.hoabui.virtualbody3d.domain.usecase.SessionBookingConfirmationWorkflow
 import com.hoabui.virtualbody3d.domain.usecase.ResolveNextSlotSelectionAfterToggleUseCase
-import com.hoabui.virtualbody3d.domain.usecase.SyncSessionBookingWithBusyUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ToggleExerciseInCartUseCase
 import com.hoabui.virtualbody3d.domain.usecase.UpdateExerciseDraftUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ValidateSessionBookingUseCase
@@ -61,8 +58,10 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import com.hoabui.virtualbody3d.domain.model.exercise.halfOpenInstantIntervalDurationMinutes
+import com.hoabui.virtualbody3d.domain.repository.BookWorkoutSessionResult
 import java.time.Instant
 import java.time.LocalTime
+import java.time.YearMonth
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ExerciseLibraryViewModelTest {
@@ -104,16 +103,17 @@ class ExerciseLibraryViewModelTest {
             emit(listOf(GymLocation(id = "default", displayName = "Default")))
             awaitCancellation()
         }
-        val busy = mockk<ObserveBusyIntervalsUseCase>()
-        every { busy(any(), any(), any()) } returns flow {
-            emit(emptyList())
-            awaitCancellation()
-        }
         val migrate = mockk<MigrateLegacyWorkoutSchedulesUseCase>()
         coEvery { migrate(any()) } returns Unit
-        val workoutSchedules = mockk<ObserveWorkoutSchedulesUseCase>()
-        every { workoutSchedules() } returns flow {
-            emit(emptyList())
+        val observeMonthlySummary = mockk<ObserveExerciseLibraryMonthlySummaryUseCase>()
+        every { observeMonthlySummary(any(), any()) } returns flow {
+            emit(
+                ExerciseLibraryMonthlySummary(
+                    yearMonth = YearMonth.of(2020, 1),
+                    workoutDayCount = 0,
+                    restDayCount = 31,
+                ),
+            )
             awaitCancellation()
         }
         val appContext = mockk<Context>(relaxed = true)
@@ -124,7 +124,7 @@ class ExerciseLibraryViewModelTest {
         val catalogMapper = ExerciseLibraryCatalogUiMapper(appContext)
         val confirmUseCase = mockk<ConfirmExerciseLibrarySessionUseCase>()
         every {
-            confirmUseCase.prepare(any(), any(), any(), any(), any(), any(), any(), any())
+            confirmUseCase.prepare(any(), any(), any(), any(), any(), any(), any())
         } answers {
             PrepareLibrarySessionConfirmResult.NoOp
         }
@@ -149,24 +149,20 @@ class ExerciseLibraryViewModelTest {
             getLibrary,
             workflow,
             locations,
-            busy,
-            workoutSchedules,
+            observeMonthlySummary,
             migrate,
             mapper,
             catalogMapper,
             reducer,
             ToggleExerciseInCartUseCase(),
             UpdateExerciseDraftUseCase(),
-            BuildLibraryBookingDensityKernelsUseCase(CalculateBookingDensityUseCase()),
             CanConfirmLibrarySessionBookingUseCase(ValidateSessionBookingUseCase()),
-            SyncSessionBookingWithBusyUseCase(),
             ResolveNextSlotSelectionAfterToggleUseCase(),
         )
     }
 
     private fun createViewModelWithBookingUseCaseMocks(
         exercises: Map<BodyRegion, List<Exercise>> = mapOf(BodyRegion.Chest to listOf(sampleExercise())),
-        buildLibraryBookingDensityKernelsUseCase: BuildLibraryBookingDensityKernelsUseCase,
         canConfirmLibrarySessionBookingUseCase: CanConfirmLibrarySessionBookingUseCase,
     ): ExerciseLibraryViewModel {
         val getLibrary = mockk<GetExerciseLibraryUseCase>()
@@ -176,16 +172,17 @@ class ExerciseLibraryViewModelTest {
             emit(listOf(GymLocation(id = "default", displayName = "Default")))
             awaitCancellation()
         }
-        val busy = mockk<ObserveBusyIntervalsUseCase>()
-        every { busy(any(), any(), any()) } returns flow {
-            emit(emptyList())
-            awaitCancellation()
-        }
         val migrate = mockk<MigrateLegacyWorkoutSchedulesUseCase>()
         coEvery { migrate(any()) } returns Unit
-        val workoutSchedules = mockk<ObserveWorkoutSchedulesUseCase>()
-        every { workoutSchedules() } returns flow {
-            emit(emptyList())
+        val observeMonthlySummary = mockk<ObserveExerciseLibraryMonthlySummaryUseCase>()
+        every { observeMonthlySummary(any(), any()) } returns flow {
+            emit(
+                ExerciseLibraryMonthlySummary(
+                    yearMonth = YearMonth.of(2020, 1),
+                    workoutDayCount = 0,
+                    restDayCount = 31,
+                ),
+            )
             awaitCancellation()
         }
         val appContext = mockk<Context>(relaxed = true)
@@ -196,7 +193,7 @@ class ExerciseLibraryViewModelTest {
         val catalogMapper = ExerciseLibraryCatalogUiMapper(appContext)
         val confirmUseCase = mockk<ConfirmExerciseLibrarySessionUseCase>()
         every {
-            confirmUseCase.prepare(any(), any(), any(), any(), any(), any(), any(), any())
+            confirmUseCase.prepare(any(), any(), any(), any(), any(), any(), any())
         } answers {
             PrepareLibrarySessionConfirmResult.NoOp
         }
@@ -221,17 +218,14 @@ class ExerciseLibraryViewModelTest {
             getLibrary,
             workflow,
             locations,
-            busy,
-            workoutSchedules,
+            observeMonthlySummary,
             migrate,
             mapper,
             catalogMapper,
             reducer,
             ToggleExerciseInCartUseCase(),
             UpdateExerciseDraftUseCase(),
-            buildLibraryBookingDensityKernelsUseCase,
             canConfirmLibrarySessionBookingUseCase,
-            SyncSessionBookingWithBusyUseCase(),
             ResolveNextSlotSelectionAfterToggleUseCase(),
         )
     }
@@ -352,12 +346,10 @@ class ExerciseLibraryViewModelTest {
     }
 
     @Test
-    fun searchQueryChange_whileBookingOpen_doesNotInvokeDensityOrValidate() = runBlocking {
-        val density = spyk(BuildLibraryBookingDensityKernelsUseCase(CalculateBookingDensityUseCase()))
+    fun searchQueryChange_whileBookingOpen_doesNotInvokeValidate() = runBlocking {
         val validate = spyk(CanConfirmLibrarySessionBookingUseCase(ValidateSessionBookingUseCase()))
 
         val vm = createViewModelWithBookingUseCaseMocks(
-            buildLibraryBookingDensityKernelsUseCase = density,
             canConfirmLibrarySessionBookingUseCase = validate,
         )
         vm.toggleExerciseInCartFromList("ex1")
@@ -365,26 +357,21 @@ class ExerciseLibraryViewModelTest {
         vm.openSessionBooking()
         delay(WAIT_FOR_COMBINE_MS)
 
-        clearMocks(density, validate, answers = false, recordedCalls = true)
+        clearMocks(validate, answers = false, recordedCalls = true)
 
         vm.updateSearchQuery("needle")
         delay(WAIT_FOR_COMBINE_MS)
 
         verify(exactly = 0) {
-            density(any(), any(), any(), any(), any(), any(), any(), any())
-        }
-        verify(exactly = 0) {
-            validate(any(), any(), any(), any(), any(), any(), any(), any())
+            validate(any(), any(), any(), any(), any(), any(), any())
         }
     }
 
     @Test
-    fun bookingSlotToggle_afterSearch_reinvokesDensityAndValidate() = runBlocking {
-        val density = spyk(BuildLibraryBookingDensityKernelsUseCase(CalculateBookingDensityUseCase()))
+    fun bookingSlotToggle_afterSearch_reinvokesValidate() = runBlocking {
         val validate = spyk(CanConfirmLibrarySessionBookingUseCase(ValidateSessionBookingUseCase()))
 
         val vm = createViewModelWithBookingUseCaseMocks(
-            buildLibraryBookingDensityKernelsUseCase = density,
             canConfirmLibrarySessionBookingUseCase = validate,
         )
         vm.toggleExerciseInCartFromList("ex1")
@@ -394,28 +381,19 @@ class ExerciseLibraryViewModelTest {
         vm.updateSearchQuery("ignore")
         delay(WAIT_FOR_COMBINE_MS)
 
-        clearMocks(density, validate, answers = false, recordedCalls = true)
+        clearMocks(validate, answers = false, recordedCalls = true)
 
         vm.onBookingSlotToggled(LocalTime.of(10, 0))
         delay(WAIT_FOR_COMBINE_MS)
 
         verify(atLeast = 1) {
-            density(any(), any(), any(), any(), any(), any(), any(), any())
-        }
-        verify(atLeast = 1) {
-            validate(any(), any(), any(), any(), any(), any(), any(), any())
+            validate(any(), any(), any(), any(), any(), any(), any())
         }
     }
 
     @Test
     fun searchQueryChange_whileBookingOpen_updatesSearchAndKeepsSessionBooking() = runBlocking {
-        val density = spyk(BuildLibraryBookingDensityKernelsUseCase(CalculateBookingDensityUseCase()))
-        val validate = spyk(CanConfirmLibrarySessionBookingUseCase(ValidateSessionBookingUseCase()))
-
-        val vm = createViewModelWithBookingUseCaseMocks(
-            buildLibraryBookingDensityKernelsUseCase = density,
-            canConfirmLibrarySessionBookingUseCase = validate,
-        )
+        val vm = createViewModel()
         vm.toggleExerciseInCartFromList("ex1")
         vm.updateActiveDraft("3", "10")
         vm.openSessionBooking()
@@ -455,16 +433,17 @@ class ExerciseLibraryViewModelTest {
             emit(listOf(GymLocation(id = "default", displayName = "Default")))
             awaitCancellation()
         }
-        val busy = mockk<ObserveBusyIntervalsUseCase>()
-        every { busy(any(), any(), any()) } returns flow {
-            emit(emptyList())
-            awaitCancellation()
-        }
         val migrate = mockk<MigrateLegacyWorkoutSchedulesUseCase>()
         coEvery { migrate(any()) } returns Unit
-        val workoutSchedules = mockk<ObserveWorkoutSchedulesUseCase>()
-        every { workoutSchedules() } returns flow {
-            emit(emptyList())
+        val observeMonthlySummary = mockk<ObserveExerciseLibraryMonthlySummaryUseCase>()
+        every { observeMonthlySummary(any(), any()) } returns flow {
+            emit(
+                ExerciseLibraryMonthlySummary(
+                    yearMonth = YearMonth.of(2020, 1),
+                    workoutDayCount = 0,
+                    restDayCount = 31,
+                ),
+            )
             awaitCancellation()
         }
         val appContext = mockk<Context>(relaxed = true)
@@ -474,7 +453,13 @@ class ExerciseLibraryViewModelTest {
         )
         val catalogMapper = ExerciseLibraryCatalogUiMapper(appContext)
         val bookInner = mockk<BookWorkoutSessionUseCase>()
-        coEvery { bookInner(any(), any(), any()) } returns com.hoabui.virtualbody3d.domain.repository.BookWorkoutSessionResult.Success(1)
+        val resolvedFromRepo = WorkoutSession(
+            id = "booked-session",
+            startInstant = Instant.parse("1970-01-01T10:00:00Z"),
+            endInstant = Instant.parse("1970-01-01T11:00:00Z"),
+            locationId = "default",
+        )
+        coEvery { bookInner(any(), any(), any()) } returns BookWorkoutSessionResult.Success(1, resolvedFromRepo)
         val confirmUseCase = ConfirmExerciseLibrarySessionUseCase(bookInner, ValidateSessionBookingUseCase())
         val workflow = SessionBookingConfirmationWorkflow(confirmUseCase)
         val reducer = ExerciseLibraryReducer(CommitLibrarySessionBookingSuccessUiMapper())
@@ -482,23 +467,22 @@ class ExerciseLibraryViewModelTest {
             getLibrary,
             workflow,
             locations,
-            busy,
-            workoutSchedules,
+            observeMonthlySummary,
             migrate,
             mapper,
             catalogMapper,
             reducer,
             ToggleExerciseInCartUseCase(),
             UpdateExerciseDraftUseCase(),
-            BuildLibraryBookingDensityKernelsUseCase(CalculateBookingDensityUseCase()),
             CanConfirmLibrarySessionBookingUseCase(ValidateSessionBookingUseCase()),
-            SyncSessionBookingWithBusyUseCase(),
             ResolveNextSlotSelectionAfterToggleUseCase(),
         )
         vm.toggleExerciseInCartFromList("ex1")
         vm.updateActiveDraft("3", "10")
         vm.openSessionBooking()
         vm.onBookingSlotToggled(LocalTime.of(10, 0))
+        delay(WAIT_FOR_COMBINE_MS)
+        vm.onBookingSlotToggled(LocalTime.of(10, 30))
         delay(WAIT_FOR_COMBINE_MS)
         assertTrue(requireNotNull(vm.successData().sessionBooking.uiModel).isBookingConfirmEnabled)
         vm.confirmSessionBooking()
@@ -509,7 +493,7 @@ class ExerciseLibraryViewModelTest {
         assertEquals(1, summary.exerciseCount)
         assertEquals("Sample", summary.primaryExerciseTitle)
         assertEquals(
-            30L,
+            60L,
             halfOpenInstantIntervalDurationMinutes(summary.sessionStartInstant, summary.sessionEndInstant),
         )
     }
