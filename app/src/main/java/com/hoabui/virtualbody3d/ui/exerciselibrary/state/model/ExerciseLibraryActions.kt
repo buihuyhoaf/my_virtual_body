@@ -1,4 +1,4 @@
-package com.hoabui.virtualbody3d.ui.exerciselibrary.state
+package com.hoabui.virtualbody3d.ui.exerciselibrary.state.model
 
 import com.hoabui.virtualbody3d.ui.exerciselibrary.ExerciseLibraryQuickChip
 import java.time.LocalTime
@@ -6,6 +6,9 @@ import java.time.LocalTime
 /**
  * Hoisted callbacks for the Exercise Library flow so screens and organisms
  * pass a single stable object instead of many lambda parameters.
+ *
+ * Not marked `Immutable`: lambda fields are unstable for Compose skippability; this type is for
+ * wiring only, not as part of immutable UI state snapshots.
  */
 data class ExerciseLibraryActions(
     val onQueryChange: (String) -> Unit,

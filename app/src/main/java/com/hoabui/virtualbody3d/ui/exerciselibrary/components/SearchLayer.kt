@@ -30,8 +30,8 @@ import com.hoabui.virtualbody3d.ui.common_ui.atom.icon.GIcon
 import com.hoabui.virtualbody3d.ui.common_ui.atom.field.GTextField
 import com.hoabui.virtualbody3d.ui.exerciselibrary.ExerciseLibraryQuickChip
 import com.hoabui.virtualbody3d.ui.exerciselibrary.selectedQuickChip
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryActions
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryActions
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
@@ -131,10 +131,10 @@ fun ExerciseLibrarySearchLayer(
     slideSpec: FiniteAnimationSpec<IntOffset>,
     modifier: Modifier = Modifier,
 ) {
-    val showSuggestionLayer = isSearchFocused || state.searchQuery.isNotEmpty()
+    val showSuggestionLayer = isSearchFocused || state.filters.searchQuery.isNotEmpty()
     Column(modifier = modifier.fillMaxWidth()) {
         ExerciseSearchBar(
-            query = state.searchQuery,
+            query = state.filters.searchQuery,
             onQueryChange = actions.onQueryChange,
             onSearchFocusChange = onSearchFocusChanged,
         )

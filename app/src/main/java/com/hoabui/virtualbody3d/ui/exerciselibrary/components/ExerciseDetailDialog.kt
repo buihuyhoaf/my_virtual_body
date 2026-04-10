@@ -18,6 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,6 +26,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import coil.compose.AsyncImage
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
@@ -36,16 +38,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
-import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
-import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
-import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
-import com.hoabui.virtualbody3d.domain.model.common.ImageSource
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
 import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
-import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
+import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
+import com.hoabui.virtualbody3d.ui.exerciselibrary.model.ExerciseLibraryCardImage
+import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toCoilModel
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseDetailSheetUiModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 private const val HeroAspectRatio = 4f / 3f
@@ -265,7 +265,7 @@ private fun ExerciseDetailIconicRow(
 
 @Composable
 fun ExerciseDetailDialog(
-    exercise: Exercise,
+    detail: ExerciseDetailSheetUiModel,
     onDismiss: () -> Unit,
 ) {
     val token = GymTheme.token
@@ -274,9 +274,8 @@ fun ExerciseDetailDialog(
     val maxDialogHeight =
         (configuration.screenHeightDp.toFloat() * token.bodyDetail.exerciseDetailDialogMaxHeightFraction).dp
     val cardWidthFraction = token.bodyDetail.exerciseDetailCardWidthFraction
-
-    val targetRegionLabel = stringResource(ExerciseDisplayResources.bodyRegionResId(exercise.bodyRegion))
-    val equipmentLabel = stringResource(ExerciseDisplayResources.equipmentResId(exercise.equipment))
+    val resourceProvider = LocalResourceProvider.current
+    val heroCoilModel = remember(detail.heroImage) { detail.heroImage.toCoilModel(resourceProvider) }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -309,12 +308,9 @@ fun ExerciseDetailDialog(
                     ) {
                         // Static header: 4:3 media + title (does not scroll)
                         Column(modifier = Modifier.fillMaxWidth()) {
-                            Image(
-                                painter = painterResource(R.drawable.body_unsplash),
-                                contentDescription = stringResource(
-                                    R.string.exercise_detail_hero_image_cd,
-                                    exercise.name,
-                                ),
+                            AsyncImage(
+                                model = heroCoilModel,
+                                contentDescription = detail.heroContentDescription,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .aspectRatio(HeroAspectRatio)
@@ -333,7 +329,7 @@ fun ExerciseDetailDialog(
                                     ),
                             ) {
                                 GText(
-                                    text = exercise.name,
+                                    text = detail.name,
                                     style = exerciseDetailTextStyle(token.typography.titleLarge),
                                     color = token.colors.textPrimary,
                                     maxLines = 2,
@@ -356,8 +352,8 @@ fun ExerciseDetailDialog(
                                 verticalArrangement = Arrangement.spacedBy(token.spacing.lg),
                             ) {
                                 ExerciseDetailIconicRow(
-                                    targetRegionLabel = targetRegionLabel,
-                                    equipmentLabel = equipmentLabel,
+                                    targetRegionLabel = detail.targetRegionLabel,
+                                    equipmentLabel = detail.equipmentLabel,
                                 )
                                 Column(
                                     verticalArrangement = Arrangement.spacedBy(token.spacing.sm),
@@ -366,12 +362,12 @@ fun ExerciseDetailDialog(
                                         text = stringResource(R.string.exercise_detail_how_to_perform),
                                         includeTopSpacing = false,
                                     )
-                                    val steps = parseDescriptionSteps(exercise.description)
+                                    val steps = parseDescriptionSteps(detail.description)
                                     if (steps.isNotEmpty()) {
                                         ExerciseNumberedStepsList(items = steps)
                                     } else {
                                         GText(
-                                            text = exercise.description,
+                                            text = detail.description,
                                             style = exerciseDetailTextStyle(token.typography.bodyMedium),
                                             color = token.colors.textPrimary,
                                         )
@@ -385,7 +381,7 @@ fun ExerciseDetailDialog(
                                         includeTopSpacing = false,
                                     )
                                     SafetyNoteCard(
-                                        notes = exercise.safetyNotes,
+                                        notes = detail.safetyNotes,
                                         useWarningAppearance = true,
                                     )
                                 }
@@ -398,7 +394,7 @@ fun ExerciseDetailDialog(
                                 .padding(token.spacing.md),
                             verticalArrangement = Arrangement.spacedBy(token.spacing.sm),
                         ) {
-                            exercise.lastWeightKg?.let { kg ->
+                            detail.lastWeightKg?.let { kg ->
                                 GText(
                                     text = stringResource(R.string.exercise_detail_last_weight, kg),
                                     style = exerciseDetailTextStyle(token.typography.bodySmall),
@@ -421,37 +417,37 @@ fun ExerciseDetailDialog(
 @Preview(showBackground = true, name = "ExerciseDetailDialog — Light")
 @Composable
 private fun PreviewExerciseDetailDialogLight() {
-    val previewExercise = Exercise(
+    val preview = ExerciseDetailSheetUiModel(
         id = "preview",
         name = "Very long exercise name for preview ellipsis behavior in the knowledge card",
-        image = ImageSource.LocalResource("ic_logo_whitecat"),
-        category = ExerciseCategory.Strength,
-        bodyRegion = BodyRegion.Chest,
         description = "1. Step one with enough text to wrap\n2. Step two\n3. Step three",
-        equipment = EquipmentType.Barbell,
         safetyNotes = "Keep core tight.\nStop if sharp pain.",
         lastWeightKg = 60.0,
+        targetRegionLabel = "Chest",
+        equipmentLabel = "Barbell",
+        heroImage = ExerciseLibraryCardImage.LocalDrawableName("ic_logo_whitecat"),
+        heroContentDescription = "Preview",
     )
     GymTheme {
-        ExerciseDetailDialog(exercise = previewExercise, onDismiss = {})
+        ExerciseDetailDialog(detail = preview, onDismiss = {})
     }
 }
 
 @Preview(showBackground = true, name = "ExerciseDetailDialog — Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun PreviewExerciseDetailDialogDark() {
-    val previewExercise = Exercise(
+    val preview = ExerciseDetailSheetUiModel(
         id = "preview",
         name = "Barbell bench press",
-        image = ImageSource.LocalResource("ic_logo_whitecat"),
-        category = ExerciseCategory.Strength,
-        bodyRegion = BodyRegion.Chest,
         description = "Lower with control.\nPress up evenly.",
-        equipment = EquipmentType.Dumbbell,
         safetyNotes = "Use a spotter for heavy sets.",
         lastWeightKg = null,
+        targetRegionLabel = "Chest",
+        equipmentLabel = "Dumbbell",
+        heroImage = ExerciseLibraryCardImage.LocalDrawableName("ic_logo_whitecat"),
+        heroContentDescription = "Preview",
     )
     GymTheme(darkTheme = true) {
-        ExerciseDetailDialog(exercise = previewExercise, onDismiss = {})
+        ExerciseDetailDialog(detail = preview, onDismiss = {})
     }
 }

@@ -1,8 +1,10 @@
 package com.hoabui.virtualbody3d.domain.model.exercise
 
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseDraft
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.isCartDraftValidForSessionConfirm
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseDraft
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryListProjectionState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryCartState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.isCartDraftValidForSessionConfirm
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import org.junit.Assert.assertEquals
@@ -45,9 +47,13 @@ class ExerciseDurationTest {
             "b" to ExerciseDraft(sets = "1", reps = "30"),
         )
         val state = ExerciseLibraryUiState(
-            itemDrafts = drafts,
-            draftOrder = persistentListOf("a", "b"),
-            exerciseMeasurementById = modes,
+            cart = LibraryCartState(
+                itemDrafts = drafts,
+                draftOrder = persistentListOf("a", "b"),
+            ),
+            libraryList = ExerciseLibraryListProjectionState(
+                exerciseMeasurementById = modes,
+            ),
         )
         assertTrue(state.isCartDraftValidForSessionConfirm())
     }
@@ -57,9 +63,13 @@ class ExerciseDurationTest {
         val modes = persistentMapOf("b" to ExerciseMeasurementMode.Duration)
         val drafts = persistentMapOf("b" to ExerciseDraft(sets = "0", reps = "0"))
         val state = ExerciseLibraryUiState(
-            itemDrafts = drafts,
-            draftOrder = persistentListOf("b"),
-            exerciseMeasurementById = modes,
+            cart = LibraryCartState(
+                itemDrafts = drafts,
+                draftOrder = persistentListOf("b"),
+            ),
+            libraryList = ExerciseLibraryListProjectionState(
+                exerciseMeasurementById = modes,
+            ),
         )
         assertFalse(state.isCartDraftValidForSessionConfirm())
     }

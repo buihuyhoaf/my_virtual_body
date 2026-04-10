@@ -45,8 +45,8 @@ import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toCoilModel
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryActions
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryActions
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
@@ -209,19 +209,19 @@ fun ExerciseLibrarySelectionBar(
             bottomEnd = token.borderWidth.none,
         )
     }
-    val cartItems = remember(libraryState.sections, libraryState.draftOrder) {
-        val byId = libraryState.sections.asSequence()
+    val cartItems = remember(libraryState.libraryList.sections, libraryState.cart.draftOrder) {
+        val byId = libraryState.libraryList.sections.asSequence()
             .flatMap { it.items.asSequence() }
             .associateBy { it.id }
-        libraryState.draftOrder.mapNotNull { byId[it] }
+        libraryState.cart.draftOrder.mapNotNull { byId[it] }
     }
-    val activeDraft = libraryState.activeExerciseId?.let { libraryState.itemDrafts[it] }
+    val activeDraft = libraryState.cart.activeExerciseId?.let { libraryState.cart.itemDrafts[it] }
     val repsCurrent = activeDraft?.reps ?: ""
     val setsCurrent = activeDraft?.sets ?: ""
-    val activeMeasurementMode = libraryState.activeExerciseId?.let { id ->
-        libraryState.exerciseMeasurementById[id]
+    val activeMeasurementMode = libraryState.cart.activeExerciseId?.let { id ->
+        libraryState.libraryList.exerciseMeasurementById[id]
     } ?: ExerciseMeasurementMode.Strength
-    val bookingEnabled = libraryState.isAddToSessionEnabled
+    val bookingEnabled = libraryState.libraryList.isAddToSessionEnabled
     GSurface(
         modifier = modifier
             .fillMaxWidth()
@@ -252,7 +252,7 @@ fun ExerciseLibrarySelectionBar(
             ) {
                 CartThumbnailRow(
                     cartItems = cartItems,
-                    activeExerciseId = libraryState.activeExerciseId,
+                    activeExerciseId = libraryState.cart.activeExerciseId,
                     onSelectCartItem = actions.onSelectCartItem,
                     onRemoveCartItem = actions.onRemoveCartItem,
                     onClearAll = actions.onClearCart,

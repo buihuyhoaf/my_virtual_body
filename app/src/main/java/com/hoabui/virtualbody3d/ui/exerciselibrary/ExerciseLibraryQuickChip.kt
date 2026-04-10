@@ -4,7 +4,7 @@ import androidx.annotation.StringRes
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
 
 /**
  * Quick-filter suggestions shown when the exercise search field is focused or has text.
@@ -17,9 +17,9 @@ enum class ExerciseLibraryQuickChip(@StringRes val labelRes: Int) {
 }
 
 fun ExerciseLibraryUiState.selectedQuickChip(): ExerciseLibraryQuickChip? = when {
-    selectedEquipment == EquipmentType.Bodyweight -> ExerciseLibraryQuickChip.Bodyweight
-    selectedExerciseCategory == ExerciseCategory.Strength -> ExerciseLibraryQuickChip.Strength
-    selectedExerciseCategory == ExerciseCategory.Mobility -> ExerciseLibraryQuickChip.Mobility
-    selectedExerciseCategory == ExerciseCategory.Cardio -> ExerciseLibraryQuickChip.Cardio
+    filters.selectedEquipment == EquipmentType.Bodyweight -> ExerciseLibraryQuickChip.Bodyweight
+    filters.selectedExerciseCategory == ExerciseCategory.Strength -> ExerciseLibraryQuickChip.Strength
+    filters.selectedExerciseCategory == ExerciseCategory.Mobility -> ExerciseLibraryQuickChip.Mobility
+    filters.selectedExerciseCategory == ExerciseCategory.Cardio -> ExerciseLibraryQuickChip.Cardio
     else -> null
 }

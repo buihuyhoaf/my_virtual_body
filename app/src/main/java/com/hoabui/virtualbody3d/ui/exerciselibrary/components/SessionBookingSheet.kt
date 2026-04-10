@@ -70,11 +70,11 @@ import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toCoilModel
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.BookingExerciseSummaryUi
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.SessionBookingPeriodId
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.SessionBookingPeriodUiModel
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.SessionBookingUiModel
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.TimeSlotCellUiModel
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.BookingExerciseSummaryUi
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingPeriodId
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingPeriodUiModel
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingUiModel
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.TimeSlotCellUiModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment

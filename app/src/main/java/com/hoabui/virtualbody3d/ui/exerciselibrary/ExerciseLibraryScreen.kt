@@ -45,8 +45,8 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySes
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySelectionBar
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseSection
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryActions
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryActions
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel.ExerciseLibraryViewModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
@@ -117,8 +117,8 @@ fun ExerciseLibraryScreen(
                     actions = actions,
                 )
                 ExerciseLibrarySessionBookingSheetHost(
-                    booking = data.sessionBooking,
-                    draftCount = data.draftOrder.size,
+                    booking = data.sessionBooking.uiModel,
+                    draftCount = data.cart.draftOrder.size,
                     zoneId = ZoneId.systemDefault(),
                     onDismissRequest = actions.onDismissSessionBooking,
                     onDateMillisSelected = actions.onBookingDateSelected,
@@ -127,23 +127,23 @@ fun ExerciseLibraryScreen(
                     onClearTimeSelection = actions.onBookingClearTimeSelection,
                     onConfirm = actions.onConfirmSessionBooking,
                 )
-                if (data.sessionBookingInput?.pendingLongSessionWarning == true) {
+                if (data.sessionBooking.input?.pendingLongSessionWarning == true) {
                     LongSessionWarningDialog(
                         onDismissRequest = actions.onLongSessionEdit,
                         onEditSession = actions.onLongSessionEdit,
                         onProceedAnyway = actions.onLongSessionProceedAnyway,
                     )
                 }
-                data.addExerciseSuccess?.let { summary ->
+                data.chrome.addExerciseSuccess?.let { summary ->
                     AddExerciseSuccessDialog(
                         summary = summary,
                         onDismiss = actions.onDismissAddExerciseSuccess,
                         onViewWorkoutPlan = actions.onOpenWorkoutPlan,
                     )
                 }
-                data.selectedExerciseForDetail?.let { exercise ->
+                data.libraryList.selectedExerciseForDetail?.let { detail ->
                     ExerciseDetailDialog(
-                        exercise = exercise,
+                        detail = detail,
                         onDismiss = actions.onClearExerciseDetail,
                     )
                 }
@@ -194,7 +194,7 @@ fun ExerciseLibraryScreenContent(
     val onSearchFocusChanged = remember {
         { focused: Boolean -> isSearchFocused.value = focused }
     }
-    val cartVisible = state.itemDrafts.isNotEmpty()
+    val cartVisible = state.cart.itemDrafts.isNotEmpty()
     val barMinHeight = token.bodyAnalysis.exerciseLibrarySelectionBarMinHeight
     val fabSize = token.bodyAnalysis.exerciseLibraryWorkoutPlanFabSize
     val fabListGutter = token.spacing.md
@@ -241,7 +241,7 @@ fun ExerciseLibraryScreenContent(
                     )
                 }
             }
-            if (state.sections.isEmpty()) {
+            if (state.libraryList.sections.isEmpty()) {
                 item(
                     key = "exercise_library_empty",
                     contentType = ExerciseLibraryListContentTypes.Empty,
@@ -260,7 +260,7 @@ fun ExerciseLibraryScreenContent(
                     }
                 }
             } else {
-                state.sections.forEach { section ->
+                state.libraryList.sections.forEach { section ->
                     stickyHeader(
                         key = "${section.bodyRegion.name}_header",
                         contentType = ExerciseLibraryListContentTypes.RegionHeader,
@@ -332,7 +332,7 @@ fun ExerciseLibraryScreenContent(
             ),
         ) {
             ExerciseLibraryWorkoutPlanFab(
-                badgeCount = state.workoutPlanFabBadgeCount,
+                badgeCount = state.chrome.workoutPlanFabBadgeCount,
                 onClick = actions.onOpenWorkoutPlan,
             )
         }

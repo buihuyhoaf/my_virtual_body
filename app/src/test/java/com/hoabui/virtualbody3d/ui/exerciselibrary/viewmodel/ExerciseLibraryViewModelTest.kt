@@ -10,17 +10,37 @@ import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.GymLocation
-import com.hoabui.virtualbody3d.domain.repository.BookWorkoutSessionResult
 import com.hoabui.virtualbody3d.domain.usecase.BookWorkoutSessionUseCase
+import com.hoabui.virtualbody3d.domain.usecase.CommitLibrarySessionBookingResult
+import com.hoabui.virtualbody3d.domain.usecase.ConfirmExerciseLibrarySessionUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetExerciseLibraryUseCase
 import com.hoabui.virtualbody3d.domain.usecase.MigrateLegacyWorkoutSchedulesUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveBusyIntervalsUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveGymLocationsUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveWorkoutSchedulesUseCase
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.domain.usecase.PrepareLibrarySessionConfirmResult
+import com.hoabui.virtualbody3d.domain.usecase.BuildLibraryBookingDensityKernelsUseCase
+import com.hoabui.virtualbody3d.domain.usecase.CalculateBookingDensityUseCase
+import com.hoabui.virtualbody3d.domain.usecase.CanConfirmLibrarySessionBookingUseCase
+import com.hoabui.virtualbody3d.domain.usecase.CanOpenExerciseLibrarySessionBookingUseCase
+import com.hoabui.virtualbody3d.domain.usecase.SessionBookingConfirmationWorkflow
+import com.hoabui.virtualbody3d.domain.usecase.ResolveNextSlotSelectionAfterToggleUseCase
+import com.hoabui.virtualbody3d.domain.usecase.SyncSessionBookingWithBusyUseCase
+import com.hoabui.virtualbody3d.domain.usecase.ToggleExerciseInCartUseCase
+import com.hoabui.virtualbody3d.domain.usecase.UpdateExerciseDraftUseCase
+import com.hoabui.virtualbody3d.domain.usecase.ValidateSessionBookingUseCase
+import com.hoabui.virtualbody3d.ui.exerciselibrary.data.CommitLibrarySessionBookingSuccessUiMapper
+import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseLibraryCatalogUiMapper
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mapper.ExerciseLibraryUiMapper
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.reducer.ExerciseLibraryReducer
+import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSession
+import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
@@ -41,6 +61,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import com.hoabui.virtualbody3d.domain.model.exercise.halfOpenInstantIntervalDurationMinutes
+import java.time.Instant
 import java.time.LocalTime
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -78,8 +99,6 @@ class ExerciseLibraryViewModelTest {
     ): ExerciseLibraryViewModel {
         val getLibrary = mockk<GetExerciseLibraryUseCase>()
         every { getLibrary() } returns flowOf(exercises)
-        val book = mockk<BookWorkoutSessionUseCase>()
-        coEvery { book(any(), any(), any()) } returns BookWorkoutSessionResult.Success(1)
         val locations = mockk<ObserveGymLocationsUseCase>()
         every { locations() } returns flow {
             emit(listOf(GymLocation(id = "default", displayName = "Default")))
@@ -97,15 +116,123 @@ class ExerciseLibraryViewModelTest {
             emit(emptyList())
             awaitCancellation()
         }
-        val context = mockk<Context>(relaxed = true)
+        val appContext = mockk<Context>(relaxed = true)
+        val mapper = ExerciseLibraryUiMapper(
+            appContext,
+            CanOpenExerciseLibrarySessionBookingUseCase(),
+        )
+        val catalogMapper = ExerciseLibraryCatalogUiMapper(appContext)
+        val confirmUseCase = mockk<ConfirmExerciseLibrarySessionUseCase>()
+        every {
+            confirmUseCase.prepare(any(), any(), any(), any(), any(), any(), any(), any())
+        } answers {
+            PrepareLibrarySessionConfirmResult.NoOp
+        }
+        coEvery {
+            confirmUseCase.commit(any(), any(), any(), any(), any(), any())
+        } returns CommitLibrarySessionBookingResult.Success(
+            scheduledCount = 1,
+            session = WorkoutSession(
+                id = "sid",
+                startInstant = Instant.parse("2020-01-01T10:00:00Z"),
+                endInstant = Instant.parse("2020-01-01T10:30:00Z"),
+                locationId = "default",
+            ),
+            scheduledDateMillis = 0L,
+            primaryExerciseTitle = "Sample",
+            locationDisplayName = "Default",
+            incrementFabBadgeBy = 1,
+        )
+        val workflow = SessionBookingConfirmationWorkflow(confirmUseCase)
+        val reducer = ExerciseLibraryReducer(CommitLibrarySessionBookingSuccessUiMapper())
         return ExerciseLibraryViewModel(
             getLibrary,
-            book,
+            workflow,
             locations,
             busy,
             workoutSchedules,
             migrate,
-            context,
+            mapper,
+            catalogMapper,
+            reducer,
+            ToggleExerciseInCartUseCase(),
+            UpdateExerciseDraftUseCase(),
+            BuildLibraryBookingDensityKernelsUseCase(CalculateBookingDensityUseCase()),
+            CanConfirmLibrarySessionBookingUseCase(ValidateSessionBookingUseCase()),
+            SyncSessionBookingWithBusyUseCase(),
+            ResolveNextSlotSelectionAfterToggleUseCase(),
+        )
+    }
+
+    private fun createViewModelWithBookingUseCaseMocks(
+        exercises: Map<BodyRegion, List<Exercise>> = mapOf(BodyRegion.Chest to listOf(sampleExercise())),
+        buildLibraryBookingDensityKernelsUseCase: BuildLibraryBookingDensityKernelsUseCase,
+        canConfirmLibrarySessionBookingUseCase: CanConfirmLibrarySessionBookingUseCase,
+    ): ExerciseLibraryViewModel {
+        val getLibrary = mockk<GetExerciseLibraryUseCase>()
+        every { getLibrary() } returns flowOf(exercises)
+        val locations = mockk<ObserveGymLocationsUseCase>()
+        every { locations() } returns flow {
+            emit(listOf(GymLocation(id = "default", displayName = "Default")))
+            awaitCancellation()
+        }
+        val busy = mockk<ObserveBusyIntervalsUseCase>()
+        every { busy(any(), any(), any()) } returns flow {
+            emit(emptyList())
+            awaitCancellation()
+        }
+        val migrate = mockk<MigrateLegacyWorkoutSchedulesUseCase>()
+        coEvery { migrate(any()) } returns Unit
+        val workoutSchedules = mockk<ObserveWorkoutSchedulesUseCase>()
+        every { workoutSchedules() } returns flow {
+            emit(emptyList())
+            awaitCancellation()
+        }
+        val appContext = mockk<Context>(relaxed = true)
+        val mapper = ExerciseLibraryUiMapper(
+            appContext,
+            CanOpenExerciseLibrarySessionBookingUseCase(),
+        )
+        val catalogMapper = ExerciseLibraryCatalogUiMapper(appContext)
+        val confirmUseCase = mockk<ConfirmExerciseLibrarySessionUseCase>()
+        every {
+            confirmUseCase.prepare(any(), any(), any(), any(), any(), any(), any(), any())
+        } answers {
+            PrepareLibrarySessionConfirmResult.NoOp
+        }
+        coEvery {
+            confirmUseCase.commit(any(), any(), any(), any(), any(), any())
+        } returns CommitLibrarySessionBookingResult.Success(
+            scheduledCount = 1,
+            session = WorkoutSession(
+                id = "sid",
+                startInstant = Instant.parse("2020-01-01T10:00:00Z"),
+                endInstant = Instant.parse("2020-01-01T10:30:00Z"),
+                locationId = "default",
+            ),
+            scheduledDateMillis = 0L,
+            primaryExerciseTitle = "Sample",
+            locationDisplayName = "Default",
+            incrementFabBadgeBy = 1,
+        )
+        val workflow = SessionBookingConfirmationWorkflow(confirmUseCase)
+        val reducer = ExerciseLibraryReducer(CommitLibrarySessionBookingSuccessUiMapper())
+        return ExerciseLibraryViewModel(
+            getLibrary,
+            workflow,
+            locations,
+            busy,
+            workoutSchedules,
+            migrate,
+            mapper,
+            catalogMapper,
+            reducer,
+            ToggleExerciseInCartUseCase(),
+            UpdateExerciseDraftUseCase(),
+            buildLibraryBookingDensityKernelsUseCase,
+            canConfirmLibrarySessionBookingUseCase,
+            SyncSessionBookingWithBusyUseCase(),
+            ResolveNextSlotSelectionAfterToggleUseCase(),
         )
     }
 
@@ -119,12 +246,12 @@ class ExerciseLibraryViewModelTest {
     fun toggle_addThenRemove_emptiesCartAndClearsActive() {
         val vm = createViewModel()
         vm.toggleExerciseInCartFromList("ex1")
-        assertTrue(vm.successData().itemDrafts.containsKey("ex1"))
-        assertEquals("ex1", vm.successData().activeExerciseId)
+        assertTrue(vm.successData().cart.itemDrafts.containsKey("ex1"))
+        assertEquals("ex1", vm.successData().cart.activeExerciseId)
         vm.toggleExerciseInCartFromList("ex1")
-        assertTrue(vm.successData().itemDrafts.isEmpty())
-        assertTrue(vm.successData().draftOrder.isEmpty())
-        assertNull(vm.successData().activeExerciseId)
+        assertTrue(vm.successData().cart.itemDrafts.isEmpty())
+        assertTrue(vm.successData().cart.draftOrder.isEmpty())
+        assertNull(vm.successData().cart.activeExerciseId)
     }
 
     @Test
@@ -142,11 +269,11 @@ class ExerciseLibraryViewModelTest {
         vm.toggleExerciseInCartFromList("b")
         vm.toggleExerciseInCartFromList("c")
         vm.setActiveCartExercise("b")
-        assertEquals("b", vm.successData().activeExerciseId)
+        assertEquals("b", vm.successData().cart.activeExerciseId)
         vm.toggleExerciseInCartFromList("b")
         val d = vm.successData()
-        assertFalse(d.itemDrafts.containsKey("b"))
-        assertEquals("c", d.activeExerciseId)
+        assertFalse(d.cart.itemDrafts.containsKey("b"))
+        assertEquals("c", d.cart.activeExerciseId)
     }
 
     @Test
@@ -154,8 +281,8 @@ class ExerciseLibraryViewModelTest {
         val vm = createViewModel()
         vm.toggleExerciseInCartFromList("ex1")
         vm.removeFromCart("ex1")
-        assertTrue(vm.successData().itemDrafts.isEmpty())
-        assertNull(vm.successData().activeExerciseId)
+        assertTrue(vm.successData().cart.itemDrafts.isEmpty())
+        assertNull(vm.successData().cart.activeExerciseId)
     }
 
     @Test
@@ -163,8 +290,8 @@ class ExerciseLibraryViewModelTest {
         val vm = createViewModel()
         vm.toggleExerciseInCartFromList("ex1")
         vm.ensureInCartAndFocusFromDetail("ex1")
-        assertTrue(vm.successData().itemDrafts.containsKey("ex1"))
-        assertEquals("ex1", vm.successData().activeExerciseId)
+        assertTrue(vm.successData().cart.itemDrafts.containsKey("ex1"))
+        assertEquals("ex1", vm.successData().cart.activeExerciseId)
     }
 
     @Test
@@ -176,10 +303,10 @@ class ExerciseLibraryViewModelTest {
         )
         vm.toggleExerciseInCartFromList("one")
         vm.toggleExerciseInCartFromList("two")
-        val sizeBefore = vm.successData().itemDrafts.size
+        val sizeBefore = vm.successData().cart.itemDrafts.size
         vm.setActiveCartExercise("two")
-        assertEquals(sizeBefore, vm.successData().itemDrafts.size)
-        assertEquals("two", vm.successData().activeExerciseId)
+        assertEquals(sizeBefore, vm.successData().cart.itemDrafts.size)
+        assertEquals("two", vm.successData().cart.activeExerciseId)
     }
 
     @Test
@@ -187,7 +314,7 @@ class ExerciseLibraryViewModelTest {
         val vm = createViewModel()
         vm.toggleExerciseInCartFromList("ex1")
         vm.removeFromCart("nope")
-        assertNotNull(vm.successData().itemDrafts["ex1"])
+        assertNotNull(vm.successData().cart.itemDrafts["ex1"])
     }
 
     @Test
@@ -196,9 +323,9 @@ class ExerciseLibraryViewModelTest {
         vm.toggleExerciseInCartFromList("ex1")
         vm.updateActiveDraft("3", "10")
         vm.openSessionBooking()
-        assertNotNull(vm.successData().sessionBookingInput)
+        assertNotNull(vm.successData().sessionBooking.input)
         vm.dismissSessionBooking()
-        assertNull(vm.successData().sessionBookingInput)
+        assertNull(vm.successData().sessionBooking.input)
     }
 
     @Test
@@ -208,27 +335,106 @@ class ExerciseLibraryViewModelTest {
         vm.updateActiveDraft("3", "10")
         vm.openSessionBooking()
         delay(WAIT_FOR_COMBINE_MS)
-        val beforeSections = vm.successData().sections
+        val beforeSections = vm.successData().libraryList.sections
         vm.onBookingSlotToggled(LocalTime.of(10, 0))
         delay(WAIT_FOR_COMBINE_MS)
-        assertTrue(beforeSections === vm.successData().sections)
+        assertTrue(beforeSections === vm.successData().libraryList.sections)
     }
 
     @Test
     fun searchQueryChange_rebuildsSections() = runBlocking {
         val vm = createViewModel()
         delay(WAIT_FOR_COMBINE_MS)
-        val beforeSections = vm.successData().sections
+        val beforeSections = vm.successData().libraryList.sections
         vm.updateSearchQuery("___no_match_xyz___")
         delay(WAIT_FOR_COMBINE_MS)
-        assertFalse(beforeSections === vm.successData().sections)
+        assertFalse(beforeSections === vm.successData().libraryList.sections)
+    }
+
+    @Test
+    fun searchQueryChange_whileBookingOpen_doesNotInvokeDensityOrValidate() = runBlocking {
+        val density = spyk(BuildLibraryBookingDensityKernelsUseCase(CalculateBookingDensityUseCase()))
+        val validate = spyk(CanConfirmLibrarySessionBookingUseCase(ValidateSessionBookingUseCase()))
+
+        val vm = createViewModelWithBookingUseCaseMocks(
+            buildLibraryBookingDensityKernelsUseCase = density,
+            canConfirmLibrarySessionBookingUseCase = validate,
+        )
+        vm.toggleExerciseInCartFromList("ex1")
+        vm.updateActiveDraft("3", "10")
+        vm.openSessionBooking()
+        delay(WAIT_FOR_COMBINE_MS)
+
+        clearMocks(density, validate, answers = false, recordedCalls = true)
+
+        vm.updateSearchQuery("needle")
+        delay(WAIT_FOR_COMBINE_MS)
+
+        verify(exactly = 0) {
+            density(any(), any(), any(), any(), any(), any(), any(), any())
+        }
+        verify(exactly = 0) {
+            validate(any(), any(), any(), any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun bookingSlotToggle_afterSearch_reinvokesDensityAndValidate() = runBlocking {
+        val density = spyk(BuildLibraryBookingDensityKernelsUseCase(CalculateBookingDensityUseCase()))
+        val validate = spyk(CanConfirmLibrarySessionBookingUseCase(ValidateSessionBookingUseCase()))
+
+        val vm = createViewModelWithBookingUseCaseMocks(
+            buildLibraryBookingDensityKernelsUseCase = density,
+            canConfirmLibrarySessionBookingUseCase = validate,
+        )
+        vm.toggleExerciseInCartFromList("ex1")
+        vm.updateActiveDraft("3", "10")
+        vm.openSessionBooking()
+        delay(WAIT_FOR_COMBINE_MS)
+        vm.updateSearchQuery("ignore")
+        delay(WAIT_FOR_COMBINE_MS)
+
+        clearMocks(density, validate, answers = false, recordedCalls = true)
+
+        vm.onBookingSlotToggled(LocalTime.of(10, 0))
+        delay(WAIT_FOR_COMBINE_MS)
+
+        verify(atLeast = 1) {
+            density(any(), any(), any(), any(), any(), any(), any(), any())
+        }
+        verify(atLeast = 1) {
+            validate(any(), any(), any(), any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun searchQueryChange_whileBookingOpen_updatesSearchAndKeepsSessionBooking() = runBlocking {
+        val density = spyk(BuildLibraryBookingDensityKernelsUseCase(CalculateBookingDensityUseCase()))
+        val validate = spyk(CanConfirmLibrarySessionBookingUseCase(ValidateSessionBookingUseCase()))
+
+        val vm = createViewModelWithBookingUseCaseMocks(
+            buildLibraryBookingDensityKernelsUseCase = density,
+            canConfirmLibrarySessionBookingUseCase = validate,
+        )
+        vm.toggleExerciseInCartFromList("ex1")
+        vm.updateActiveDraft("3", "10")
+        vm.openSessionBooking()
+        delay(WAIT_FOR_COMBINE_MS)
+        assertNotNull(vm.successData().sessionBooking.uiModel)
+
+        vm.updateSearchQuery("filter-text")
+        delay(WAIT_FOR_COMBINE_MS)
+
+        val data = vm.successData()
+        assertEquals("filter-text", data.filters.searchQuery)
+        assertNotNull(data.sessionBooking.uiModel)
     }
 
     @Test
     fun isAddToSessionEnabled_falseWhenCartEmpty() = runBlocking {
         val vm = createViewModel()
         delay(WAIT_FOR_COMBINE_MS)
-        assertFalse(vm.successData().isAddToSessionEnabled)
+        assertFalse(vm.successData().libraryList.isAddToSessionEnabled)
     }
 
     @Test
@@ -237,23 +443,69 @@ class ExerciseLibraryViewModelTest {
         vm.toggleExerciseInCartFromList("ex1")
         vm.updateActiveDraft("3", "10")
         delay(WAIT_FOR_COMBINE_MS)
-        assertTrue(vm.successData().isAddToSessionEnabled)
+        assertTrue(vm.successData().libraryList.isAddToSessionEnabled)
     }
 
     @Test
     fun confirmSessionBooking_success_clearsCartAndSetsSummary() = runBlocking {
-        val vm = createViewModel()
+        val getLibrary = mockk<GetExerciseLibraryUseCase>()
+        every { getLibrary() } returns flowOf(mapOf(BodyRegion.Chest to listOf(sampleExercise())))
+        val locations = mockk<ObserveGymLocationsUseCase>()
+        every { locations() } returns flow {
+            emit(listOf(GymLocation(id = "default", displayName = "Default")))
+            awaitCancellation()
+        }
+        val busy = mockk<ObserveBusyIntervalsUseCase>()
+        every { busy(any(), any(), any()) } returns flow {
+            emit(emptyList())
+            awaitCancellation()
+        }
+        val migrate = mockk<MigrateLegacyWorkoutSchedulesUseCase>()
+        coEvery { migrate(any()) } returns Unit
+        val workoutSchedules = mockk<ObserveWorkoutSchedulesUseCase>()
+        every { workoutSchedules() } returns flow {
+            emit(emptyList())
+            awaitCancellation()
+        }
+        val appContext = mockk<Context>(relaxed = true)
+        val mapper = ExerciseLibraryUiMapper(
+            appContext,
+            CanOpenExerciseLibrarySessionBookingUseCase(),
+        )
+        val catalogMapper = ExerciseLibraryCatalogUiMapper(appContext)
+        val bookInner = mockk<BookWorkoutSessionUseCase>()
+        coEvery { bookInner(any(), any(), any()) } returns com.hoabui.virtualbody3d.domain.repository.BookWorkoutSessionResult.Success(1)
+        val confirmUseCase = ConfirmExerciseLibrarySessionUseCase(bookInner, ValidateSessionBookingUseCase())
+        val workflow = SessionBookingConfirmationWorkflow(confirmUseCase)
+        val reducer = ExerciseLibraryReducer(CommitLibrarySessionBookingSuccessUiMapper())
+        val vm = ExerciseLibraryViewModel(
+            getLibrary,
+            workflow,
+            locations,
+            busy,
+            workoutSchedules,
+            migrate,
+            mapper,
+            catalogMapper,
+            reducer,
+            ToggleExerciseInCartUseCase(),
+            UpdateExerciseDraftUseCase(),
+            BuildLibraryBookingDensityKernelsUseCase(CalculateBookingDensityUseCase()),
+            CanConfirmLibrarySessionBookingUseCase(ValidateSessionBookingUseCase()),
+            SyncSessionBookingWithBusyUseCase(),
+            ResolveNextSlotSelectionAfterToggleUseCase(),
+        )
         vm.toggleExerciseInCartFromList("ex1")
         vm.updateActiveDraft("3", "10")
         vm.openSessionBooking()
         vm.onBookingSlotToggled(LocalTime.of(10, 0))
         delay(WAIT_FOR_COMBINE_MS)
-        assertTrue(requireNotNull(vm.successData().sessionBooking).isBookingConfirmEnabled)
+        assertTrue(requireNotNull(vm.successData().sessionBooking.uiModel).isBookingConfirmEnabled)
         vm.confirmSessionBooking()
         delay(WAIT_FOR_COMBINE_MS)
         val d = vm.successData()
-        assertTrue(d.itemDrafts.isEmpty())
-        val summary = requireNotNull(d.addExerciseSuccess)
+        assertTrue(d.cart.itemDrafts.isEmpty())
+        val summary = requireNotNull(d.chrome.addExerciseSuccess)
         assertEquals(1, summary.exerciseCount)
         assertEquals("Sample", summary.primaryExerciseTitle)
         assertEquals(
