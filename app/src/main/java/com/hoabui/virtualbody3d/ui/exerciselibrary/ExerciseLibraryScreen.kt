@@ -45,6 +45,7 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySes
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySelectionBar
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseSection
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.CartSetField
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryActions
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel.ExerciseLibraryViewModel
@@ -102,6 +103,9 @@ fun ExerciseLibraryScreen(
                 viewModel.dismissAddExerciseSuccess()
                 onNavigateToWorkoutCalendar()
             },
+            onStepCartField = viewModel::stepCartField,
+            onAddCartSetRow = { exerciseId -> viewModel.stepCartField(exerciseId, 0, CartSetField.SETS, 1) },
+            onSetCartFieldManual = viewModel::setCartFieldManual,
         )
     }
 

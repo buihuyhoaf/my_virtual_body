@@ -32,9 +32,12 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.presentation.exerciseLibraryB
 import com.hoabui.virtualbody3d.ui.exerciselibrary.presentation.exerciseLibrarySectionRebuildKey
 import com.hoabui.virtualbody3d.ui.exerciselibrary.presentation.mergeExerciseLibraryPresentation
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mapper.ExerciseLibraryUiMapper
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.CartSetField
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryWeeklyHeatmapState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryCartState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SetRowDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.WeeklyHeatmapDayUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibraryIntent
@@ -404,19 +407,28 @@ class ExerciseLibraryViewModel @Inject constructor(
     }
 
     fun toggleExerciseInCartFromList(exerciseId: String) {
+        val wasInCart = exerciseId in filterState.value.cart.itemDrafts
         val snap = toggleExerciseInCartUseCase(
             filterState.value.toCartSnapshot(),
             ExerciseLibraryCartCommand.Toggle(exerciseId),
         )
         dispatch(ExerciseLibraryUpdate.CartFromDomain(snap))
+        // Prefill weight from history when the exercise is newly added (not removed)
+        if (!wasInCart && exerciseId in snap.itemDrafts) {
+            prefillFromHistory(exerciseId)
+        }
     }
 
     fun ensureInCartAndFocusFromDetail(exerciseId: String) {
+        val wasInCart = exerciseId in filterState.value.cart.itemDrafts
         val snap = toggleExerciseInCartUseCase(
             filterState.value.toCartSnapshot(),
             ExerciseLibraryCartCommand.EnsureInCartAndFocus(exerciseId),
         )
         dispatch(ExerciseLibraryUpdate.CartFromDomain(snap))
+        if (!wasInCart) {
+            prefillFromHistory(exerciseId)
+        }
     }
 
     fun removeFromCart(exerciseId: String) {
@@ -447,6 +459,105 @@ class ExerciseLibraryViewModel @Inject constructor(
             reps,
         )
         dispatch(ExerciseLibraryUpdate.CartFromDomain(snap))
+    }
+
+    /**
+     * Steps a single numeric field of one set row up or down.
+     * - SETS field: [delta] > 0 adds a cloned row; [delta] < 0 removes the last row.
+     * - REPS: ±1 per tap.
+     * - WEIGHT: ±2.5 kg per tap.
+     * - MINUTES: ±1 min per tap.
+     * - SECONDS: ±30 s per tap (normalised across minutes).
+     */
+    fun stepCartField(exerciseId: String, setIndex: Int, field: CartSetField, delta: Int) {
+        val draft = filterState.value.cart.itemDrafts[exerciseId] ?: return
+        val newDraft = when (field) {
+            CartSetField.SETS -> {
+                if (delta > 0) {
+                    val lastRow = draft.setRows.lastOrNull() ?: SetRowDraft()
+                    draft.copy(setRows = (draft.setRows + lastRow).toImmutableList())
+                } else if (delta < 0 && draft.setRows.size > 1) {
+                    draft.copy(setRows = draft.setRows.dropLast(1).toImmutableList())
+                } else {
+                    return
+                }
+            }
+            else -> {
+                val row = draft.setRows.getOrNull(setIndex) ?: return
+                val newRow = when (field) {
+                    CartSetField.REPS -> row.copy(reps = (row.reps + delta).coerceAtLeast(0))
+                    CartSetField.WEIGHT -> row.copy(
+                        weightKg = (row.weightKg + delta * WEIGHT_STEP_KG).coerceAtLeast(0.0),
+                    )
+                    CartSetField.MINUTES -> row.copy(minutes = (row.minutes + delta).coerceAtLeast(0))
+                    CartSetField.SECONDS -> {
+                        val totalSec = (row.minutes * 60 + row.seconds + delta * SECONDS_STEP)
+                            .coerceAtLeast(0)
+                        row.copy(minutes = totalSec / 60, seconds = totalSec % 60)
+                    }
+                    CartSetField.SETS -> return
+                }
+                val newRows = draft.setRows.mapIndexed { i, r -> if (i == setIndex) newRow else r }
+                    .toImmutableList()
+                draft.copy(setRows = newRows)
+            }
+        }
+        dispatch(ExerciseLibraryUpdate.CartDraftUpdated(exerciseId, newDraft))
+    }
+
+    /**
+     * Applies a manually entered numeric value to a specific field of a specific set row.
+     * Called when the user confirms a value in the number-pad dialog.
+     */
+    fun setCartFieldManual(exerciseId: String, setIndex: Int, field: CartSetField, value: String) {
+        val draft = filterState.value.cart.itemDrafts[exerciseId] ?: return
+        when (field) {
+            CartSetField.SETS -> {
+                val count = value.toIntOrNull()?.coerceAtLeast(1) ?: return
+                val current = draft.setRows
+                val newRows = when {
+                    count == current.size -> return
+                    count > current.size -> {
+                        val last = current.lastOrNull() ?: SetRowDraft()
+                        (current + List(count - current.size) { last }).toImmutableList()
+                    }
+                    else -> current.take(count).toImmutableList()
+                }
+                dispatch(ExerciseLibraryUpdate.CartDraftUpdated(exerciseId, draft.copy(setRows = newRows)))
+            }
+            else -> {
+                val row = draft.setRows.getOrNull(setIndex) ?: return
+                val newRow = when (field) {
+                    CartSetField.REPS -> row.copy(reps = value.toIntOrNull()?.coerceAtLeast(0) ?: return)
+                    CartSetField.WEIGHT -> row.copy(
+                        weightKg = value.toDoubleOrNull()?.coerceAtLeast(0.0) ?: return,
+                    )
+                    CartSetField.MINUTES -> row.copy(minutes = value.toIntOrNull()?.coerceAtLeast(0) ?: return)
+                    CartSetField.SECONDS -> row.copy(seconds = value.toIntOrNull()?.coerceIn(0, 59) ?: return)
+                    CartSetField.SETS -> return
+                }
+                val newRows = draft.setRows.mapIndexed { i, r -> if (i == setIndex) newRow else r }
+                    .toImmutableList()
+                dispatch(ExerciseLibraryUpdate.CartDraftUpdated(exerciseId, draft.copy(setRows = newRows)))
+            }
+        }
+    }
+
+    /**
+     * Prefills the initial set row for [exerciseId] with the historical weight from [Exercise.lastWeightKg].
+     * Called after a new exercise is added to the cart.
+     */
+    fun prefillFromHistory(exerciseId: String) {
+        val exercise = catalogExercisesById.value[exerciseId] ?: return
+        val lastWeight = exercise.lastWeightKg ?: return
+        val draft = filterState.value.cart.itemDrafts[exerciseId] ?: return
+        if (draft.setRows.isEmpty()) return
+        val prefilled = draft.copy(
+            setRows = draft.setRows.mapIndexed { i, row ->
+                if (i == 0) row.copy(weightKg = lastWeight) else row
+            }.toImmutableList(),
+        )
+        dispatch(ExerciseLibraryUpdate.CartDraftUpdated(exerciseId, prefilled))
     }
 
     fun openSessionBooking() {
@@ -516,6 +627,8 @@ class ExerciseLibraryViewModel @Inject constructor(
 
     private companion object {
         const val BOOKING_LOG_TAG = "ExerciseLibraryBooking"
+        const val WEIGHT_STEP_KG = 2.5
+        const val SECONDS_STEP = 30
     }
 }
 

@@ -4,11 +4,11 @@ import android.content.Context
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
-import com.hoabui.virtualbody3d.domain.model.exercise.parseCartDurationTotalSecondsForSummary
-import com.hoabui.virtualbody3d.domain.model.exercise.parseCartStrengthSetsRepsForSummary
+import com.hoabui.virtualbody3d.domain.model.exercise.normalizeDurationMinutesSeconds
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toExerciseLibraryCardImage
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.BookingExerciseSummaryUi
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseDraft
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SetRowDraft
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList
@@ -41,15 +41,15 @@ private fun formatBookingExerciseParametersSummary(
 ): String =
     when (mode) {
         ExerciseMeasurementMode.Strength -> {
-            val pair = parseCartStrengthSetsRepsForSummary(draft.sets, draft.reps) ?: return ""
-            context.getString(
-                R.string.exercise_library_booking_param_strength,
-                pair.first,
-                pair.second,
-            )
+            val sets = draft.setRows.size
+            val reps = draft.setRows.firstOrNull()?.reps ?: 0
+            if (sets <= 0 || reps <= 0) return ""
+            context.getString(R.string.exercise_library_booking_param_strength, sets, reps)
         }
         ExerciseMeasurementMode.Duration -> {
-            val total = parseCartDurationTotalSecondsForSummary(draft.sets, draft.reps) ?: return ""
+            val row = draft.setRows.firstOrNull() ?: SetRowDraft()
+            val total = normalizeDurationMinutesSeconds(row.minutes, row.seconds)
+            if (total <= 0) return ""
             val minutes = total / 60
             val seconds = total % 60
             if (seconds == 0) {

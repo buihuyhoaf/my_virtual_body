@@ -4,6 +4,7 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryListProjectionState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryCartState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SetRowDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.isCartDraftValidForSessionConfirm
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
@@ -43,8 +44,16 @@ class ExerciseDurationTest {
             "b" to ExerciseMeasurementMode.Duration,
         )
         val drafts = persistentMapOf(
-            "a" to ExerciseDraft(sets = "3", reps = "10"),
-            "b" to ExerciseDraft(sets = "1", reps = "30"),
+            // Strength: 3 sets × 10 reps — valid
+            "a" to ExerciseDraft(
+                setRows = persistentListOf(
+                    SetRowDraft(reps = 10),
+                    SetRowDraft(reps = 10),
+                    SetRowDraft(reps = 10),
+                ),
+            ),
+            // Duration: 1 min 30 sec — valid
+            "b" to ExerciseDraft(setRows = persistentListOf(SetRowDraft(minutes = 1, seconds = 30))),
         )
         val state = ExerciseLibraryUiState(
             cart = LibraryCartState(
@@ -61,7 +70,7 @@ class ExerciseDurationTest {
     @Test
     fun isCartDraftValid_durationZeroTotal_disabled() {
         val modes = persistentMapOf("b" to ExerciseMeasurementMode.Duration)
-        val drafts = persistentMapOf("b" to ExerciseDraft(sets = "0", reps = "0"))
+        val drafts = persistentMapOf("b" to ExerciseDraft(setRows = persistentListOf(SetRowDraft(minutes = 0, seconds = 0))))
         val state = ExerciseLibraryUiState(
             cart = LibraryCartState(
                 itemDrafts = drafts,
