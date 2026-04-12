@@ -1,7 +1,8 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.components
 
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animate
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,9 +28,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
@@ -40,7 +43,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,16 +51,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.util.VelocityTracker
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlin.math.absoluteValue
-import kotlin.math.abs
 import coil.compose.AsyncImage
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
@@ -80,12 +80,8 @@ import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
 import kotlinx.collections.immutable.ImmutableList
-
-
-import android.util.Log
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.draw.alpha
+import kotlinx.coroutines.launch
+import kotlin.math.absoluteValue
 
 // ─────────────────────────────────────────────────────────
 // Thumbnail row (unchanged)
@@ -140,10 +136,6 @@ fun CartThumbnailRow(
 // Stepper control: [-] value [+]
 // ─────────────────────────────────────────────────────────
 
-/**
- * Reusable [-] value [+] stepper.
- * Tapping the value label opens a number-pad dialog for manual entry.
- */
 @Composable
 private fun StepperControl(
     label: String,
@@ -187,7 +179,6 @@ private fun StepperControl(
                 ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // [-] button
             Box(
                 modifier = Modifier
                     .size(stepperButtonSize)
@@ -202,12 +193,9 @@ private fun StepperControl(
                 contentAlignment = Alignment.Center,
             ) {
                 GText(
-                    text = "−",
-                    style = token.typography.titleMedium,
-                    color = token.colors.primary,
+                    text = "−", style = token.typography.titleMedium, color = token.colors.primary
                 )
             }
-            // Value (tap for manual input)
             Box(
                 modifier = Modifier
                     .widthIn(min = stepperValueMinWidth)
@@ -229,7 +217,6 @@ private fun StepperControl(
                     modifier = Modifier.padding(horizontal = token.spacing.xxs),
                 )
             }
-            // [+] button
             Box(
                 modifier = Modifier
                     .size(stepperButtonSize)
@@ -244,9 +231,7 @@ private fun StepperControl(
                 contentAlignment = Alignment.Center,
             ) {
                 GText(
-                    text = "+",
-                    style = token.typography.titleMedium,
-                    color = token.colors.primary,
+                    text = "+", style = token.typography.titleMedium, color = token.colors.primary
                 )
             }
         }
@@ -280,7 +265,11 @@ private fun StepperControl(
             },
             dismissButton = {
                 TextButton(onClick = { showDialog = false }) {
-                    GText(text = stringResource(android.R.string.cancel), style = GymTheme.token.typography.labelMedium, color = GymTheme.token.colors.textSecondary)
+                    GText(
+                        text = stringResource(android.R.string.cancel),
+                        style = GymTheme.token.typography.labelMedium,
+                        color = GymTheme.token.colors.textSecondary
+                    )
                 }
             },
         )
@@ -338,6 +327,7 @@ private fun CartSetRowItem(
                     modifier = Modifier.weight(1f),
                 )
             }
+
             ExerciseMeasurementMode.Duration -> {
                 StepperControl(
                     label = minutesLabel,
@@ -363,7 +353,6 @@ private fun CartSetRowItem(
 // ─────────────────────────────────────────────────────────
 // Full stepper section: Sets header + per-row inputs
 // ─────────────────────────────────────────────────────────
-
 @Composable
 fun CartSetStepperSection(
     exerciseId: String,
@@ -374,14 +363,12 @@ fun CartSetStepperSection(
     modifier: Modifier = Modifier,
 ) {
     val token = GymTheme.token
-    val setListMax = token.bodyAnalysis.exerciseLibraryCartSetRowsListMaxHeight
     val setsLabel = stringResource(R.string.exercise_library_stepper_sets_label)
 
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(token.spacing.xs),
     ) {
-        // Sets stepper (controls row count)
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -398,25 +385,25 @@ fun CartSetStepperSection(
 
         GDivider(modifier = Modifier.fillMaxWidth(), color = token.colors.borderSubtle)
 
-        // One row per set — LazyColumn with stable keys for performance
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = setListMax),
+        // SỬA Ở ĐÂY: Dùng Column thường thay vì LazyColumn
+        Column(
+            modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(token.spacing.xs),
         ) {
-            itemsIndexed(
-                items = setRows,
-                key = { index, _ -> "${exerciseId}_set_$index" },
-            ) { index, row ->
+            setRows.forEachIndexed { index, row ->
                 CartSetRowItem(
                     setIndex = index,
                     row = row,
                     measurementMode = measurementMode,
                     exerciseId = exerciseId,
                     onStep = { field, delta -> onStepField(exerciseId, index, field, delta) },
-                    onManual = { field, value -> onSetFieldManual(exerciseId, index, field, value) },
-                    modifier = Modifier.animateItem(),
+                    onManual = { field, value ->
+                        onSetFieldManual(
+                            exerciseId, index, field, value
+                        )
+                    },
+                    // Giữ lại animation nếu muốn
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         }
@@ -453,6 +440,7 @@ private fun CartDragHandle(
         )
     }
 }
+
 // ─────────────────────────────────────────────────────────
 // Cart thumbnail composables (unchanged)
 // ─────────────────────────────────────────────────────────
@@ -485,9 +473,7 @@ private fun ExerciseLibraryCartThumbnail(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .then(
-                        if (isActive) Modifier.padding(activeInset) else Modifier,
-                    )
+                    .then(if (isActive) Modifier.padding(activeInset) else Modifier)
                     .clip(circularShape),
             ) {
                 AsyncImage(
@@ -524,8 +510,7 @@ private fun ExerciseLibraryCartRemoveSticker(
     val visualDiameter = token.bodyAnalysis.exerciseLibraryCartRemoveStickerVisualDiameter
     val glyphSize = token.bodyAnalysis.exerciseLibraryCartRemoveGlyphSize
     Box(
-        modifier = modifier
-            .clickable(
+        modifier = modifier.clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = ripple(bounded = true),
                 role = Role.Button,
@@ -558,6 +543,10 @@ private fun ExerciseLibraryCartRemoveSticker(
     }
 }
 
+// ─────────────────────────────────────────────────────────
+// FINAL CORE COMPONENT
+// ─────────────────────────────────────────────────────────
+
 @Composable
 fun ExerciseLibrarySelectionBar(
     libraryState: ExerciseLibraryUiState,
@@ -566,18 +555,17 @@ fun ExerciseLibrarySelectionBar(
 ) {
     val token = GymTheme.token
     val density = LocalDensity.current
+    val scope = rememberCoroutineScope()
 
     val cartItems = remember(libraryState.libraryList.sections, libraryState.cart.draftOrder) {
-        val byId = libraryState.libraryList.sections.asSequence()
-            .flatMap { it.items.asSequence() }.associateBy { it.id }
+        val byId = libraryState.libraryList.sections.asSequence().flatMap { it.items.asSequence() }
+            .associateBy { it.id }
         libraryState.cart.draftOrder.mapNotNull { byId[it] }
     }
+
     val activeId = libraryState.cart.activeExerciseId
     val isCartExpanded = libraryState.cart.isCartExpanded
     val activeDraft = activeId?.let { libraryState.cart.itemDrafts[it] }
-    val activeMeasurementMode = activeId?.let { id ->
-        libraryState.libraryList.exerciseMeasurementById[id]
-    } ?: ExerciseMeasurementMode.Strength
     val activeExerciseTitle = remember(activeId, cartItems) {
         activeId?.let { id -> cartItems.firstOrNull { it.id == id }?.title }
     }
@@ -586,21 +574,25 @@ fun ExerciseLibrarySelectionBar(
         token.bodyAnalysis.exerciseLibrarySelectionBarCollapsedListBottomInset.toPx()
     }
 
-    var fullContentHeightPx by remember { mutableFloatStateOf(0f) }
+    // Khởi tạo target height là 400dp để rangePx có giá trị ngay lập tức
+    var fullContentHeightPx by remember { mutableFloatStateOf(with(density) { 400.dp.toPx() }) }
     var expansionProgress by remember {
         mutableFloatStateOf(if (isCartExpanded) 1f else 0f)
     }
     var isDragging by remember { mutableStateOf(false) }
 
-    // Đảm bảo rangePx luôn có giá trị để bắt đầu vuốt
-    val rangePx = (fullContentHeightPx - collapsedHeightPx).coerceAtLeast(with(density) { 100.dp.toPx() })
+    // Tính range dựa trên kích thước thực tế đo được
+    val rangePx = (fullContentHeightPx - collapsedHeightPx).coerceAtLeast(1f)
 
     LaunchedEffect(isCartExpanded) {
         if (!isDragging) {
             animate(
                 initialValue = expansionProgress,
                 targetValue = if (isCartExpanded) 1f else 0f,
-                animationSpec = tween(token.motion.duration.standard)
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioNoBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
             ) { value, _ -> expansionProgress = value }
         }
     }
@@ -609,38 +601,46 @@ fun ExerciseLibrarySelectionBar(
         (collapsedHeightPx + (rangePx * expansionProgress)).toDp()
     }
 
+    // Logic xử lý Drag & Click chỉ cho Handle
     val dragModifier = Modifier.pointerInput(rangePx) {
+        val velocityThreshold = 500.dp.toPx()
         awaitEachGesture {
             val down = awaitFirstDown(requireUnconsumed = false)
             val tracker = VelocityTracker()
             var totalDragY = 0f
-
-            // Chỉ bắt đầu Drag nếu chạm vào vùng Handle
-            // (Hòa có thể bỏ check Y này nếu muốn vuốt ở bất cứ đâu trên Bar)
             isDragging = true
 
             verticalDrag(down.id) { change ->
                 val dragAmount = change.positionChange().y
                 totalDragY += dragAmount
+                // Quan trọng: Update progress dựa trên range thực tế
                 expansionProgress = (expansionProgress - dragAmount / rangePx).coerceIn(0f, 1f)
                 tracker.addPosition(change.uptimeMillis, change.position)
                 change.consume()
             }
-
             isDragging = false
 
             if (totalDragY.absoluteValue < 10f) {
                 actions.onToggleCartExpanded()
             } else {
                 val velocityY = tracker.calculateVelocity().y
-                val velocityThreshold = with(density) { 500.dp.toPx() }
                 val shouldExpand = when {
                     velocityY < -velocityThreshold -> true
                     velocityY > velocityThreshold -> false
                     expansionProgress > 0.5f -> true
                     else -> false
                 }
-                if (shouldExpand != isCartExpanded) actions.onToggleCartExpanded()
+                if (shouldExpand != isCartExpanded) {
+                    actions.onToggleCartExpanded()
+                } else {
+                    scope.launch {
+                        animate(
+                            initialValue = expansionProgress,
+                            targetValue = if (isCartExpanded) 1f else 0f,
+                            animationSpec = spring(Spring.DampingRatioNoBouncy)
+                        ) { v, _ -> expansionProgress = v }
+                    }
+                }
             }
         }
     }
@@ -648,50 +648,58 @@ fun ExerciseLibrarySelectionBar(
     GSurface(
         modifier = modifier
             .fillMaxWidth()
-            .height(currentHeightDp)
+            .height(currentHeightDp) // Surface đóng vai trò là "cửa sổ" cắt (clip) nội dung
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
         color = token.colors.surface,
         shadowElevation = token.elevation.level3,
         treatment = GSurfaceTreatment.Flat,
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            // LAYER: Expanded Content (WrapContent up to 400dp)
+        // Mấu chốt: wrapContentHeight(unbounded = true) giúp Column đo được 400dp
+        // ngay cả khi Surface đang chỉ cao 72dp.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(align = Alignment.Top, unbounded = true)
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 400.dp)
-                    .onSizeChanged {
-                        if (it.height > collapsedHeightPx) {
-                            fullContentHeightPx = it.height.toFloat()
+                    .heightIn(max = 400.dp) // Giới hạn thực tế để ko bị lỗi infinity
+                    .onSizeChanged { size ->
+                        // Chỉ cập nhật nếu đo được kích thước thực sự lớn hơn mức collapsed
+                        if (size.height > collapsedHeightPx) {
+                            fullContentHeightPx = size.height.toFloat()
                         }
                     }
-                    .alpha(expansionProgress.coerceIn(0.01f, 1f)) // Tránh alpha = 0 để hệ thống vẫn nhận diện Hit-test
             ) {
-                CartDragHandle()
+                // Chỉ Dragger nhận sự kiện
+                CartDragHandle(modifier = dragModifier)
 
-                Column(modifier = Modifier.padding(horizontal = token.spacing.sm)) {
-                    CartThumbnailRow(
-                        cartItems = cartItems,
-                        activeExerciseId = activeId,
-                        onSelectCartItem = actions.onSelectCartItem,
-                        onRemoveCartItem = actions.onRemoveCartItem,
-                        onClearAll = actions.onClearCart,
+                CartThumbnailRow(
+                    cartItems = cartItems,
+                    activeExerciseId = activeId,
+                    onSelectCartItem = actions.onSelectCartItem,
+                    onRemoveCartItem = actions.onRemoveCartItem,
+                    onClearAll = actions.onClearCart,
+                    modifier = Modifier.padding(horizontal = token.spacing.sm)
+                )
+
+                // Nội dung trồi lên vật lý (không dùng alpha)
+                activeExerciseTitle?.let { title ->
+                    GText(
+                        text = title,
+                        style = token.typography.titleMedium,
+                        color = token.colors.textPrimary,
+                        modifier = Modifier.padding(
+                            start = token.spacing.sm,
+                            end = token.spacing.sm,
+                            top = token.spacing.sm,
+                            bottom = token.spacing.xs
+                        )
                     )
-
-                    if (expansionProgress > 0.5f) {
-                        activeExerciseTitle?.let { title ->
-                            GText(
-                                text = title,
-                                style = token.typography.titleMedium,
-                                color = token.colors.textPrimary,
-                                modifier = Modifier.padding(vertical = token.spacing.xs)
-                            )
-                        }
-                    }
                 }
 
-                if (expansionProgress > 0.5f && activeDraft != null && activeId != null) {
-                    // PHẦN NÀY CHỈ SCROLL TRONG ĐÂY
+                if (activeDraft != null && activeId != null) {
                     Column(
                         modifier = Modifier
                             .weight(1f, fill = false)
@@ -702,60 +710,29 @@ fun ExerciseLibrarySelectionBar(
                         CartSetStepperSection(
                             exerciseId = activeId,
                             setRows = activeDraft.setRows,
-                            measurementMode = activeMeasurementMode,
+                            measurementMode = libraryState.libraryList.exerciseMeasurementById[activeId]
+                                ?: ExerciseMeasurementMode.Strength,
                             onStepField = actions.onStepCartField,
                             onSetFieldManual = actions.onSetCartFieldManual,
                         )
                     }
                 }
 
-                if (expansionProgress > 0.5f) {
-                    GButton(
-                        text = stringResource(R.string.exercise_library_add_to_session),
-                        onClick = actions.onAddToSession,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(token.spacing.sm),
-                        enabled = libraryState.libraryList.isAddToSessionEnabled
-                    )
-                }
-            }
-
-            // LAYER: Collapse Overlay (Dùng để hiển thị đẹp khi đóng)
-            if (expansionProgress < 0.2f) {
-                Box(
+                GButton(
+                    text = stringResource(R.string.exercise_library_add_to_session),
+                    onClick = actions.onAddToSession,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(with(density) { collapsedHeightPx.toDp() })
-                        .background(token.colors.surface)
-                ) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        CartDragHandle()
-                        CartThumbnailRow(
-                            cartItems = cartItems,
-                            activeExerciseId = activeId,
-                            onSelectCartItem = actions.onSelectCartItem,
-                            onRemoveCartItem = actions.onRemoveCartItem,
-                            onClearAll = actions.onClearCart,
-                            modifier = Modifier.padding(horizontal = token.spacing.sm)
-                        )
-                    }
-                }
+                        .padding(token.spacing.sm),
+                    enabled = libraryState.libraryList.isAddToSessionEnabled
+                )
             }
-
-            // CLEAR HITBOX FOR DRAG: Một lớp trong suốt phủ lên Handle để bắt Gesture
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp) // Kích thước của vùng Handle để vuốt/chạm
-                    .then(dragModifier)
-            )
         }
     }
 }
+
 // ─────────────────────────────────────────────────────────
 // File-level constants
 // ─────────────────────────────────────────────────────────
 
-/** Kotlin format pattern for displaying weight values (e.g. "20.0"). */
 private const val WEIGHT_FORMAT = "%.1f"
