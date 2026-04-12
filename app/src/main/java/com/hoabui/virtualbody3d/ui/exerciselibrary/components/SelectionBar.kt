@@ -1,9 +1,15 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.components
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,11 +17,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -29,12 +37,14 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -396,8 +406,46 @@ fun CartSetStepperSection(
 }
 
 // ─────────────────────────────────────────────────────────
-// Selection bar (updated)
+// Drag Handle
 // ─────────────────────────────────────────────────────────
+
+@Composable
+private fun CartDragHandle(
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val token = GymTheme.token
+    val handleColor = token.colors.borderStrong.copy(alpha = PrimitiveAlphaTokens.MEDIUM)
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                role = Role.Button,
+                onClick = onToggle,
+            )
+            .padding(vertical = 8.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = Modifier
+                .width(36.dp)
+                .height(4.dp)
+                .background(
+                    color = handleColor,
+                    shape = RoundedCornerShape(50),
+                ),
+        )
+    }
+}
+
+// ─────────────────────────────────────────────────────────
+// Selection bar (dual-state: collapsed / expanded)
+// ─────────────────────────────────────────────────────────
+
+/** Minimum cumulative drag distance (px) required to trigger a state toggle. */
+private const val DRAG_THRESHOLD_PX = 80f
 
 @Composable
 fun ExerciseLibrarySelectionBar(
@@ -429,10 +477,37 @@ fun ExerciseLibrarySelectionBar(
         libraryState.libraryList.exerciseMeasurementById[id]
     } ?: ExerciseMeasurementMode.Strength
     val bookingEnabled = libraryState.libraryList.isAddToSessionEnabled
+    val isExpanded = libraryState.cart.isCartExpanded
+
+    // Reset cumulative drag delta whenever expansion state changes externally (e.g., via tap).
+    var cumulativeDragDelta by remember(isExpanded) { mutableFloatStateOf(0f) }
+
+    val dragModifier = Modifier.pointerInput(actions.onToggleCartExpanded, isExpanded) {
+        detectVerticalDragGestures(
+            onDragStart = { cumulativeDragDelta = 0f },
+            onDragEnd = { cumulativeDragDelta = 0f },
+            onDragCancel = { cumulativeDragDelta = 0f },
+            onVerticalDrag = { change, dragAmount ->
+                change.consume()
+                cumulativeDragDelta += dragAmount
+                // Negative delta = drag upward → expand; positive = drag downward → collapse
+                if (!isExpanded && cumulativeDragDelta < -DRAG_THRESHOLD_PX) {
+                    actions.onToggleCartExpanded()
+                    cumulativeDragDelta = 0f
+                } else if (isExpanded && cumulativeDragDelta > DRAG_THRESHOLD_PX) {
+                    actions.onToggleCartExpanded()
+                    cumulativeDragDelta = 0f
+                }
+            },
+        )
+    }
+
+    val heightModifier = if (isExpanded) Modifier.wrapContentHeight() else Modifier.heightIn(min = barMin)
     GSurface(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = barMin),
+            .then(heightModifier)
+            .then(dragModifier),
         shape = slabShape,
         color = token.colors.surface,
         shadowElevation = token.elevation.level3,
@@ -445,40 +520,81 @@ fun ExerciseLibrarySelectionBar(
                 thickness = dockTopThickness,
                 color = token.colors.borderStrong.copy(alpha = PrimitiveAlphaTokens.MEDIUM),
             )
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = barMin)
-                    .padding(
-                        start = token.spacing.sm,
-                        end = token.spacing.sm,
-                        top = token.spacing.sm,
-                        bottom = token.spacing.sm,
-                    ),
-                verticalArrangement = Arrangement.spacedBy(token.spacing.sm),
-            ) {
-                CartThumbnailRow(
-                    cartItems = cartItems,
-                    activeExerciseId = activeId,
-                    onSelectCartItem = actions.onSelectCartItem,
-                    onRemoveCartItem = actions.onRemoveCartItem,
-                    onClearAll = actions.onClearCart,
-                )
-                if (activeDraft != null && activeId != null) {
-                    CartSetStepperSection(
-                        exerciseId = activeId,
-                        setRows = activeDraft.setRows,
-                        measurementMode = activeMeasurementMode,
-                        onStepField = actions.onStepCartField,
-                        onSetFieldManual = actions.onSetCartFieldManual,
-                    )
+            // Always-visible drag handle
+            CartDragHandle(
+                onToggle = actions.onToggleCartExpanded,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            // Animated content transitions between collapsed and expanded
+            AnimatedContent(
+                targetState = isExpanded,
+                transitionSpec = {
+                    fadeIn(tween(durationMillis = 220)) togetherWith fadeOut(tween(durationMillis = 150))
+                },
+                label = "cart_expand_collapse",
+                modifier = Modifier.fillMaxWidth(),
+            ) { expanded ->
+                if (expanded) {
+                    // Expanded: full exercise detail view
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                start = token.spacing.sm,
+                                end = token.spacing.sm,
+                                bottom = token.spacing.sm,
+                            ),
+                        verticalArrangement = Arrangement.spacedBy(token.spacing.sm),
+                    ) {
+                        CartThumbnailRow(
+                            cartItems = cartItems,
+                            activeExerciseId = activeId,
+                            onSelectCartItem = actions.onSelectCartItem,
+                            onRemoveCartItem = actions.onRemoveCartItem,
+                            onClearAll = actions.onClearCart,
+                        )
+                        if (activeDraft != null && activeId != null) {
+                            CartSetStepperSection(
+                                exerciseId = activeId,
+                                setRows = activeDraft.setRows,
+                                measurementMode = activeMeasurementMode,
+                                onStepField = actions.onStepCartField,
+                                onSetFieldManual = actions.onSetCartFieldManual,
+                            )
+                        }
+                        GButton(
+                            text = stringResource(R.string.exercise_library_add_to_session),
+                            onClick = actions.onAddToSession,
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = bookingEnabled,
+                        )
+                    }
+                } else {
+                    // Collapsed: only thumbnails + clear all, tapping area also expands
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = barMin)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = actions.onToggleCartExpanded,
+                            )
+                            .padding(
+                                start = token.spacing.sm,
+                                end = token.spacing.sm,
+                                bottom = token.spacing.sm,
+                            ),
+                    ) {
+                        CartThumbnailRow(
+                            cartItems = cartItems,
+                            activeExerciseId = activeId,
+                            onSelectCartItem = actions.onSelectCartItem,
+                            onRemoveCartItem = actions.onRemoveCartItem,
+                            onClearAll = actions.onClearCart,
+                        )
+                    }
                 }
-                GButton(
-                    text = stringResource(R.string.exercise_library_add_to_session),
-                    onClick = actions.onAddToSession,
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = bookingEnabled,
-                )
             }
         }
     }

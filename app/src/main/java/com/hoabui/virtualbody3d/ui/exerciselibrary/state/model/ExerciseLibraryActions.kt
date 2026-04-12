@@ -38,4 +38,6 @@ data class ExerciseLibraryActions(
     val onAddCartSetRow: (exerciseId: String) -> Unit,
     /** Manual numeric entry for a specific field of a specific set row. */
     val onSetCartFieldManual: (exerciseId: String, setIndex: Int, field: CartSetField, value: String) -> Unit,
+    /** Toggle the cart panel between collapsed and expanded states. */
+    val onToggleCartExpanded: () -> Unit,
 )
