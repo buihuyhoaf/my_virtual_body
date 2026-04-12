@@ -4,8 +4,9 @@ import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.normalizeDurationMinutesSeconds
 
 /**
- * `true` when every cart draft is valid for booking confirm (strength: positive sets/reps;
- * duration: normalized total seconds > 0).
+ * `true` when every cart draft is valid for booking confirm:
+ *  - Strength: at least one set row with positive reps.
+ *  - Duration: the first row's minutes+seconds normalise to > 0 total seconds.
  */
 fun ExerciseLibraryUiState.isCartDraftValidForSessionConfirm(): Boolean {
     if (cart.itemDrafts.isEmpty()) return false
@@ -13,14 +14,11 @@ fun ExerciseLibraryUiState.isCartDraftValidForSessionConfirm(): Boolean {
         val mode = libraryList.exerciseMeasurementById[id] ?: ExerciseMeasurementMode.Strength
         when (mode) {
             ExerciseMeasurementMode.Strength -> {
-                val sets = draft.sets.trim().toIntOrNull()
-                val reps = draft.reps.trim().toIntOrNull()
-                sets != null && reps != null && sets > 0 && reps > 0
+                draft.setRows.isNotEmpty() && draft.setRows.all { row -> row.reps > 0 }
             }
             ExerciseMeasurementMode.Duration -> {
-                val minutes = draft.sets.trim().toIntOrNull() ?: 0
-                val seconds = draft.reps.trim().toIntOrNull() ?: 0
-                normalizeDurationMinutesSeconds(minutes, seconds) > 0
+                val row = draft.setRows.firstOrNull() ?: return@all false
+                normalizeDurationMinutesSeconds(row.minutes, row.seconds) > 0
             }
         }
     }

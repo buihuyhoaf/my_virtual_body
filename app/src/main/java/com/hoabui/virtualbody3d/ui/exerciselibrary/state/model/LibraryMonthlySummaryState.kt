@@ -1,17 +1,18 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.state.model
 
 import androidx.compose.runtime.Immutable
-import java.time.YearMonth
+import kotlinx.collections.immutable.ImmutableList
 
+/**
+ * UI state for the weekly activity heatmap card in the Exercise Library screen.
+ */
 @Immutable
-sealed interface LibraryMonthlySummaryState {
-    data object Loading : LibraryMonthlySummaryState
+sealed interface LibraryWeeklyHeatmapState {
+    data object Loading : LibraryWeeklyHeatmapState
 
     data class Loaded(
-        val yearMonth: YearMonth,
-        val workoutDayCount: Int,
-        val restDayCount: Int,
-    ) : LibraryMonthlySummaryState
+        val days: ImmutableList<WeeklyHeatmapDayUiModel>,
+    ) : LibraryWeeklyHeatmapState
 
-    data class Error(val message: String) : LibraryMonthlySummaryState
+    data class Error(val message: String) : LibraryWeeklyHeatmapState
 }

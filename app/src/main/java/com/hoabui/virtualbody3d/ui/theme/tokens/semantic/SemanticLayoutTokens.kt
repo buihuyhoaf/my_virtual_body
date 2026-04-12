@@ -102,6 +102,25 @@ data class BodyAnalysisLayoutSemantics(
      * Strictly below 28dp so thumbnail center stays selectable; list tiles use [exerciseLibraryCornerStickerTouchTargetSize].
      */
     val exerciseLibraryCartRemoveTouchTargetSize: Dp,
+    /** Horizontal pill width for the exercise library cart drag affordance. */
+    val exerciseLibraryCartDragHandleWidth: Dp,
+    /** Vertical thickness of the cart drag handle pill. */
+    val exerciseLibraryCartDragHandleHeight: Dp,
+    /** Square size for cart stepper [−] / [+] tap targets. */
+    val exerciseLibraryCartStepperButtonSize: Dp,
+    /** Minimum width of the value field between stepper buttons. */
+    val exerciseLibraryCartStepperValueMinWidth: Dp,
+    /** Max height of the per-set list before internal vertical scroll. */
+    val exerciseLibraryCartSetRowsListMaxHeight: Dp,
+    /** Drag distance threshold for ambiguous-velocity snap decisions. */
+    val exerciseLibraryCartSnapDragDistanceThreshold: Dp,
+    /** Absolute vertical velocity threshold for snap (pixels per second). */
+    val exerciseLibraryCartSnapVelocityThresholdPxPerSec: Float,
+    /**
+     * Fallback extra height when expanded content has not been measured yet (title + stepper + CTA).
+     * Replaced by real measurement once the expanded column lays out.
+     */
+    val exerciseLibraryCartExpandedContentFallbackExtra: Dp,
     /** Booking sheet top corner radius (modal). */
     val exerciseLibraryBookingSheetTopCornerRadius: Dp,
     /** Minimum touch width of a day chip in session booking. */
@@ -203,6 +222,14 @@ fun gymBodyAnalysisLayoutSemantics(): BodyAnalysisLayoutSemantics = BodyAnalysis
     exerciseLibraryCartRemoveStickerVisualDiameter = 20.dp,
     exerciseLibraryCartRemoveGlyphSize = 14.dp,
     exerciseLibraryCartRemoveTouchTargetSize = 27.dp,
+    exerciseLibraryCartDragHandleWidth = 36.dp,
+    exerciseLibraryCartDragHandleHeight = 4.dp,
+    exerciseLibraryCartStepperButtonSize = 40.dp,
+    exerciseLibraryCartStepperValueMinWidth = 42.dp,
+    exerciseLibraryCartSetRowsListMaxHeight = 240.dp,
+    exerciseLibraryCartSnapDragDistanceThreshold = 80.dp,
+    exerciseLibraryCartSnapVelocityThresholdPxPerSec = 800f,
+    exerciseLibraryCartExpandedContentFallbackExtra = 280.dp,
     exerciseLibraryBookingSheetTopCornerRadius = 16.dp,
     exerciseLibraryBookingDateChipMinWidth = 52.dp,
     exerciseLibraryBookingDateChipHeight = 40.dp,

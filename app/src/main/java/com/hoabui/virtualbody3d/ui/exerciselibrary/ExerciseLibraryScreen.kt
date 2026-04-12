@@ -10,10 +10,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -38,13 +36,14 @@ import com.hoabui.virtualbody3d.ui.components.UiStateContent
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.AddExerciseSuccessDialog
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseDetailDialog
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryEmptyState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryMonthlySummaryCard
+import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryWeeklyHeatmapCard
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySearchLayer
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.LongSessionWarningDialog
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySessionBookingSheetHost
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySelectionBar
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseSection
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.CartSetField
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryActions
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel.ExerciseLibraryViewModel
@@ -55,6 +54,7 @@ import kotlinx.coroutines.flow.filter
 import java.time.ZoneId
 
 private object ExerciseLibraryListContentTypes {
+    const val WeeklyHeatmap = "exercise_library_weekly_heatmap"
     const val RegionHeader = "exercise_library_region_header"
     const val RegionRow = "exercise_library_region_row"
     const val Empty = "exercise_library_empty"
@@ -102,6 +102,10 @@ fun ExerciseLibraryScreen(
                 viewModel.dismissAddExerciseSuccess()
                 onNavigateToWorkoutCalendar()
             },
+            onStepCartField = viewModel::stepCartField,
+            onAddCartSetRow = { exerciseId -> viewModel.stepCartField(exerciseId, 0, CartSetField.SETS, 1) },
+            onSetCartFieldManual = viewModel::setCartFieldManual,
+            onToggleCartExpanded = viewModel::toggleCartExpanded,
         )
     }
 
@@ -194,11 +198,12 @@ fun ExerciseLibraryScreenContent(
         { focused: Boolean -> isSearchFocused.value = focused }
     }
     val cartVisible = state.cart.itemDrafts.isNotEmpty()
-    val barMinHeight = token.bodyAnalysis.exerciseLibrarySelectionBarMinHeight
-    val listBottomPadding = if (cartVisible) barMinHeight else token.spacing.none
+    val cartCollapsedInset = token.bodyAnalysis.exerciseLibrarySelectionBarCollapsedListBottomInset
+    val listBottomPadding = if (cartVisible) cartCollapsedInset else token.spacing.none
     val bodyTok = token.bodyAnalysis
     Box(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
+            // Sticky search bar header
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -216,12 +221,6 @@ fun ExerciseLibraryScreenContent(
                     slideSpec = slideSpec,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                Spacer(modifier = Modifier.height(bodyTok.exerciseLibrarySearchToSummaryGap))
-                ExerciseLibraryMonthlySummaryCard(
-                    state = state.monthlySummary,
-                    onClick = actions.onNavigateToWorkoutCalendar,
-                    modifier = Modifier.fillMaxWidth(),
-                )
             }
             Box(
                 modifier = Modifier
@@ -233,6 +232,28 @@ fun ExerciseLibraryScreenContent(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = listBottomPadding),
                 ) {
+                    // Weekly heatmap as first scrollable item
+                    item(
+                        key = "exercise_library_weekly_heatmap",
+                        contentType = ExerciseLibraryListContentTypes.WeeklyHeatmap,
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    start = token.spacing.md,
+                                    end = token.spacing.md,
+                                    top = token.spacing.xs,
+                                    bottom = bodyTok.exerciseLibrarySearchToSummaryGap,
+                                ),
+                        ) {
+                            ExerciseLibraryWeeklyHeatmapCard(
+                                state = state.weeklyHeatmap,
+                                onClick = actions.onNavigateToWorkoutCalendar,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                    }
                     if (state.libraryList.sections.isEmpty()) {
                         item(
                             key = "exercise_library_empty",

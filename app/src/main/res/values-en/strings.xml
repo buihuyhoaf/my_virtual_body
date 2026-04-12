@@ -84,4 +84,13 @@
     <string name="workout_calendar_delete_undo_snackbar">Exercise removed.</string>
     <string name="workout_calendar_undo">Undo</string>
     <string name="workout_calendar_delete_failed">Couldn\'t delete. Try again.</string>
+    <string name="exercise_library_stepper_sets_label">Sets</string>
+    <string name="exercise_library_stepper_reps_label">Reps</string>
+    <string name="exercise_library_stepper_weight_label">KG</string>
+    <string name="exercise_library_stepper_minutes_label">Min</string>
+    <string name="exercise_library_stepper_seconds_label">Sec</string>
+    <string name="exercise_library_stepper_decrease_cd">Decrease %s</string>
+    <string name="exercise_library_stepper_increase_cd">Increase %s</string>
+    <string name="exercise_library_stepper_value_cd">Enter %s manually</string>
+    <string name="exercise_library_set_row_label">Set %d</string>
 </resources>
