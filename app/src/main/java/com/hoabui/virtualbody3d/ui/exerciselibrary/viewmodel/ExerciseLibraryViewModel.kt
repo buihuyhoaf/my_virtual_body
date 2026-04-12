@@ -533,7 +533,7 @@ class ExerciseLibraryViewModel @Inject constructor(
                         weightKg = value.toDoubleOrNull()?.coerceAtLeast(0.0) ?: return,
                     )
                     CartSetField.MINUTES -> row.copy(minutes = value.toIntOrNull()?.coerceAtLeast(0) ?: return)
-                    CartSetField.SECONDS -> row.copy(seconds = value.toIntOrNull()?.coerceIn(0, 59) ?: return)
+                    CartSetField.SECONDS -> row.copy(seconds = value.toIntOrNull()?.coerceIn(0, MAX_SECONDS_IN_MINUTE) ?: return)
                     CartSetField.SETS -> return
                 }
                 val newRows = draft.setRows.mapIndexed { i, r -> if (i == setIndex) newRow else r }
@@ -629,6 +629,7 @@ class ExerciseLibraryViewModel @Inject constructor(
         const val BOOKING_LOG_TAG = "ExerciseLibraryBooking"
         const val WEIGHT_STEP_KG = 2.5
         const val SECONDS_STEP = 30
+        const val MAX_SECONDS_IN_MINUTE = 59
     }
 }
 

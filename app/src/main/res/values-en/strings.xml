@@ -93,5 +93,4 @@
     <string name="exercise_library_stepper_increase_cd">Increase %s</string>
     <string name="exercise_library_stepper_value_cd">Enter %s manually</string>
     <string name="exercise_library_set_row_label">Set %d</string>
-    <string name="exercise_library_stepper_weight_format">%.1f</string>
 </resources>

@@ -8,7 +8,10 @@ import androidx.compose.runtime.Immutable
  */
 @Immutable
 data class SetRowDraft(
-    /** Repetitions per set (used for strength mode). */
+    /**
+     * Repetitions per set (used for strength mode).
+     * Defaults to 10, a common starting point for resistance training sets.
+     */
     val reps: Int = 10,
     /** Weight in kilograms (used for strength mode). */
     val weightKg: Double = 0.0,

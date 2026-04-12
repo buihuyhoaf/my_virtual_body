@@ -239,7 +239,6 @@
     <string name="exercise_library_stepper_increase_cd">Tăng %s</string>
     <string name="exercise_library_stepper_value_cd">Nhập %s thủ công</string>
     <string name="exercise_library_set_row_label">Hiệp %d</string>
-    <string name="exercise_library_stepper_weight_format">%.1f</string>
     <string name="exercise_library_add_success_title">Đã thêm thành công!</string>
     <string name="exercise_library_add_success_date_today">Hôm nay</string>
     <string name="exercise_library_add_success_date_tomorrow">Ngày mai</string>

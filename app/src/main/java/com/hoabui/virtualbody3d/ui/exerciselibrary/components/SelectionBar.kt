@@ -304,7 +304,7 @@ private fun CartSetRowItem(
                 )
                 StepperControl(
                     label = weightLabel,
-                    displayValue = "%.1f".format(row.weightKg),
+                    displayValue = WEIGHT_FORMAT.format(row.weightKg),
                     onDecrease = { onStep(CartSetField.WEIGHT, -1) },
                     onIncrease = { onStep(CartSetField.WEIGHT, +1) },
                     onManualInput = { onManual(CartSetField.WEIGHT, it) },
@@ -374,7 +374,7 @@ fun CartSetStepperSection(
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(max = 240.dp),
+                .heightIn(max = SetListMaxHeight),
             verticalArrangement = Arrangement.spacedBy(token.spacing.xs),
         ) {
             itemsIndexed(
@@ -588,3 +588,13 @@ private fun ExerciseLibraryCartRemoveSticker(
         }
     }
 }
+
+// ─────────────────────────────────────────────────────────
+// File-level constants
+// ─────────────────────────────────────────────────────────
+
+/** Maximum height of the per-set row list before it scrolls. */
+private val SetListMaxHeight = 240.dp
+
+/** Kotlin format pattern for displaying weight values (e.g. "20.0"). */
+private const val WEIGHT_FORMAT = "%.1f"
