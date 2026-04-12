@@ -55,6 +55,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import kotlin.math.absoluteValue
 import kotlin.math.abs
 import coil.compose.AsyncImage
@@ -79,6 +80,12 @@ import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
 import kotlinx.collections.immutable.ImmutableList
+
+
+import android.util.Log
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.draw.alpha
 
 // ─────────────────────────────────────────────────────────
 // Thumbnail row (unchanged)
@@ -446,232 +453,6 @@ private fun CartDragHandle(
         )
     }
 }
-
-// ─────────────────────────────────────────────────────────
-// Selection bar (dual-state: collapsed / expanded)
-// ─────────────────────────────────────────────────────────
-
-private const val EXPANSION_REVEAL_EPSILON = 0.02f
-
-@Composable
-fun ExerciseLibrarySelectionBar(
-    libraryState: ExerciseLibraryUiState,
-    actions: ExerciseLibraryActions,
-    modifier: Modifier = Modifier,
-) {
-    val token = GymTheme.token
-    val density = LocalDensity.current
-    val topCorner = token.bodyAnalysis.exerciseLibrarySelectionBarTopCornerRadius
-    val slabShape = remember(topCorner, token.borderWidth.none) {
-        RoundedCornerShape(
-            topStart = topCorner,
-            topEnd = topCorner,
-            bottomStart = token.borderWidth.none,
-            bottomEnd = token.borderWidth.none,
-        )
-    }
-    val cartItems = remember(libraryState.libraryList.sections, libraryState.cart.draftOrder) {
-        val byId = libraryState.libraryList.sections.asSequence()
-            .flatMap { it.items.asSequence() }
-            .associateBy { it.id }
-        libraryState.cart.draftOrder.mapNotNull { byId[it] }
-    }
-    val activeId = libraryState.cart.activeExerciseId
-    val activeDraft = activeId?.let { libraryState.cart.itemDrafts[it] }
-    val activeMeasurementMode = activeId?.let { id ->
-        libraryState.libraryList.exerciseMeasurementById[id]
-    } ?: ExerciseMeasurementMode.Strength
-    val bookingEnabled = libraryState.libraryList.isAddToSessionEnabled
-    val isCartExpanded = libraryState.cart.isCartExpanded
-    val activeExerciseTitle = remember(activeId, cartItems) {
-        activeId?.let { id -> cartItems.firstOrNull { it.id == id }?.title }
-    }
-
-    val collapsedInsetDp = token.bodyAnalysis.exerciseLibrarySelectionBarCollapsedListBottomInset
-    val collapsedHeightPx = remember(collapsedInsetDp, density) {
-        with(density) { collapsedInsetDp.toPx() }
-    }
-    val fallbackExtraPx = remember(token.bodyAnalysis.exerciseLibraryCartExpandedContentFallbackExtra, density) {
-        with(density) { token.bodyAnalysis.exerciseLibraryCartExpandedContentFallbackExtra.toPx() }
-    }
-
-    var expandedMeasuredPx by remember { mutableFloatStateOf(0f) }
-    val expandedHeightPx = remember(expandedMeasuredPx, collapsedHeightPx, fallbackExtraPx) {
-        if (expandedMeasuredPx > 0f) expandedMeasuredPx
-        else collapsedHeightPx + fallbackExtraPx
-    }
-
-    var expansionProgress by remember {
-        mutableFloatStateOf(if (libraryState.cart.isCartExpanded) 1f else 0f)
-    }
-    var isDragging by remember { mutableStateOf(false) }
-
-    val onToggleUpdated = rememberUpdatedState(actions.onToggleCartExpanded)
-    val isCartExpandedUpdated = rememberUpdatedState(isCartExpanded)
-    val velThreshold = token.bodyAnalysis.exerciseLibraryCartSnapVelocityThresholdPxPerSec
-    val tapSlopPx = remember(token.spacing.xs, density) {
-        with(density) { token.spacing.xs.toPx() }
-    }
-
-    LaunchedEffect(isCartExpanded, isDragging) {
-        if (!isDragging) {
-            val target = if (isCartExpanded) 1f else 0f
-            if ((expansionProgress - target).absoluteValue > 0.001f) {
-                animate(
-                    initialValue = expansionProgress,
-                    targetValue = target,
-                    animationSpec = tween(
-                        durationMillis = token.motion.duration.standard,
-                        easing = token.motion.easing.standard,
-                    ),
-                ) { v, _ ->
-                    expansionProgress = v
-                }
-            }
-        }
-    }
-
-    val barHeightPx = remember(collapsedHeightPx, expandedHeightPx, expansionProgress) {
-        collapsedHeightPx + (expandedHeightPx - collapsedHeightPx) * expansionProgress
-    }
-    val barHeightDp = with(density) { barHeightPx.toDp() }
-
-    val revealDetail =
-        isCartExpanded || isDragging || expansionProgress > EXPANSION_REVEAL_EPSILON
-
-    val handleDragModifier = Modifier.pointerInput(
-        collapsedHeightPx,
-        expandedHeightPx,
-        velThreshold,
-        tapSlopPx,
-    ) {
-        awaitEachGesture {
-            val down = awaitFirstDown(requireUnconsumed = false)
-            val tracker = VelocityTracker()
-            tracker.addPosition(down.uptimeMillis, down.position)
-            isDragging = true
-            var totalAbs = 0f
-            verticalDrag(down.id) { change ->
-                tracker.addPosition(change.uptimeMillis, change.position)
-                val dy = change.positionChange().y
-                totalAbs += abs(dy)
-                val range = (expandedHeightPx - collapsedHeightPx).coerceAtLeast(1f)
-                expansionProgress = (expansionProgress - dy / range).coerceIn(0f, 1f)
-                change.consume()
-            }
-            val vy = tracker.calculateVelocity().y
-            val targetExpanded = when {
-                vy < -velThreshold -> true
-                vy > velThreshold -> false
-                expansionProgress > 0.5f -> true
-                else -> false
-            }
-            isDragging = false
-            if (totalAbs < tapSlopPx) {
-                onToggleUpdated.value()
-            } else if (targetExpanded != isCartExpandedUpdated.value) {
-                onToggleUpdated.value()
-            }
-        }
-    }
-
-    GSurface(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(barHeightDp)
-            .clip(slabShape),
-        shape = slabShape,
-        color = token.colors.surface,
-        shadowElevation = token.elevation.level3,
-        treatment = GSurfaceTreatment.Flat,
-        border = null,
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .onSizeChanged {
-                    if (revealDetail) {
-                        expandedMeasuredPx = it.height.toFloat()
-                    }
-                },
-        ) {
-            CartDragHandle(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .then(handleDragModifier),
-            )
-            if (!revealDetail) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = actions.onToggleCartExpanded,
-                        )
-                        .padding(
-                            start = token.spacing.sm,
-                            end = token.spacing.sm,
-                            bottom = token.spacing.sm,
-                        ),
-                ) {
-                    CartThumbnailRow(
-                        cartItems = cartItems,
-                        activeExerciseId = activeId,
-                        onSelectCartItem = actions.onSelectCartItem,
-                        onRemoveCartItem = actions.onRemoveCartItem,
-                        onClearAll = actions.onClearCart,
-                    )
-                }
-            } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            start = token.spacing.sm,
-                            end = token.spacing.sm,
-                            bottom = token.spacing.sm,
-                        ),
-                    verticalArrangement = Arrangement.spacedBy(token.spacing.sm),
-                ) {
-                    CartThumbnailRow(
-                        cartItems = cartItems,
-                        activeExerciseId = activeId,
-                        onSelectCartItem = actions.onSelectCartItem,
-                        onRemoveCartItem = actions.onRemoveCartItem,
-                        onClearAll = actions.onClearCart,
-                    )
-                    activeExerciseTitle?.let { title ->
-                        GText(
-                            text = title,
-                            style = token.typography.titleMedium,
-                            color = token.colors.textPrimary,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                    if (activeDraft != null) {
-                        CartSetStepperSection(
-                            exerciseId = checkNotNull(activeId),
-                            setRows = activeDraft.setRows,
-                            measurementMode = activeMeasurementMode,
-                            onStepField = actions.onStepCartField,
-                            onSetFieldManual = actions.onSetCartFieldManual,
-                        )
-                    }
-                    GButton(
-                        text = stringResource(R.string.exercise_library_add_to_session),
-                        onClick = actions.onAddToSession,
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = bookingEnabled,
-                    )
-                }
-            }
-        }
-    }
-}
-
 // ─────────────────────────────────────────────────────────
 // Cart thumbnail composables (unchanged)
 // ─────────────────────────────────────────────────────────
@@ -777,6 +558,201 @@ private fun ExerciseLibraryCartRemoveSticker(
     }
 }
 
+@Composable
+fun ExerciseLibrarySelectionBar(
+    libraryState: ExerciseLibraryUiState,
+    actions: ExerciseLibraryActions,
+    modifier: Modifier = Modifier,
+) {
+    val token = GymTheme.token
+    val density = LocalDensity.current
+
+    val cartItems = remember(libraryState.libraryList.sections, libraryState.cart.draftOrder) {
+        val byId = libraryState.libraryList.sections.asSequence()
+            .flatMap { it.items.asSequence() }.associateBy { it.id }
+        libraryState.cart.draftOrder.mapNotNull { byId[it] }
+    }
+    val activeId = libraryState.cart.activeExerciseId
+    val isCartExpanded = libraryState.cart.isCartExpanded
+    val activeDraft = activeId?.let { libraryState.cart.itemDrafts[it] }
+    val activeMeasurementMode = activeId?.let { id ->
+        libraryState.libraryList.exerciseMeasurementById[id]
+    } ?: ExerciseMeasurementMode.Strength
+    val activeExerciseTitle = remember(activeId, cartItems) {
+        activeId?.let { id -> cartItems.firstOrNull { it.id == id }?.title }
+    }
+
+    val collapsedHeightPx = with(density) {
+        token.bodyAnalysis.exerciseLibrarySelectionBarCollapsedListBottomInset.toPx()
+    }
+
+    var fullContentHeightPx by remember { mutableFloatStateOf(0f) }
+    var expansionProgress by remember {
+        mutableFloatStateOf(if (isCartExpanded) 1f else 0f)
+    }
+    var isDragging by remember { mutableStateOf(false) }
+
+    // Đảm bảo rangePx luôn có giá trị để bắt đầu vuốt
+    val rangePx = (fullContentHeightPx - collapsedHeightPx).coerceAtLeast(with(density) { 100.dp.toPx() })
+
+    LaunchedEffect(isCartExpanded) {
+        if (!isDragging) {
+            animate(
+                initialValue = expansionProgress,
+                targetValue = if (isCartExpanded) 1f else 0f,
+                animationSpec = tween(token.motion.duration.standard)
+            ) { value, _ -> expansionProgress = value }
+        }
+    }
+
+    val currentHeightDp = with(density) {
+        (collapsedHeightPx + (rangePx * expansionProgress)).toDp()
+    }
+
+    val dragModifier = Modifier.pointerInput(rangePx) {
+        awaitEachGesture {
+            val down = awaitFirstDown(requireUnconsumed = false)
+            val tracker = VelocityTracker()
+            var totalDragY = 0f
+
+            // Chỉ bắt đầu Drag nếu chạm vào vùng Handle
+            // (Hòa có thể bỏ check Y này nếu muốn vuốt ở bất cứ đâu trên Bar)
+            isDragging = true
+
+            verticalDrag(down.id) { change ->
+                val dragAmount = change.positionChange().y
+                totalDragY += dragAmount
+                expansionProgress = (expansionProgress - dragAmount / rangePx).coerceIn(0f, 1f)
+                tracker.addPosition(change.uptimeMillis, change.position)
+                change.consume()
+            }
+
+            isDragging = false
+
+            if (totalDragY.absoluteValue < 10f) {
+                actions.onToggleCartExpanded()
+            } else {
+                val velocityY = tracker.calculateVelocity().y
+                val velocityThreshold = with(density) { 500.dp.toPx() }
+                val shouldExpand = when {
+                    velocityY < -velocityThreshold -> true
+                    velocityY > velocityThreshold -> false
+                    expansionProgress > 0.5f -> true
+                    else -> false
+                }
+                if (shouldExpand != isCartExpanded) actions.onToggleCartExpanded()
+            }
+        }
+    }
+
+    GSurface(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(currentHeightDp)
+            .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
+        color = token.colors.surface,
+        shadowElevation = token.elevation.level3,
+        treatment = GSurfaceTreatment.Flat,
+    ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            // LAYER: Expanded Content (WrapContent up to 400dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 400.dp)
+                    .onSizeChanged {
+                        if (it.height > collapsedHeightPx) {
+                            fullContentHeightPx = it.height.toFloat()
+                        }
+                    }
+                    .alpha(expansionProgress.coerceIn(0.01f, 1f)) // Tránh alpha = 0 để hệ thống vẫn nhận diện Hit-test
+            ) {
+                CartDragHandle()
+
+                Column(modifier = Modifier.padding(horizontal = token.spacing.sm)) {
+                    CartThumbnailRow(
+                        cartItems = cartItems,
+                        activeExerciseId = activeId,
+                        onSelectCartItem = actions.onSelectCartItem,
+                        onRemoveCartItem = actions.onRemoveCartItem,
+                        onClearAll = actions.onClearCart,
+                    )
+
+                    if (expansionProgress > 0.5f) {
+                        activeExerciseTitle?.let { title ->
+                            GText(
+                                text = title,
+                                style = token.typography.titleMedium,
+                                color = token.colors.textPrimary,
+                                modifier = Modifier.padding(vertical = token.spacing.xs)
+                            )
+                        }
+                    }
+                }
+
+                if (expansionProgress > 0.5f && activeDraft != null && activeId != null) {
+                    // PHẦN NÀY CHỈ SCROLL TRONG ĐÂY
+                    Column(
+                        modifier = Modifier
+                            .weight(1f, fill = false)
+                            .fillMaxWidth()
+                            .padding(horizontal = token.spacing.sm)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        CartSetStepperSection(
+                            exerciseId = activeId,
+                            setRows = activeDraft.setRows,
+                            measurementMode = activeMeasurementMode,
+                            onStepField = actions.onStepCartField,
+                            onSetFieldManual = actions.onSetCartFieldManual,
+                        )
+                    }
+                }
+
+                if (expansionProgress > 0.5f) {
+                    GButton(
+                        text = stringResource(R.string.exercise_library_add_to_session),
+                        onClick = actions.onAddToSession,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(token.spacing.sm),
+                        enabled = libraryState.libraryList.isAddToSessionEnabled
+                    )
+                }
+            }
+
+            // LAYER: Collapse Overlay (Dùng để hiển thị đẹp khi đóng)
+            if (expansionProgress < 0.2f) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(with(density) { collapsedHeightPx.toDp() })
+                        .background(token.colors.surface)
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        CartDragHandle()
+                        CartThumbnailRow(
+                            cartItems = cartItems,
+                            activeExerciseId = activeId,
+                            onSelectCartItem = actions.onSelectCartItem,
+                            onRemoveCartItem = actions.onRemoveCartItem,
+                            onClearAll = actions.onClearCart,
+                            modifier = Modifier.padding(horizontal = token.spacing.sm)
+                        )
+                    }
+                }
+            }
+
+            // CLEAR HITBOX FOR DRAG: Một lớp trong suốt phủ lên Handle để bắt Gesture
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp) // Kích thước của vùng Handle để vuốt/chạm
+                    .then(dragModifier)
+            )
+        }
+    }
+}
 // ─────────────────────────────────────────────────────────
 // File-level constants
 // ─────────────────────────────────────────────────────────

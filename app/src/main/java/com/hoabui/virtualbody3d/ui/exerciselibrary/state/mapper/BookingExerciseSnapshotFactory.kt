@@ -43,13 +43,12 @@ private fun formatBookingExerciseParametersSummary(
         ExerciseMeasurementMode.Strength -> {
             val sets = draft.setRows.size
             val reps = draft.setRows.firstOrNull()?.reps ?: 0
-            if (sets <= 0 || reps <= 0) return ""
-            context.getString(R.string.exercise_library_booking_param_strength, sets, reps)
+            if (sets <= 0 || reps <= 0)  ""
+            else context.getString(R.string.exercise_library_booking_param_strength, sets, reps)
         }
         ExerciseMeasurementMode.Duration -> {
             val row = draft.setRows.firstOrNull() ?: SetRowDraft()
             val total = normalizeDurationMinutesSeconds(row.minutes, row.seconds)
-            if (total <= 0) return ""
             val minutes = total / 60
             val seconds = total % 60
             if (seconds == 0) {
