@@ -14,6 +14,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toPersistentSet
+import kotlinx.collections.immutable.toImmutableMap
 import javax.inject.Inject
 
 class ExerciseLibraryReducer @Inject constructor(
@@ -29,6 +30,15 @@ class ExerciseLibraryReducer @Inject constructor(
             is ExerciseLibraryUpdate.CartFromDomain -> state.withCartSnapshot(update.snapshot)
             is ExerciseLibraryUpdate.CatalogLoaded ->
                 state.copy(catalog = update.catalog)
+            is ExerciseLibraryUpdate.CartDraftUpdated -> {
+                if (update.exerciseId !in state.cart.itemDrafts) return state
+                state.copy(
+                    cart = state.cart.copy(
+                        itemDrafts = (state.cart.itemDrafts + (update.exerciseId to update.draft))
+                            .toImmutableMap(),
+                    ),
+                )
+            }
             is ExerciseLibraryUpdate.WeeklyHeatmapLoaded ->
                 state.copy(weeklyHeatmap = update.state)
             is ExerciseLibraryUpdate.SessionBookingOpened ->

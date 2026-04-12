@@ -2,6 +2,7 @@ package com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi
 
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseLibraryCartSnapshot
 import com.hoabui.virtualbody3d.domain.usecase.CommitLibrarySessionBookingResult
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryCatalogState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryWeeklyHeatmapState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingInput
@@ -18,6 +19,15 @@ sealed interface ExerciseLibraryUpdate {
     data object LibraryCleared : ExerciseLibraryUpdate
 
     data class CartFromDomain(val snapshot: ExerciseLibraryCartSnapshot) : ExerciseLibraryUpdate
+
+    /**
+     * Direct UI-layer draft mutation for one exercise (stepper interactions).
+     * Bypasses the domain snapshot round-trip for instant, granular updates.
+     */
+    data class CartDraftUpdated(
+        val exerciseId: String,
+        val draft: ExerciseDraft,
+    ) : ExerciseLibraryUpdate
 
     data class CatalogLoaded(val catalog: ExerciseLibraryCatalogState) : ExerciseLibraryUpdate
 
