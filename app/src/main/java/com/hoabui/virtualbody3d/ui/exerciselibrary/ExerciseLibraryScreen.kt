@@ -38,7 +38,7 @@ import com.hoabui.virtualbody3d.ui.components.UiStateContent
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.AddExerciseSuccessDialog
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseDetailDialog
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryEmptyState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryMonthlySummaryCard
+import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryWeeklyHeatmapCard
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySearchLayer
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.LongSessionWarningDialog
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySessionBookingSheetHost
@@ -217,7 +217,7 @@ fun ExerciseLibraryScreenContent(
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(modifier = Modifier.height(bodyTok.exerciseLibrarySearchToSummaryGap))
-                ExerciseLibraryMonthlySummaryCard(
+                ExerciseLibraryWeeklyHeatmapCard(
                     state = state.weeklyHeatmap,
                     onClick = actions.onNavigateToWorkoutCalendar,
                     modifier = Modifier.fillMaxWidth(),

@@ -34,7 +34,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 @Composable
-fun ExerciseLibraryMonthlySummaryCard(
+fun ExerciseLibraryWeeklyHeatmapCard(
     state: LibraryWeeklyHeatmapState,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -185,7 +185,7 @@ private fun HeatmapDayItem(
 @Composable
 private fun ExerciseLibraryWeeklyHeatmapCardLoadedLightPreview() {
     GymTheme(darkTheme = false) {
-        ExerciseLibraryMonthlySummaryCard(
+        ExerciseLibraryWeeklyHeatmapCard(
             state = LibraryWeeklyHeatmapState.Loaded(
                 days = previewHeatmapDays(),
             ),
@@ -199,7 +199,7 @@ private fun ExerciseLibraryWeeklyHeatmapCardLoadedLightPreview() {
 @Composable
 private fun ExerciseLibraryWeeklyHeatmapCardLoadedDarkPreview() {
     GymTheme(darkTheme = true) {
-        ExerciseLibraryMonthlySummaryCard(
+        ExerciseLibraryWeeklyHeatmapCard(
             state = LibraryWeeklyHeatmapState.Loaded(
                 days = previewHeatmapDays(),
             ),
@@ -213,7 +213,7 @@ private fun ExerciseLibraryWeeklyHeatmapCardLoadedDarkPreview() {
 @Composable
 private fun ExerciseLibraryWeeklyHeatmapCardLoadingPreview() {
     GymTheme(darkTheme = false) {
-        ExerciseLibraryMonthlySummaryCard(
+        ExerciseLibraryWeeklyHeatmapCard(
             state = LibraryWeeklyHeatmapState.Loading,
             onClick = {},
             modifier = Modifier.padding(GymTheme.token.spacing.md),
