@@ -620,6 +620,10 @@ class ExerciseLibraryViewModel @Inject constructor(
         dispatchIntent(ExerciseLibraryIntent.ClearExerciseDetail)
     }
 
+    fun toggleCartExpanded() {
+        dispatchIntent(ExerciseLibraryIntent.ToggleCartExpanded)
+    }
+
     fun confirmSessionBooking() {
         Log.d(BOOKING_LOG_TAG, "confirmSessionBooking: enqueue RunBookingConfirmation")
         sideEffects.trySend(ExerciseLibrarySideEffect.RunBookingConfirmation)

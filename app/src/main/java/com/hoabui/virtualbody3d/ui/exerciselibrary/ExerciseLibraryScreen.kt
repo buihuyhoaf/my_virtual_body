@@ -10,10 +10,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -56,6 +54,7 @@ import kotlinx.coroutines.flow.filter
 import java.time.ZoneId
 
 private object ExerciseLibraryListContentTypes {
+    const val WeeklyHeatmap = "exercise_library_weekly_heatmap"
     const val RegionHeader = "exercise_library_region_header"
     const val RegionRow = "exercise_library_region_row"
     const val Empty = "exercise_library_empty"
@@ -106,6 +105,7 @@ fun ExerciseLibraryScreen(
             onStepCartField = viewModel::stepCartField,
             onAddCartSetRow = { exerciseId -> viewModel.stepCartField(exerciseId, 0, CartSetField.SETS, 1) },
             onSetCartFieldManual = viewModel::setCartFieldManual,
+            onToggleCartExpanded = viewModel::toggleCartExpanded,
         )
     }
 
@@ -203,6 +203,7 @@ fun ExerciseLibraryScreenContent(
     val bodyTok = token.bodyAnalysis
     Box(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
+            // Sticky search bar header
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -220,12 +221,6 @@ fun ExerciseLibraryScreenContent(
                     slideSpec = slideSpec,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                Spacer(modifier = Modifier.height(bodyTok.exerciseLibrarySearchToSummaryGap))
-                ExerciseLibraryWeeklyHeatmapCard(
-                    state = state.weeklyHeatmap,
-                    onClick = actions.onNavigateToWorkoutCalendar,
-                    modifier = Modifier.fillMaxWidth(),
-                )
             }
             Box(
                 modifier = Modifier
@@ -237,6 +232,27 @@ fun ExerciseLibraryScreenContent(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = listBottomPadding),
                 ) {
+                    // Weekly heatmap as first scrollable item
+                    item(
+                        key = "exercise_library_weekly_heatmap",
+                        contentType = ExerciseLibraryListContentTypes.WeeklyHeatmap,
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    horizontal = token.spacing.md,
+                                    top = token.spacing.xs,
+                                    bottom = bodyTok.exerciseLibrarySearchToSummaryGap,
+                                ),
+                        ) {
+                            ExerciseLibraryWeeklyHeatmapCard(
+                                state = state.weeklyHeatmap,
+                                onClick = actions.onNavigateToWorkoutCalendar,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                    }
                     if (state.libraryList.sections.isEmpty()) {
                         item(
                             key = "exercise_library_empty",

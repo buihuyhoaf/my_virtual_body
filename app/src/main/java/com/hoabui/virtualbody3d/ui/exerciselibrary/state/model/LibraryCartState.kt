@@ -20,4 +20,6 @@ data class LibraryCartState(
     val draftOrder: ImmutableList<String> = persistentListOf(),
     /** Which cart line is being edited in the console. */
     val activeExerciseId: String? = null,
+    /** Whether the cart panel is expanded to show full exercise details. */
+    val isCartExpanded: Boolean = false,
 )

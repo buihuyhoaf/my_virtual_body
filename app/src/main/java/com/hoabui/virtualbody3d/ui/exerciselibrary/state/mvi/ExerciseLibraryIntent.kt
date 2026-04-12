@@ -29,4 +29,6 @@ sealed interface ExerciseLibraryIntent {
     data class SelectExerciseForDetail(val exerciseId: String) : ExerciseLibraryIntent
 
     data object ClearExerciseDetail : ExerciseLibraryIntent
+
+    data object ToggleCartExpanded : ExerciseLibraryIntent
 }

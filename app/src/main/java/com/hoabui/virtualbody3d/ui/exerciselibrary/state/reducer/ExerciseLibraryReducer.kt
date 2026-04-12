@@ -69,6 +69,7 @@ class ExerciseLibraryReducer @Inject constructor(
                     itemDrafts = persistentMapOf(),
                     draftOrder = persistentListOf(),
                     activeExerciseId = null,
+                    isCartExpanded = false,
                 ),
                 chrome = state.chrome.copy(
                     detailExerciseId = null,
@@ -131,6 +132,7 @@ class ExerciseLibraryReducer @Inject constructor(
                             itemDrafts = persistentMapOf(),
                             draftOrder = persistentListOf(),
                             activeExerciseId = null,
+                            isCartExpanded = false,
                         ),
                         sessionBooking = SessionBookingSheetState(),
                         chrome = state.chrome.copy(
@@ -255,6 +257,9 @@ class ExerciseLibraryReducer @Inject constructor(
 
             ExerciseLibraryIntent.ClearExerciseDetail ->
                 state.copy(chrome = state.chrome.copy(detailExerciseId = null))
+
+            ExerciseLibraryIntent.ToggleCartExpanded ->
+                state.copy(cart = state.cart.copy(isCartExpanded = !state.cart.isCartExpanded))
         }
     }
 }
