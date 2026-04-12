@@ -29,8 +29,8 @@ class ExerciseLibraryReducer @Inject constructor(
             is ExerciseLibraryUpdate.CartFromDomain -> state.withCartSnapshot(update.snapshot)
             is ExerciseLibraryUpdate.CatalogLoaded ->
                 state.copy(catalog = update.catalog)
-            is ExerciseLibraryUpdate.MonthlySummaryLoaded ->
-                state.copy(monthlySummary = update.summary)
+            is ExerciseLibraryUpdate.WeeklyHeatmapLoaded ->
+                state.copy(weeklyHeatmap = update.state)
             is ExerciseLibraryUpdate.SessionBookingOpened ->
                 state.copy(sessionBooking = state.sessionBooking.copy(input = update.input))
             is ExerciseLibraryUpdate.SessionBookingPruned ->
