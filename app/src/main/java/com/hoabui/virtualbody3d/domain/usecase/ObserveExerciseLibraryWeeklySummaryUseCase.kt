@@ -26,7 +26,7 @@ class ObserveExerciseLibraryWeeklySummaryUseCase @Inject constructor(
             .map { schedules ->
                 val countByDay = schedules
                     .groupBy { it.scheduledAt.atZone(zoneId).toLocalDate() }
-                    .mapValues { (_, rows) -> rows.size }
+                    .mapValues { (_, rows) -> rows.distinctBy { it.sessionId }.size }
                 (0L..6L).map { offset ->
                     val date = monday.plusDays(offset)
                     ExerciseLibraryWeeklyDayItem(
