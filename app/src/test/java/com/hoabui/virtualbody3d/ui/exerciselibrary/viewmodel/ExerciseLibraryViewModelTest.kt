@@ -15,8 +15,8 @@ import com.hoabui.virtualbody3d.domain.usecase.CommitLibrarySessionBookingResult
 import com.hoabui.virtualbody3d.domain.usecase.ConfirmExerciseLibrarySessionUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetExerciseLibraryUseCase
 import com.hoabui.virtualbody3d.domain.usecase.MigrateLegacyWorkoutSchedulesUseCase
-import com.hoabui.virtualbody3d.domain.model.calendar.ExerciseLibraryMonthlySummary
-import com.hoabui.virtualbody3d.domain.usecase.ObserveExerciseLibraryMonthlySummaryUseCase
+import com.hoabui.virtualbody3d.domain.model.calendar.ExerciseLibraryWeeklyDayItem
+import com.hoabui.virtualbody3d.domain.usecase.ObserveExerciseLibraryWeeklySummaryUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveGymLocationsUseCase
 import com.hoabui.virtualbody3d.domain.usecase.PrepareLibrarySessionConfirmResult
 import com.hoabui.virtualbody3d.domain.usecase.CanConfirmLibrarySessionBookingUseCase
@@ -60,8 +60,8 @@ import org.junit.Test
 import com.hoabui.virtualbody3d.domain.model.exercise.halfOpenInstantIntervalDurationMinutes
 import com.hoabui.virtualbody3d.domain.repository.BookWorkoutSessionResult
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalTime
-import java.time.YearMonth
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ExerciseLibraryViewModelTest {
@@ -105,14 +105,16 @@ class ExerciseLibraryViewModelTest {
         }
         val migrate = mockk<MigrateLegacyWorkoutSchedulesUseCase>()
         coEvery { migrate(any()) } returns Unit
-        val observeMonthlySummary = mockk<ObserveExerciseLibraryMonthlySummaryUseCase>()
-        every { observeMonthlySummary(any(), any()) } returns flow {
+        val observeWeeklySummary = mockk<ObserveExerciseLibraryWeeklySummaryUseCase>()
+        every { observeWeeklySummary(any(), any()) } returns flow {
             emit(
-                ExerciseLibraryMonthlySummary(
-                    yearMonth = YearMonth.of(2020, 1),
-                    workoutDayCount = 0,
-                    restDayCount = 31,
-                ),
+                (0L..6L).map { offset ->
+                    ExerciseLibraryWeeklyDayItem(
+                        date = LocalDate.of(2020, 1, 6).plusDays(offset),
+                        sessionCount = 0,
+                        isToday = offset == 0L,
+                    )
+                },
             )
             awaitCancellation()
         }
@@ -149,7 +151,7 @@ class ExerciseLibraryViewModelTest {
             getLibrary,
             workflow,
             locations,
-            observeMonthlySummary,
+            observeWeeklySummary,
             migrate,
             mapper,
             catalogMapper,
@@ -174,14 +176,16 @@ class ExerciseLibraryViewModelTest {
         }
         val migrate = mockk<MigrateLegacyWorkoutSchedulesUseCase>()
         coEvery { migrate(any()) } returns Unit
-        val observeMonthlySummary = mockk<ObserveExerciseLibraryMonthlySummaryUseCase>()
-        every { observeMonthlySummary(any(), any()) } returns flow {
+        val observeWeeklySummary = mockk<ObserveExerciseLibraryWeeklySummaryUseCase>()
+        every { observeWeeklySummary(any(), any()) } returns flow {
             emit(
-                ExerciseLibraryMonthlySummary(
-                    yearMonth = YearMonth.of(2020, 1),
-                    workoutDayCount = 0,
-                    restDayCount = 31,
-                ),
+                (0L..6L).map { offset ->
+                    ExerciseLibraryWeeklyDayItem(
+                        date = LocalDate.of(2020, 1, 6).plusDays(offset),
+                        sessionCount = 0,
+                        isToday = offset == 0L,
+                    )
+                },
             )
             awaitCancellation()
         }
@@ -218,7 +222,7 @@ class ExerciseLibraryViewModelTest {
             getLibrary,
             workflow,
             locations,
-            observeMonthlySummary,
+            observeWeeklySummary,
             migrate,
             mapper,
             catalogMapper,
@@ -435,14 +439,16 @@ class ExerciseLibraryViewModelTest {
         }
         val migrate = mockk<MigrateLegacyWorkoutSchedulesUseCase>()
         coEvery { migrate(any()) } returns Unit
-        val observeMonthlySummary = mockk<ObserveExerciseLibraryMonthlySummaryUseCase>()
-        every { observeMonthlySummary(any(), any()) } returns flow {
+        val observeWeeklySummary = mockk<ObserveExerciseLibraryWeeklySummaryUseCase>()
+        every { observeWeeklySummary(any(), any()) } returns flow {
             emit(
-                ExerciseLibraryMonthlySummary(
-                    yearMonth = YearMonth.of(2020, 1),
-                    workoutDayCount = 0,
-                    restDayCount = 31,
-                ),
+                (0L..6L).map { offset ->
+                    ExerciseLibraryWeeklyDayItem(
+                        date = LocalDate.of(2020, 1, 6).plusDays(offset),
+                        sessionCount = 0,
+                        isToday = offset == 0L,
+                    )
+                },
             )
             awaitCancellation()
         }
@@ -467,7 +473,7 @@ class ExerciseLibraryViewModelTest {
             getLibrary,
             workflow,
             locations,
-            observeMonthlySummary,
+            observeWeeklySummary,
             migrate,
             mapper,
             catalogMapper,

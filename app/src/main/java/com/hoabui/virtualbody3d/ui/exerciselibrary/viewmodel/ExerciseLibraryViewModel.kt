@@ -16,7 +16,7 @@ import com.hoabui.virtualbody3d.domain.usecase.ExerciseLibraryCartCommand
 import com.hoabui.virtualbody3d.domain.usecase.GetExerciseLibraryUseCase
 import com.hoabui.virtualbody3d.domain.usecase.MigrateLegacyWorkoutSchedulesUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveGymLocationsUseCase
-import com.hoabui.virtualbody3d.domain.usecase.ObserveExerciseLibraryMonthlySummaryUseCase
+import com.hoabui.virtualbody3d.domain.usecase.ObserveExerciseLibraryWeeklySummaryUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ResolveNextSlotSelectionAfterToggleUseCase
 import com.hoabui.virtualbody3d.domain.usecase.SessionBookingConfirmationWorkflow
 import com.hoabui.virtualbody3d.domain.usecase.SessionBookingWorkflowInput
@@ -33,8 +33,9 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.presentation.exerciseLibraryS
 import com.hoabui.virtualbody3d.ui.exerciselibrary.presentation.mergeExerciseLibraryPresentation
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mapper.ExerciseLibraryUiMapper
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryMonthlySummaryState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryWeeklyHeatmapState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryCartState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.WeeklyHeatmapDayUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibraryIntent
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibrarySideEffect
@@ -63,8 +64,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.time.LocalDate
 import java.time.LocalTime
-import java.time.YearMonth
 import java.time.ZoneId
 import javax.inject.Inject
 
@@ -73,7 +74,7 @@ class ExerciseLibraryViewModel @Inject constructor(
     private val getExerciseLibraryUseCase: GetExerciseLibraryUseCase,
     private val sessionBookingConfirmationWorkflow: SessionBookingConfirmationWorkflow,
     private val observeGymLocationsUseCase: ObserveGymLocationsUseCase,
-    private val observeExerciseLibraryMonthlySummaryUseCase: ObserveExerciseLibraryMonthlySummaryUseCase,
+    private val observeExerciseLibraryWeeklySummaryUseCase: ObserveExerciseLibraryWeeklySummaryUseCase,
     private val migrateLegacyWorkoutSchedulesUseCase: MigrateLegacyWorkoutSchedulesUseCase,
     private val exerciseLibraryUiMapper: ExerciseLibraryUiMapper,
     private val exerciseLibraryCatalogUiMapper: ExerciseLibraryCatalogUiMapper,
@@ -230,22 +231,26 @@ class ExerciseLibraryViewModel @Inject constructor(
             .catch { setError(it.message ?: "Unknown error") }
             .launchIn(viewModelScope)
 
-        observeExerciseLibraryMonthlySummaryUseCase(YearMonth.now(zoneId), zoneId)
-            .onEach { domain ->
+        observeExerciseLibraryWeeklySummaryUseCase(LocalDate.now(zoneId), zoneId)
+            .onEach { dayItems ->
+                val dayUiModels = dayItems.map { item ->
+                    WeeklyHeatmapDayUiModel(
+                        dayLabel = item.date.dayOfWeek.toVietnameseDayLabel(),
+                        dayOfMonth = item.date.dayOfMonth,
+                        densityLevel = item.sessionCount.coerceAtMost(3),
+                        isToday = item.isToday,
+                    )
+                }.toImmutableList()
                 dispatch(
-                    ExerciseLibraryUpdate.MonthlySummaryLoaded(
-                        LibraryMonthlySummaryState.Loaded(
-                            yearMonth = domain.yearMonth,
-                            workoutDayCount = domain.workoutDayCount,
-                            restDayCount = domain.restDayCount,
-                        ),
+                    ExerciseLibraryUpdate.WeeklyHeatmapLoaded(
+                        LibraryWeeklyHeatmapState.Loaded(days = dayUiModels),
                     ),
                 )
             }
             .catch { e ->
                 dispatch(
-                    ExerciseLibraryUpdate.MonthlySummaryLoaded(
-                        LibraryMonthlySummaryState.Error(e.message.orEmpty()),
+                    ExerciseLibraryUpdate.WeeklyHeatmapLoaded(
+                        LibraryWeeklyHeatmapState.Error(e.message.orEmpty()),
                     ),
                 )
             }
@@ -512,4 +517,14 @@ class ExerciseLibraryViewModel @Inject constructor(
     private companion object {
         const val BOOKING_LOG_TAG = "ExerciseLibraryBooking"
     }
+}
+
+private fun java.time.DayOfWeek.toVietnameseDayLabel(): String = when (this) {
+    java.time.DayOfWeek.MONDAY -> "T2"
+    java.time.DayOfWeek.TUESDAY -> "T3"
+    java.time.DayOfWeek.WEDNESDAY -> "T4"
+    java.time.DayOfWeek.THURSDAY -> "T5"
+    java.time.DayOfWeek.FRIDAY -> "T6"
+    java.time.DayOfWeek.SATURDAY -> "T7"
+    java.time.DayOfWeek.SUNDAY -> "CN"
 }

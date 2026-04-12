@@ -218,7 +218,7 @@ fun ExerciseLibraryScreenContent(
                 )
                 Spacer(modifier = Modifier.height(bodyTok.exerciseLibrarySearchToSummaryGap))
                 ExerciseLibraryMonthlySummaryCard(
-                    state = state.monthlySummary,
+                    state = state.weeklyHeatmap,
                     onClick = actions.onNavigateToWorkoutCalendar,
                     modifier = Modifier.fillMaxWidth(),
                 )

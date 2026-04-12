@@ -114,10 +114,16 @@ data class BodyAnalysisTokens(
     val heroSlimChipIconTextGap: Dp,
     val heroSlimChipLabelLetterSpacing: TextUnit,
     val exerciseLibraryStickySearchHeaderMinHeight: Dp,
-    /** Vertical gap between fixed search chrome and monthly summary card. */
+    /** Vertical gap between fixed search chrome and weekly heatmap card. */
     val exerciseLibrarySearchToSummaryGap: Dp,
-    val exerciseLibraryMonthlySummaryCardHorizontalPadding: Dp,
-    val exerciseLibraryMonthlySummaryCardVerticalPadding: Dp,
+    val exerciseLibraryHeatmapCardHorizontalPadding: Dp,
+    val exerciseLibraryHeatmapCardVerticalPadding: Dp,
+    /** Height of each day cell in the weekly heatmap row. */
+    val exerciseLibraryHeatmapDayItemHeight: Dp,
+    /** Corner radius for each day cell in the weekly heatmap row. */
+    val exerciseLibraryHeatmapDayItemCornerRadius: Dp,
+    /** Horizontal gap between adjacent day cells in the weekly heatmap. */
+    val exerciseLibraryHeatmapDayItemSpacing: Dp,
     val exerciseLibraryQuickAddIconContainerSize: Dp,
     val exerciseLibraryQuickAddTextInset: Dp,
     val exerciseLibrarySelectionBarTopCornerRadius: Dp,
@@ -265,8 +271,11 @@ fun gymBodyAnalysisTokens(
         heroSlimChipLabelLetterSpacing = layout.heroSlimChipLabelLetterSpacing,
         exerciseLibraryStickySearchHeaderMinHeight = spacing.lg + spacing.md + spacing.xs + layout.heroSlimChipHeight + spacing.xxs,
         exerciseLibrarySearchToSummaryGap = spacing.sm,
-        exerciseLibraryMonthlySummaryCardHorizontalPadding = spacing.md,
-        exerciseLibraryMonthlySummaryCardVerticalPadding = spacing.sm,
+        exerciseLibraryHeatmapCardHorizontalPadding = spacing.md,
+        exerciseLibraryHeatmapCardVerticalPadding = spacing.sm,
+        exerciseLibraryHeatmapDayItemHeight = spacing.xxl + spacing.sm,
+        exerciseLibraryHeatmapDayItemCornerRadius = spacing.xs,
+        exerciseLibraryHeatmapDayItemSpacing = spacing.xxs,
         exerciseLibraryQuickAddIconContainerSize = layout.heroSlimChipHeight,
         exerciseLibraryQuickAddTextInset = spacing.xxl + spacing.xs,
         exerciseLibrarySelectionBarTopCornerRadius = layout.exerciseLibrarySelectionBarTopCornerRadius,
