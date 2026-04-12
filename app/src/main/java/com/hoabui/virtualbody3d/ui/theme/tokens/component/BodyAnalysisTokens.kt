@@ -129,6 +129,19 @@ data class BodyAnalysisTokens(
     val exerciseLibrarySelectionBarTopCornerRadius: Dp,
     val exerciseLibraryCartNumericFieldWidth: Dp,
     val exerciseLibrarySelectionBarMinHeight: Dp,
+    /**
+     * Bottom inset for the exercise list so content clears the **collapsed** selection bar
+     * (handle + thumbnail row + padding). Tighter than [exerciseLibrarySelectionBarMinHeight].
+     */
+    val exerciseLibrarySelectionBarCollapsedListBottomInset: Dp,
+    val exerciseLibraryCartDragHandleWidth: Dp,
+    val exerciseLibraryCartDragHandleHeight: Dp,
+    val exerciseLibraryCartStepperButtonSize: Dp,
+    val exerciseLibraryCartStepperValueMinWidth: Dp,
+    val exerciseLibraryCartSetRowsListMaxHeight: Dp,
+    val exerciseLibraryCartSnapDragDistanceThreshold: Dp,
+    val exerciseLibraryCartSnapVelocityThresholdPxPerSec: Float,
+    val exerciseLibraryCartExpandedContentFallbackExtra: Dp,
     val exerciseLibrarySelectionBarAddButtonMaxWidth: Dp,
     val exerciseLibraryCartThumbnailSize: Dp,
     val exerciseLibraryAnchoredConsoleTopBorderWidth: Dp,
@@ -283,6 +296,21 @@ fun gymBodyAnalysisTokens(
         exerciseLibrarySelectionBarMinHeight = layout.exerciseLibraryCartThumbnailSize +
             layout.exerciseLibraryConsolePrecisionRowHeight * 2 +
             spacing.sm * 2 + spacing.md * 2,
+        exerciseLibrarySelectionBarCollapsedListBottomInset =
+            spacing.xs + spacing.xs +
+                layout.exerciseLibraryCartDragHandleHeight +
+                layout.exerciseLibraryCartThumbnailSize +
+                spacing.sm,
+        exerciseLibraryCartDragHandleWidth = layout.exerciseLibraryCartDragHandleWidth,
+        exerciseLibraryCartDragHandleHeight = layout.exerciseLibraryCartDragHandleHeight,
+        exerciseLibraryCartStepperButtonSize = layout.exerciseLibraryCartStepperButtonSize,
+        exerciseLibraryCartStepperValueMinWidth = layout.exerciseLibraryCartStepperValueMinWidth,
+        exerciseLibraryCartSetRowsListMaxHeight = layout.exerciseLibraryCartSetRowsListMaxHeight,
+        exerciseLibraryCartSnapDragDistanceThreshold = layout.exerciseLibraryCartSnapDragDistanceThreshold,
+        exerciseLibraryCartSnapVelocityThresholdPxPerSec =
+            layout.exerciseLibraryCartSnapVelocityThresholdPxPerSec,
+        exerciseLibraryCartExpandedContentFallbackExtra =
+            layout.exerciseLibraryCartExpandedContentFallbackExtra,
         exerciseLibrarySelectionBarAddButtonMaxWidth = spacing.xl + spacing.xl + spacing.md,
         exerciseLibraryCartThumbnailSize = layout.exerciseLibraryCartThumbnailSize,
         exerciseLibraryAnchoredConsoleTopBorderWidth = layout.exerciseLibraryAnchoredConsoleTopBorderWidth,

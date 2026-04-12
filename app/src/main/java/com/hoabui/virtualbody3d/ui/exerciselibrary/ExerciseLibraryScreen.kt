@@ -198,8 +198,8 @@ fun ExerciseLibraryScreenContent(
         { focused: Boolean -> isSearchFocused.value = focused }
     }
     val cartVisible = state.cart.itemDrafts.isNotEmpty()
-    val barMinHeight = token.bodyAnalysis.exerciseLibrarySelectionBarMinHeight
-    val listBottomPadding = if (cartVisible) barMinHeight else token.spacing.none
+    val cartCollapsedInset = token.bodyAnalysis.exerciseLibrarySelectionBarCollapsedListBottomInset
+    val listBottomPadding = if (cartVisible) cartCollapsedInset else token.spacing.none
     val bodyTok = token.bodyAnalysis
     Box(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -241,7 +241,8 @@ fun ExerciseLibraryScreenContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(
-                                    horizontal = token.spacing.md,
+                                    start = token.spacing.md,
+                                    end = token.spacing.md,
                                     top = token.spacing.xs,
                                     bottom = bodyTok.exerciseLibrarySearchToSummaryGap,
                                 ),
