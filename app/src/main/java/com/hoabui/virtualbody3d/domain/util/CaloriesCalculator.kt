@@ -27,6 +27,7 @@ object ExerciseCaloriesMetadataProvider {
 }
 
 object CaloriesCalculator {
+    @Suppress("UNUSED_PARAMETER")
     fun estimateCalories(
         exerciseId: String,
         measurementMode: ExerciseMeasurementMode,
@@ -53,7 +54,7 @@ object CaloriesCalculator {
         if (effectiveMinutes <= 0.0) {
             return 0f
         }
-        // Body weight fallback is applied below when user profile data is incomplete.
+        // Body weight fallback is applied below when user profile data is incomplete to avoid zero output.
         val effectiveBodyWeightKg = if (bodyWeightKg > 0.0) bodyWeightKg else DEFAULT_BODY_WEIGHT_KG
         val safeLoadKg = averageLoadKg.coerceAtLeast(0.0)
 
@@ -66,6 +67,7 @@ object CaloriesCalculator {
          * FinalCalories = BaseCalories * IntensityScaler * EPOCScaler
          */
         // Lean body mass is intentionally not used to keep the strength model MET-based and consistent.
+        // The parameter remains for compatibility with existing callers.
         val baseCalories = met * MET_WEIGHT_FACTOR * effectiveBodyWeightKg * effectiveMinutes
         val isStrength = measurementMode == ExerciseMeasurementMode.Strength
         val loadRatio = if (isStrength && safeLoadKg > 0.0) safeLoadKg / effectiveBodyWeightKg else 0.0
@@ -96,11 +98,11 @@ private const val DEFAULT_CARDIO_MET = 6.0
 private const val DEFAULT_STRENGTH_MET = 5.0
 // Fallback when user body weight is missing or invalid; may skew estimates for users far from 70kg.
 private const val DEFAULT_BODY_WEIGHT_KG = 70.0
-// Minimum MET for heavy compounds, calibrated to hit ~25-40 kcal for typical heavy sets.
+// Minimum MET for heavy compounds, calibrated to hit ~25-40 kcal for 10 reps @ 95kg, 4.5s tempo, 70kg body weight.
 private const val HEAVY_COMPOUND_BASE_MET = 7.5
-// Higher k for heavy compounds to reflect stronger afterburn vs. isolation lifts (calibrated to target range).
+// Higher k for heavy compounds to reflect stronger afterburn vs. isolation lifts (calibrated to target range above).
 private const val EPOC_COEFFICIENT_COMPOUND = 0.4
-// Lower k for isolation work to reduce afterburn influence (calibrated to target range).
+// Lower k for isolation work to reduce afterburn influence (calibrated to target range above).
 private const val EPOC_COEFFICIENT_ISOLATION = 0.2
 
 private val HEAVY_COMPOUND_LIFTS = setOf(
