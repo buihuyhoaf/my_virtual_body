@@ -12,21 +12,18 @@ import com.hoabui.virtualbody3d.domain.model.workoutlog.WorkoutLogExerciseDetail
 import com.hoabui.virtualbody3d.domain.model.workoutlog.WorkoutLogSessionDetail
 import com.hoabui.virtualbody3d.domain.model.workoutlog.WorkoutLogSetDetail
 import java.time.Instant
-import java.time.ZoneId
 import java.util.Locale
 
 internal fun WorkoutLogSessionWithExercises.toDomain(): WorkoutLogSessionDetail {
-    val zone = ZoneId.of(session.zoneId)
     return WorkoutLogSessionDetail(
         id = session.id,
         startInstant = Instant.ofEpochMilli(session.startEpochMillis),
         endInstant = Instant.ofEpochMilli(session.endEpochMillis),
-        zoneId = zone,
-        exercises = exercises.map { it.toDomain(zone) },
+        exercises = exercises.map { it.toDomain() },
     )
 }
 
-private fun WorkoutLogExerciseWithDetails.toDomain(zoneId: ZoneId): WorkoutLogExerciseDetail = WorkoutLogExerciseDetail(
+private fun WorkoutLogExerciseWithDetails.toDomain(): WorkoutLogExerciseDetail = WorkoutLogExerciseDetail(
     id = exercise.id,
     sessionId = exercise.sessionId,
     exerciseId = exercise.exerciseId,

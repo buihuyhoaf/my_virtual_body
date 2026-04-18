@@ -28,9 +28,9 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import java.time.Clock
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -60,7 +60,7 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
         session: WorkoutSession,
         lines: List<SessionExerciseLine>,
     ): BookWorkoutSessionResult {
-        val zoneId = ZoneId.systemDefault()
+        val systemZone = Clock.systemDefaultZone().zone
         if (lines.isEmpty()) {
             Log.w(WORKOUT_DB_TRACE_LOG_TAG, "bookSession: InvalidDraft — lines.isEmpty() sessionId=${session.id}")
             return BookWorkoutSessionResult.InvalidDraft
@@ -70,9 +70,9 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
             "bookSession: persisting sessionId=${session.id} lines=${lines.size} " +
                 "start=${session.startInstant} end=${session.endInstant}",
         )
-        val scheduledAt = LocalDateTime.ofInstant(session.startInstant, zoneId)
+        val scheduledAt = LocalDateTime.ofInstant(session.startInstant, systemZone)
         val now = System.currentTimeMillis()
-        val dayKey = session.startInstant.atZone(zoneId).toLocalDate().toEpochDay()
+        val dayKey = session.startInstant.atZone(systemZone).toLocalDate().toEpochDay()
         val startMs = session.startInstant.toEpochMilli()
         val endMs = session.endInstant.toEpochMilli()
         return withContext(ioDispatcher) {
@@ -156,20 +156,20 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
     }
 
     override suspend fun migrateLegacySchedulesIfNeeded() {
-        val zoneId = ZoneId.systemDefault()
+        val systemZone = Clock.systemDefaultZone().zone
         val legacy = workoutScheduleRepository.getAllSchedules()
             .filter { it.sessionId == null }
-            .sortedBy { it.scheduledAt.atZone(zoneId).toInstant().toEpochMilli() }
+            .sortedBy { it.scheduledAt.atZone(systemZone).toInstant().toEpochMilli() }
         var idx = 0
         while (idx < legacy.size) {
             val first = legacy[idx]
             val locationId = first.locationId
-            val clusterStartMillis = first.scheduledAt.atZone(zoneId).toInstant().toEpochMilli()
+            val clusterStartMillis = first.scheduledAt.atZone(systemZone).toInstant().toEpochMilli()
             var j = idx + 1
             while (j < legacy.size) {
                 val next = legacy[j]
                 if (next.locationId != locationId) break
-                if (next.scheduledAt.atZone(zoneId).toInstant().toEpochMilli() <=
+                if (next.scheduledAt.atZone(systemZone).toInstant().toEpochMilli() <=
                     clusterStartMillis + SESSION_BOOKING_DURATION_MINUTES * 60_000
                 ) {
                     j++
@@ -178,7 +178,7 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
                 }
             }
             val cluster = legacy.subList(idx, j)
-            val startMillis = cluster.minOf { it.scheduledAt.atZone(zoneId).toInstant().toEpochMilli() }
+            val startMillis = cluster.minOf { it.scheduledAt.atZone(systemZone).toInstant().toEpochMilli() }
             val start = Instant.ofEpochMilli(startMillis)
             val end = start.plusSeconds(SESSION_BOOKING_DURATION_MINUTES * 60L)
             val sessionId = UUID.randomUUID().toString()

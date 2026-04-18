@@ -5,8 +5,8 @@ import com.hoabui.virtualbody3d.domain.model.calendar.resolveWorkoutCalendarLine
 import com.hoabui.virtualbody3d.domain.util.CaloriesCalculator
 import com.hoabui.virtualbody3d.domain.repository.ExercisesRepository
 import com.hoabui.virtualbody3d.domain.repository.WorkoutScheduleRepository
+import java.time.Clock
 import java.time.LocalDate
-import java.time.ZoneId
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -19,7 +19,7 @@ class ObserveWorkoutCalendarDayDetailUseCase @Inject constructor(
 ) {
     operator fun invoke(day: LocalDate): Flow<List<WorkoutCalendarExerciseLine>> {
         val dayKey = day.toEpochDay()
-        val zoneId = ZoneId.systemDefault()
+        val systemZone = Clock.systemDefaultZone().zone
         return combine(
             workoutScheduleRepository.observeSchedulesInDayRange(dayKey, dayKey),
             exercisesRepository.getAllExercises(),
@@ -64,7 +64,7 @@ class ObserveWorkoutCalendarDayDetailUseCase @Inject constructor(
                         exerciseImageResUrl = sch.exerciseImageResUrl,
                         catalogExercise = catalog,
                     ),
-                    startInstant = sch.scheduledAt.atZone(zoneId).toInstant(),
+                    startInstant = sch.scheduledAt.atZone(systemZone).toInstant(),
                 )
             }
         }

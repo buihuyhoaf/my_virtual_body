@@ -2,15 +2,14 @@ package com.hoabui.virtualbody3d.ui.exerciselibrary.state.model
 
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.ZoneId
+import java.time.Clock
 
 /** Epoch millis at start of today in the system default zone (default booking date). */
 fun defaultExerciseLibraryCartDateMillis(): Long {
-    val zone = ZoneId.systemDefault()
-    return LocalDate.now(zone).atStartOfDay(zone).toInstant().toEpochMilli()
+    val systemZone = Clock.systemDefaultZone().zone
+    return LocalDate.now().atStartOfDay(systemZone).toInstant().toEpochMilli()
 }
 
 fun defaultExerciseLibraryCartTime(): LocalTime {
-    val zone = ZoneId.systemDefault()
-    return LocalTime.now(zone)
+    return LocalTime.now()
 }

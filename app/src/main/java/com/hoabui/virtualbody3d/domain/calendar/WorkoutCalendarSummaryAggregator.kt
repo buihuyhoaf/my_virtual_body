@@ -4,14 +4,14 @@ import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarDayCellStat
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarDaySummary
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutExecutionStatus
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
-import java.time.ZoneId
+import java.time.Clock
 
 fun groupSchedulesToDaySummaries(
     schedules: List<WorkoutSchedule>,
-    zoneId: ZoneId,
 ): Map<Long, WorkoutCalendarDaySummary> {
     if (schedules.isEmpty()) return emptyMap()
-    val byDay = schedules.groupBy { it.scheduledAt.atZone(zoneId).toLocalDate().toEpochDay() }
+    val systemZone = Clock.systemDefaultZone().zone
+    val byDay = schedules.groupBy { it.scheduledAt.atZone(systemZone).toLocalDate().toEpochDay() }
     return byDay.mapValues { (epochDay, rows) ->
         WorkoutCalendarDaySummary(
             epochDay = epochDay,

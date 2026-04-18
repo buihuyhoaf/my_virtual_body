@@ -13,6 +13,8 @@ import com.hoabui.virtualbody3d.domain.model.workoutlog.WorkoutLogSessionDetail
 import com.hoabui.virtualbody3d.domain.model.workoutlog.WorkoutLogSessionInput
 import com.hoabui.virtualbody3d.domain.repository.WorkoutLogRepository
 import com.hoabui.virtualbody3d.domain.util.CaloriesCalculator
+import java.time.Clock
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import javax.inject.Inject
@@ -33,8 +35,10 @@ class WorkoutLogRepositoryImpl @Inject constructor(
             .map { sessions -> sessions.map { it.toDomain() } }
 
     override suspend fun saveWorkoutLogSession(session: WorkoutLogSessionInput) = withContext(ioDispatcher) {
-        val zoneId = session.zoneId
-        val dayKey = session.startInstant.atZone(zoneId).toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE)
+        val dayKey = LocalDateTime.ofInstant(
+            session.startInstant,
+            Clock.systemDefaultZone().zone,
+        ).toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE)
         val snapshotWeight = progressTimelineLocalDataSource
             .getLatestSnapshotOnOrBefore(dayKey)
             ?.weightKg
@@ -45,7 +49,6 @@ class WorkoutLogRepositoryImpl @Inject constructor(
             startEpochMillis = session.startInstant.toEpochMilli(),
             endEpochMillis = session.endInstant.toEpochMilli(),
             dayKey = dayKey,
-            zoneId = zoneId.id,
         )
         val exerciseEntities = mutableListOf<WorkoutLogExerciseEntity>()
         val setEntities = mutableListOf<WorkoutLogSetEntity>()

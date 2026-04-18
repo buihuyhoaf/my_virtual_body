@@ -11,9 +11,10 @@ import com.hoabui.virtualbody3d.domain.repository.ExercisesRepository
 import com.hoabui.virtualbody3d.domain.repository.WorkoutLogRepository
 import com.hoabui.virtualbody3d.domain.repository.WorkoutScheduleRepository
 import com.hoabui.virtualbody3d.domain.util.CaloriesCalculator
+import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
@@ -32,7 +33,6 @@ class GetWorkoutDetailsUseCase @Inject constructor(
      * Each block contains the session time range and associated exercises.
      */
     operator fun invoke(day: LocalDate): Flow<List<WorkoutCalendarSessionBlock>> {
-        val zoneId = ZoneId.systemDefault()
         val dayKey = day.toEpochDay()
         val logDayKey = day.format(DateTimeFormatter.ISO_LOCAL_DATE)
         return combine(
@@ -52,7 +52,7 @@ class GetWorkoutDetailsUseCase @Inject constructor(
                     val rowId = schedule.rowId ?: return@mapNotNull null
                     val logEntry = consumeLogEntry(schedule, logBySessionExercise, logs)
                     val (startInstant, setBreakdownLabel, caloriesLabel, caloriesKcal) =
-                        resolveWorkoutLineMetrics(schedule, logEntry, zoneId)
+                        resolveWorkoutLineMetrics(schedule, logEntry)
                     val catalog = exerciseById[schedule.exerciseId]
 
                     // Debug logging for sessionId/exerciseId matching
@@ -86,7 +86,7 @@ class GetWorkoutDetailsUseCase @Inject constructor(
                 }
 
             // Group exercise lines by sessionId into session blocks
-            groupExercisesIntoSessionBlocks(lines, zoneId)
+            groupExercisesIntoSessionBlocks(lines)
         }
     }
 }
@@ -134,9 +134,10 @@ private data class WorkoutLineMetrics(
 private fun resolveWorkoutLineMetrics(
     schedule: WorkoutSchedule,
     logEntry: WorkoutLogExerciseDetail?,
-    zoneId: ZoneId,
 ): WorkoutLineMetrics {
-    val startInstant = logEntry?.startInstant ?: schedule.scheduledAt.atZone(zoneId).toInstant()
+    val startInstant = logEntry?.startInstant ?: schedule.scheduledAt
+        .atZone(Clock.systemDefaultZone().zone)
+        .toInstant()
 
     // **BUG FIX**: Always prioritize actual log data over schedule data when log exists.
     // This fixes the "20 kg vs 80 kg" weight mismatch bug where schedule.weightKg was
@@ -297,12 +298,6 @@ private fun estimateScheduleCalories(schedule: WorkoutSchedule, logEntry: Workou
     }
 }
 
-private fun formatStartTimeLabel(instant: Instant, zoneId: ZoneId): String {
-    val locale = Locale.getDefault()
-    val formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)
-    return instant.atZone(zoneId).toLocalTime().format(formatter)
-}
-
 private fun formatCaloriesLabel(kcal: Float): String =
     "🔥 ${kcal.roundToInt()} kcal"
 
@@ -331,12 +326,12 @@ private fun formatWeight(weightKg: Double): String {
  */
 private fun groupExercisesIntoSessionBlocks(
     lines: List<WorkoutCalendarExerciseLine>,
-    zoneId: ZoneId,
 ): List<WorkoutCalendarSessionBlock> {
     if (lines.isEmpty()) return emptyList()
 
     val locale = Locale.getDefault()
     val timeFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)
+    val systemZone = Clock.systemDefaultZone().zone
 
     // Group by sessionId; null sessionIds get individual groups
     val groupedBySession = lines.groupBy { it.sessionId }
@@ -347,8 +342,8 @@ private fun groupExercisesIntoSessionBlocks(
         val endInstant = sortedExercises.last().startInstant
 
         // Calculate session time label: "08:00 AM - 09:30 AM session" or just "08:00 AM" for single exercises
-        val startTime = startInstant.atZone(zoneId).toLocalTime().format(timeFormatter)
-        val endTime = endInstant.atZone(zoneId).toLocalTime().format(timeFormatter)
+        val startTime = LocalDateTime.ofInstant(startInstant, systemZone).toLocalTime().format(timeFormatter)
+        val endTime = LocalDateTime.ofInstant(endInstant, systemZone).toLocalTime().format(timeFormatter)
 
         val sessionTimeLabel = if (sortedExercises.size == 1 || startTime == endTime) {
             startTime

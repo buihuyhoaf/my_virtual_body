@@ -80,10 +80,11 @@ import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.coroutines.launch
+import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -153,7 +154,7 @@ private fun SessionBookingSheetContent(
     onClearTimeSelection: () -> Unit,
     onConfirm: () -> Unit,
 ) {
-    val zoneId = ZoneId.systemDefault()
+    val systemZone = Clock.systemDefaultZone().zone
     val token = GymTheme.token
     val scrollState = rememberScrollState()
     val slotRowState = rememberLazyListState()
@@ -164,12 +165,12 @@ private fun SessionBookingSheetContent(
     val slotChipMinW = token.bodyAnalysis.exerciseLibraryBookingTimeSlotHorizontalMinWidth
     val input = booking.input
     val dayLabelsLocale = Locale.getDefault()
-    val shortDayFmt = remember(zoneId, dayLabelsLocale) {
+    val shortDayFmt = remember(dayLabelsLocale) {
         DateTimeFormatter.ofPattern("EEE", dayLabelsLocale)
     }
     val selectedLocalDate =
-        remember(input.selectedDateMillis, zoneId) {
-            Instant.ofEpochMilli(input.selectedDateMillis).atZone(zoneId).toLocalDate()
+        remember(input.selectedDateMillis, systemZone) {
+            LocalDateTime.ofInstant(Instant.ofEpochMilli(input.selectedDateMillis), systemZone).toLocalDate()
         }
     val lifecycleOwner = LocalLifecycleOwner.current
     var resumeKey by remember { mutableIntStateOf(0) }
@@ -182,8 +183,8 @@ private fun SessionBookingSheetContent(
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
-    val dayHorizon = remember(zoneId, input.selectedDateMillis, resumeKey) {
-        val today = LocalDate.now(zoneId)
+    val dayHorizon = remember(input.selectedDateMillis, resumeKey) {
+        val today = LocalDate.now()
         (0 until SESSION_BOOKING_DAY_HORIZON).map { today.plusDays(it.toLong()) }
     }
     val selectedLocationName = booking.selectedLocationDisplayName
@@ -551,11 +552,11 @@ private fun BookingDateChipItem(
     chipH: Dp,
     onDateMillisSelected: (Long) -> Unit,
 ) {
-    val zoneId = ZoneId.systemDefault()
-    val millis = remember(day, zoneId) {
-        day.atStartOfDay(zoneId).toInstant().toEpochMilli()
+    val systemZone = Clock.systemDefaultZone().zone
+    val millis = remember(day, systemZone) {
+        day.atStartOfDay(systemZone).toInstant().toEpochMilli()
     }
-    val onClick = remember(day, zoneId, onDateMillisSelected) {
+    val onClick = remember(day, onDateMillisSelected, millis) {
         { onDateMillisSelected(millis) }
     }
     val selected = day == selectedLocalDate
@@ -713,4 +714,3 @@ private fun TimeSlotHorizontalCell(
         )
     }
 }
-

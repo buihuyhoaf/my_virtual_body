@@ -7,7 +7,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.ZoneId
 
 class SessionBookingSlotLogicTest {
 
@@ -259,11 +258,10 @@ class SessionBookingSlotLogicTest {
 
     @Test
     fun proposedVariableSessionInterval_twoDifferentLocalDates() {
-        val zone = ZoneId.of("UTC")
         val d1 = LocalDate.of(2026, 6, 1)
         val d2 = LocalDate.of(2026, 6, 2)
-        val a = proposedVariableSessionInterval(d1, LocalTime.of(22, 0), LocalTime.of(23, 0), zone)
-        val b = proposedVariableSessionInterval(d2, LocalTime.of(22, 0), LocalTime.of(23, 0), zone)
+        val a = proposedVariableSessionInterval(d1, LocalTime.of(22, 0), LocalTime.of(23, 0))
+        val b = proposedVariableSessionInterval(d2, LocalTime.of(22, 0), LocalTime.of(23, 0))
         assertTrue(a.start.isBefore(b.start))
         assertTrue(a.end.isBefore(b.start))
     }

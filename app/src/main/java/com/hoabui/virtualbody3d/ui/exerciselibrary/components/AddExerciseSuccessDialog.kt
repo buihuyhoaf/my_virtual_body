@@ -26,9 +26,10 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.AddExerciseSucces
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.defaultExerciseLibraryCartDateMillis
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
+import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
@@ -77,14 +78,14 @@ fun AddExerciseSuccessDialog(
 @Composable
 private fun AddExerciseSuccessReceiptBody(summary: AddExerciseSuccessSummary) {
     val token = GymTheme.token
-    val zone = ZoneId.systemDefault()
+    val systemZone = Clock.systemDefaultZone().zone
     val dateFormatter = remember {
         DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(Locale.getDefault())
     }
-    val sessionDate = remember(summary.sessionStartInstant, zone) {
-        summary.sessionStartInstant.atZone(zone).toLocalDate()
+    val sessionDate = remember(summary.sessionStartInstant, systemZone) {
+        LocalDateTime.ofInstant(summary.sessionStartInstant, systemZone).toLocalDate()
     }
-    val today = LocalDate.now(zone)
+    val today = LocalDate.now()
     val dateText = when (sessionDate) {
         today -> stringResource(R.string.exercise_library_add_success_date_today)
         today.plusDays(1) -> stringResource(R.string.exercise_library_add_success_date_tomorrow)
@@ -93,11 +94,11 @@ private fun AddExerciseSuccessReceiptBody(summary: AddExerciseSuccessSummary) {
     val timeFormatter = remember {
         DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(Locale.getDefault())
     }
-    val startLocalTime = remember(summary.sessionStartInstant, zone) {
-        summary.sessionStartInstant.atZone(zone).toLocalTime()
+    val startLocalTime = remember(summary.sessionStartInstant, systemZone) {
+        LocalDateTime.ofInstant(summary.sessionStartInstant, systemZone).toLocalTime()
     }
-    val endLocalTime = remember(summary.sessionEndInstant, zone) {
-        summary.sessionEndInstant.atZone(zone).toLocalTime()
+    val endLocalTime = remember(summary.sessionEndInstant, systemZone) {
+        LocalDateTime.ofInstant(summary.sessionEndInstant, systemZone).toLocalTime()
     }
     val timeRangeText = stringResource(
         R.string.exercise_library_add_success_line_time_range,
@@ -193,12 +194,12 @@ private fun AddExerciseSuccessReceiptRow(
 }
 
 private fun previewSummary(exerciseCount: Int, primaryExerciseTitle: String?): AddExerciseSuccessSummary {
-    val zone = ZoneId.systemDefault()
+    val systemZone = Clock.systemDefaultZone().zone
     val start = Instant.ofEpochMilli(defaultExerciseLibraryCartDateMillis())
-        .atZone(zone)
+        .atZone(systemZone)
         .toLocalDate()
         .atTime(10, 0)
-        .atZone(zone)
+        .atZone(systemZone)
         .toInstant()
     val end = start.plusSeconds(30L * 60L * exerciseCount.coerceAtLeast(1))
     return AddExerciseSuccessSummary(

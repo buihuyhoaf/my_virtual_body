@@ -69,7 +69,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.ZoneId
 import javax.inject.Inject
 
 @HiltViewModel
@@ -233,7 +232,7 @@ class ExerciseLibraryViewModel @Inject constructor(
             .catch { setError(it.message ?: "Unknown error") }
             .launchIn(viewModelScope)
 
-        observeExerciseLibraryWeeklySummaryUseCase(LocalDate.now(ZoneId.systemDefault()))
+        observeExerciseLibraryWeeklySummaryUseCase(LocalDate.now())
             .onEach { dayItems ->
                 val dayUiModels = dayItems.map { item ->
                     WeeklyHeatmapDayUiModel(
