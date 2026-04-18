@@ -9,6 +9,10 @@ data class ExerciseCaloriesMetadata(
 )
 
 object ExerciseCaloriesMetadataProvider {
+    /**
+     * Seed metadata using common MET tables and typical time-under-tension heuristics.
+     * Values are intentionally conservative placeholders until the catalog supplies per-exercise data.
+     */
     private val metadataById: Map<String, ExerciseCaloriesMetadata> = mapOf(
         "squat" to ExerciseCaloriesMetadata(met = 6.0, tutSecondsPerRep = 4.5),
         "bicep_curl" to ExerciseCaloriesMetadata(met = 3.5, tutSecondsPerRep = 4.0),
