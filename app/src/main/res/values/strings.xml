@@ -210,6 +210,7 @@
     <string name="exercise_library_cart_choose_time">Chọn giờ</string>
     <string name="exercise_library_cart_add_short">Thêm</string>
     <string name="exercise_library_add_to_session">Thêm vào ca tập</string>
+    <string name="exercise_library_estimated_calories">Est. %1$d kcal</string>
     <string name="exercise_library_booking_title">Đặt ca tập</string>
     <string name="exercise_library_booking_confirm">Xác nhận</string>
     <string name="exercise_library_booking_cancel">Hủy</string>
