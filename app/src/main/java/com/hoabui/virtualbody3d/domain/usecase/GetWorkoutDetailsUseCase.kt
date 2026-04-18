@@ -402,11 +402,12 @@ private fun resolveSessionEndInstant(
         workoutSessionsById[sessionId]?.endInstant?.let { return it }
         logSessionsById[sessionId]?.endInstant?.let { return it }
     }
-    val lastDurationSeconds = sortedExercises.lastOrNull()?.durationSeconds?.coerceAtLeast(0) ?: 0
+    val lastExercise = sortedExercises.lastOrNull() ?: return startInstant
+    val lastDurationSeconds = lastExercise.durationSeconds?.coerceAtLeast(0) ?: 0
     return if (lastDurationSeconds > 0) {
-        startInstant.plusSeconds(lastDurationSeconds.toLong())
+        lastExercise.startInstant.plusSeconds(lastDurationSeconds.toLong())
     } else {
-        startInstant
+        lastExercise.startInstant
     }
 }
 
