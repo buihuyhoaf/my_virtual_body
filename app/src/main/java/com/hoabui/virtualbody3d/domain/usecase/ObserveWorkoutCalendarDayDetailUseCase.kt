@@ -2,6 +2,7 @@ package com.hoabui.virtualbody3d.domain.usecase
 
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarExerciseLine
 import com.hoabui.virtualbody3d.domain.model.calendar.resolveWorkoutCalendarLineImage
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.util.CaloriesCalculator
 import com.hoabui.virtualbody3d.domain.repository.ExercisesRepository
 import com.hoabui.virtualbody3d.domain.repository.WorkoutScheduleRepository
@@ -29,9 +30,9 @@ class ObserveWorkoutCalendarDayDetailUseCase @Inject constructor(
                 val rowId = sch.rowId ?: return@mapNotNull null
                 val catalog = exerciseById[sch.exerciseId]
                 val setBreakdownLabel = when (sch.measurementMode) {
-                    com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode.Strength ->
+                    ExerciseMeasurementMode.Strength ->
                         "${sch.sets} Sets • ${formatWeight(sch.weightKg)} kg x ${sch.reps}"
-                    com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode.Duration -> {
+                    ExerciseMeasurementMode.Duration -> {
                         val minutes = (sch.durationSeconds ?: 0) / 60
                         "${sch.sets} Sets • ${minutes.coerceAtLeast(1)}m"
                     }

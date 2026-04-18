@@ -82,7 +82,7 @@ private fun ExerciseMeasurementMode.toEntityValue(): String = when (this) {
     ExerciseMeasurementMode.Duration -> "duration"
 }
 
-private fun String.toMeasurementMode(): ExerciseMeasurementMode = when (lowercase()) {
+fun String.toMeasurementMode(): ExerciseMeasurementMode = when (lowercase()) {
     "duration" -> ExerciseMeasurementMode.Duration
     else -> ExerciseMeasurementMode.Strength
 }
