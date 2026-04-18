@@ -20,7 +20,7 @@ class DatabaseSeeder @Inject constructor(
 ) {
     private val refreshLock = Any()
     @Volatile
-    private var hasRefreshedLocalImageNames = false
+    private var hasRefreshedLocalImageNamesThisSession = false
 
     fun roomCallback(): RoomDatabase.Callback =
         object : RoomDatabase.Callback() {
@@ -32,9 +32,9 @@ class DatabaseSeeder @Inject constructor(
             override fun onOpen(db: SupportSQLiteDatabase) {
                 super.onOpen(db)
                 synchronized(refreshLock) {
-                    if (hasRefreshedLocalImageNames == true) return
+                    if (hasRefreshedLocalImageNamesThisSession) return
                     refreshExerciseLocalImageNames(db)
-                    hasRefreshedLocalImageNames = true
+                    hasRefreshedLocalImageNamesThisSession = true
                 }
             }
         }
