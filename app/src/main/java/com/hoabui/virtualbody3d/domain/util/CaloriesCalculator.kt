@@ -94,7 +94,7 @@ private const val MET_WEIGHT_FACTOR = 0.0175
 private const val DEFAULT_TUT_SECONDS_PER_REP = 4.0
 private const val DEFAULT_CARDIO_MET = 6.0
 private const val DEFAULT_STRENGTH_MET = 5.0
-// Fallback when user body weight is missing or invalid; product default to keep estimates stable.
+// Fallback when user body weight is missing or invalid; may skew estimates for users far from 70kg.
 private const val DEFAULT_BODY_WEIGHT_KG = 70.0
 // Minimum MET for heavy compounds, calibrated to hit ~25-40 kcal for typical heavy sets.
 private const val HEAVY_COMPOUND_BASE_MET = 7.5
