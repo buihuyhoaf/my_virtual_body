@@ -20,4 +20,7 @@ class ProgressTimelineLocalDataSource @Inject constructor(
         progressTimelineDao.observeAllByDate()
             .map { list -> list.map { it.toProgressSnapshotDto() } }
             .flowOn(ioDispatcher)
+
+    suspend fun getLatestSnapshotOnOrBefore(dateIso: String): ProgressSnapshotDto? =
+        progressTimelineDao.getLatestSnapshotOnOrBefore(dateIso)?.toProgressSnapshotDto()
 }

@@ -8,6 +8,7 @@ import com.hoabui.virtualbody3d.data.local.db.ExerciseDao
 import com.hoabui.virtualbody3d.data.local.db.MIGRATION_1_2
 import com.hoabui.virtualbody3d.data.local.db.MIGRATION_3_4
 import com.hoabui.virtualbody3d.data.local.db.MIGRATION_4_5
+import com.hoabui.virtualbody3d.data.local.db.MIGRATION_5_6
 import com.hoabui.virtualbody3d.data.local.db.migration2To3
 import com.hoabui.virtualbody3d.data.local.db.NutritionSummaryDao
 import com.hoabui.virtualbody3d.data.local.db.ProgressTimelineDao
@@ -15,6 +16,7 @@ import com.hoabui.virtualbody3d.data.local.db.VirtualBodyDatabase
 import com.hoabui.virtualbody3d.data.local.db.WorkoutScheduleDao
 import com.hoabui.virtualbody3d.data.local.db.seed.DatabaseSeeder
 import com.hoabui.virtualbody3d.data.local.db.WorkoutSessionDao
+import com.hoabui.virtualbody3d.data.local.db.WorkoutLogDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -39,7 +41,7 @@ object DatabaseModule {
             VirtualBodyDatabase::class.java,
             DB_NAME,
         )
-            .addMigrations(MIGRATION_1_2, migration2To3(databaseSeeder), MIGRATION_3_4, MIGRATION_4_5)
+            .addMigrations(MIGRATION_1_2, migration2To3(databaseSeeder), MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
             .addCallback(databaseSeeder.roomCallback())
             .build()
 
@@ -56,6 +58,11 @@ object DatabaseModule {
     @Singleton
     fun provideWorkoutSessionDao(db: VirtualBodyDatabase): WorkoutSessionDao =
         db.workoutSessionDao()
+
+    @Provides
+    @Singleton
+    fun provideWorkoutLogDao(db: VirtualBodyDatabase): WorkoutLogDao =
+        db.workoutLogDao()
 
     @Provides
     @Singleton

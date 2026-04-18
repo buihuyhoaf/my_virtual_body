@@ -380,28 +380,50 @@ private fun WorkoutCalendarExerciseRow(
                 error = fallbackPainter,
             )
             Column(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = token.spacing.xs),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    GText(
+                        text = line.startTimeLabel,
+                        style = token.typography.labelSmall,
+                        color = token.colors.textSecondary,
+                    )
+                    GText(
+                        text = line.caloriesLabel,
+                        style = token.typography.labelSmall,
+                        color = token.colors.primary,
+                    )
+                }
                 GText(
                     text = line.title,
                     style = workoutCalendarExerciseNameStyle(token),
                     color = token.colors.textPrimary,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                GText(
-                    text = line.metricsLabel,
-                    style = workoutCalendarSupportingBodyStyle(token),
-                    color = token.colors.textSecondary,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = cal.exerciseRowTitleToMetricsGap),
                 )
                 GText(
-                    text = line.statusLabel,
-                    style = workoutCalendarSupportingLabelStyle(token),
-                    color = token.colors.textMuted,
+                    text = line.setBreakdownLabel,
+                    style = workoutCalendarSupportingBodyStyle(token),
+                    color = token.colors.textSecondary,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = cal.exerciseRowMetricsToStatusGap),
                 )
+                if (line.statusLabel.isNotBlank()) {
+                    GText(
+                        text = line.statusLabel,
+                        style = workoutCalendarSupportingLabelStyle(token),
+                        color = token.colors.textMuted,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = cal.exerciseRowMetricsToStatusGap),
+                    )
+                }
             }
         }
     }
@@ -431,14 +453,18 @@ private fun DayListPreviewLight() {
                         WorkoutCalendarExerciseLineUiModel(
                             rowId = 1L,
                             title = "Squat",
-                            metricsLabel = "3 × 10",
+                            startTimeLabel = "06:30",
+                            setBreakdownLabel = "3 Sets • 95 kg x 10",
+                            caloriesLabel = "🔥 25 kcal",
                             statusLabel = "Scheduled",
                             image = ImageSource.LocalResource(WORKOUT_CALENDAR_FALLBACK_DRAWABLE_NAME),
                         ),
                         WorkoutCalendarExerciseLineUiModel(
                             rowId = 2L,
                             title = "Romanian deadlift",
-                            metricsLabel = "4 × 8",
+                            startTimeLabel = "18:00",
+                            setBreakdownLabel = "4 Sets • 75 kg x 8",
+                            caloriesLabel = "🔥 18 kcal",
                             statusLabel = "Completed",
                             image = ImageSource.LocalResource(WORKOUT_CALENDAR_FALLBACK_DRAWABLE_NAME),
                         ),

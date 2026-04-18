@@ -8,6 +8,12 @@ data class ExerciseCaloriesMetadata(
     val tutSecondsPerRep: Double,
 )
 
+data class CaloriesEstimate(
+    val calories: Float,
+    val met: Double,
+    val epocFactor: Double,
+)
+
 object ExerciseCaloriesMetadataProvider {
     /**
      * Seed metadata using common MET tables and typical time-under-tension heuristics.
@@ -15,8 +21,8 @@ object ExerciseCaloriesMetadataProvider {
      */
     private val metadataById: Map<String, ExerciseCaloriesMetadata> = mapOf(
         "squat" to ExerciseCaloriesMetadata(met = 6.0, tutSecondsPerRep = 4.5),
-        "bicep_curl" to ExerciseCaloriesMetadata(met = 3.5, tutSecondsPerRep = 4.0),
-        "bench_press" to ExerciseCaloriesMetadata(met = 5.0, tutSecondsPerRep = 4.0),
+        "bicep_curl" to ExerciseCaloriesMetadata(met = 3.5, tutSecondsPerRep = 4.5),
+        "bench_press" to ExerciseCaloriesMetadata(met = 5.0, tutSecondsPerRep = 4.5),
         "deadlift" to ExerciseCaloriesMetadata(met = HEAVY_COMPOUND_BASE_MET, tutSecondsPerRep = 4.5),
         "running" to ExerciseCaloriesMetadata(met = 7.5, tutSecondsPerRep = DEFAULT_TUT_SECONDS_PER_REP),
         "cycling" to ExerciseCaloriesMetadata(met = 6.8, tutSecondsPerRep = DEFAULT_TUT_SECONDS_PER_REP),
@@ -37,6 +43,27 @@ object CaloriesCalculator {
         bodyWeightKg: Double,
         leanBodyMassKg: Double?,
     ): Float {
+        return estimateCaloriesWithMetadata(
+            exerciseId = exerciseId,
+            measurementMode = measurementMode,
+            durationMinutes = durationMinutes,
+            totalReps = totalReps,
+            averageLoadKg = averageLoadKg,
+            bodyWeightKg = bodyWeightKg,
+            leanBodyMassKg = leanBodyMassKg,
+        ).calories
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun estimateCaloriesWithMetadata(
+        exerciseId: String,
+        measurementMode: ExerciseMeasurementMode,
+        durationMinutes: Double,
+        totalReps: Int,
+        averageLoadKg: Double,
+        bodyWeightKg: Double,
+        leanBodyMassKg: Double?,
+    ): CaloriesEstimate {
         val normalizedExerciseId = exerciseId.lowercase()
         val metadata = ExerciseCaloriesMetadataProvider.metadataFor(normalizedExerciseId)
         val met = when {
@@ -52,7 +79,11 @@ object CaloriesCalculator {
             ExerciseMeasurementMode.Strength -> totalReps * tutSeconds / 60.0
         }.coerceAtLeast(0.0)
         if (effectiveMinutes <= 0.0) {
-            return 0f
+            return CaloriesEstimate(
+                calories = 0f,
+                met = met,
+                epocFactor = 1.0,
+            )
         }
         // Body weight fallback is applied below when user profile data is incomplete to avoid zero output.
         val effectiveBodyWeightKg = if (bodyWeightKg > 0.0) bodyWeightKg else DEFAULT_BODY_WEIGHT_KG
@@ -77,7 +108,11 @@ object CaloriesCalculator {
         } else {
             1.0 to 1.0
         }
-        return (baseCalories * intensityScaler * epocScaler).toFloat()
+        return CaloriesEstimate(
+            calories = (baseCalories * intensityScaler * epocScaler).toFloat(),
+            met = met,
+            epocFactor = epocScaler,
+        )
     }
 
     private fun defaultMetFor(measurementMode: ExerciseMeasurementMode): Double = when (measurementMode) {
@@ -93,7 +128,7 @@ object CaloriesCalculator {
 }
 
 private const val MET_WEIGHT_FACTOR = 0.0175
-private const val DEFAULT_TUT_SECONDS_PER_REP = 4.0
+private const val DEFAULT_TUT_SECONDS_PER_REP = 4.5
 private const val DEFAULT_CARDIO_MET = 6.0
 private const val DEFAULT_STRENGTH_MET = 5.0
 // Fallback when user body weight is missing or invalid; may skew estimates for users far from 70kg.
