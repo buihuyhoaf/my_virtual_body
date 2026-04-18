@@ -36,9 +36,11 @@ object CaloriesCalculator {
         bodyWeightKg: Double,
         leanBodyMassKg: Double?,
     ): Float {
-        val metadata = ExerciseCaloriesMetadataProvider.metadataFor(exerciseId)
+        val normalizedExerciseId = exerciseId.lowercase()
+        val metadata = ExerciseCaloriesMetadataProvider.metadataFor(normalizedExerciseId)
         val met = when {
-            measurementMode == ExerciseMeasurementMode.Strength && isHeavyCompoundLift(exerciseId) ->
+            // Enforce a minimum MET for heavy compounds even if metadata is missing or conservative.
+            measurementMode == ExerciseMeasurementMode.Strength && isHeavyCompoundLift(normalizedExerciseId) ->
                 max(metadata?.met ?: DEFAULT_STRENGTH_MET, HEAVY_COMPOUND_BASE_MET)
             else -> metadata?.met ?: defaultMetFor(measurementMode)
         }
@@ -50,6 +52,7 @@ object CaloriesCalculator {
         if (effectiveMinutes <= 0.0) {
             return 0f
         }
+        // Fallback body weight ensures stable estimates when user profile data is incomplete.
         val effectiveBodyWeightKg = if (bodyWeightKg > 0.0) bodyWeightKg else DEFAULT_BODY_WEIGHT_KG
         val safeLoadKg = averageLoadKg.coerceAtLeast(0.0)
 
@@ -65,7 +68,7 @@ object CaloriesCalculator {
         val isStrength = measurementMode == ExerciseMeasurementMode.Strength
         val loadRatio = if (isStrength && safeLoadKg > 0.0) safeLoadKg / effectiveBodyWeightKg else 0.0
         val (intensityScaler, epocScaler) = if (isStrength) {
-            val epocCoefficient = epocCoefficientFor(exerciseId)
+            val epocCoefficient = epocCoefficientFor(normalizedExerciseId)
             (1.0 + loadRatio) to (1.0 + (epocCoefficient * loadRatio))
         } else {
             1.0 to 1.0
@@ -78,11 +81,11 @@ object CaloriesCalculator {
         ExerciseMeasurementMode.Strength -> DEFAULT_STRENGTH_MET
     }
 
-    private fun isHeavyCompoundLift(exerciseId: String): Boolean =
-        HEAVY_COMPOUND_LIFTS.contains(exerciseId.lowercase())
+    private fun isHeavyCompoundLift(normalizedExerciseId: String): Boolean =
+        HEAVY_COMPOUND_LIFTS.contains(normalizedExerciseId)
 
-    private fun epocCoefficientFor(exerciseId: String): Double =
-        if (isHeavyCompoundLift(exerciseId)) EPOC_COEFFICIENT_COMPOUND else EPOC_COEFFICIENT_ISOLATION
+    private fun epocCoefficientFor(normalizedExerciseId: String): Double =
+        if (isHeavyCompoundLift(normalizedExerciseId)) EPOC_COEFFICIENT_COMPOUND else EPOC_COEFFICIENT_ISOLATION
 }
 
 private const val MET_WEIGHT_FACTOR = 0.0175
