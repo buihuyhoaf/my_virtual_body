@@ -92,12 +92,13 @@ private const val MET_WEIGHT_FACTOR = 0.0175
 private const val DEFAULT_TUT_SECONDS_PER_REP = 4.0
 private const val DEFAULT_CARDIO_MET = 6.0
 private const val DEFAULT_STRENGTH_MET = 5.0
-// Fallback when user body weight is missing or invalid.
+// Fallback when user body weight is missing or invalid; keeps estimates stable.
 private const val DEFAULT_BODY_WEIGHT_KG = 70.0
+// Minimum MET for heavy compounds, calibrated to match typical heavy-set output targets.
 private const val HEAVY_COMPOUND_BASE_MET = 7.5
-// Higher k for heavy compounds to reflect stronger afterburn vs. isolation lifts.
+// Higher k for heavy compounds to reflect stronger afterburn vs. isolation lifts (calibrated).
 private const val EPOC_COEFFICIENT_COMPOUND = 0.4
-// Lower k for isolation work to reduce afterburn influence.
+// Lower k for isolation work to reduce afterburn influence (calibrated).
 private const val EPOC_COEFFICIENT_ISOLATION = 0.2
 
 private val HEAVY_COMPOUND_LIFTS = setOf(
