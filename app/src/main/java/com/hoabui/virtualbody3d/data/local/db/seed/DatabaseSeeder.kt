@@ -181,11 +181,13 @@ class DatabaseSeeder @Inject constructor(
         db.beginTransaction()
         try {
             val updateExerciseImage = db.compileStatement(
-                "UPDATE exercises SET local_image_name = ? WHERE id = ?",
+                "UPDATE exercises SET local_image_name = ? WHERE id = ? AND (local_image_name IS NOT ?)",
             )
             CatalogSeedData.exerciseRowsForSeed().forEach { e ->
+                val id = requireNotNull(e.id) { "Seed exercise id is required" }
                 bindStringOrNull(updateExerciseImage, 1, e.localImageName)
-                updateExerciseImage.bindString(2, e.id.orEmpty())
+                updateExerciseImage.bindString(2, id)
+                bindStringOrNull(updateExerciseImage, 3, e.localImageName)
                 updateExerciseImage.executeUpdateDelete()
                 updateExerciseImage.clearBindings()
             }
