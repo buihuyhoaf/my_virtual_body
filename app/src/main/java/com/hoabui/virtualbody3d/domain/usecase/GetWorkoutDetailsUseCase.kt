@@ -345,7 +345,7 @@ private fun groupExercisesIntoSessionBlocks(
         val startInstant = sortedExercises.first().startInstant
         val endInstant = sortedExercises.last().startInstant
 
-        // Calculate session time label: "08:00 AM - 09:30 AM Session" or just "08:00 AM" for single exercises
+        // Calculate session time label: "08:00 AM - 09:30 AM session" or just "08:00 AM" for single exercises
         val startTime = startInstant.atZone(zoneId).toLocalTime().format(timeFormatter)
         val endTime = endInstant.atZone(zoneId).toLocalTime().format(timeFormatter)
 

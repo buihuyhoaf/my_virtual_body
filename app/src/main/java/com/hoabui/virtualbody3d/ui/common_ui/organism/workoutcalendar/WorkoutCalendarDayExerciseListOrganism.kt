@@ -267,7 +267,7 @@ private fun SessionHeaderRow(
                     .background(intensityColor),
             )
             GText(
-                text = "$timeLabel Session",
+                text = "$timeLabel session",
                 style = workoutCalendarUnifiedSectionTitleStyle(token),
                 color = token.colors.textPrimary,
             )
