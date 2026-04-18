@@ -27,7 +27,8 @@ internal fun WorkoutSessionEntity.toDto(): WorkoutSessionDto = WorkoutSessionDto
     locationId = locationId,
 )
 
-internal fun WorkoutSessionDto.toEntity(zoneId: ZoneId): WorkoutSessionEntity {
+internal fun WorkoutSessionDto.toEntity(): WorkoutSessionEntity {
+    val zoneId = ZoneId.systemDefault()
     val dayKey = Instant.ofEpochMilli(startEpochMillis).atZone(zoneId).toLocalDate().toEpochDay()
     return WorkoutSessionEntity(
         id = id,

@@ -17,17 +17,14 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.Instant
 import java.time.LocalTime
-import java.time.ZoneId
 
 class SessionBookingConfirmationWorkflowTest {
-
-    private val zoneId: ZoneId = ZoneId.of("UTC")
 
     @Test
     fun run_noOp_emitsPreparingThenNoOp() = runBlocking {
         val confirm = mockk<ConfirmExerciseLibrarySessionUseCase>()
         every {
-            confirm.prepare(any(), any(), any(), any(), any(), any(), any())
+            confirm.prepare(any(), any(), any(), any(), any(), any())
         } returns PrepareLibrarySessionConfirmResult.NoOp
         val wf = SessionBookingConfirmationWorkflow(confirm)
         val input = minimalInput()
@@ -45,7 +42,7 @@ class SessionBookingConfirmationWorkflowTest {
     fun run_longSession_emitsAwaitingAck() = runBlocking {
         val confirm = mockk<ConfirmExerciseLibrarySessionUseCase>()
         every {
-            confirm.prepare(any(), any(), any(), any(), any(), any(), any())
+            confirm.prepare(any(), any(), any(), any(), any(), any())
         } returns PrepareLibrarySessionConfirmResult.LongSessionAcknowledgementRequired
         val wf = SessionBookingConfirmationWorkflow(confirm)
         val events = wf.run(minimalInput()).toList()
@@ -75,10 +72,10 @@ class SessionBookingConfirmationWorkflowTest {
         )
         val confirm = mockk<ConfirmExerciseLibrarySessionUseCase>()
         every {
-            confirm.prepare(any(), any(), any(), any(), any(), any(), any())
+            confirm.prepare(any(), any(), any(), any(), any(), any())
         } returns ready
         coEvery {
-            confirm.commit(any(), any(), any(), any(), any(), any())
+            confirm.commit(any(), any(), any(), any(), any())
         } returns CommitLibrarySessionBookingResult.Success(
             scheduledCount = 2,
             session = session,
@@ -113,7 +110,6 @@ class SessionBookingConfirmationWorkflowTest {
             exerciseMeasurementById = mapOf("ex1" to ExerciseMeasurementMode.Strength),
             exerciseSnapshotTitlesById = emptyMap(),
             exercisesById = emptyMap(),
-            zoneId = zoneId,
             locationDisplayName = "Gym",
         )
 }

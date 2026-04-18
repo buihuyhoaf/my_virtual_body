@@ -12,7 +12,8 @@ import kotlinx.coroutines.flow.map
 class ObserveWorkoutCalendarMonthSummariesUseCase @Inject constructor(
     private val workoutScheduleRepository: WorkoutScheduleRepository,
 ) {
-    operator fun invoke(yearMonth: YearMonth, zoneId: ZoneId): Flow<Map<Long, WorkoutCalendarDaySummary>> {
+    operator fun invoke(yearMonth: YearMonth): Flow<Map<Long, WorkoutCalendarDaySummary>> {
+        val zoneId = ZoneId.systemDefault()
         val start = yearMonth.atDay(1).toEpochDay()
         val end = yearMonth.atEndOfMonth().toEpochDay()
         return workoutScheduleRepository.observeSchedulesInDayRange(start, end)

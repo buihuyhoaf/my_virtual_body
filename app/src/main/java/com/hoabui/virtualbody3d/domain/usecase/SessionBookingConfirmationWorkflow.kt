@@ -4,7 +4,6 @@ import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.LibraryCartDraft
 import com.hoabui.virtualbody3d.domain.model.exercise.PendingSessionBooking
-import java.time.ZoneId
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -18,7 +17,6 @@ data class SessionBookingWorkflowInput(
     val exerciseMeasurementById: Map<String, ExerciseMeasurementMode>,
     val exerciseSnapshotTitlesById: Map<String, String>,
     val exercisesById: Map<String, Exercise>,
-    val zoneId: ZoneId,
     val locationDisplayName: String,
 )
 
@@ -51,7 +49,6 @@ class SessionBookingConfirmationWorkflow @Inject constructor(
                 exerciseMeasurementById = input.exerciseMeasurementById,
                 exerciseSnapshotTitlesById = input.exerciseSnapshotTitlesById,
                 exercisesById = input.exercisesById,
-                zoneId = input.zoneId,
                 locationDisplayName = input.locationDisplayName,
             )
         ) {
@@ -69,7 +66,6 @@ class SessionBookingConfirmationWorkflow @Inject constructor(
                 val result = confirmExerciseLibrarySessionUseCase.commit(
                     session = prep.session,
                     lines = prep.lines,
-                    zoneId = input.zoneId,
                     scheduledDateMillis = prep.scheduledDateMillis,
                     primaryExerciseTitle = prep.primaryExerciseTitle,
                     locationDisplayName = prep.locationDisplayName,

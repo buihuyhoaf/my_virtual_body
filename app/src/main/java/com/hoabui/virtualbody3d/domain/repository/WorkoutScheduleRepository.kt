@@ -3,11 +3,10 @@ package com.hoabui.virtualbody3d.domain.repository
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutExecutionStatus
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutScheduleDeleteResult
-import java.time.ZoneId
 import kotlinx.coroutines.flow.Flow
 
 interface WorkoutScheduleRepository {
-    suspend fun saveWorkoutSchedule(schedule: WorkoutSchedule, planZoneId: ZoneId)
+    suspend fun saveWorkoutSchedule(schedule: WorkoutSchedule)
 
     fun observeWorkoutSchedules(): Flow<List<WorkoutSchedule>>
 
@@ -25,5 +24,5 @@ interface WorkoutScheduleRepository {
     /**
      * Restores a delete performed via [deleteWorkoutScheduleByRowId] (re-inserts session when needed, then upserts schedule).
      */
-    suspend fun restoreWorkoutScheduleDelete(result: WorkoutScheduleDeleteResult, planZoneId: ZoneId)
+    suspend fun restoreWorkoutScheduleDelete(result: WorkoutScheduleDeleteResult)
 }

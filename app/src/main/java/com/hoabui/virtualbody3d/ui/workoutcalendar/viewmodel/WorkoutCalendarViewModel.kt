@@ -58,8 +58,7 @@ class WorkoutCalendarViewModel @Inject constructor(
     private val sharedPreferences: SharedPreferences,
 ) : UiStateViewModel<WorkoutCalendarContent, WorkoutCalendarEvent>() {
 
-    private val zoneId: ZoneId = ZoneId.systemDefault()
-    private val today: LocalDate = LocalDate.now(zoneId)
+    private val today: LocalDate = LocalDate.now(ZoneId.systemDefault())
     private val _visibleMonth = MutableStateFlow(YearMonth.from(today))
     private val _selectedDate = MutableStateFlow(today)
 
@@ -85,8 +84,8 @@ class WorkoutCalendarViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             combine(
-                _visibleMonth.flatMapLatest { ym -> observeMonthSummaries(ym, zoneId) },
-                _selectedDate.flatMapLatest { d -> getWorkoutDetails(d, zoneId) },
+                _visibleMonth.flatMapLatest { ym -> observeMonthSummaries(ym) },
+                _selectedDate.flatMapLatest { d -> getWorkoutDetails(d) },
                 _visibleMonth,
                 _selectedDate,
             ) { summaries, sessionBlocks, vm, sd ->
@@ -171,7 +170,7 @@ class WorkoutCalendarViewModel @Inject constructor(
         val snapshot = pendingUndoDelete ?: return
         pendingUndoDelete = null
         launchSafely {
-            restoreWorkoutScheduleDelete(snapshot, zoneId)
+            restoreWorkoutScheduleDelete(snapshot)
         }
     }
 

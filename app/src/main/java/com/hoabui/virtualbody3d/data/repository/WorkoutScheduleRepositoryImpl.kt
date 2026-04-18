@@ -16,7 +16,6 @@ import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutScheduleDeleteResult
 import com.hoabui.virtualbody3d.domain.repository.WorkoutScheduleRepository
 import com.hoabui.virtualbody3d.di.IoDispatcher
-import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
@@ -34,10 +33,7 @@ class WorkoutScheduleRepositoryImpl @Inject constructor(
 
     private val sessionDao get() = database.workoutSessionDao()
 
-    /** Wall-clock zone used when mapping stored instants to [WorkoutSchedule.scheduledAt]. */
-    private val mappingZoneId: ZoneId = ZoneId.systemDefault()
-
-    override suspend fun saveWorkoutSchedule(schedule: WorkoutSchedule, planZoneId: ZoneId) {
+    override suspend fun saveWorkoutSchedule(schedule: WorkoutSchedule) {
         withContext(ioDispatcher) {
             try {
                 if (BuildConfig.DEBUG) {
@@ -47,7 +43,7 @@ class WorkoutScheduleRepositoryImpl @Inject constructor(
                     )
                 }
                 val now = System.currentTimeMillis()
-                localDataSource.upsert(schedule.toEntity(planZoneId, now))
+                localDataSource.upsert(schedule.toEntity(now))
                 if (BuildConfig.DEBUG) {
                     Log.d(WORKOUT_DB_TRACE_LOG_TAG, "upsert success clientId=${schedule.id}")
                 }
@@ -67,7 +63,7 @@ class WorkoutScheduleRepositoryImpl @Inject constructor(
                 if (BuildConfig.DEBUG) {
                     Log.d(WORKOUT_DB_TRACE_LOG_TAG, "emit count=${entities.size} source=observeAllSchedules")
                 }
-                entities.map { it.toDomain(mappingZoneId) }
+                entities.map { it.toDomain() }
             }
             .flowOn(ioDispatcher)
     }
@@ -87,14 +83,14 @@ class WorkoutScheduleRepositoryImpl @Inject constructor(
                         "emit count=${entities.size} dayKey range=${formatEpochDayRangeForLog(startDay, endDay)}",
                     )
                 }
-                entities.map { it.toDomain(mappingZoneId) }
+                entities.map { it.toDomain() }
             }
             .flowOn(ioDispatcher)
     }
 
     override suspend fun getAllSchedules(): List<WorkoutSchedule> = withContext(ioDispatcher) {
         try {
-            localDataSource.getAllSchedules().map { it.toDomain(mappingZoneId) }
+            localDataSource.getAllSchedules().map { it.toDomain() }
         } catch (t: Throwable) {
             Log.e(WORKOUT_DB_TRACE_LOG_TAG, "getAllSchedules failed", t)
             throw t
@@ -132,7 +128,7 @@ class WorkoutScheduleRepositoryImpl @Inject constructor(
             try {
                 localDataSource.deleteScheduleByRowIdWithSessionCleanup(rowId)?.let { (entity, removedSession) ->
                     WorkoutScheduleDeleteResult(
-                        schedule = entity.toDomain(mappingZoneId),
+                        schedule = entity.toDomain(),
                         removedSession = removedSession?.toDomain(),
                     )
                 }
@@ -142,16 +138,16 @@ class WorkoutScheduleRepositoryImpl @Inject constructor(
             }
         }
 
-    override suspend fun restoreWorkoutScheduleDelete(result: WorkoutScheduleDeleteResult, planZoneId: ZoneId) {
+    override suspend fun restoreWorkoutScheduleDelete(result: WorkoutScheduleDeleteResult) {
         withContext(ioDispatcher) {
             try {
                 val now = System.currentTimeMillis()
                 database.withTransaction {
                     result.removedSession?.let { session ->
-                        sessionDao.insertSession(session.toDto().toEntity(planZoneId))
+                        sessionDao.insertSession(session.toDto().toEntity())
                     }
                     localDataSource.upsert(
-                        result.schedule.copy(rowId = null).toEntity(planZoneId, now),
+                        result.schedule.copy(rowId = null).toEntity(now),
                     )
                 }
                 if (BuildConfig.DEBUG) {

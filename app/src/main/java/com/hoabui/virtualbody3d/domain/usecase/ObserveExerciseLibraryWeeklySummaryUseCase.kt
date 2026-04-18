@@ -17,7 +17,8 @@ import kotlinx.coroutines.flow.map
 class ObserveExerciseLibraryWeeklySummaryUseCase @Inject constructor(
     private val workoutScheduleRepository: WorkoutScheduleRepository,
 ) {
-    operator fun invoke(today: LocalDate, zoneId: ZoneId): Flow<List<ExerciseLibraryWeeklyDayItem>> {
+    operator fun invoke(today: LocalDate): Flow<List<ExerciseLibraryWeeklyDayItem>> {
+        val zoneId = ZoneId.systemDefault()
         val monday = today.with(DayOfWeek.MONDAY)
         val sunday = monday.plusDays(6)
         val startEpochDay = monday.toEpochDay()

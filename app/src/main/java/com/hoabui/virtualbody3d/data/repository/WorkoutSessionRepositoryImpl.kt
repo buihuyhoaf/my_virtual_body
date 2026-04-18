@@ -59,8 +59,8 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
     override suspend fun bookSession(
         session: WorkoutSession,
         lines: List<SessionExerciseLine>,
-        zoneId: ZoneId,
     ): BookWorkoutSessionResult {
+        val zoneId = ZoneId.systemDefault()
         if (lines.isEmpty()) {
             Log.w(WORKOUT_DB_TRACE_LOG_TAG, "bookSession: InvalidDraft — lines.isEmpty() sessionId=${session.id}")
             return BookWorkoutSessionResult.InvalidDraft
@@ -106,7 +106,7 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
                                 locationId = session.locationId,
                                 exerciseImageResUrl = line.exerciseImageResUrl,
                                 exerciseLocalImageName = line.exerciseLocalImageName,
-                            ).toEntity(zoneId, now)
+                            ).toEntity(now)
                             workoutScheduleLocalDataSource.upsert(entity)
                         }
                         BookWorkoutSessionResult.Success(
@@ -114,7 +114,7 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
                             resolvedSession = resolved,
                         )
                     } else {
-                        val sessionEntity = session.toDto().toEntity(zoneId)
+                        val sessionEntity = session.toDto().toEntity()
                         workoutSessionDao.insertSession(sessionEntity)
                         for (line in lines) {
                             val entity = WorkoutSchedule(
@@ -132,7 +132,7 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
                                 locationId = session.locationId,
                                 exerciseImageResUrl = line.exerciseImageResUrl,
                                 exerciseLocalImageName = line.exerciseLocalImageName,
-                            ).toEntity(zoneId, now)
+                            ).toEntity(now)
                             workoutScheduleLocalDataSource.upsert(entity)
                         }
                         BookWorkoutSessionResult.Success(
@@ -155,7 +155,8 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun migrateLegacySchedulesIfNeeded(zoneId: ZoneId) {
+    override suspend fun migrateLegacySchedulesIfNeeded() {
+        val zoneId = ZoneId.systemDefault()
         val legacy = workoutScheduleRepository.getAllSchedules()
             .filter { it.sessionId == null }
             .sortedBy { it.scheduledAt.atZone(zoneId).toInstant().toEpochMilli() }
@@ -188,12 +189,10 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
                     endEpochMillis = end.toEpochMilli(),
                     locationId = locationId,
                 ),
-                zoneId,
             )
             for (sch in cluster) {
                 workoutScheduleRepository.saveWorkoutSchedule(
                     sch.copy(sessionId = sessionId),
-                    planZoneId = zoneId,
                 )
             }
             idx = j

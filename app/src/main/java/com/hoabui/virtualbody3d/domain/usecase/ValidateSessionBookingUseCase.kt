@@ -5,7 +5,6 @@ import com.hoabui.virtualbody3d.domain.model.exercise.LibraryCartDraft
 import com.hoabui.virtualbody3d.domain.model.exercise.isContiguousThirtyMinuteChain
 import com.hoabui.virtualbody3d.domain.model.exercise.isValidForSessionConfirm
 import java.time.LocalTime
-import java.time.ZoneId
 import javax.inject.Inject
 
 /**
@@ -19,7 +18,6 @@ class ValidateSessionBookingUseCase @Inject constructor() {
         selectedDateMillis: Long,
         cart: LibraryCartDraft,
         exerciseMeasurementById: Map<String, ExerciseMeasurementMode>,
-        zoneId: ZoneId,
         isConfirming: Boolean,
     ): Boolean {
         if (isConfirming) return false

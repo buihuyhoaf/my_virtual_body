@@ -31,7 +31,8 @@ class GetWorkoutDetailsUseCase @Inject constructor(
      * Returns workout session blocks grouped by sessionId for the given day.
      * Each block contains the session time range and associated exercises.
      */
-    operator fun invoke(day: LocalDate, zoneId: ZoneId): Flow<List<WorkoutCalendarSessionBlock>> {
+    operator fun invoke(day: LocalDate): Flow<List<WorkoutCalendarSessionBlock>> {
+        val zoneId = ZoneId.systemDefault()
         val dayKey = day.toEpochDay()
         val logDayKey = day.format(DateTimeFormatter.ISO_LOCAL_DATE)
         return combine(

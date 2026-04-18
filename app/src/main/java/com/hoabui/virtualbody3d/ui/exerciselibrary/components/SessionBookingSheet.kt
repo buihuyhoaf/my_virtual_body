@@ -94,7 +94,6 @@ private fun sessionBookingSheetTextStyle(base: TextStyle): TextStyle = base.merg
 fun ExerciseLibrarySessionBookingSheetHost(
     booking: SessionBookingUiModel?,
     draftCount: Int,
-    zoneId: ZoneId,
     onDismissRequest: () -> Unit,
     onDateMillisSelected: (Long) -> Unit,
     onLocationSelected: (String) -> Unit,
@@ -131,7 +130,6 @@ fun ExerciseLibrarySessionBookingSheetHost(
                     .heightIn(max = sheetMaxHeight),
                 booking = booking,
                 draftCount = draftCount,
-                zoneId = zoneId,
                 onDismissClick = onDismissRequest,
                 onDateMillisSelected = onDateMillisSelected,
                 onLocationSelected = onLocationSelected,
@@ -148,7 +146,6 @@ private fun SessionBookingSheetContent(
     modifier: Modifier = Modifier,
     booking: SessionBookingUiModel,
     draftCount: Int,
-    zoneId: ZoneId,
     onDismissClick: () -> Unit,
     onDateMillisSelected: (Long) -> Unit,
     onLocationSelected: (String) -> Unit,
@@ -156,6 +153,7 @@ private fun SessionBookingSheetContent(
     onClearTimeSelection: () -> Unit,
     onConfirm: () -> Unit,
 ) {
+    val zoneId = ZoneId.systemDefault()
     val token = GymTheme.token
     val scrollState = rememberScrollState()
     val slotRowState = rememberLazyListState()
@@ -237,7 +235,6 @@ private fun SessionBookingSheetContent(
                 BookingDateChipItem(
                     day = day,
                     selectedLocalDate = selectedLocalDate,
-                    zoneId = zoneId,
                     shortDayFmt = shortDayFmt,
                     chipMinW = chipMinW,
                     chipH = chipH,
@@ -549,12 +546,12 @@ private fun BookingSectionLabel(
 private fun BookingDateChipItem(
     day: LocalDate,
     selectedLocalDate: LocalDate,
-    zoneId: ZoneId,
     shortDayFmt: DateTimeFormatter,
     chipMinW: Dp,
     chipH: Dp,
     onDateMillisSelected: (Long) -> Unit,
 ) {
+    val zoneId = ZoneId.systemDefault()
     val millis = remember(day, zoneId) {
         day.atStartOfDay(zoneId).toInstant().toEpochMilli()
     }

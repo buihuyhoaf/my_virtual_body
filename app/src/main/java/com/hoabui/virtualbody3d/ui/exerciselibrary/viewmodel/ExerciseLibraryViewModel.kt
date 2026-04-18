@@ -91,7 +91,6 @@ class ExerciseLibraryViewModel @Inject constructor(
     private val confirmBookingMutex = Mutex()
 
     private val filterState = MutableStateFlow(ExerciseLibraryUiState())
-    private val zoneId: ZoneId = ZoneId.systemDefault()
 
     private val bookingGridSlotStarts: List<LocalTime> = bookingSlotStartsForDay(
         firstSlot = SESSION_BOOKING_GRID_FIRST_SLOT,
@@ -219,7 +218,7 @@ class ExerciseLibraryViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            migrateLegacyWorkoutSchedulesUseCase(zoneId)
+            migrateLegacyWorkoutSchedulesUseCase()
         }
 
         getExerciseLibraryUseCase()
@@ -234,7 +233,7 @@ class ExerciseLibraryViewModel @Inject constructor(
             .catch { setError(it.message ?: "Unknown error") }
             .launchIn(viewModelScope)
 
-        observeExerciseLibraryWeeklySummaryUseCase(LocalDate.now(zoneId), zoneId)
+        observeExerciseLibraryWeeklySummaryUseCase(LocalDate.now(ZoneId.systemDefault()))
             .onEach { dayItems ->
                 val dayUiModels = dayItems.map { item ->
                     WeeklyHeatmapDayUiModel(
@@ -285,7 +284,6 @@ class ExerciseLibraryViewModel @Inject constructor(
             selectedDateMillis = input.selectedDateMillis,
             cart = filtersWithMeasurement.toLibraryCartDraft(),
             exerciseMeasurementById = filtersWithMeasurement.libraryList.exerciseMeasurementById,
-            zoneId = zoneId,
             isConfirming = input.isConfirming,
         )
     }
@@ -333,7 +331,6 @@ class ExerciseLibraryViewModel @Inject constructor(
                     selectedDateMillis = input.selectedDateMillis,
                     cart = cartDraft,
                     exerciseMeasurementById = filters.libraryList.exerciseMeasurementById,
-                    zoneId = zoneId,
                     isConfirming = input.isConfirming,
                 )
                 Log.d(
@@ -356,7 +353,6 @@ class ExerciseLibraryViewModel @Inject constructor(
                     exerciseMeasurementById = filters.libraryList.exerciseMeasurementById,
                     exerciseSnapshotTitlesById = titlesById,
                     exercisesById = exercisesById,
-                    zoneId = zoneId,
                     locationDisplayName = locationDisplayName,
                 )
                 sessionBookingConfirmationWorkflow.run(workflowInput).collect { status ->

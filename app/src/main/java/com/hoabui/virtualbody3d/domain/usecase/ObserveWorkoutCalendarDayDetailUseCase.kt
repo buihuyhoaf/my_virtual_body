@@ -7,20 +7,19 @@ import com.hoabui.virtualbody3d.domain.repository.ExercisesRepository
 import com.hoabui.virtualbody3d.domain.repository.WorkoutScheduleRepository
 import java.time.LocalDate
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
-import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlin.math.roundToInt
+import java.util.Locale
 
 class ObserveWorkoutCalendarDayDetailUseCase @Inject constructor(
     private val workoutScheduleRepository: WorkoutScheduleRepository,
     private val exercisesRepository: ExercisesRepository,
 ) {
-    operator fun invoke(day: LocalDate, zoneId: ZoneId): Flow<List<WorkoutCalendarExerciseLine>> {
+    operator fun invoke(day: LocalDate): Flow<List<WorkoutCalendarExerciseLine>> {
         val dayKey = day.toEpochDay()
+        val zoneId = ZoneId.systemDefault()
         return combine(
             workoutScheduleRepository.observeSchedulesInDayRange(dayKey, dayKey),
             exercisesRepository.getAllExercises(),
@@ -29,9 +28,6 @@ class ObserveWorkoutCalendarDayDetailUseCase @Inject constructor(
             schedules.mapNotNull { sch ->
                 val rowId = sch.rowId ?: return@mapNotNull null
                 val catalog = exerciseById[sch.exerciseId]
-                val startLabel = sch.scheduledAt.format(
-                    DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(Locale.getDefault()),
-                )
                 val setBreakdownLabel = when (sch.measurementMode) {
                     com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode.Strength ->
                         "${sch.sets} Sets • ${formatWeight(sch.weightKg)} kg x ${sch.reps}"
@@ -55,20 +51,20 @@ class ObserveWorkoutCalendarDayDetailUseCase @Inject constructor(
                     rowId = rowId,
                     exerciseId = sch.exerciseId,
                     exerciseDisplayName = catalog?.name ?: sch.exerciseId,
-                    startTimeLabel = startLabel,
                     setBreakdownLabel = setBreakdownLabel,
                     caloriesLabel = "🔥 ${calories.roundToInt()} kcal",
+                    caloriesKcal = calories,
                     sets = sch.sets,
                     reps = sch.reps,
                     durationSeconds = sch.durationSeconds,
                     measurementMode = sch.measurementMode,
-                    executionStatus = sch.executionStatus,
                     sessionId = sch.sessionId,
                     image = resolveWorkoutCalendarLineImage(
                         exerciseLocalImageName = sch.exerciseLocalImageName,
                         exerciseImageResUrl = sch.exerciseImageResUrl,
                         catalogExercise = catalog,
                     ),
+                    startInstant = sch.scheduledAt.atZone(zoneId).toInstant(),
                 )
             }
         }
