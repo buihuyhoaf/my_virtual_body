@@ -52,7 +52,7 @@ object CaloriesCalculator {
         if (effectiveMinutes <= 0.0) {
             return 0f
         }
-        // Fallback body weight ensures stable estimates when user profile data is incomplete.
+        // Body weight fallback is applied below when user profile data is incomplete.
         val effectiveBodyWeightKg = if (bodyWeightKg > 0.0) bodyWeightKg else DEFAULT_BODY_WEIGHT_KG
         val safeLoadKg = averageLoadKg.coerceAtLeast(0.0)
 
@@ -92,7 +92,7 @@ private const val MET_WEIGHT_FACTOR = 0.0175
 private const val DEFAULT_TUT_SECONDS_PER_REP = 4.0
 private const val DEFAULT_CARDIO_MET = 6.0
 private const val DEFAULT_STRENGTH_MET = 5.0
-// Product fallback when user body weight is missing or invalid.
+// Fallback when user body weight is missing or invalid.
 private const val DEFAULT_BODY_WEIGHT_KG = 70.0
 private const val HEAVY_COMPOUND_BASE_MET = 7.5
 // Higher k for heavy compounds to reflect stronger afterburn vs. isolation lifts.
