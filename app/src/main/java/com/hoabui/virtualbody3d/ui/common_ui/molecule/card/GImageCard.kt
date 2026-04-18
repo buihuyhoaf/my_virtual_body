@@ -168,7 +168,6 @@ private fun Modifier.pressScale(interactionSource: MutableInteractionSource, sca
  *
  * @param selectionHighlight When `true`, uses primary border and subtle elevation for selected state.
  * @param weakSelectionHighlight When `true` (and selection is not strong), uses a softer border/tint for in-cart items.
- * @param onLongClick Optional long-press handler (e.g. open detail). Uses [combinedClickable] when non-null.
  */
 @Composable
 fun GImageCard(
@@ -196,7 +195,6 @@ fun GImageCard(
     selectionHighlight: Boolean = false,
     weakSelectionHighlight: Boolean = false,
     onClick: (() -> Unit)? = null,
-    onLongClick: (() -> Unit)? = null,
 ) {
     val token = GymTheme.token
     val (cardWidth, cardHeight) = token.bodyAnalysis.cardImageWithText.cardDimensions(cardSize)
@@ -218,7 +216,7 @@ fun GImageCard(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (isPressed && (onClick != null || onLongClick != null)) 0.96f else 1f,
+        targetValue = if (isPressed && onClick != null) 0.96f else 1f,
         label = "g_image_card_scale",
     )
 
@@ -235,42 +233,6 @@ fun GImageCard(
     }
 
     when {
-        onLongClick != null -> {
-            GCard(
-                onClick = onClick ?: {},
-                onLongClick = onLongClick,
-                modifier = cardModifier,
-                shape = cardShape,
-                elevation = cardElevation,
-                pressedElevation = token.elevation.level0,
-                border = borderStroke,
-                treatment = GSurfaceTreatment.Flat,
-                contentModifier = Modifier.fillMaxSize(),
-                interactionSource = interactionSource,
-            ) {
-                GImageCardStack(
-                    cardWidth = cardWidth,
-                    imageSlotHeight = imageSlotHeight,
-                    imageClip = imageClip,
-                    cardSize = cardSize,
-                    model = model,
-                    contentDescription = contentDescription,
-                    sizeStyle = sizeStyle,
-                    firstLineText = firstLineText,
-                    secondLineText = secondLineText,
-                    badge = badge,
-                    badgeChrome = badgeChrome,
-                    imageOverlayEnd = imageOverlayEnd,
-                    imageOverlayTopEnd = imageOverlayTopEnd,
-                    imageOverlayTopEndEdgeInset = imageOverlayTopEndEdgeInset,
-                    trailingOverlayEnd = trailingOverlayEnd,
-                    reserveExerciseLibraryTextEndInset = reserveExerciseLibraryTextEndInset,
-                    textSectionLeading = textSectionLeading,
-                    selectionHighlight = selectionHighlight,
-                    weakSelectionHighlight = weakSelectionHighlight,
-                )
-            }
-        }
         onClick != null -> {
             GCard(
                 onClick = onClick,

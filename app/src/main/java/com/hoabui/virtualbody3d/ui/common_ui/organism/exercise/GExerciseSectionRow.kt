@@ -176,7 +176,6 @@ fun GExerciseSectionCardRow(
                 selectionHighlight = item.isSelected,
                 weakSelectionHighlight = item.isInCartInactive,
                 onClick = onOpenDetail,
-                onLongClick = null,
             )
         }
     }
