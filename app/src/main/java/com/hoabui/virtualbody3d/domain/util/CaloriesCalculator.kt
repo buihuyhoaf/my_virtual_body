@@ -76,7 +76,8 @@ object CaloriesCalculator {
         val tutSeconds = metadata?.tutSecondsPerRep ?: DEFAULT_TUT_SECONDS_PER_REP
         val effectiveMinutes = when (measurementMode) {
             ExerciseMeasurementMode.Duration -> durationMinutes
-            // Strength uses time-under-tension only; rest periods are intentionally excluded.
+            // Strength uses time-under-tension only; rest periods are intentionally excluded because
+            // the model applies EPOC scaling to capture post-set recovery cost.
             ExerciseMeasurementMode.Strength -> totalReps * tutSeconds / 60.0
         }.coerceAtLeast(0.0)
         if (effectiveMinutes <= 0.0) {
@@ -129,6 +130,7 @@ object CaloriesCalculator {
 }
 
 private const val MET_WEIGHT_FACTOR = 0.0175
+// Default TUT applies to strength reps; duration-mode exercises use explicit duration minutes instead.
 private const val DEFAULT_TUT_SECONDS_PER_REP = 4.5
 private const val DEFAULT_CARDIO_MET = 6.0
 private const val DEFAULT_STRENGTH_MET = 5.0

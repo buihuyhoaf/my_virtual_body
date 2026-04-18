@@ -160,7 +160,7 @@ private fun formatStrengthSetBreakdown(
     }
     val avgWeight = weights.takeIf { it.isNotEmpty() }?.average()
     val isUniformReps = repsRange?.let { it.first == it.second } ?: false
-    val isUniformWeight = weights.distinctBy { it.formatWeightKey() }.size <= 1
+    val isUniformWeight = weights.distinctBy { it.formatWeightGroupingKey() }.size <= 1
     val weightLabel = avgWeight?.let { formatWeight(it) }
     return if (isUniformReps && isUniformWeight && repsRange != null && avgWeight != null) {
         "$safeSetCount Sets • $weightLabel kg x ${repsRange.first}"
@@ -232,7 +232,7 @@ private fun formatDurationSeconds(seconds: Int): String {
     }
 }
 
-private fun Double.formatWeightKey(): String =
+private fun Double.formatWeightGroupingKey(): String =
     String.format(Locale.ROOT, "%.1f", this)
 
 private fun formatWeight(weightKg: Double): String {
