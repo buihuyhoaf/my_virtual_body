@@ -25,6 +25,11 @@ class DatabaseSeeder @Inject constructor(
                 super.onCreate(db)
                 seedCatalogFreshDatabase(db)
             }
+
+            override fun onOpen(db: SupportSQLiteDatabase) {
+                super.onOpen(db)
+                refreshExerciseLocalImageNames(db)
+            }
         }
 
     /**
@@ -169,6 +174,25 @@ class DatabaseSeeder @Inject constructor(
             bindString(1, json)
             executeInsert()
             close()
+        }
+    }
+
+    private fun refreshExerciseLocalImageNames(db: SupportSQLiteDatabase) {
+        db.beginTransaction()
+        try {
+            val updateExerciseImage = db.compileStatement(
+                "UPDATE exercises SET local_image_name = ? WHERE id = ?",
+            )
+            CatalogSeedData.exerciseRowsForSeed().forEach { e ->
+                bindStringOrNull(updateExerciseImage, 1, e.localImageName)
+                updateExerciseImage.bindString(2, e.id.orEmpty())
+                updateExerciseImage.executeUpdateDelete()
+                updateExerciseImage.clearBindings()
+            }
+            updateExerciseImage.close()
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
         }
     }
 
