@@ -56,8 +56,10 @@ object CaloriesCalculator {
         return (baseCalories * intensityFactor).toFloat()
     }
 
-    private fun defaultMetFor(measurementMode: ExerciseMeasurementMode): Double =
-        if (measurementMode == ExerciseMeasurementMode.Duration) DEFAULT_CARDIO_MET else DEFAULT_STRENGTH_MET
+    private fun defaultMetFor(measurementMode: ExerciseMeasurementMode): Double = when (measurementMode) {
+        ExerciseMeasurementMode.Duration -> DEFAULT_CARDIO_MET
+        ExerciseMeasurementMode.Strength -> DEFAULT_STRENGTH_MET
+    }
 }
 
 private const val MET_WEIGHT_FACTOR = 0.0175

@@ -555,8 +555,8 @@ fun ExerciseLibrarySelectionBar(
                     }
                     val durationMinutes = totalDurationSeconds / 60.0
                     val totalReps = it.setRows.sumOf { setRow -> setRow.reps }
-                    val loadValues = it.setRows.map { setRow -> setRow.weightKg }.filter { value ->
-                        value > 0.0
+                    val loadValues = it.setRows.mapNotNull { setRow ->
+                        setRow.weightKg.takeIf { value -> value > 0.0 }
                     }
                     val averageLoad = if (loadValues.isNotEmpty()) loadValues.average() else 0.0
                     CaloriesCalculator.estimateCalories(
