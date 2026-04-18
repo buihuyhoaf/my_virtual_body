@@ -550,12 +550,14 @@ fun ExerciseLibrarySelectionBar(
                 val measurementMode = libraryState.libraryList.exerciseMeasurementById[id]
                     ?: ExerciseMeasurementMode.Strength
                 val estimatedCalories = draft?.let {
-                    val totalDurationSeconds = it.setRows.sumOf { row ->
-                        (row.minutes * 60) + row.seconds
+                    val totalDurationSeconds = it.setRows.sumOf { setRow ->
+                        (setRow.minutes * 60) + setRow.seconds
                     }
                     val durationMinutes = totalDurationSeconds / 60.0
-                    val totalReps = it.setRows.sumOf { row -> row.reps }
-                    val loadValues = it.setRows.map { row -> row.weightKg }.filter { value -> value > 0.0 }
+                    val totalReps = it.setRows.sumOf { setRow -> setRow.reps }
+                    val loadValues = it.setRows.map { setRow -> setRow.weightKg }.filter { value ->
+                        value > 0.0
+                    }
                     val averageLoad = if (loadValues.isNotEmpty()) loadValues.average() else 0.0
                     CaloriesCalculator.estimateCalories(
                         exerciseId = id,
