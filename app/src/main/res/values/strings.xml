@@ -476,6 +476,8 @@
     <!-- Workout calendar -->
     <string name="workout_calendar_title">Kế hoạch tập</string>
     <string name="workout_calendar_empty_day">Không có bài tập cho ngày này.</string>
+    <string name="workout_calendar_rest_day_title">Ngày nghỉ! 💪</string>
+    <string name="workout_calendar_rest_day_subtitle">Nghỉ ngơi là một phần quan trọng của quá trình tập luyện</string>
     <string name="workout_calendar_prev_month_cd">Tháng trước</string>
     <string name="workout_calendar_next_month_cd">Tháng sau</string>
     <string name="workout_calendar_weekday_mo">T2</string>
