@@ -555,7 +555,7 @@ private fun BookingDateChipItem(
     val millis = remember(day, systemZone) {
         day.atStartOfDay(systemZone).toInstant().toEpochMilli()
     }
-    val onClick = remember(day, onDateMillisSelected, millis) {
+    val onClick = remember(day, onDateMillisSelected) {
         { onDateMillisSelected(millis) }
     }
     val selected = day == selectedLocalDate
