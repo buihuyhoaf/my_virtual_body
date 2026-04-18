@@ -228,15 +228,15 @@ private fun formatDurationSeconds(seconds: Int): String {
     return if (secs == 0) {
         "${mins}m"
     } else {
-        "%d:%02d".format(mins, secs)
+        String.format(Locale.ROOT, "%d:%02d", mins, secs)
     }
 }
 
 private fun Double.formatWeightKey(): String =
-    "%.1f".format(this)
+    String.format(Locale.ROOT, "%.1f", this)
 
 private fun formatWeight(weightKg: Double): String {
-    val rounded = "%.1f".format(weightKg)
+    val rounded = String.format(Locale.ROOT, "%.1f", weightKg)
     return rounded.removeSuffix(".0")
 }
 

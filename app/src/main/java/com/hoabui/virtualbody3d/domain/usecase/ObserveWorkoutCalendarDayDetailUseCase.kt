@@ -76,7 +76,7 @@ class ObserveWorkoutCalendarDayDetailUseCase @Inject constructor(
 }
 
 private fun formatWeight(weightKg: Double): String {
-    val rounded = "%.1f".format(weightKg)
+    val rounded = String.format(Locale.ROOT, "%.1f", weightKg)
     return rounded.removeSuffix(".0")
 }
 
