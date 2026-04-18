@@ -17,7 +17,7 @@ object ExerciseCaloriesMetadataProvider {
         "squat" to ExerciseCaloriesMetadata(met = 6.0, tutSecondsPerRep = 4.5),
         "bicep_curl" to ExerciseCaloriesMetadata(met = 3.5, tutSecondsPerRep = 4.0),
         "bench_press" to ExerciseCaloriesMetadata(met = 5.0, tutSecondsPerRep = 4.0),
-        "deadlift" to ExerciseCaloriesMetadata(met = 7.5, tutSecondsPerRep = 4.5),
+        "deadlift" to ExerciseCaloriesMetadata(met = HEAVY_COMPOUND_BASE_MET, tutSecondsPerRep = 4.5),
         "running" to ExerciseCaloriesMetadata(met = 7.5, tutSecondsPerRep = DEFAULT_TUT_SECONDS_PER_REP),
         "cycling" to ExerciseCaloriesMetadata(met = 6.8, tutSecondsPerRep = DEFAULT_TUT_SECONDS_PER_REP),
     )
@@ -60,8 +60,8 @@ object CaloriesCalculator {
          * Strength model:
          * BaseCalories = BaseMET * 0.0175 * BodyWeightKg * EffectiveMinutes
          * EffectiveMinutes = (Reps * TUT_Per_Rep) / 60
-         * IntensityScaler = 1 + (LiftedWeight / BodyWeightKg)
-         * EPOCScaler = 1 + (k * (LiftedWeight / BodyWeightKg))
+         * IntensityScaler = 1 + (AverageLoadKg / BodyWeightKg)
+         * EPOCScaler = 1 + (k * (AverageLoadKg / BodyWeightKg))
          * FinalCalories = BaseCalories * IntensityScaler * EPOCScaler
          */
         val baseCalories = met * MET_WEIGHT_FACTOR * effectiveBodyWeightKg * effectiveMinutes
