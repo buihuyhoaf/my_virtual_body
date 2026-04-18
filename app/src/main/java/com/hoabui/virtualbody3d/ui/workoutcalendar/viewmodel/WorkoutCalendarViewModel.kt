@@ -8,7 +8,7 @@ import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarDaySummary
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarExerciseLine
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutScheduleDeleteResult
 import com.hoabui.virtualbody3d.domain.usecase.DeleteWorkoutScheduleUseCase
-import com.hoabui.virtualbody3d.domain.usecase.ObserveWorkoutCalendarDayDetailUseCase
+import com.hoabui.virtualbody3d.domain.usecase.GetWorkoutDetailsUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveWorkoutCalendarMonthSummariesUseCase
 import com.hoabui.virtualbody3d.domain.usecase.RestoreWorkoutScheduleDeleteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -51,7 +51,7 @@ sealed interface WorkoutCalendarEvent {
 @HiltViewModel
 class WorkoutCalendarViewModel @Inject constructor(
     private val observeMonthSummaries: ObserveWorkoutCalendarMonthSummariesUseCase,
-    private val observeDayDetail: ObserveWorkoutCalendarDayDetailUseCase,
+    private val getWorkoutDetails: GetWorkoutDetailsUseCase,
     private val deleteWorkoutSchedule: DeleteWorkoutScheduleUseCase,
     private val restoreWorkoutScheduleDelete: RestoreWorkoutScheduleDeleteUseCase,
     private val sharedPreferences: SharedPreferences,
@@ -85,7 +85,7 @@ class WorkoutCalendarViewModel @Inject constructor(
         viewModelScope.launch {
             combine(
                 _visibleMonth.flatMapLatest { ym -> observeMonthSummaries(ym, zoneId) },
-                _selectedDate.flatMapLatest { d -> observeDayDetail(d, zoneId) },
+                _selectedDate.flatMapLatest { d -> getWorkoutDetails(d, zoneId) },
                 _visibleMonth,
                 _selectedDate,
             ) { summaries, lines, vm, sd ->

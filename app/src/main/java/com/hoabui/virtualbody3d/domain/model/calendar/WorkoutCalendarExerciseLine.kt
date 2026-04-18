@@ -12,6 +12,9 @@ data class WorkoutCalendarExerciseLine(
     val rowId: Long,
     val exerciseId: String,
     val exerciseDisplayName: String,
+    val startTimeLabel: String,
+    val setBreakdownLabel: String,
+    val caloriesLabel: String,
     val sets: Int,
     val reps: Int,
     val durationSeconds: Int?,
@@ -28,7 +31,9 @@ data class WorkoutCalendarExerciseLine(
 data class WorkoutCalendarExerciseLineUiModel(
     val rowId: Long,
     val title: String,
-    val metricsLabel: String,
+    val startTimeLabel: String,
+    val setBreakdownLabel: String,
+    val caloriesLabel: String,
     val statusLabel: String,
     val image: ImageSource,
 )
@@ -37,12 +42,13 @@ data class WorkoutCalendarExerciseLineUiModel(
  * Maps a domain line to a UI model using **already localized** labels from the presentation layer.
  */
 fun WorkoutCalendarExerciseLine.toUiModel(
-    metricsLabel: String,
     statusLabel: String,
 ): WorkoutCalendarExerciseLineUiModel = WorkoutCalendarExerciseLineUiModel(
     rowId = rowId,
     title = exerciseDisplayName,
-    metricsLabel = metricsLabel,
+    startTimeLabel = startTimeLabel,
+    setBreakdownLabel = setBreakdownLabel,
+    caloriesLabel = caloriesLabel,
     statusLabel = statusLabel,
     image = image,
 )

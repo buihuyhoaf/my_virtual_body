@@ -49,3 +49,63 @@ val MIGRATION_4_5: Migration = object : Migration(4, 5) {
         )
     }
 }
+
+val MIGRATION_5_6: Migration = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `workout_log_sessions` (
+                `id` TEXT NOT NULL,
+                `startEpochMillis` INTEGER NOT NULL,
+                `endEpochMillis` INTEGER NOT NULL,
+                `dayKey` TEXT NOT NULL,
+                `zoneId` TEXT NOT NULL,
+                PRIMARY KEY(`id`)
+            )
+            """.trimIndent(),
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_workout_log_sessions_dayKey` ON `workout_log_sessions` (`dayKey`)")
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `workout_log_exercises` (
+                `id` TEXT NOT NULL,
+                `sessionId` TEXT NOT NULL,
+                `exerciseId` TEXT NOT NULL,
+                `displayNameSnapshot` TEXT NOT NULL,
+                `measurementMode` TEXT NOT NULL,
+                `startTimeMillis` INTEGER NOT NULL,
+                `orderIndex` INTEGER NOT NULL,
+                PRIMARY KEY(`id`)
+            )
+            """.trimIndent(),
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_workout_log_exercises_sessionId` ON `workout_log_exercises` (`sessionId`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_workout_log_exercises_exerciseId` ON `workout_log_exercises` (`exerciseId`)")
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `workout_log_sets` (
+                `id` TEXT NOT NULL,
+                `exerciseLogId` TEXT NOT NULL,
+                `reps` INTEGER NOT NULL,
+                `weightKg` REAL NOT NULL,
+                `durationSeconds` INTEGER,
+                `setIndex` INTEGER NOT NULL,
+                PRIMARY KEY(`id`)
+            )
+            """.trimIndent(),
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_workout_log_sets_exerciseLogId` ON `workout_log_sets` (`exerciseLogId`)")
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `workout_log_energy` (
+                `exerciseLogId` TEXT NOT NULL,
+                `kcal` REAL NOT NULL,
+                `bodyWeightUsed` REAL NOT NULL,
+                `metUsed` REAL NOT NULL,
+                `epocFactorUsed` REAL NOT NULL,
+                PRIMARY KEY(`exerciseLogId`)
+            )
+            """.trimIndent(),
+        )
+    }
+}
