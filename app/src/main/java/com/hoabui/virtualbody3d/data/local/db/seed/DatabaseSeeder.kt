@@ -18,6 +18,8 @@ import javax.inject.Singleton
 class DatabaseSeeder @Inject constructor(
     private val gson: Gson,
 ) {
+    @Volatile
+    private var hasRefreshedLocalImageNames = false
 
     fun roomCallback(): RoomDatabase.Callback =
         object : RoomDatabase.Callback() {
@@ -28,7 +30,9 @@ class DatabaseSeeder @Inject constructor(
 
             override fun onOpen(db: SupportSQLiteDatabase) {
                 super.onOpen(db)
+                if (hasRefreshedLocalImageNames) return
                 refreshExerciseLocalImageNames(db)
+                hasRefreshedLocalImageNames = true
             }
         }
 
@@ -193,11 +197,12 @@ class DatabaseSeeder @Inject constructor(
             )
             CatalogSeedData.exerciseRowsForSeed().forEach { e ->
                 val id = requireNotNull(e.id) { "Seed exercise id is required" }
-                bindStringOrNull(updateExerciseImage, 1, e.localImageName)
+                val localImageName = e.localImageName
+                bindStringOrNull(updateExerciseImage, 1, localImageName)
                 updateExerciseImage.bindString(2, id)
-                bindStringOrNull(updateExerciseImage, 3, e.localImageName)
-                bindStringOrNull(updateExerciseImage, 4, e.localImageName)
-                bindStringOrNull(updateExerciseImage, 5, e.localImageName)
+                bindStringOrNull(updateExerciseImage, 3, localImageName)
+                bindStringOrNull(updateExerciseImage, 4, localImageName)
+                bindStringOrNull(updateExerciseImage, 5, localImageName)
                 updateExerciseImage.executeUpdateDelete()
                 updateExerciseImage.clearBindings()
             }
