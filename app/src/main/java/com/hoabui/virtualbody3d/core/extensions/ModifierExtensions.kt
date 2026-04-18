@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.util.VelocityTracker
+import androidx.compose.ui.layout.onSizeChanged
 
 data class VerticalDragResult(
     val totalDragY: Float,
@@ -42,4 +43,10 @@ fun Modifier.verticalDraggable(
             )
         }
     }
+}
+
+fun Modifier.onHeightMeasured(
+    onHeightMeasured: (heightPx: Float) -> Unit,
+): Modifier = onSizeChanged { size ->
+    onHeightMeasured(size.height.toFloat())
 }

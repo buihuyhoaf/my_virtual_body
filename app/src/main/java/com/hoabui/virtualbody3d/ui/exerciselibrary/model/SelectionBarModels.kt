@@ -10,4 +10,5 @@ data class ActiveExerciseInfo(
     val title: String?,
     val draft: ExerciseDraft?,
     val measurementMode: ExerciseMeasurementMode,
+    val estimatedCalories: Float,
 )

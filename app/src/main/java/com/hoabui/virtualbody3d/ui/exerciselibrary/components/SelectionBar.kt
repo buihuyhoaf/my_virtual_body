@@ -42,6 +42,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import coil.compose.AsyncImage
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
+import com.hoabui.virtualbody3d.domain.util.CaloriesCalculator
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
 import com.hoabui.virtualbody3d.ui.common_ui.atom.divider.GDivider
@@ -545,12 +546,35 @@ fun ExerciseLibrarySelectionBar(
     ) {
         derivedStateOf {
             libraryState.cart.activeExerciseId?.let { id ->
+                val draft = libraryState.cart.itemDrafts[id]
+                val measurementMode = libraryState.libraryList.exerciseMeasurementById[id]
+                    ?: ExerciseMeasurementMode.Strength
+                val estimatedCalories = draft?.let {
+                    val totalDurationSeconds = it.setRows.sumOf { setRow ->
+                        (setRow.minutes * 60) + setRow.seconds
+                    }
+                    val durationMinutes = totalDurationSeconds / 60.0
+                    val totalReps = it.setRows.sumOf { setRow -> setRow.reps }
+                    val loadValues = it.setRows.mapNotNull { setRow ->
+                        setRow.weightKg.takeIf { value -> value > 0.0 }
+                    }
+                    val averageLoad = if (loadValues.isNotEmpty()) loadValues.average() else 0.0
+                    CaloriesCalculator.estimateCalories(
+                        exerciseId = id,
+                        measurementMode = measurementMode,
+                        durationMinutes = durationMinutes,
+                        totalReps = totalReps,
+                        averageLoadKg = averageLoad,
+                        bodyWeightKg = DEFAULT_BODY_WEIGHT_KG,
+                        leanBodyMassKg = null,
+                    )
+                } ?: 0f
                 ActiveExerciseInfo(
                     id = id,
                     title = cartItems.firstOrNull { it.id == id }?.title,
-                    draft = libraryState.cart.itemDrafts[id],
-                    measurementMode = libraryState.libraryList.exerciseMeasurementById[id]
-                        ?: ExerciseMeasurementMode.Strength,
+                    draft = draft,
+                    measurementMode = measurementMode,
+                    estimatedCalories = estimatedCalories,
                 )
             }
         }
@@ -570,3 +594,5 @@ fun ExerciseLibrarySelectionBar(
 // ─────────────────────────────────────────────────────────
 
 private const val WEIGHT_FORMAT = "%.1f"
+// Default fallback when profile weight is unavailable in the selection bar UI state.
+private const val DEFAULT_BODY_WEIGHT_KG = 70.0
