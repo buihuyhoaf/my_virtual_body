@@ -32,7 +32,7 @@ class DatabaseSeeder @Inject constructor(
             override fun onOpen(db: SupportSQLiteDatabase) {
                 super.onOpen(db)
                 synchronized(refreshLock) {
-                    if (hasRefreshedLocalImageNames) return
+                    if (hasRefreshedLocalImageNames == true) return
                     refreshExerciseLocalImageNames(db)
                     hasRefreshedLocalImageNames = true
                 }
@@ -191,25 +191,33 @@ class DatabaseSeeder @Inject constructor(
                 """
                 UPDATE exercises
                 SET local_image_name = ?
-                WHERE id = ? AND (
-                  local_image_name IS NULL AND ? IS NOT NULL
-                  OR local_image_name IS NOT NULL AND ? IS NULL
-                  OR local_image_name != ?
-                )
+                WHERE id = ? AND (local_image_name IS NULL OR local_image_name != ?)
+                """.trimIndent(),
+            )
+            val clearExerciseImage = db.compileStatement(
+                """
+                UPDATE exercises
+                SET local_image_name = NULL
+                WHERE id = ? AND local_image_name IS NOT NULL
                 """.trimIndent(),
             )
             CatalogSeedData.exerciseRowsForSeed().forEach { e ->
                 val id = requireNotNull(e.id) { "Seed exercise id is required" }
                 val localImageName = e.localImageName
-                bindStringOrNull(updateExerciseImage, 1, localImageName)
-                updateExerciseImage.bindString(2, id)
-                bindStringOrNull(updateExerciseImage, 3, localImageName)
-                bindStringOrNull(updateExerciseImage, 4, localImageName)
-                bindStringOrNull(updateExerciseImage, 5, localImageName)
-                updateExerciseImage.executeUpdateDelete()
-                updateExerciseImage.clearBindings()
+                if (localImageName == null) {
+                    clearExerciseImage.bindString(1, id)
+                    clearExerciseImage.executeUpdateDelete()
+                    clearExerciseImage.clearBindings()
+                } else {
+                    updateExerciseImage.bindString(1, localImageName)
+                    updateExerciseImage.bindString(2, id)
+                    updateExerciseImage.bindString(3, localImageName)
+                    updateExerciseImage.executeUpdateDelete()
+                    updateExerciseImage.clearBindings()
+                }
             }
             updateExerciseImage.close()
+            clearExerciseImage.close()
             db.setTransactionSuccessful()
         } finally {
             db.endTransaction()
