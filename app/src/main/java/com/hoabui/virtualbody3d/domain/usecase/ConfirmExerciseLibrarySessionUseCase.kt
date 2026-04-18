@@ -12,7 +12,6 @@ import com.hoabui.virtualbody3d.domain.model.exercise.shouldWarnLongSession
 import com.hoabui.virtualbody3d.domain.repository.BookWorkoutSessionResult
 import java.time.Clock
 import java.time.Instant
-import java.time.LocalDateTime
 import java.util.UUID
 import javax.inject.Inject
 
@@ -73,10 +72,9 @@ class ConfirmExerciseLibrarySessionUseCase @Inject constructor(
             return PrepareLibrarySessionConfirmResult.LongSessionAcknowledgementRequired
         }
 
-        val date = LocalDateTime.ofInstant(
-            Instant.ofEpochMilli(pending.selectedDateMillis),
-            Clock.systemDefaultZone().zone,
-        ).toLocalDate()
+        val date = Instant.ofEpochMilli(pending.selectedDateMillis)
+            .atZone(Clock.systemDefaultZone().zone)
+            .toLocalDate()
         val orderedSlots = pending.selectedSlotStarts.sorted()
         val minSlot = orderedSlots.first()
         val maxSlot = orderedSlots.last()

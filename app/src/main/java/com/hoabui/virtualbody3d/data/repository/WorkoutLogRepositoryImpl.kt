@@ -14,7 +14,6 @@ import com.hoabui.virtualbody3d.domain.model.workoutlog.WorkoutLogSessionInput
 import com.hoabui.virtualbody3d.domain.repository.WorkoutLogRepository
 import com.hoabui.virtualbody3d.domain.util.CaloriesCalculator
 import java.time.Clock
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import javax.inject.Inject
@@ -35,10 +34,10 @@ class WorkoutLogRepositoryImpl @Inject constructor(
             .map { sessions -> sessions.map { it.toDomain() } }
 
     override suspend fun saveWorkoutLogSession(session: WorkoutLogSessionInput) = withContext(ioDispatcher) {
-        val dayKey = LocalDateTime.ofInstant(
-            session.startInstant,
-            Clock.systemDefaultZone().zone,
-        ).toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE)
+        val dayKey = session.startInstant
+            .atZone(Clock.systemDefaultZone().zone)
+            .toLocalDate()
+            .format(DateTimeFormatter.ISO_LOCAL_DATE)
         val snapshotWeight = progressTimelineLocalDataSource
             .getLatestSnapshotOnOrBefore(dayKey)
             ?.weightKg

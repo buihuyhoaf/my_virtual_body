@@ -14,7 +14,6 @@ import com.hoabui.virtualbody3d.domain.util.CaloriesCalculator
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
@@ -342,8 +341,8 @@ private fun groupExercisesIntoSessionBlocks(
         val endInstant = sortedExercises.last().startInstant
 
         // Calculate session time label: "08:00 AM - 09:30 AM session" or just "08:00 AM" for single exercises
-        val startTime = LocalDateTime.ofInstant(startInstant, systemZone).toLocalTime().format(timeFormatter)
-        val endTime = LocalDateTime.ofInstant(endInstant, systemZone).toLocalTime().format(timeFormatter)
+        val startTime = startInstant.atZone(systemZone).toLocalTime().format(timeFormatter)
+        val endTime = endInstant.atZone(systemZone).toLocalTime().format(timeFormatter)
 
         val sessionTimeLabel = if (sortedExercises.size == 1 || startTime == endTime) {
             startTime

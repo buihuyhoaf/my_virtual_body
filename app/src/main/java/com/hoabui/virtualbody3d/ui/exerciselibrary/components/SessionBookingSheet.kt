@@ -83,7 +83,6 @@ import kotlinx.coroutines.launch
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -170,7 +169,7 @@ private fun SessionBookingSheetContent(
     }
     val selectedLocalDate =
         remember(input.selectedDateMillis, systemZone) {
-            LocalDateTime.ofInstant(Instant.ofEpochMilli(input.selectedDateMillis), systemZone).toLocalDate()
+            Instant.ofEpochMilli(input.selectedDateMillis).atZone(systemZone).toLocalDate()
         }
     val lifecycleOwner = LocalLifecycleOwner.current
     var resumeKey by remember { mutableIntStateOf(0) }

@@ -29,7 +29,6 @@ import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
@@ -83,7 +82,7 @@ private fun AddExerciseSuccessReceiptBody(summary: AddExerciseSuccessSummary) {
         DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(Locale.getDefault())
     }
     val sessionDate = remember(summary.sessionStartInstant, systemZone) {
-        LocalDateTime.ofInstant(summary.sessionStartInstant, systemZone).toLocalDate()
+        summary.sessionStartInstant.atZone(systemZone).toLocalDate()
     }
     val today = LocalDate.now()
     val dateText = when (sessionDate) {
@@ -95,10 +94,10 @@ private fun AddExerciseSuccessReceiptBody(summary: AddExerciseSuccessSummary) {
         DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(Locale.getDefault())
     }
     val startLocalTime = remember(summary.sessionStartInstant, systemZone) {
-        LocalDateTime.ofInstant(summary.sessionStartInstant, systemZone).toLocalTime()
+        summary.sessionStartInstant.atZone(systemZone).toLocalTime()
     }
     val endLocalTime = remember(summary.sessionEndInstant, systemZone) {
-        LocalDateTime.ofInstant(summary.sessionEndInstant, systemZone).toLocalTime()
+        summary.sessionEndInstant.atZone(systemZone).toLocalTime()
     }
     val timeRangeText = stringResource(
         R.string.exercise_library_add_success_line_time_range,

@@ -5,7 +5,6 @@ import com.hoabui.virtualbody3d.data.model.WorkoutSessionDto
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSession
 import java.time.Clock
 import java.time.Instant
-import java.time.LocalDateTime
 
 fun WorkoutSessionDto.toDomain(): WorkoutSession = WorkoutSession(
     id = id,
@@ -29,10 +28,10 @@ internal fun WorkoutSessionEntity.toDto(): WorkoutSessionDto = WorkoutSessionDto
 )
 
 internal fun WorkoutSessionDto.toEntity(): WorkoutSessionEntity {
-    val dayKey = LocalDateTime.ofInstant(
-        Instant.ofEpochMilli(startEpochMillis),
-        Clock.systemDefaultZone().zone,
-    ).toLocalDate().toEpochDay()
+    val dayKey = Instant.ofEpochMilli(startEpochMillis)
+        .atZone(Clock.systemDefaultZone().zone)
+        .toLocalDate()
+        .toEpochDay()
     return WorkoutSessionEntity(
         id = id,
         locationId = locationId,
