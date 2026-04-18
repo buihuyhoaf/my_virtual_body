@@ -138,7 +138,7 @@ fun GExerciseSectionCardRow(
                 { badgeContent.invoke(item) }
             } else if (item.badgeText != null) {
                 val badgeText = item.badgeText
-                { GImageCardHolisticCapsuleLabel(badgeText!!) }
+                { GImageCardHolisticCapsuleLabel(badgeText) }
             } else {
                 null
             }
