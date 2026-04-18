@@ -5,7 +5,6 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteStatement
 import com.google.gson.Gson
 import com.hoabui.virtualbody3d.data.model.ExerciseDto
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,7 +18,9 @@ import javax.inject.Singleton
 class DatabaseSeeder @Inject constructor(
     private val gson: Gson,
 ) {
-    private val hasRefreshedLocalImageNames = AtomicBoolean(false)
+    private val refreshLock = Any()
+    @Volatile
+    private var hasRefreshedLocalImageNames = false
 
     fun roomCallback(): RoomDatabase.Callback =
         object : RoomDatabase.Callback() {
@@ -30,8 +31,11 @@ class DatabaseSeeder @Inject constructor(
 
             override fun onOpen(db: SupportSQLiteDatabase) {
                 super.onOpen(db)
-                if (!hasRefreshedLocalImageNames.compareAndSet(false, true)) return
-                refreshExerciseLocalImageNames(db)
+                synchronized(refreshLock) {
+                    if (hasRefreshedLocalImageNames) return
+                    refreshExerciseLocalImageNames(db)
+                    hasRefreshedLocalImageNames = true
+                }
             }
         }
 
@@ -187,8 +191,11 @@ class DatabaseSeeder @Inject constructor(
                 """
                 UPDATE exercises
                 SET local_image_name = ?
-                WHERE id = ?
-                  AND COALESCE(local_image_name, '\u0000') != COALESCE(?, '\u0000')
+                WHERE id = ? AND (
+                  local_image_name IS NULL AND ? IS NOT NULL
+                  OR local_image_name IS NOT NULL AND ? IS NULL
+                  OR local_image_name != ?
+                )
                 """.trimIndent(),
             )
             CatalogSeedData.exerciseRowsForSeed().forEach { e ->
@@ -197,6 +204,8 @@ class DatabaseSeeder @Inject constructor(
                 bindStringOrNull(updateExerciseImage, 1, localImageName)
                 updateExerciseImage.bindString(2, id)
                 bindStringOrNull(updateExerciseImage, 3, localImageName)
+                bindStringOrNull(updateExerciseImage, 4, localImageName)
+                bindStringOrNull(updateExerciseImage, 5, localImageName)
                 updateExerciseImage.executeUpdateDelete()
                 updateExerciseImage.clearBindings()
             }
