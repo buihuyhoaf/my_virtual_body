@@ -380,23 +380,29 @@ private fun WorkoutCalendarExerciseRow(
                 error = fallbackPainter,
             )
             Column(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = token.spacing.xs),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    GText(
-                        text = line.startTimeLabel,
-                        style = token.typography.labelSmall,
-                        color = token.colors.textSecondary,
-                    )
-                    GText(
-                        text = line.caloriesLabel,
-                        style = token.typography.labelSmall,
-                        color = token.colors.primary,
-                    )
+                if (line.startTimeLabel.isNotBlank() || line.caloriesLabel.isNotBlank()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = token.spacing.xs),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        if (line.startTimeLabel.isNotBlank()) {
+                            GText(
+                                text = line.startTimeLabel,
+                                style = token.typography.labelSmall,
+                                color = token.colors.textSecondary,
+                            )
+                        }
+                        if (line.caloriesLabel.isNotBlank()) {
+                            GText(
+                                text = line.caloriesLabel,
+                                style = token.typography.labelSmall,
+                                color = token.colors.primary,
+                            )
+                        }
+                    }
                 }
                 GText(
                     text = line.title,
@@ -406,14 +412,16 @@ private fun WorkoutCalendarExerciseRow(
                         .fillMaxWidth()
                         .padding(top = cal.exerciseRowTitleToMetricsGap),
                 )
-                GText(
-                    text = line.setBreakdownLabel,
-                    style = workoutCalendarSupportingBodyStyle(token),
-                    color = token.colors.textSecondary,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = cal.exerciseRowMetricsToStatusGap),
-                )
+                if (line.setBreakdownLabel.isNotBlank()) {
+                    GText(
+                        text = line.setBreakdownLabel,
+                        style = workoutCalendarSupportingBodyStyle(token),
+                        color = token.colors.textSecondary,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = cal.exerciseRowMetricsToStatusGap),
+                    )
+                }
                 if (line.statusLabel.isNotBlank()) {
                     GText(
                         text = line.statusLabel,

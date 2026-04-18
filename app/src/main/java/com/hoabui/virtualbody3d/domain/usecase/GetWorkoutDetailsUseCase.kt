@@ -36,7 +36,7 @@ class GetWorkoutDetailsUseCase @Inject constructor(
             val exerciseById = exercises.associateBy { it.id }
             val logs = sessions.flatMap { it.exercises }.toMutableList()
             val logBySessionExercise = logs.groupBy { log ->
-                "${log.sessionId}:${log.exerciseId}"
+                LogKey(log.sessionId, log.exerciseId)
             }.mapValues { (_, list) -> list.sortedBy { it.startInstant } }.toMutableMap()
             schedules.sortedBy { it.scheduledAt }
                 .mapNotNull { schedule ->
@@ -71,10 +71,10 @@ class GetWorkoutDetailsUseCase @Inject constructor(
 
 private fun consumeLogEntry(
     schedule: WorkoutSchedule,
-    logBySessionExercise: MutableMap<String, List<WorkoutLogExerciseDetail>>,
+    logBySessionExercise: MutableMap<LogKey, List<WorkoutLogExerciseDetail>>,
     logFallbackList: MutableList<WorkoutLogExerciseDetail>,
 ): WorkoutLogExerciseDetail? {
-    val key = schedule.sessionId?.let { "$it:${schedule.exerciseId}" }
+    val key = schedule.sessionId?.let { LogKey(it, schedule.exerciseId) }
     if (key != null) {
         val list = logBySessionExercise[key]
         if (!list.isNullOrEmpty()) {
@@ -87,6 +87,11 @@ private fun consumeLogEntry(
     val fallbackIndex = logFallbackList.indexOfFirst { it.exerciseId == schedule.exerciseId }
     return if (fallbackIndex >= 0) logFallbackList.removeAt(fallbackIndex) else null
 }
+
+private data class LogKey(
+    val sessionId: String,
+    val exerciseId: String,
+)
 
 private data class WorkoutLineMetrics(
     val startInstant: Instant,
@@ -160,7 +165,7 @@ private fun formatStrengthSetBreakdown(
     }
     val avgWeight = weights.takeIf { it.isNotEmpty() }?.average()
     val isUniformReps = repsRange?.let { it.first == it.second } ?: false
-    val isUniformWeight = weights.distinctBy { it.formatWeightGroupingKey() }.size <= 1
+    val isUniformWeight = weights.distinctBy { it.normalizeWeightForGrouping() }.size <= 1
     val weightLabel = avgWeight?.let { formatWeight(it) }
     return if (isUniformReps && isUniformWeight && repsRange != null && avgWeight != null) {
         "$safeSetCount Sets • $weightLabel kg x ${repsRange.first}"
@@ -232,7 +237,7 @@ private fun formatDurationSeconds(seconds: Int): String {
     }
 }
 
-private fun Double.formatWeightGroupingKey(): String =
+private fun Double.normalizeWeightForGrouping(): String =
     String.format(Locale.ROOT, "%.1f", this)
 
 private fun formatWeight(weightKg: Double): String {
