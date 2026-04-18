@@ -13,11 +13,8 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.time.ZoneId
 
 class ConfirmExerciseLibrarySessionUseCaseTest {
-
-    private val zoneId: ZoneId = ZoneId.of("UTC")
 
     private val sampleCart = LibraryCartDraft(
         draftOrder = listOf("ex1"),
@@ -41,7 +38,6 @@ class ConfirmExerciseLibrarySessionUseCaseTest {
             measurementById,
             emptyMap(),
             emptyMap(),
-            zoneId,
             "Gym",
         )
         assertEquals(PrepareLibrarySessionConfirmResult.NoOp, r)
@@ -56,7 +52,7 @@ class ConfirmExerciseLibrarySessionUseCaseTest {
             endInstant = java.time.Instant.EPOCH.plusSeconds(3600),
             locationId = "loc",
         )
-        coEvery { book(any(), any(), any()) } returns BookWorkoutSessionResult.Success(2, resolved)
+        coEvery { book(any(), any()) } returns BookWorkoutSessionResult.Success(2, resolved)
         val useCase = ConfirmExerciseLibrarySessionUseCase(book, ValidateSessionBookingUseCase())
         val session = WorkoutSession(
             id = "s1",
@@ -68,7 +64,6 @@ class ConfirmExerciseLibrarySessionUseCaseTest {
             useCase.commit(
                 session = session,
                 lines = emptyList(),
-                zoneId = zoneId,
                 scheduledDateMillis = 100L,
                 primaryExerciseTitle = "Squat",
                 locationDisplayName = "West",

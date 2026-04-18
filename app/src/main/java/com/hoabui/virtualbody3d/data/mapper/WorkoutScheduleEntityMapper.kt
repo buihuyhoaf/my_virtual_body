@@ -8,11 +8,11 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 
-internal fun WorkoutScheduleEntity.toDomain(planZoneId: ZoneId): WorkoutSchedule = WorkoutSchedule(
+internal fun WorkoutScheduleEntity.toDomain(): WorkoutSchedule = WorkoutSchedule(
     id = clientId,
     rowId = id,
     exerciseId = exerciseId,
-    scheduledAt = LocalDateTime.ofInstant(Instant.ofEpochMilli(scheduledAtEpochMillis), planZoneId),
+    scheduledAt = LocalDateTime.ofInstant(Instant.ofEpochMilli(scheduledAtEpochMillis), ZoneId.systemDefault()),
     sets = sets,
     reps = reps,
     weightKg = weightKg,
@@ -27,8 +27,9 @@ internal fun WorkoutScheduleEntity.toDomain(planZoneId: ZoneId): WorkoutSchedule
     exerciseLocalImageName = exerciseLocalImageName,
 )
 
-internal fun WorkoutSchedule.toEntity(planZoneId: ZoneId, nowMillis: Long): WorkoutScheduleEntity {
-    val dayKey = scheduledAt.atZone(planZoneId).toLocalDate().toEpochDay()
+internal fun WorkoutSchedule.toEntity(nowMillis: Long): WorkoutScheduleEntity {
+    val zoneId = ZoneId.systemDefault()
+    val dayKey = scheduledAt.atZone(zoneId).toLocalDate().toEpochDay()
     val created = nowMillis
     return WorkoutScheduleEntity(
         id = rowId ?: 0L,
@@ -36,7 +37,7 @@ internal fun WorkoutSchedule.toEntity(planZoneId: ZoneId, nowMillis: Long): Work
         dayKey = dayKey,
         exerciseId = exerciseId,
         sessionId = sessionId,
-        scheduledAtEpochMillis = scheduledAt.atZone(planZoneId).toInstant().toEpochMilli(),
+        scheduledAtEpochMillis = scheduledAt.atZone(zoneId).toInstant().toEpochMilli(),
         sets = sets,
         reps = reps,
         weightKg = weightKg,
@@ -54,8 +55,8 @@ internal fun WorkoutSchedule.toEntity(planZoneId: ZoneId, nowMillis: Long): Work
 }
 
 /** For legacy import: entity row is always new. */
-internal fun WorkoutSchedule.toEntityForInsert(planZoneId: ZoneId, nowMillis: Long): WorkoutScheduleEntity =
-    copy(rowId = null).toEntity(planZoneId, nowMillis).copy(id = 0L)
+internal fun WorkoutSchedule.toEntityForInsert(nowMillis: Long): WorkoutScheduleEntity =
+    copy(rowId = null).toEntity(nowMillis).copy(id = 0L)
 
 fun WorkoutExecutionStatus.toStorageString(): String = toEntityValue()
 

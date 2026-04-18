@@ -55,16 +55,15 @@ class ConfirmExerciseLibrarySessionUseCase @Inject constructor(
         exerciseMeasurementById: Map<String, ExerciseMeasurementMode>,
         exerciseSnapshotTitlesById: Map<String, String>,
         exercisesById: Map<String, Exercise>,
-        zoneId: ZoneId,
         locationDisplayName: String,
     ): PrepareLibrarySessionConfirmResult {
+        val zoneId = ZoneId.systemDefault()
         if (!validateSessionBookingUseCase.canEnableConfirm(
                 selectedSlotStarts = pending.selectedSlotStarts.toSet(),
                 selectedLocationId = pending.selectedLocationId,
                 selectedDateMillis = pending.selectedDateMillis,
                 cart = cart,
                 exerciseMeasurementById = exerciseMeasurementById,
-                zoneId = zoneId,
                 isConfirming = pending.isConfirming,
             )
         ) {
@@ -116,12 +115,11 @@ class ConfirmExerciseLibrarySessionUseCase @Inject constructor(
     suspend fun commit(
         session: WorkoutSession,
         lines: List<SessionExerciseLine>,
-        zoneId: ZoneId,
         scheduledDateMillis: Long,
         primaryExerciseTitle: String?,
         locationDisplayName: String,
     ): CommitLibrarySessionBookingResult =
-        when (val result = bookWorkoutSessionUseCase(session, lines, zoneId)) {
+        when (val result = bookWorkoutSessionUseCase(session, lines)) {
             BookWorkoutSessionResult.Conflict -> CommitLibrarySessionBookingResult.Conflict
             BookWorkoutSessionResult.InvalidDraft -> CommitLibrarySessionBookingResult.InvalidDraft
             is BookWorkoutSessionResult.Success -> CommitLibrarySessionBookingResult.Success(

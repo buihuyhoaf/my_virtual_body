@@ -5,7 +5,6 @@ import com.hoabui.virtualbody3d.domain.model.calendar.resolveWorkoutCalendarLine
 import com.hoabui.virtualbody3d.domain.repository.ExercisesRepository
 import com.hoabui.virtualbody3d.domain.repository.WorkoutScheduleRepository
 import java.time.LocalDate
-import java.time.ZoneId
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -14,7 +13,7 @@ class ObserveWorkoutCalendarDayDetailUseCase @Inject constructor(
     private val workoutScheduleRepository: WorkoutScheduleRepository,
     private val exercisesRepository: ExercisesRepository,
 ) {
-    operator fun invoke(day: LocalDate, zoneId: ZoneId): Flow<List<WorkoutCalendarExerciseLine>> {
+    operator fun invoke(day: LocalDate): Flow<List<WorkoutCalendarExerciseLine>> {
         val dayKey = day.toEpochDay()
         return combine(
             workoutScheduleRepository.observeSchedulesInDayRange(dayKey, dayKey),

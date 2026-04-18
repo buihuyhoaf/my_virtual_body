@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,9 +28,9 @@ class WorkoutSessionLocalDataSource @Inject constructor(
         workoutSessionDao.getAllSessions().map { it.toDto() }
     }
 
-    suspend fun insertSession(dto: WorkoutSessionDto, zoneId: ZoneId) {
+    suspend fun insertSession(dto: WorkoutSessionDto) {
         withContext(ioDispatcher) {
-            workoutSessionDao.insertSession(dto.toEntity(zoneId))
+            workoutSessionDao.insertSession(dto.toEntity())
         }
     }
 }

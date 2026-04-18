@@ -52,7 +52,6 @@ import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import java.time.ZoneId
 
 private object ExerciseLibraryListContentTypes {
     const val RegionHeader = "exercise_library_region_header"
@@ -118,7 +117,6 @@ fun ExerciseLibraryScreen(
                 ExerciseLibrarySessionBookingSheetHost(
                     booking = data.sessionBooking.uiModel,
                     draftCount = data.cart.draftOrder.size,
-                    zoneId = ZoneId.systemDefault(),
                     onDismissRequest = actions.onDismissSessionBooking,
                     onDateMillisSelected = actions.onBookingDateSelected,
                     onLocationSelected = actions.onBookingLocationSelected,
