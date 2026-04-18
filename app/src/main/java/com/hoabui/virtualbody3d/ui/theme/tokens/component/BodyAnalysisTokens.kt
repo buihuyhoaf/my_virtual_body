@@ -114,15 +114,34 @@ data class BodyAnalysisTokens(
     val heroSlimChipIconTextGap: Dp,
     val heroSlimChipLabelLetterSpacing: TextUnit,
     val exerciseLibraryStickySearchHeaderMinHeight: Dp,
-    /** Vertical gap between fixed search chrome and monthly summary card. */
+    /** Vertical gap between fixed search chrome and weekly heatmap card. */
     val exerciseLibrarySearchToSummaryGap: Dp,
-    val exerciseLibraryMonthlySummaryCardHorizontalPadding: Dp,
-    val exerciseLibraryMonthlySummaryCardVerticalPadding: Dp,
+    val exerciseLibraryHeatmapCardHorizontalPadding: Dp,
+    val exerciseLibraryHeatmapCardVerticalPadding: Dp,
+    /** Height of each day cell in the weekly heatmap row. */
+    val exerciseLibraryHeatmapDayItemHeight: Dp,
+    /** Corner radius for each day cell in the weekly heatmap row. */
+    val exerciseLibraryHeatmapDayItemCornerRadius: Dp,
+    /** Horizontal gap between adjacent day cells in the weekly heatmap. */
+    val exerciseLibraryHeatmapDayItemSpacing: Dp,
     val exerciseLibraryQuickAddIconContainerSize: Dp,
     val exerciseLibraryQuickAddTextInset: Dp,
     val exerciseLibrarySelectionBarTopCornerRadius: Dp,
     val exerciseLibraryCartNumericFieldWidth: Dp,
     val exerciseLibrarySelectionBarMinHeight: Dp,
+    /**
+     * Bottom inset for the exercise list so content clears the **collapsed** selection bar
+     * (handle + thumbnail row + padding). Tighter than [exerciseLibrarySelectionBarMinHeight].
+     */
+    val exerciseLibrarySelectionBarCollapsedListBottomInset: Dp,
+    val exerciseLibraryCartDragHandleWidth: Dp,
+    val exerciseLibraryCartDragHandleHeight: Dp,
+    val exerciseLibraryCartStepperButtonSize: Dp,
+    val exerciseLibraryCartStepperValueMinWidth: Dp,
+    val exerciseLibraryCartSetRowsListMaxHeight: Dp,
+    val exerciseLibraryCartSnapDragDistanceThreshold: Dp,
+    val exerciseLibraryCartSnapVelocityThresholdPxPerSec: Float,
+    val exerciseLibraryCartExpandedContentFallbackExtra: Dp,
     val exerciseLibrarySelectionBarAddButtonMaxWidth: Dp,
     val exerciseLibraryCartThumbnailSize: Dp,
     val exerciseLibraryAnchoredConsoleTopBorderWidth: Dp,
@@ -265,8 +284,11 @@ fun gymBodyAnalysisTokens(
         heroSlimChipLabelLetterSpacing = layout.heroSlimChipLabelLetterSpacing,
         exerciseLibraryStickySearchHeaderMinHeight = spacing.lg + spacing.md + spacing.xs + layout.heroSlimChipHeight + spacing.xxs,
         exerciseLibrarySearchToSummaryGap = spacing.sm,
-        exerciseLibraryMonthlySummaryCardHorizontalPadding = spacing.md,
-        exerciseLibraryMonthlySummaryCardVerticalPadding = spacing.sm,
+        exerciseLibraryHeatmapCardHorizontalPadding = spacing.md,
+        exerciseLibraryHeatmapCardVerticalPadding = spacing.sm,
+        exerciseLibraryHeatmapDayItemHeight = spacing.xxl + spacing.sm,
+        exerciseLibraryHeatmapDayItemCornerRadius = spacing.xs,
+        exerciseLibraryHeatmapDayItemSpacing = spacing.xxs,
         exerciseLibraryQuickAddIconContainerSize = layout.heroSlimChipHeight,
         exerciseLibraryQuickAddTextInset = spacing.xxl + spacing.xs,
         exerciseLibrarySelectionBarTopCornerRadius = layout.exerciseLibrarySelectionBarTopCornerRadius,
@@ -274,6 +296,21 @@ fun gymBodyAnalysisTokens(
         exerciseLibrarySelectionBarMinHeight = layout.exerciseLibraryCartThumbnailSize +
             layout.exerciseLibraryConsolePrecisionRowHeight * 2 +
             spacing.sm * 2 + spacing.md * 2,
+        exerciseLibrarySelectionBarCollapsedListBottomInset =
+            spacing.xs + spacing.xs +
+                layout.exerciseLibraryCartDragHandleHeight +
+                layout.exerciseLibraryCartThumbnailSize +
+                spacing.sm,
+        exerciseLibraryCartDragHandleWidth = layout.exerciseLibraryCartDragHandleWidth,
+        exerciseLibraryCartDragHandleHeight = layout.exerciseLibraryCartDragHandleHeight,
+        exerciseLibraryCartStepperButtonSize = layout.exerciseLibraryCartStepperButtonSize,
+        exerciseLibraryCartStepperValueMinWidth = layout.exerciseLibraryCartStepperValueMinWidth,
+        exerciseLibraryCartSetRowsListMaxHeight = layout.exerciseLibraryCartSetRowsListMaxHeight,
+        exerciseLibraryCartSnapDragDistanceThreshold = layout.exerciseLibraryCartSnapDragDistanceThreshold,
+        exerciseLibraryCartSnapVelocityThresholdPxPerSec =
+            layout.exerciseLibraryCartSnapVelocityThresholdPxPerSec,
+        exerciseLibraryCartExpandedContentFallbackExtra =
+            layout.exerciseLibraryCartExpandedContentFallbackExtra,
         exerciseLibrarySelectionBarAddButtonMaxWidth = spacing.xl + spacing.xl + spacing.md,
         exerciseLibraryCartThumbnailSize = layout.exerciseLibraryCartThumbnailSize,
         exerciseLibraryAnchoredConsoleTopBorderWidth = layout.exerciseLibraryAnchoredConsoleTopBorderWidth,

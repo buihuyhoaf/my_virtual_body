@@ -1,0 +1,1 @@
+For all agentic workflows and pull request creations, use Claude 3.5 Sonnet

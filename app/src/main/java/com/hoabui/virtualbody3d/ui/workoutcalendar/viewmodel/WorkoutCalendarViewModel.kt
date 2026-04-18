@@ -5,10 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.hoabui.virtualbody3d.core.base.UiStateViewModel
 import com.hoabui.virtualbody3d.core.utils.Constants
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarDaySummary
-import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarExerciseLine
+import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarSessionBlock
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutScheduleDeleteResult
 import com.hoabui.virtualbody3d.domain.usecase.DeleteWorkoutScheduleUseCase
-import com.hoabui.virtualbody3d.domain.usecase.ObserveWorkoutCalendarDayDetailUseCase
+import com.hoabui.virtualbody3d.domain.usecase.GetWorkoutDetailsUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveWorkoutCalendarMonthSummariesUseCase
 import com.hoabui.virtualbody3d.domain.usecase.RestoreWorkoutScheduleDeleteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,7 +27,8 @@ data class WorkoutCalendarContent(
     val visibleYearMonth: YearMonth,
     val selectedDate: LocalDate,
     val summariesByEpochDay: Map<Long, WorkoutCalendarDaySummary>,
-    val dayLines: List<WorkoutCalendarExerciseLine>,
+    /** Session blocks grouped by sessionId for the selected day. */
+    val sessionBlocks: List<WorkoutCalendarSessionBlock>,
 )
 
 data class WorkoutCalendarDeleteDialogState(
@@ -51,7 +52,7 @@ sealed interface WorkoutCalendarEvent {
 @HiltViewModel
 class WorkoutCalendarViewModel @Inject constructor(
     private val observeMonthSummaries: ObserveWorkoutCalendarMonthSummariesUseCase,
-    private val observeDayDetail: ObserveWorkoutCalendarDayDetailUseCase,
+    private val getWorkoutDetails: GetWorkoutDetailsUseCase,
     private val deleteWorkoutSchedule: DeleteWorkoutScheduleUseCase,
     private val restoreWorkoutScheduleDelete: RestoreWorkoutScheduleDeleteUseCase,
     private val sharedPreferences: SharedPreferences,
@@ -84,15 +85,15 @@ class WorkoutCalendarViewModel @Inject constructor(
         viewModelScope.launch {
             combine(
                 _visibleMonth.flatMapLatest { ym -> observeMonthSummaries(ym) },
-                _selectedDate.flatMapLatest { d -> observeDayDetail(d) },
+                _selectedDate.flatMapLatest { d -> getWorkoutDetails(d) },
                 _visibleMonth,
                 _selectedDate,
-            ) { summaries, lines, vm, sd ->
+            ) { summaries, sessionBlocks, vm, sd ->
                 WorkoutCalendarContent(
                     visibleYearMonth = vm,
                     selectedDate = sd,
                     summariesByEpochDay = summaries,
-                    dayLines = lines,
+                    sessionBlocks = sessionBlocks,
                 )
             }.collect { content ->
                 setSuccess(content)

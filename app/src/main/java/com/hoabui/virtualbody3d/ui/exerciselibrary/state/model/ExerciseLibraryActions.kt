@@ -32,4 +32,12 @@ data class ExerciseLibraryActions(
     val onClearExerciseDetail: () -> Unit,
     val onDismissAddExerciseSuccess: () -> Unit,
     val onNavigateToWorkoutCalendar: () -> Unit,
+    /** Stepper [+]/[-] tap: step a specific field of a specific set row by [delta] units. */
+    val onStepCartField: (exerciseId: String, setIndex: Int, field: CartSetField, delta: Int) -> Unit,
+    /** Tap on the [+] side of the Sets stepper: add a new cloned row for [exerciseId]. */
+    val onAddCartSetRow: (exerciseId: String) -> Unit,
+    /** Manual numeric entry for a specific field of a specific set row. */
+    val onSetCartFieldManual: (exerciseId: String, setIndex: Int, field: CartSetField, value: String) -> Unit,
+    /** Toggle the cart panel between collapsed and expanded states. */
+    val onToggleCartExpanded: () -> Unit,
 )

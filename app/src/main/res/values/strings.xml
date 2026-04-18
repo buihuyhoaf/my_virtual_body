@@ -171,12 +171,9 @@
 
     <!-- Exercise Library Screen -->
     <string name="exercise_library_title">Tất cả bài tập</string>
-    <string name="exercise_library_monthly_summary_workout_label">Tập luyện</string>
-    <string name="exercise_library_monthly_summary_rest_label">Nghỉ ngơi</string>
-    <string name="exercise_library_monthly_summary_separator"> · </string>
-    <string name="exercise_library_monthly_summary_nav_cd">Xem lịch tập trong tháng</string>
-    <string name="exercise_library_monthly_summary_loading_cd">Đang tải tóm tắt tháng</string>
-    <string name="exercise_library_monthly_summary_error">Không tải được tóm tắt tháng</string>
+    <string name="exercise_library_weekly_heatmap_nav_cd">Xem lịch tập trong tuần</string>
+    <string name="exercise_library_weekly_heatmap_loading_cd">Đang tải hoạt động tuần này</string>
+    <string name="exercise_library_weekly_heatmap_error">Không tải được dữ liệu tuần này</string>
     <string name="exercise_library_search_hint">Tìm bài tập</string>
     <string name="exercise_library_filter_all">Tất cả</string>
     <string name="exercise_library_last_weight">%1$.0f kg</string>
@@ -213,6 +210,7 @@
     <string name="exercise_library_cart_choose_time">Chọn giờ</string>
     <string name="exercise_library_cart_add_short">Thêm</string>
     <string name="exercise_library_add_to_session">Thêm vào ca tập</string>
+    <string name="exercise_library_estimated_calories">Ước tính %1$d kcal</string>
     <string name="exercise_library_booking_title">Đặt ca tập</string>
     <string name="exercise_library_booking_confirm">Xác nhận</string>
     <string name="exercise_library_booking_cancel">Hủy</string>
@@ -233,6 +231,15 @@
     <string name="exercise_library_long_session_proceed">Vẫn đặt</string>
     <string name="exercise_library_cart_times_separator">×</string>
     <string name="exercise_library_console_times_operator">×</string>
+    <string name="exercise_library_stepper_sets_label">Hiệp</string>
+    <string name="exercise_library_stepper_reps_label">Lần</string>
+    <string name="exercise_library_stepper_weight_label">KG</string>
+    <string name="exercise_library_stepper_minutes_label">Phút</string>
+    <string name="exercise_library_stepper_seconds_label">Giây</string>
+    <string name="exercise_library_stepper_decrease_cd">Giảm %s</string>
+    <string name="exercise_library_stepper_increase_cd">Tăng %s</string>
+    <string name="exercise_library_stepper_value_cd">Nhập %s thủ công</string>
+    <string name="exercise_library_set_row_label">Hiệp %d</string>
     <string name="exercise_library_add_success_title">Đã thêm thành công!</string>
     <string name="exercise_library_add_success_date_today">Hôm nay</string>
     <string name="exercise_library_add_success_date_tomorrow">Ngày mai</string>
@@ -469,6 +476,8 @@
     <!-- Workout calendar -->
     <string name="workout_calendar_title">Kế hoạch tập</string>
     <string name="workout_calendar_empty_day">Không có bài tập cho ngày này.</string>
+    <string name="workout_calendar_rest_day_title">Ngày nghỉ! 💪</string>
+    <string name="workout_calendar_rest_day_subtitle">Nghỉ ngơi là một phần quan trọng của quá trình tập luyện</string>
     <string name="workout_calendar_prev_month_cd">Tháng trước</string>
     <string name="workout_calendar_next_month_cd">Tháng sau</string>
     <string name="workout_calendar_weekday_mo">T2</string>

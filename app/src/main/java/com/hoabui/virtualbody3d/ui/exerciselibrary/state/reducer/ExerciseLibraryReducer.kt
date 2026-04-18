@@ -14,6 +14,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toPersistentSet
+import kotlinx.collections.immutable.toImmutableMap
 import javax.inject.Inject
 
 class ExerciseLibraryReducer @Inject constructor(
@@ -29,8 +30,17 @@ class ExerciseLibraryReducer @Inject constructor(
             is ExerciseLibraryUpdate.CartFromDomain -> state.withCartSnapshot(update.snapshot)
             is ExerciseLibraryUpdate.CatalogLoaded ->
                 state.copy(catalog = update.catalog)
-            is ExerciseLibraryUpdate.MonthlySummaryLoaded ->
-                state.copy(monthlySummary = update.summary)
+            is ExerciseLibraryUpdate.CartDraftUpdated -> {
+                if (update.exerciseId !in state.cart.itemDrafts) return state
+                state.copy(
+                    cart = state.cart.copy(
+                        itemDrafts = (state.cart.itemDrafts + (update.exerciseId to update.draft))
+                            .toImmutableMap(),
+                    ),
+                )
+            }
+            is ExerciseLibraryUpdate.WeeklyHeatmapLoaded ->
+                state.copy(weeklyHeatmap = update.state)
             is ExerciseLibraryUpdate.SessionBookingOpened ->
                 state.copy(sessionBooking = state.sessionBooking.copy(input = update.input))
             is ExerciseLibraryUpdate.SessionBookingPruned ->
@@ -59,6 +69,7 @@ class ExerciseLibraryReducer @Inject constructor(
                     itemDrafts = persistentMapOf(),
                     draftOrder = persistentListOf(),
                     activeExerciseId = null,
+                    isCartExpanded = false,
                 ),
                 chrome = state.chrome.copy(
                     detailExerciseId = null,
@@ -121,6 +132,7 @@ class ExerciseLibraryReducer @Inject constructor(
                             itemDrafts = persistentMapOf(),
                             draftOrder = persistentListOf(),
                             activeExerciseId = null,
+                            isCartExpanded = false,
                         ),
                         sessionBooking = SessionBookingSheetState(),
                         chrome = state.chrome.copy(
@@ -245,6 +257,9 @@ class ExerciseLibraryReducer @Inject constructor(
 
             ExerciseLibraryIntent.ClearExerciseDetail ->
                 state.copy(chrome = state.chrome.copy(detailExerciseId = null))
+
+            ExerciseLibraryIntent.ToggleCartExpanded ->
+                state.copy(cart = state.cart.copy(isCartExpanded = !state.cart.isCartExpanded))
         }
     }
 }
