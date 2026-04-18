@@ -182,8 +182,7 @@ private fun buildSetBreakdownLabel(
             if (logEntry != null) {
                 val reps = logSets.map { it.reps }.filter { it > 0 }
                 val weights = logSets.map { it.weightKg }.filter { it > 0.0 }
-                val setCount = logSets.size.takeIf { it > 0 } ?: schedule.sets
-                formatStrengthSetBreakdown(setCount, reps, weights)
+                formatStrengthSetBreakdown(logSets.size, reps, weights)
             } else {
                 formatStrengthSetBreakdown(
                     setCount = schedule.sets,

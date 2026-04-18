@@ -150,12 +150,7 @@ fun WorkoutCalendarDayExerciseListOrganism(
                 }
             } else {
                 sessionBlocks.forEachIndexed { blockIndex, block ->
-                    val headerKey = buildString {
-                        append("session_header_")
-                        append(block.sessionId ?: "ungrouped_$blockIndex")
-                        append('_')
-                        append(block.exercises.firstOrNull()?.rowId ?: blockIndex)
-                    }
+                    val headerKey = "session_header_${block.sessionId ?: "ungrouped_$blockIndex"}"
                     stickyHeader(key = headerKey) {
                         SessionHeaderRow(
                             timeLabel = block.sessionTimeLabel,
