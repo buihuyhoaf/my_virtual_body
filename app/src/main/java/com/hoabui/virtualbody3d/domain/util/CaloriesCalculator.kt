@@ -14,9 +14,9 @@ object ExerciseCaloriesMetadataProvider {
      * Values are intentionally conservative placeholders until the catalog supplies per-exercise data.
      */
     private val metadataById: Map<String, ExerciseCaloriesMetadata> = mapOf(
-        "squat" to ExerciseCaloriesMetadata(met = 7.5, tutSecondsPerRep = 4.5),
+        "squat" to ExerciseCaloriesMetadata(met = 6.0, tutSecondsPerRep = 4.5),
         "bicep_curl" to ExerciseCaloriesMetadata(met = 3.5, tutSecondsPerRep = 4.0),
-        "bench_press" to ExerciseCaloriesMetadata(met = 7.5, tutSecondsPerRep = 4.0),
+        "bench_press" to ExerciseCaloriesMetadata(met = 5.0, tutSecondsPerRep = 4.0),
         "deadlift" to ExerciseCaloriesMetadata(met = 7.5, tutSecondsPerRep = 4.5),
         "running" to ExerciseCaloriesMetadata(met = 7.5, tutSecondsPerRep = DEFAULT_TUT_SECONDS_PER_REP),
         "cycling" to ExerciseCaloriesMetadata(met = 6.8, tutSecondsPerRep = DEFAULT_TUT_SECONDS_PER_REP),
@@ -45,7 +45,7 @@ object CaloriesCalculator {
         val tutSeconds = metadata?.tutSecondsPerRep ?: DEFAULT_TUT_SECONDS_PER_REP
         val effectiveMinutes = when (measurementMode) {
             ExerciseMeasurementMode.Duration -> durationMinutes
-            ExerciseMeasurementMode.Strength -> totalReps.coerceAtLeast(0) * tutSeconds / 60.0
+            ExerciseMeasurementMode.Strength -> totalReps * tutSeconds / 60.0
         }.coerceAtLeast(0.0)
         if (effectiveMinutes <= 0.0) {
             return 0f
@@ -62,25 +62,13 @@ object CaloriesCalculator {
          * FinalCalories = BaseCalories * IntensityScaler * EPOCScaler
          */
         val baseCalories = met * MET_WEIGHT_FACTOR * effectiveBodyWeightKg * effectiveMinutes
-        val loadRatio = if (measurementMode == ExerciseMeasurementMode.Strength && safeLoadKg > 0.0) {
-            safeLoadKg / effectiveBodyWeightKg
+        val isStrength = measurementMode == ExerciseMeasurementMode.Strength
+        val loadRatio = if (isStrength && safeLoadKg > 0.0) safeLoadKg / effectiveBodyWeightKg else 0.0
+        val (intensityScaler, epocScaler) = if (isStrength) {
+            val epocCoefficient = epocCoefficientFor(exerciseId)
+            (1.0 + loadRatio) to (1.0 + (epocCoefficient * loadRatio))
         } else {
-            0.0
-        }
-        val intensityScaler = if (measurementMode == ExerciseMeasurementMode.Strength) {
-            1.0 + loadRatio
-        } else {
-            1.0
-        }
-        val epocCoefficient = if (measurementMode == ExerciseMeasurementMode.Strength) {
-            epocCoefficientFor(exerciseId)
-        } else {
-            0.0
-        }
-        val epocScaler = if (measurementMode == ExerciseMeasurementMode.Strength) {
-            1.0 + (epocCoefficient * loadRatio)
-        } else {
-            1.0
+            1.0 to 1.0
         }
         return (baseCalories * intensityScaler * epocScaler).toFloat()
     }
