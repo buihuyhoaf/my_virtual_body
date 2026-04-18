@@ -6,10 +6,13 @@ import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarSessionBloc
 import com.hoabui.virtualbody3d.domain.model.calendar.resolveWorkoutCalendarLineImage
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
+import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSession
 import com.hoabui.virtualbody3d.domain.model.workoutlog.WorkoutLogExerciseDetail
+import com.hoabui.virtualbody3d.domain.model.workoutlog.WorkoutLogSessionDetail
 import com.hoabui.virtualbody3d.domain.repository.ExercisesRepository
 import com.hoabui.virtualbody3d.domain.repository.WorkoutLogRepository
 import com.hoabui.virtualbody3d.domain.repository.WorkoutScheduleRepository
+import com.hoabui.virtualbody3d.domain.repository.WorkoutSessionRepository
 import com.hoabui.virtualbody3d.domain.util.CaloriesCalculator
 import java.time.Clock
 import java.time.Instant
@@ -25,6 +28,7 @@ import kotlinx.coroutines.flow.combine
 class GetWorkoutDetailsUseCase @Inject constructor(
     private val workoutScheduleRepository: WorkoutScheduleRepository,
     private val workoutLogRepository: WorkoutLogRepository,
+    private val workoutSessionRepository: WorkoutSessionRepository,
     private val exercisesRepository: ExercisesRepository,
 ) {
     /**
@@ -36,11 +40,14 @@ class GetWorkoutDetailsUseCase @Inject constructor(
         val logDayKey = day.format(DateTimeFormatter.ISO_LOCAL_DATE)
         return combine(
             workoutScheduleRepository.observeSchedulesInDayRange(dayKey, dayKey),
+            workoutSessionRepository.observeWorkoutSessionsInDayRange(dayKey, dayKey),
             workoutLogRepository.observeWorkoutLogsByDay(logDayKey),
             exercisesRepository.getAllExercises(),
-        ) { schedules, sessions, exercises ->
+        ) { schedules, workoutSessions, logSessions, exercises ->
             val exerciseById = exercises.associateBy { it.id }
-            val logs = sessions.flatMap { it.exercises }.toMutableList()
+            val workoutSessionsById = workoutSessions.associateBy { it.id }
+            val logSessionsById = logSessions.associateBy { it.id }
+            val logs = logSessions.flatMap { it.exercises }.toMutableList()
             val logBySessionExercise = logs.groupBy { log ->
                 LogKey(log.sessionId, log.exerciseId)
             }.mapValues { (_, list) -> list.sortedBy { it.startInstant } }.toMutableMap()
@@ -85,7 +92,11 @@ class GetWorkoutDetailsUseCase @Inject constructor(
                 }
 
             // Group exercise lines by sessionId into session blocks
-            groupExercisesIntoSessionBlocks(lines)
+            groupExercisesIntoSessionBlocks(
+                lines = lines,
+                workoutSessionsById = workoutSessionsById,
+                logSessionsById = logSessionsById,
+            )
         }
     }
 }
@@ -168,22 +179,16 @@ private fun buildSetBreakdownLabel(
 
     return when (measurementMode) {
         ExerciseMeasurementMode.Strength -> {
-            // **BUG FIX**: Always use log data exclusively when available.
-            // Previously, when logSets was empty but had a match, it could fallback to schedule values.
-            // Now we only use schedule values when there is no log entry at all.
-            if (logEntry != null && logSets.isNotEmpty()) {
-                // Use logged actual performance data (fixes 20kg vs 80kg bug)
+            if (logEntry != null) {
                 val reps = logSets.map { it.reps }.filter { it > 0 }
                 val weights = logSets.map { it.weightKg }.filter { it > 0.0 }
-                Log.d(TAG, "buildSetBreakdownLabel: Using LOG data - weights=$weights, reps=$reps")
-                formatStrengthSetBreakdown(logSets.size, reps, weights)
+                val setCount = logSets.size.takeIf { it > 0 } ?: schedule.sets
+                formatStrengthSetBreakdown(setCount, reps, weights)
             } else {
-                // No log entry: use planned schedule values
-                Log.d(TAG, "buildSetBreakdownLabel: Using SCHEDULE data - weight=${schedule.weightKg}, reps=${schedule.reps}")
                 formatStrengthSetBreakdown(
                     setCount = schedule.sets,
                     reps = listOf(schedule.reps).filter { it > 0 },
-                    weights = listOf(schedule.weightKg).filter { it > 0.0 },
+                    weights = emptyList(),
                 )
             }
         }
@@ -325,6 +330,8 @@ private fun formatWeight(weightKg: Double): String {
  */
 private fun groupExercisesIntoSessionBlocks(
     lines: List<WorkoutCalendarExerciseLine>,
+    workoutSessionsById: Map<String, WorkoutSession>,
+    logSessionsById: Map<String, WorkoutLogSessionDetail>,
 ): List<WorkoutCalendarSessionBlock> {
     if (lines.isEmpty()) return emptyList()
 
@@ -337,10 +344,21 @@ private fun groupExercisesIntoSessionBlocks(
 
     return groupedBySession.map { (sessionId, exercises) ->
         val sortedExercises = exercises.sortedBy { it.startInstant }
-        val startInstant = sortedExercises.first().startInstant
-        val endInstant = sortedExercises.last().startInstant
+        val fallbackStartInstant = sortedExercises.first().startInstant
+        val startInstant = resolveSessionStartInstant(
+            sessionId = sessionId,
+            workoutSessionsById = workoutSessionsById,
+            logSessionsById = logSessionsById,
+            fallbackStartInstant = fallbackStartInstant,
+        )
+        val endInstant = resolveSessionEndInstant(
+            sessionId = sessionId,
+            workoutSessionsById = workoutSessionsById,
+            logSessionsById = logSessionsById,
+            startInstant = startInstant,
+            sortedExercises = sortedExercises,
+        )
 
-        // Calculate session time label: "08:00 AM - 09:30 AM session" or just "08:00 AM" for single exercises
         val startTime = startInstant.atZone(systemZone).toLocalTime().format(timeFormatter)
         val endTime = endInstant.atZone(systemZone).toLocalTime().format(timeFormatter)
 
@@ -359,6 +377,37 @@ private fun groupExercisesIntoSessionBlocks(
             totalCaloriesKcal = sortedExercises.sumOf { it.caloriesKcal.toDouble() }.toFloat(),
         )
     }.sortedBy { it.startInstant }
+}
+
+private fun resolveSessionStartInstant(
+    sessionId: String?,
+    workoutSessionsById: Map<String, WorkoutSession>,
+    logSessionsById: Map<String, WorkoutLogSessionDetail>,
+    fallbackStartInstant: Instant,
+): Instant {
+    if (sessionId.isNullOrBlank()) return fallbackStartInstant
+    return workoutSessionsById[sessionId]?.startInstant
+        ?: logSessionsById[sessionId]?.startInstant
+        ?: fallbackStartInstant
+}
+
+private fun resolveSessionEndInstant(
+    sessionId: String?,
+    workoutSessionsById: Map<String, WorkoutSession>,
+    logSessionsById: Map<String, WorkoutLogSessionDetail>,
+    startInstant: Instant,
+    sortedExercises: List<WorkoutCalendarExerciseLine>,
+): Instant {
+    if (!sessionId.isNullOrBlank()) {
+        workoutSessionsById[sessionId]?.endInstant?.let { return it }
+        logSessionsById[sessionId]?.endInstant?.let { return it }
+    }
+    val lastDurationSeconds = sortedExercises.lastOrNull()?.durationSeconds?.coerceAtLeast(0) ?: 0
+    return if (lastDurationSeconds > 0) {
+        startInstant.plusSeconds(lastDurationSeconds.toLong())
+    } else {
+        startInstant
+    }
 }
 
 private const val DEFAULT_BODY_WEIGHT_KG = 70.0

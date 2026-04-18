@@ -56,6 +56,11 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
             .map { list -> list.map { it.toDomain() } }
             .flowOn(ioDispatcher)
 
+    override fun observeWorkoutSessionsInDayRange(startDay: Long, endDay: Long): Flow<List<WorkoutSession>> =
+        workoutSessionDao.observeSessionsInDayRange(startDay, endDay)
+            .map { list -> list.map { it.toDomain() } }
+            .flowOn(ioDispatcher)
+
     override suspend fun bookSession(
         session: WorkoutSession,
         lines: List<SessionExerciseLine>,

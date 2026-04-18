@@ -12,6 +12,15 @@ interface WorkoutSessionDao {
     @Query("SELECT * FROM workout_sessions ORDER BY startEpochMillis ASC")
     fun observeAllSessions(): Flow<List<WorkoutSessionEntity>>
 
+    @Query(
+        """
+        SELECT * FROM workout_sessions
+        WHERE dayKey BETWEEN :startDay AND :endDay
+        ORDER BY startEpochMillis ASC
+        """,
+    )
+    fun observeSessionsInDayRange(startDay: Long, endDay: Long): Flow<List<WorkoutSessionEntity>>
+
     @Query("SELECT * FROM workout_sessions ORDER BY startEpochMillis ASC")
     suspend fun getAllSessions(): List<WorkoutSessionEntity>
 

@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.stickyHeader
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -85,29 +86,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 
 private enum class SwipeDeleteAnchor { Closed, Open }
 
-/**
- * Sealed class representing items in the lazy column for session-based layout.
- */
-private sealed class CalendarListItem {
-    abstract val key: Any
-
-    data class SessionHeader(
-        val sessionId: String?,
-        val timeLabel: String,
-        val totalCaloriesLabel: String,
-        val intensityLevel: WorkoutIntensityLevel,
-    ) : CalendarListItem() {
-        override val key: Any get() = "session_header_${sessionId ?: "ungrouped"}"
-    }
-
-    data class ExerciseItem(
-        val exercise: WorkoutCalendarExerciseLineUiModel,
-        val isFirstInSession: Boolean,
-    ) : CalendarListItem() {
-        override val key: Any get() = "exercise_${exercise.rowId}"
-    }
-}
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WorkoutCalendarDayExerciseListOrganism(
@@ -127,31 +105,11 @@ fun WorkoutCalendarDayExerciseListOrganism(
     val cal = token.workoutCalendar
     val locale = LocalConfiguration.current.locales.get(0) ?: Locale.getDefault()
     val headerFormat = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(locale)
-
-    // Flatten session blocks into a flat list with headers
-    val listItems = remember(sessionBlocks) {
-        buildList {
-            sessionBlocks.forEachIndexed { blockIndex, block ->
-                // Add session header for each block
-                add(
-                    CalendarListItem.SessionHeader(
-                        sessionId = block.sessionId,
-                        timeLabel = block.sessionTimeLabel,
-                        totalCaloriesLabel = block.totalCaloriesLabel,
-                        intensityLevel = block.intensityLevel,
-                    ),
-                )
-                // Add exercises in this session
-                block.exercises.forEachIndexed { exerciseIndex, exercise ->
-                    add(
-                        CalendarListItem.ExerciseItem(
-                            exercise = exercise,
-                            isFirstInSession = exerciseIndex == 0,
-                        ),
-                    )
-                }
-            }
-        }
+    val firstExerciseRowId = remember(sessionBlocks) {
+        sessionBlocks.asSequence()
+            .flatMap { it.exercises.asSequence() }
+            .firstOrNull()
+            ?.rowId
     }
 
     Column(modifier = modifier.fillMaxSize()) {
@@ -171,7 +129,7 @@ fun WorkoutCalendarDayExerciseListOrganism(
             contentPadding = PaddingValues(token.spacing.none),
             verticalArrangement = Arrangement.spacedBy(token.spacing.xs),
         ) {
-            if (listItems.isEmpty()) {
+            if (sessionBlocks.isEmpty()) {
                 // Enhanced empty state with GStatePanel
                 item(key = "empty") {
                     GStatePanel(
@@ -191,41 +149,43 @@ fun WorkoutCalendarDayExerciseListOrganism(
                     )
                 }
             } else {
-                items(
-                    items = listItems,
-                    key = { it.key },
-                ) { item ->
-                    when (item) {
-                        is CalendarListItem.SessionHeader -> {
-                            SessionHeaderRow(
-                                timeLabel = item.timeLabel,
-                                totalCaloriesLabel = item.totalCaloriesLabel,
-                                intensityLevel = item.intensityLevel,
-                                cal = cal,
-                                token = token,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .animateItem(),
-                            )
-                        }
-                        is CalendarListItem.ExerciseItem -> {
-                            val isFirstItem = listItems.indexOfFirst { it is CalendarListItem.ExerciseItem } ==
-                                listItems.indexOf(item)
-                            SwipeToDeleteExerciseRow(
-                                line = item.exercise,
-                                cal = cal,
-                                token = token,
-                                openSwipeRowId = openSwipeRowId,
-                                pendingSwipeCloseRowId = pendingSwipeCloseRowId,
-                                playSwipeHintNudge = playSwipeHintNudge && isFirstItem,
-                                onSwipeRowOpened = onSwipeRowOpened,
-                                onSwipeRowSettledClosed = onSwipeRowSettledClosed,
-                                onConsumePendingSwipeClose = onConsumePendingSwipeClose,
-                                onDeleteAffordanceClick = onDeleteAffordanceClick,
-                                onSwipeHintConsumed = onSwipeHintConsumed,
-                                modifier = Modifier.animateItem(),
-                            )
-                        }
+                sessionBlocks.forEachIndexed { blockIndex, block ->
+                    val headerKey = buildString {
+                        append("session_header_")
+                        append(block.sessionId ?: "ungrouped_$blockIndex")
+                        append('_')
+                        append(block.exercises.firstOrNull()?.rowId ?: blockIndex)
+                    }
+                    stickyHeader(key = headerKey) {
+                        SessionHeaderRow(
+                            timeLabel = block.sessionTimeLabel,
+                            totalCaloriesLabel = block.totalCaloriesLabel,
+                            intensityLevel = block.intensityLevel,
+                            token = token,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(token.colors.surface)
+                                .animateItem(),
+                        )
+                    }
+                    items(
+                        items = block.exercises,
+                        key = { exercise -> "exercise_${exercise.rowId}" },
+                    ) { exercise ->
+                        SwipeToDeleteExerciseRow(
+                            line = exercise,
+                            cal = cal,
+                            token = token,
+                            openSwipeRowId = openSwipeRowId,
+                            pendingSwipeCloseRowId = pendingSwipeCloseRowId,
+                            playSwipeHintNudge = playSwipeHintNudge && exercise.rowId == firstExerciseRowId,
+                            onSwipeRowOpened = onSwipeRowOpened,
+                            onSwipeRowSettledClosed = onSwipeRowSettledClosed,
+                            onConsumePendingSwipeClose = onConsumePendingSwipeClose,
+                            onDeleteAffordanceClick = onDeleteAffordanceClick,
+                            onSwipeHintConsumed = onSwipeHintConsumed,
+                            modifier = Modifier.animateItem(),
+                        )
                     }
                 }
             }
@@ -241,7 +201,6 @@ private fun SessionHeaderRow(
     timeLabel: String,
     totalCaloriesLabel: String,
     intensityLevel: WorkoutIntensityLevel,
-    cal: WorkoutCalendarTokens,
     token: GymToken,
     modifier: Modifier = Modifier,
 ) {
@@ -267,7 +226,7 @@ private fun SessionHeaderRow(
                     .background(intensityColor),
             )
             GText(
-                text = "$timeLabel session",
+                text = timeLabel,
                 style = workoutCalendarUnifiedSectionTitleStyle(token),
                 color = token.colors.textPrimary,
             )
