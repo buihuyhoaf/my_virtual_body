@@ -1,6 +1,7 @@
 package com.hoabui.virtualbody3d.domain.util
 
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
+import java.util.Locale
 import kotlin.math.max
 
 data class ExerciseCaloriesMetadata(
@@ -29,7 +30,7 @@ object ExerciseCaloriesMetadataProvider {
     )
 
     fun metadataFor(exerciseId: String): ExerciseCaloriesMetadata? =
-        metadataById[exerciseId] ?: metadataById[exerciseId.lowercase()]
+        metadataById[exerciseId] ?: metadataById[exerciseId.lowercase(Locale.ROOT)]
 }
 
 object CaloriesCalculator {
@@ -64,7 +65,7 @@ object CaloriesCalculator {
         bodyWeightKg: Double,
         leanBodyMassKg: Double?,
     ): CaloriesEstimate {
-        val normalizedExerciseId = exerciseId.lowercase()
+        val normalizedExerciseId = exerciseId.lowercase(Locale.ROOT)
         val metadata = ExerciseCaloriesMetadataProvider.metadataFor(normalizedExerciseId)
         val met = when {
             // Enforce a minimum MET for heavy compounds even if metadata is missing or conservative.

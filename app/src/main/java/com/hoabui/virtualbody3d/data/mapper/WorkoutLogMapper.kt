@@ -13,6 +13,7 @@ import com.hoabui.virtualbody3d.domain.model.workoutlog.WorkoutLogSessionDetail
 import com.hoabui.virtualbody3d.domain.model.workoutlog.WorkoutLogSetDetail
 import java.time.Instant
 import java.time.ZoneId
+import java.util.Locale
 
 internal fun WorkoutLogSessionWithExercises.toDomain(): WorkoutLogSessionDetail {
     val zone = ZoneId.of(session.zoneId)
@@ -59,7 +60,8 @@ internal fun WorkoutLogSessionEntity.toDomain(): WorkoutLogSessionDetail = Worko
     exercises = emptyList(),
 ).toDomain()
 
-internal fun WorkoutLogExerciseEntity.toMeasurementMode(): ExerciseMeasurementMode = when (measurementMode.lowercase()) {
+internal fun WorkoutLogExerciseEntity.toMeasurementMode(): ExerciseMeasurementMode =
+    when (measurementMode.lowercase(Locale.ROOT)) {
     "duration" -> ExerciseMeasurementMode.Duration
     else -> ExerciseMeasurementMode.Strength
 }

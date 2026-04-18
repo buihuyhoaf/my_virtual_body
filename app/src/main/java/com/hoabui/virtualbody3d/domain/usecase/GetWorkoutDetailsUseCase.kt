@@ -153,7 +153,11 @@ private fun formatStrengthSetBreakdown(
 ): String {
     val safeSetCount = setCount.coerceAtLeast(0)
     if (safeSetCount == 0) return "0 Sets"
-    val repsRange = reps.takeIf { it.isNotEmpty() }?.let { it.minOrNull()!! to it.maxOrNull()!! }
+    val repsRange = reps.takeIf { it.isNotEmpty() }?.let { repsList ->
+        val min = repsList.minOrNull() ?: 0
+        val max = repsList.maxOrNull() ?: min
+        min to max
+    }
     val avgWeight = weights.takeIf { it.isNotEmpty() }?.average()
     val isUniformReps = repsRange?.let { it.first == it.second } ?: false
     val isUniformWeight = weights.distinctBy { it.formatWeightKey() }.size <= 1
