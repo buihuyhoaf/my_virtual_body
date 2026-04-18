@@ -23,7 +23,7 @@ object ExerciseCaloriesMetadataProvider {
     )
 
     fun metadataFor(exerciseId: String): ExerciseCaloriesMetadata? =
-        metadataById[exerciseId.lowercase()]
+        metadataById[exerciseId] ?: metadataById[exerciseId.lowercase()]
 }
 
 object CaloriesCalculator {
@@ -52,7 +52,7 @@ object CaloriesCalculator {
         } else {
             met * MET_WEIGHT_FACTOR * bodyWeightKg * effectiveMinutes
         }
-        val intensityFactor = if (averageLoadKg > 0.0) {
+        val intensityFactor = if (averageLoadKg > 0.0 && bodyWeightKg > 0.0) {
             1.0 + (averageLoadKg / bodyWeightKg)
         } else {
             1.0

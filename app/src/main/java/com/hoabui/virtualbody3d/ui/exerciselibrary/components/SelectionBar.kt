@@ -594,4 +594,5 @@ fun ExerciseLibrarySelectionBar(
 // ─────────────────────────────────────────────────────────
 
 private const val WEIGHT_FORMAT = "%.1f"
+// Default fallback when profile weight is unavailable in the selection bar UI state.
 private const val DEFAULT_BODY_WEIGHT_KG = 70.0
