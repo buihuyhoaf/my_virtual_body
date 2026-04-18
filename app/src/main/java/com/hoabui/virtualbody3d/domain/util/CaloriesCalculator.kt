@@ -47,6 +47,7 @@ object CaloriesCalculator {
         val tutSeconds = metadata?.tutSecondsPerRep ?: DEFAULT_TUT_SECONDS_PER_REP
         val effectiveMinutes = when (measurementMode) {
             ExerciseMeasurementMode.Duration -> durationMinutes
+            // Strength uses time-under-tension only; rest periods are intentionally excluded.
             ExerciseMeasurementMode.Strength -> totalReps * tutSeconds / 60.0
         }.coerceAtLeast(0.0)
         if (effectiveMinutes <= 0.0) {
@@ -64,6 +65,7 @@ object CaloriesCalculator {
          * EPOCScaler = 1 + (k * (AverageLoadKg / BodyWeightKg))
          * FinalCalories = BaseCalories * IntensityScaler * EPOCScaler
          */
+        // Lean body mass is intentionally not used to keep the strength model MET-based and consistent.
         val baseCalories = met * MET_WEIGHT_FACTOR * effectiveBodyWeightKg * effectiveMinutes
         val isStrength = measurementMode == ExerciseMeasurementMode.Strength
         val loadRatio = if (isStrength && safeLoadKg > 0.0) safeLoadKg / effectiveBodyWeightKg else 0.0
@@ -92,13 +94,13 @@ private const val MET_WEIGHT_FACTOR = 0.0175
 private const val DEFAULT_TUT_SECONDS_PER_REP = 4.0
 private const val DEFAULT_CARDIO_MET = 6.0
 private const val DEFAULT_STRENGTH_MET = 5.0
-// Fallback when user body weight is missing or invalid; keeps estimates stable.
+// Fallback when user body weight is missing or invalid; product default to keep estimates stable.
 private const val DEFAULT_BODY_WEIGHT_KG = 70.0
-// Minimum MET for heavy compounds, calibrated to match typical heavy-set output targets.
+// Minimum MET for heavy compounds, calibrated to hit ~25-40 kcal for typical heavy sets.
 private const val HEAVY_COMPOUND_BASE_MET = 7.5
-// Higher k for heavy compounds to reflect stronger afterburn vs. isolation lifts (calibrated).
+// Higher k for heavy compounds to reflect stronger afterburn vs. isolation lifts (calibrated to target range).
 private const val EPOC_COEFFICIENT_COMPOUND = 0.4
-// Lower k for isolation work to reduce afterburn influence (calibrated).
+// Lower k for isolation work to reduce afterburn influence (calibrated to target range).
 private const val EPOC_COEFFICIENT_ISOLATION = 0.2
 
 private val HEAVY_COMPOUND_LIFTS = setOf(
