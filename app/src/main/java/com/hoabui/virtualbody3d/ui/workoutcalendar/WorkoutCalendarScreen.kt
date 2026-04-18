@@ -19,14 +19,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.core.extensions.toWorkoutCalendarLineUiModel
-import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarExerciseLineUiModel
+import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarSessionBlockUiModel
+import com.hoabui.virtualbody3d.domain.model.calendar.toUiModel
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
 import com.hoabui.virtualbody3d.ui.common_ui.atom.dialog.GDialog
@@ -123,7 +122,6 @@ private fun WorkoutCalendarSuccessContent(
 ) {
     val cal = GymTheme.token.workoutCalendar
     val token = GymTheme.token
-    val resources = LocalResources.current
     val locale = LocalConfiguration.current.locales.get(0) ?: Locale.getDefault()
     val fullDateFormat = remember(locale) {
         DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(locale)
@@ -134,8 +132,10 @@ private fun WorkoutCalendarSuccessContent(
         today = today,
         summaries = data.summariesByEpochDay,
     )
-    val lineUiModels: List<WorkoutCalendarExerciseLineUiModel> =
-        data.dayLines.map { line -> line.toWorkoutCalendarLineUiModel(resources) }
+
+    // Map session blocks to UI models
+    val sessionBlockUiModels: List<WorkoutCalendarSessionBlockUiModel> =
+        data.sessionBlocks.map { block -> block.toUiModel() }
 
     val deleteDialog by viewModel.deleteDialog.collectAsStateWithLifecycle()
     val openSwipeRowId by viewModel.openSwipeRowId.collectAsStateWithLifecycle()
@@ -199,10 +199,10 @@ private fun WorkoutCalendarSuccessContent(
         Spacer(modifier = Modifier.height(cal.sectionGapMajor))
         WorkoutCalendarDayExerciseListOrganism(
             selectedDate = data.selectedDate,
-            lines = lineUiModels,
+            sessionBlocks = sessionBlockUiModels,
             openSwipeRowId = openSwipeRowId,
             pendingSwipeCloseRowId = pendingSwipeCloseRowId,
-            playSwipeHintNudge = lineUiModels.isNotEmpty() && !swipeHintSeen,
+            playSwipeHintNudge = sessionBlockUiModels.flatMap { it.exercises }.isNotEmpty() && !swipeHintSeen,
             onSwipeRowOpened = viewModel::onSwipeRowOpened,
             onSwipeRowSettledClosed = viewModel::onSwipeRowSettledClosed,
             onConsumePendingSwipeClose = viewModel::consumePendingSwipeCloseRow,

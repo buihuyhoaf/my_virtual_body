@@ -18,15 +18,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
@@ -39,27 +43,32 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.domain.model.calendar.WORKOUT_CALENDAR_FALLBACK_DRAWABLE_NAME
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarExerciseLineUiModel
+import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarSessionBlockUiModel
+import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutIntensityLevel
 import com.hoabui.virtualbody3d.domain.model.common.ImageSource
 import com.hoabui.virtualbody3d.domain.repository.ResourceProvider
 import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.state.GStatePanel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toCoilModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toExerciseLibraryCardImage
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
@@ -76,10 +85,34 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 
 private enum class SwipeDeleteAnchor { Closed, Open }
 
+/**
+ * Sealed class representing items in the lazy column for session-based layout.
+ */
+private sealed class CalendarListItem {
+    abstract val key: Any
+
+    data class SessionHeader(
+        val sessionId: String?,
+        val timeLabel: String,
+        val totalCaloriesLabel: String,
+        val intensityLevel: WorkoutIntensityLevel,
+    ) : CalendarListItem() {
+        override val key: Any get() = "session_header_${sessionId ?: "ungrouped"}"
+    }
+
+    data class ExerciseItem(
+        val exercise: WorkoutCalendarExerciseLineUiModel,
+        val isFirstInSession: Boolean,
+    ) : CalendarListItem() {
+        override val key: Any get() = "exercise_${exercise.rowId}"
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WorkoutCalendarDayExerciseListOrganism(
     selectedDate: LocalDate,
-    lines: List<WorkoutCalendarExerciseLineUiModel>,
+    sessionBlocks: List<WorkoutCalendarSessionBlockUiModel>,
     modifier: Modifier = Modifier,
     openSwipeRowId: Long? = null,
     pendingSwipeCloseRowId: Long? = null,
@@ -92,11 +125,37 @@ fun WorkoutCalendarDayExerciseListOrganism(
 ) {
     val token = GymTheme.token
     val cal = token.workoutCalendar
-    val locale =
-        LocalConfiguration.current.locales.get(0) ?: Locale.getDefault()
-    val headerFormat =
-        DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(locale)
+    val locale = LocalConfiguration.current.locales.get(0) ?: Locale.getDefault()
+    val headerFormat = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(locale)
+
+    // Flatten session blocks into a flat list with headers
+    val listItems = remember(sessionBlocks) {
+        buildList {
+            sessionBlocks.forEachIndexed { blockIndex, block ->
+                // Add session header for each block
+                add(
+                    CalendarListItem.SessionHeader(
+                        sessionId = block.sessionId,
+                        timeLabel = block.sessionTimeLabel,
+                        totalCaloriesLabel = block.totalCaloriesLabel,
+                        intensityLevel = block.intensityLevel,
+                    ),
+                )
+                // Add exercises in this session
+                block.exercises.forEachIndexed { exerciseIndex, exercise ->
+                    add(
+                        CalendarListItem.ExerciseItem(
+                            exercise = exercise,
+                            isFirstInSession = exerciseIndex == 0,
+                        ),
+                    )
+                }
+            }
+        }
+    }
+
     Column(modifier = modifier.fillMaxSize()) {
+        // Date header
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -104,44 +163,131 @@ fun WorkoutCalendarDayExerciseListOrganism(
         ) {
             WorkoutCalendarSectionLabel(text = selectedDate.format(headerFormat))
         }
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
             contentPadding = PaddingValues(token.spacing.none),
-            verticalArrangement = Arrangement.spacedBy(cal.exerciseItemListGap),
+            verticalArrangement = Arrangement.spacedBy(token.spacing.xs),
         ) {
-            if (lines.isEmpty()) {
+            if (listItems.isEmpty()) {
+                // Enhanced empty state with GStatePanel
                 item(key = "empty") {
-                    GText(
-                        text = stringResource(R.string.workout_calendar_empty_day),
-                        style = token.typography.bodyMedium,
-                        color = token.colors.textMuted,
-                        modifier = Modifier.fillMaxWidth(),
+                    GStatePanel(
+                        title = stringResource(R.string.workout_calendar_rest_day_title),
+                        subtitle = stringResource(R.string.workout_calendar_rest_day_subtitle),
+                        modifier = Modifier
+                            .fillParentMaxHeight(0.6f)
+                            .fillMaxWidth(),
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Default.FitnessCenter,
+                                contentDescription = null,
+                                modifier = Modifier.size(48.dp),
+                                tint = token.colors.textMuted,
+                            )
+                        },
                     )
                 }
             } else {
-                itemsIndexed(
-                    items = lines,
-                    key = { _, line -> line.rowId },
-                ) { index, line ->
-                    SwipeToDeleteExerciseRow(
-                        line = line,
-                        cal = cal,
-                        token = token,
-                        openSwipeRowId = openSwipeRowId,
-                        pendingSwipeCloseRowId = pendingSwipeCloseRowId,
-                        playSwipeHintNudge = playSwipeHintNudge && index == 0,
-                        onSwipeRowOpened = onSwipeRowOpened,
-                        onSwipeRowSettledClosed = onSwipeRowSettledClosed,
-                        onConsumePendingSwipeClose = onConsumePendingSwipeClose,
-                        onDeleteAffordanceClick = onDeleteAffordanceClick,
-                        onSwipeHintConsumed = onSwipeHintConsumed,
-                    )
+                items(
+                    items = listItems,
+                    key = { it.key },
+                ) { item ->
+                    when (item) {
+                        is CalendarListItem.SessionHeader -> {
+                            SessionHeaderRow(
+                                timeLabel = item.timeLabel,
+                                totalCaloriesLabel = item.totalCaloriesLabel,
+                                intensityLevel = item.intensityLevel,
+                                cal = cal,
+                                token = token,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .animateItem(),
+                            )
+                        }
+                        is CalendarListItem.ExerciseItem -> {
+                            val isFirstItem = listItems.indexOfFirst { it is CalendarListItem.ExerciseItem } ==
+                                listItems.indexOf(item)
+                            SwipeToDeleteExerciseRow(
+                                line = item.exercise,
+                                cal = cal,
+                                token = token,
+                                openSwipeRowId = openSwipeRowId,
+                                pendingSwipeCloseRowId = pendingSwipeCloseRowId,
+                                playSwipeHintNudge = playSwipeHintNudge && isFirstItem,
+                                onSwipeRowOpened = onSwipeRowOpened,
+                                onSwipeRowSettledClosed = onSwipeRowSettledClosed,
+                                onConsumePendingSwipeClose = onConsumePendingSwipeClose,
+                                onDeleteAffordanceClick = onDeleteAffordanceClick,
+                                onSwipeHintConsumed = onSwipeHintConsumed,
+                                modifier = Modifier.animateItem(),
+                            )
+                        }
+                    }
                 }
             }
         }
     }
+}
+
+/**
+ * Session header component showing time range and total calories.
+ */
+@Composable
+private fun SessionHeaderRow(
+    timeLabel: String,
+    totalCaloriesLabel: String,
+    intensityLevel: WorkoutIntensityLevel,
+    cal: WorkoutCalendarTokens,
+    token: GymToken,
+    modifier: Modifier = Modifier,
+) {
+    val intensityColor = intensityLevel.toColor(token)
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = token.spacing.sm),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
+        ) {
+            // Intensity indicator bar
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .height(24.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(intensityColor),
+            )
+            GText(
+                text = "$timeLabel Session",
+                style = workoutCalendarUnifiedSectionTitleStyle(token),
+                color = token.colors.textPrimary,
+            )
+        }
+        GText(
+            text = totalCaloriesLabel,
+            style = token.typography.labelMedium,
+            color = intensityColor,
+        )
+    }
+}
+
+/**
+ * Extension to convert intensity level to color.
+ */
+@Composable
+private fun WorkoutIntensityLevel.toColor(token: GymToken): Color = when (this) {
+    WorkoutIntensityLevel.Light -> token.colors.success
+    WorkoutIntensityLevel.Moderate -> token.colors.warning
+    WorkoutIntensityLevel.High -> token.colors.error
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -158,6 +304,7 @@ private fun SwipeToDeleteExerciseRow(
     onConsumePendingSwipeClose: (Long) -> Unit,
     onDeleteAffordanceClick: (rowId: Long, exerciseName: String) -> Unit,
     onSwipeHintConsumed: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
@@ -174,8 +321,6 @@ private fun SwipeToDeleteExerciseRow(
         animationSpec = snapSpec,
     )
 
-    // Apply anchors during the composition apply phase (before layout). LaunchedEffect runs too late:
-    // offset { requireOffset() } crashes on first layout because offset is still NaN.
     DisposableEffect(
         cal.swipeDeleteTrackWidth,
         layoutDirection,
@@ -183,8 +328,7 @@ private fun SwipeToDeleteExerciseRow(
         density.fontScale,
     ) {
         val w = with(density) { cal.swipeDeleteTrackWidth.toPx() }
-        val openX =
-            if (layoutDirection == LayoutDirection.Rtl) w else -w
+        val openX = if (layoutDirection == LayoutDirection.Rtl) w else -w
         anchoredState.updateAnchors(
             DraggableAnchors {
                 SwipeDeleteAnchor.Closed at 0f
@@ -262,7 +406,7 @@ private fun SwipeToDeleteExerciseRow(
 
     val clipShape = RoundedCornerShape(token.radius.sm)
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(clipShape),
     ) {
@@ -341,6 +485,10 @@ private fun SwipeDeleteUnderlay(
     }
 }
 
+/**
+ * Updated exercise row without time/status labels (moved to session header).
+ * Now includes intensity color-coded indicator.
+ */
 @Composable
 private fun WorkoutCalendarExerciseRow(
     line: WorkoutCalendarExerciseLineUiModel,
@@ -353,12 +501,15 @@ private fun WorkoutCalendarExerciseRow(
         line.image.toExerciseLibraryCardImage().toCoilModel(resourceProvider)
     }
     val fallbackPainter = painterResource(R.drawable.body_unsplash)
+    val intensityColor = line.intensityLevel.toColor(token)
+
     GCard(
         modifier = Modifier.fillMaxWidth(),
         onClick = null,
         shape = RoundedCornerShape(token.radius.sm),
         containerColor = token.colors.surface,
-        border = BorderStroke(token.borderWidth.hairline, token.colors.borderSubtle),
+        // Intensity color-coded border
+        border = BorderStroke(token.borderWidth.thin, intensityColor.copy(alpha = 0.5f)),
         treatment = GSurfaceTreatment.Flat,
         elevation = token.elevation.level0,
         contentModifier = Modifier.padding(cal.exerciseItemInnerPadding),
@@ -368,6 +519,15 @@ private fun WorkoutCalendarExerciseRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(cal.exerciseRowThumbnailToTextGap),
         ) {
+            // Intensity indicator bar on the left edge
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(intensityColor),
+            )
+
             AsyncImage(
                 model = coilModel,
                 contentDescription = line.title,
@@ -379,63 +539,38 @@ private fun WorkoutCalendarExerciseRow(
                 placeholder = fallbackPainter,
                 error = fallbackPainter,
             )
-            Column(modifier = Modifier.fillMaxWidth()) {
-                if (line.startTimeLabel.isNotBlank() || line.caloriesLabel.isNotBlank()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = token.spacing.xs),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        if (line.startTimeLabel.isNotBlank()) {
-                            GText(
-                                text = line.startTimeLabel,
-                                style = token.typography.labelSmall,
-                                color = token.colors.textSecondary,
-                            )
-                        }
-                        if (line.caloriesLabel.isNotBlank()) {
-                            GText(
-                                text = line.caloriesLabel,
-                                style = token.typography.labelSmall,
-                                color = token.colors.primary,
-                            )
-                        }
-                    }
-                }
+            Column(modifier = Modifier.weight(1f)) {
                 GText(
                     text = line.title,
                     style = workoutCalendarExerciseNameStyle(token),
                     color = token.colors.textPrimary,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = cal.exerciseRowTitleToMetricsGap),
+                    modifier = Modifier.fillMaxWidth(),
                 )
                 if (line.setBreakdownLabel.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(token.spacing.xxs))
                     GText(
                         text = line.setBreakdownLabel,
                         style = workoutCalendarSupportingBodyStyle(token),
                         color = token.colors.textSecondary,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = cal.exerciseRowMetricsToStatusGap),
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
-                if (line.statusLabel.isNotBlank()) {
-                    GText(
-                        text = line.statusLabel,
-                        style = workoutCalendarSupportingLabelStyle(token),
-                        color = token.colors.textMuted,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = cal.exerciseRowMetricsToStatusGap),
-                    )
-                }
+            }
+            // Calories badge on the right
+            if (line.caloriesLabel.isNotBlank()) {
+                GText(
+                    text = line.caloriesLabel,
+                    style = token.typography.labelSmall,
+                    color = intensityColor,
+                )
             }
         }
     }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Previews
+// ─────────────────────────────────────────────────────────────────────────────
 
 @Preview(showBackground = true)
 @Composable
@@ -457,24 +592,46 @@ private fun DayListPreviewLight() {
             ) {
                 WorkoutCalendarDayExerciseListOrganism(
                     selectedDate = LocalDate.of(2024, 4, 10),
-                    lines = listOf(
-                        WorkoutCalendarExerciseLineUiModel(
-                            rowId = 1L,
-                            title = "Squat",
-                            startTimeLabel = "06:30",
-                            setBreakdownLabel = "3 Sets • 95 kg x 10",
-                            caloriesLabel = "🔥 25 kcal",
-                            statusLabel = "Scheduled",
-                            image = ImageSource.LocalResource(WORKOUT_CALENDAR_FALLBACK_DRAWABLE_NAME),
+                    sessionBlocks = listOf(
+                        WorkoutCalendarSessionBlockUiModel(
+                            sessionId = "session_1",
+                            sessionTimeLabel = "06:30 - 07:45",
+                            exercises = listOf(
+                                WorkoutCalendarExerciseLineUiModel(
+                                    rowId = 1L,
+                                    title = "Squat",
+                                    setBreakdownLabel = "3 Sets • 95 kg x 10",
+                                    caloriesLabel = "🔥 125 kcal",
+                                    intensityLevel = WorkoutIntensityLevel.Moderate,
+                                    image = ImageSource.LocalResource(WORKOUT_CALENDAR_FALLBACK_DRAWABLE_NAME),
+                                ),
+                                WorkoutCalendarExerciseLineUiModel(
+                                    rowId = 2L,
+                                    title = "Romanian deadlift",
+                                    setBreakdownLabel = "4 Sets • 75 kg x 8",
+                                    caloriesLabel = "🔥 280 kcal",
+                                    intensityLevel = WorkoutIntensityLevel.High,
+                                    image = ImageSource.LocalResource(WORKOUT_CALENDAR_FALLBACK_DRAWABLE_NAME),
+                                ),
+                            ),
+                            totalCaloriesLabel = "🔥 405 kcal",
+                            intensityLevel = WorkoutIntensityLevel.High,
                         ),
-                        WorkoutCalendarExerciseLineUiModel(
-                            rowId = 2L,
-                            title = "Romanian deadlift",
-                            startTimeLabel = "18:00",
-                            setBreakdownLabel = "4 Sets • 75 kg x 8",
-                            caloriesLabel = "🔥 18 kcal",
-                            statusLabel = "Completed",
-                            image = ImageSource.LocalResource(WORKOUT_CALENDAR_FALLBACK_DRAWABLE_NAME),
+                        WorkoutCalendarSessionBlockUiModel(
+                            sessionId = "session_2",
+                            sessionTimeLabel = "18:00",
+                            exercises = listOf(
+                                WorkoutCalendarExerciseLineUiModel(
+                                    rowId = 3L,
+                                    title = "Bicep Curl",
+                                    setBreakdownLabel = "3 Sets • 15 kg x 12",
+                                    caloriesLabel = "🔥 45 kcal",
+                                    intensityLevel = WorkoutIntensityLevel.Light,
+                                    image = ImageSource.LocalResource(WORKOUT_CALENDAR_FALLBACK_DRAWABLE_NAME),
+                                ),
+                            ),
+                            totalCaloriesLabel = "🔥 45 kcal",
+                            intensityLevel = WorkoutIntensityLevel.Light,
                         ),
                     ),
                     modifier = Modifier.fillMaxSize(),
@@ -486,7 +643,7 @@ private fun DayListPreviewLight() {
 
 @Preview(showBackground = true)
 @Composable
-private fun DayListPreviewDark() {
+private fun DayListPreviewEmpty() {
     val context = LocalContext.current
     val previewResourceProvider = remember {
         object : ResourceProvider {
@@ -504,7 +661,7 @@ private fun DayListPreviewDark() {
             ) {
                 WorkoutCalendarDayExerciseListOrganism(
                     selectedDate = LocalDate.of(2024, 4, 10),
-                    lines = emptyList(),
+                    sessionBlocks = emptyList(),
                     modifier = Modifier.fillMaxSize(),
                 )
             }

@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.hoabui.virtualbody3d.core.base.UiStateViewModel
 import com.hoabui.virtualbody3d.core.utils.Constants
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarDaySummary
-import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarExerciseLine
+import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarSessionBlock
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutScheduleDeleteResult
 import com.hoabui.virtualbody3d.domain.usecase.DeleteWorkoutScheduleUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetWorkoutDetailsUseCase
@@ -27,7 +27,8 @@ data class WorkoutCalendarContent(
     val visibleYearMonth: YearMonth,
     val selectedDate: LocalDate,
     val summariesByEpochDay: Map<Long, WorkoutCalendarDaySummary>,
-    val dayLines: List<WorkoutCalendarExerciseLine>,
+    /** Session blocks grouped by sessionId for the selected day. */
+    val sessionBlocks: List<WorkoutCalendarSessionBlock>,
 )
 
 data class WorkoutCalendarDeleteDialogState(
@@ -88,12 +89,12 @@ class WorkoutCalendarViewModel @Inject constructor(
                 _selectedDate.flatMapLatest { d -> getWorkoutDetails(d, zoneId) },
                 _visibleMonth,
                 _selectedDate,
-            ) { summaries, lines, vm, sd ->
+            ) { summaries, sessionBlocks, vm, sd ->
                 WorkoutCalendarContent(
                     visibleYearMonth = vm,
                     selectedDate = sd,
                     summariesByEpochDay = summaries,
-                    dayLines = lines,
+                    sessionBlocks = sessionBlocks,
                 )
             }.collect { content ->
                 setSuccess(content)

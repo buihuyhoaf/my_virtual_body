@@ -61,6 +61,8 @@
     <!-- Workout calendar -->
     <string name="workout_calendar_title">Workout plan</string>
     <string name="workout_calendar_empty_day">No exercises scheduled for this day.</string>
+    <string name="workout_calendar_rest_day_title">Rest Day! 💪</string>
+    <string name="workout_calendar_rest_day_subtitle">Rest is an important part of your fitness journey</string>
     <string name="workout_calendar_prev_month_cd">Previous month</string>
     <string name="workout_calendar_next_month_cd">Next month</string>
     <string name="workout_calendar_weekday_mo">Mo</string>
