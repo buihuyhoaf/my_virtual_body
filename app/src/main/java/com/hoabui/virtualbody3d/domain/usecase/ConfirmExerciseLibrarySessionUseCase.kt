@@ -10,8 +10,8 @@ import com.hoabui.virtualbody3d.domain.model.exercise.buildSessionExerciseLinesF
 import com.hoabui.virtualbody3d.domain.model.exercise.proposedVariableSessionInterval
 import com.hoabui.virtualbody3d.domain.model.exercise.shouldWarnLongSession
 import com.hoabui.virtualbody3d.domain.repository.BookWorkoutSessionResult
+import java.time.Clock
 import java.time.Instant
-import java.time.ZoneId
 import java.util.UUID
 import javax.inject.Inject
 
@@ -57,7 +57,6 @@ class ConfirmExerciseLibrarySessionUseCase @Inject constructor(
         exercisesById: Map<String, Exercise>,
         locationDisplayName: String,
     ): PrepareLibrarySessionConfirmResult {
-        val zoneId = ZoneId.systemDefault()
         if (!validateSessionBookingUseCase.canEnableConfirm(
                 selectedSlotStarts = pending.selectedSlotStarts.toSet(),
                 selectedLocationId = pending.selectedLocationId,
@@ -73,7 +72,9 @@ class ConfirmExerciseLibrarySessionUseCase @Inject constructor(
             return PrepareLibrarySessionConfirmResult.LongSessionAcknowledgementRequired
         }
 
-        val date = Instant.ofEpochMilli(pending.selectedDateMillis).atZone(zoneId).toLocalDate()
+        val date = Instant.ofEpochMilli(pending.selectedDateMillis)
+            .atZone(Clock.systemDefaultZone().zone)
+            .toLocalDate()
         val orderedSlots = pending.selectedSlotStarts.sorted()
         val minSlot = orderedSlots.first()
         val maxSlot = orderedSlots.last()
@@ -81,7 +82,6 @@ class ConfirmExerciseLibrarySessionUseCase @Inject constructor(
             date = date,
             minSlot = minSlot,
             maxSlot = maxSlot,
-            zoneId = zoneId,
         )
 
         val lines = buildSessionExerciseLinesFromLibraryCart(

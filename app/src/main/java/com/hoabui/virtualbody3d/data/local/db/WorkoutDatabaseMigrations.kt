@@ -59,7 +59,6 @@ val MIGRATION_5_6: Migration = object : Migration(5, 6) {
                 `startEpochMillis` INTEGER NOT NULL,
                 `endEpochMillis` INTEGER NOT NULL,
                 `dayKey` TEXT NOT NULL,
-                `zoneId` TEXT NOT NULL,
                 PRIMARY KEY(`id`)
             )
             """.trimIndent(),
@@ -107,5 +106,31 @@ val MIGRATION_5_6: Migration = object : Migration(5, 6) {
             )
             """.trimIndent(),
         )
+    }
+}
+
+val MIGRATION_6_7: Migration = object : Migration(6, 7) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `workout_log_sessions_new` (
+                `id` TEXT NOT NULL,
+                `startEpochMillis` INTEGER NOT NULL,
+                `endEpochMillis` INTEGER NOT NULL,
+                `dayKey` TEXT NOT NULL,
+                PRIMARY KEY(`id`)
+            )
+            """.trimIndent(),
+        )
+        db.execSQL(
+            """
+            INSERT INTO `workout_log_sessions_new` (`id`, `startEpochMillis`, `endEpochMillis`, `dayKey`)
+            SELECT `id`, `startEpochMillis`, `endEpochMillis`, `dayKey`
+            FROM `workout_log_sessions`
+            """.trimIndent(),
+        )
+        db.execSQL("DROP TABLE `workout_log_sessions`")
+        db.execSQL("ALTER TABLE `workout_log_sessions_new` RENAME TO `workout_log_sessions`")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_workout_log_sessions_dayKey` ON `workout_log_sessions` (`dayKey`)")
     }
 }

@@ -27,6 +27,9 @@ interface WorkoutSessionRepository {
     /** All stored workout sessions (timeline aggregate rows). */
     fun observeWorkoutSessions(): Flow<List<WorkoutSession>>
 
+    /** Stored workout sessions constrained by local epoch-day range. */
+    fun observeWorkoutSessionsInDayRange(startDay: Long, endDay: Long): Flow<List<WorkoutSession>>
+
     fun observeGymLocations(): Flow<List<GymLocation>>
 
     /** Idempotent: merges legacy schedules without [sessionId] into sessions once. */

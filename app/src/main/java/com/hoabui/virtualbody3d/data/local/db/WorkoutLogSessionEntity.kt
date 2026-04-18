@@ -16,5 +16,4 @@ data class WorkoutLogSessionEntity(
     val startEpochMillis: Long,
     val endEpochMillis: Long,
     val dayKey: String,
-    val zoneId: String,
 )

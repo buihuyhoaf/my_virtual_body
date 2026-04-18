@@ -2,13 +2,11 @@ package com.hoabui.virtualbody3d.domain.model.workoutlog
 
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import java.time.Instant
-import java.time.ZoneId
 
 data class WorkoutLogSessionInput(
     val id: String,
     val startInstant: Instant,
     val endInstant: Instant,
-    val zoneId: ZoneId,
     val exercises: List<WorkoutLogExerciseInput>,
 )
 
@@ -32,7 +30,6 @@ data class WorkoutLogSessionDetail(
     val id: String,
     val startInstant: Instant,
     val endInstant: Instant,
-    val zoneId: ZoneId,
     val exercises: List<WorkoutLogExerciseDetail>,
 )
 

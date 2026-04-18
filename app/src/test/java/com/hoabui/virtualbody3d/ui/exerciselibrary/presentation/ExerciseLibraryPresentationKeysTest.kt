@@ -14,7 +14,7 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryFilterStat
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingInput
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingSheetState
 import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.ZoneOffset
 import io.mockk.mockk
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
@@ -27,7 +27,7 @@ import org.junit.Test
  */
 class ExerciseLibraryPresentationKeysTest {
 
-    private val zoneUtc: ZoneId = ZoneId.of("UTC")
+    private val zoneUtc = ZoneOffset.UTC
 
     private val catalogMapper = ExerciseLibraryCatalogUiMapper(mockk<Context>(relaxed = true))
 

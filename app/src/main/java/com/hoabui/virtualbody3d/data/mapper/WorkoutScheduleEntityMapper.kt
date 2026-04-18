@@ -4,15 +4,18 @@ import com.hoabui.virtualbody3d.data.local.db.WorkoutScheduleEntity
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutExecutionStatus
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
+import java.time.Clock
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
 
 internal fun WorkoutScheduleEntity.toDomain(): WorkoutSchedule = WorkoutSchedule(
     id = clientId,
     rowId = id,
     exerciseId = exerciseId,
-    scheduledAt = LocalDateTime.ofInstant(Instant.ofEpochMilli(scheduledAtEpochMillis), ZoneId.systemDefault()),
+    scheduledAt = LocalDateTime.ofInstant(
+        Instant.ofEpochMilli(scheduledAtEpochMillis),
+        Clock.systemDefaultZone().zone,
+    ),
     sets = sets,
     reps = reps,
     weightKg = weightKg,
@@ -28,8 +31,8 @@ internal fun WorkoutScheduleEntity.toDomain(): WorkoutSchedule = WorkoutSchedule
 )
 
 internal fun WorkoutSchedule.toEntity(nowMillis: Long): WorkoutScheduleEntity {
-    val zoneId = ZoneId.systemDefault()
-    val dayKey = scheduledAt.atZone(zoneId).toLocalDate().toEpochDay()
+    val systemZone = Clock.systemDefaultZone().zone
+    val dayKey = scheduledAt.atZone(systemZone).toLocalDate().toEpochDay()
     val created = nowMillis
     return WorkoutScheduleEntity(
         id = rowId ?: 0L,
@@ -37,7 +40,7 @@ internal fun WorkoutSchedule.toEntity(nowMillis: Long): WorkoutScheduleEntity {
         dayKey = dayKey,
         exerciseId = exerciseId,
         sessionId = sessionId,
-        scheduledAtEpochMillis = scheduledAt.atZone(zoneId).toInstant().toEpochMilli(),
+        scheduledAtEpochMillis = scheduledAt.atZone(systemZone).toInstant().toEpochMilli(),
         sets = sets,
         reps = reps,
         weightKg = weightKg,

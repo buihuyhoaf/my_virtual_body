@@ -42,7 +42,6 @@ import com.hoabui.virtualbody3d.ui.workoutcalendar.viewmodel.WorkoutCalendarCont
 import com.hoabui.virtualbody3d.ui.workoutcalendar.viewmodel.WorkoutCalendarEvent
 import com.hoabui.virtualbody3d.ui.workoutcalendar.viewmodel.WorkoutCalendarViewModel
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
@@ -53,8 +52,7 @@ fun WorkoutCalendarScreen(
     modifier: Modifier = Modifier,
     viewModel: WorkoutCalendarViewModel = hiltViewModel(),
 ) {
-    val zoneId = ZoneId.systemDefault()
-    val today = LocalDate.now(zoneId)
+    val today = LocalDate.now()
     val screen by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current

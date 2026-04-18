@@ -15,7 +15,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.ZoneId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -58,7 +57,7 @@ class WorkoutCalendarViewModel @Inject constructor(
     private val sharedPreferences: SharedPreferences,
 ) : UiStateViewModel<WorkoutCalendarContent, WorkoutCalendarEvent>() {
 
-    private val today: LocalDate = LocalDate.now(ZoneId.systemDefault())
+    private val today: LocalDate = LocalDate.now()
     private val _visibleMonth = MutableStateFlow(YearMonth.from(today))
     private val _selectedDate = MutableStateFlow(today)
 

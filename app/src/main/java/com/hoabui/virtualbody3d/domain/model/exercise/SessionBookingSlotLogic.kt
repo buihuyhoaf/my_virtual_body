@@ -1,8 +1,8 @@
 package com.hoabui.virtualbody3d.domain.model.exercise
 
+import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.ZoneId
 import java.time.ZonedDateTime
 
 /**
@@ -28,13 +28,12 @@ fun bookingSlotStartsForDay(
     return result
 }
 
-/** Half-open **[start, start + 30m)** for a single grid row on [date] in [zoneId]. */
+/** Half-open **[start, start + 30m)** for a single grid row on [date] in the local system zone. */
 fun thirtyMinuteIntervalAtSlot(
     date: LocalDate,
     slotStart: LocalTime,
-    zoneId: ZoneId,
 ): InstantInterval {
-    val start = ZonedDateTime.of(date, slotStart, zoneId).toInstant()
+    val start = ZonedDateTime.of(date, slotStart, Clock.systemDefaultZone().zone).toInstant()
     return instantIntervalFromStart(start, SESSION_BOOKING_SLOT_STEP_MINUTES)
 }
 
@@ -104,15 +103,15 @@ fun isContiguousThirtyMinuteChain(sortedSlots: List<LocalTime>): Boolean {
     return true
 }
 
-/** Proposed workout session **[minSlot, maxSlot + 30m)** in [zoneId] (half-open). */
+/** Proposed workout session **[minSlot, maxSlot + 30m)** in the local system zone (half-open). */
 fun proposedVariableSessionInterval(
     date: LocalDate,
     minSlot: LocalTime,
     maxSlot: LocalTime,
-    zoneId: ZoneId,
 ): InstantInterval {
-    val start = ZonedDateTime.of(date, minSlot, zoneId).toInstant()
-    val end = ZonedDateTime.of(date, maxSlot, zoneId)
+    val systemZone = Clock.systemDefaultZone().zone
+    val start = ZonedDateTime.of(date, minSlot, systemZone).toInstant()
+    val end = ZonedDateTime.of(date, maxSlot, systemZone)
         .plusMinutes(SESSION_BOOKING_SLOT_STEP_MINUTES)
         .toInstant()
     return InstantInterval(start, end)
@@ -126,14 +125,13 @@ fun totalSelectedSessionMinutes(slotCount: Int): Int =
 fun shouldWarnLongSession(selectedSlotCount: Int): Boolean =
     totalSelectedSessionMinutes(selectedSlotCount) > 120
 
-/** [start, start + sessionDurationMinutes) as Instant interval from grid [date] + [slotStart] in [zoneId]. */
+/** [start, start + sessionDurationMinutes) as Instant interval from grid [date] + [slotStart] in the local system zone. */
 fun proposedSessionIntervalFromSlotStart(
     date: LocalDate,
     slotStart: LocalTime,
-    zoneId: ZoneId,
     sessionDurationMinutes: Long,
 ): InstantInterval {
-    val zdtStart = ZonedDateTime.of(date, slotStart, zoneId)
+    val zdtStart = ZonedDateTime.of(date, slotStart, Clock.systemDefaultZone().zone)
     val start = zdtStart.toInstant()
     return instantIntervalFromStart(start, sessionDurationMinutes)
 }

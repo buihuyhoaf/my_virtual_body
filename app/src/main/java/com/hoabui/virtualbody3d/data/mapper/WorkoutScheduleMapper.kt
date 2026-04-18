@@ -4,14 +4,17 @@ import com.hoabui.virtualbody3d.data.model.WorkoutScheduleDto
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutExecutionStatus
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
+import java.time.Clock
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
 
 fun WorkoutSchedule.toDto(): WorkoutScheduleDto = WorkoutScheduleDto(
     id = id,
     exerciseId = exerciseId,
-    scheduledAtEpochMillis = scheduledAt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+    scheduledAtEpochMillis = scheduledAt
+        .atZone(Clock.systemDefaultZone().zone)
+        .toInstant()
+        .toEpochMilli(),
     sets = sets,
     reps = reps,
     weightKg = weightKg,
@@ -29,7 +32,10 @@ fun WorkoutScheduleDto.toDomain(): WorkoutSchedule = WorkoutSchedule(
     id = id,
     rowId = null,
     exerciseId = exerciseId,
-    scheduledAt = LocalDateTime.ofInstant(Instant.ofEpochMilli(scheduledAtEpochMillis), ZoneId.systemDefault()),
+    scheduledAt = LocalDateTime.ofInstant(
+        Instant.ofEpochMilli(scheduledAtEpochMillis),
+        Clock.systemDefaultZone().zone,
+    ),
     sets = sets,
     reps = reps,
     weightKg = weightKg,

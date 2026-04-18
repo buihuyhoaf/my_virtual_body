@@ -6,13 +6,13 @@ import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutExecutionStatus
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
 import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.Clock
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class WorkoutCalendarSummaryAggregatorTest {
 
-    private val zoneId: ZoneId = ZoneId.of("Asia/Ho_Chi_Minh")
+    private val systemZone = Clock.systemDefaultZone().zone
 
     @Test
     fun toCellStatus_empty_isEmpty() {
@@ -44,11 +44,11 @@ class WorkoutCalendarSummaryAggregatorTest {
             scheduleAt("b", day1Evening, WorkoutExecutionStatus.Completed),
             scheduleAt("c", day2, WorkoutExecutionStatus.Missed),
         )
-        val summaries = groupSchedulesToDaySummaries(schedules, zoneId)
+        val summaries = groupSchedulesToDaySummaries(schedules)
         assertEquals(2, summaries.size)
-        val key1 = day1Morning.atZone(zoneId).toLocalDate().toEpochDay()
+        val key1 = day1Morning.atZone(systemZone).toLocalDate().toEpochDay()
         assertEquals(WorkoutCalendarDayCellStatus.Mixed, summaries[key1]?.cellStatus)
-        val key2 = day2.atZone(zoneId).toLocalDate().toEpochDay()
+        val key2 = day2.atZone(systemZone).toLocalDate().toEpochDay()
         assertEquals(WorkoutCalendarDayCellStatus.Missed, summaries[key2]?.cellStatus)
     }
 
