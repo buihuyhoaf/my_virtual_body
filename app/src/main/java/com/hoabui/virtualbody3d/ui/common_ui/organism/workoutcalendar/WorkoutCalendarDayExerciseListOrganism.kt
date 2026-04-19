@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -53,6 +54,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
@@ -527,17 +529,24 @@ private fun WorkoutCalendarExerciseRow(
                         text = line.setBreakdownLabel,
                         style = workoutCalendarSupportingBodyStyle(token),
                         color = token.colors.textSecondary,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
             if (line.caloriesLabel.isNotBlank()) {
-                GText(
-                    text = line.caloriesLabel,
-                    style = token.typography.labelMedium,
-                    color = caloriesColor,
-                    textAlign = TextAlign.End,
-                )
+                Box(
+                    modifier = Modifier.widthIn(min = 48.dp),
+                    contentAlignment = Alignment.CenterEnd,
+                ) {
+                    GText(
+                        text = line.caloriesLabel,
+                        style = token.typography.labelMedium,
+                        color = caloriesColor,
+                        textAlign = TextAlign.End,
+                    )
+                }
             }
         }
     }

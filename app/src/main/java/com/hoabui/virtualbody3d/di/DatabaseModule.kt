@@ -42,6 +42,9 @@ object DatabaseModule {
             VirtualBodyDatabase::class.java,
             DB_NAME,
         )
+            // NOTE: Keep destructive fallback disabled.
+            // Any schema removal (e.g. dropping a column such as zoneId) must use
+            // an explicit version bump + migration (create new table -> copy -> drop -> rename -> re-index).
             .addMigrations(
                 MIGRATION_1_2,
                 migration2To3(databaseSeeder),
