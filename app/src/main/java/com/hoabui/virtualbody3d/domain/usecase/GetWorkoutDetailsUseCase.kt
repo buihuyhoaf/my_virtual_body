@@ -49,15 +49,25 @@ class GetWorkoutDetailsUseCase @Inject constructor(
             val exerciseById = exercises.associateBy { it.id }
             val workoutSessionsById = workoutSessions.associateBy { it.id }
             val logSessionsById = logSessions.associateBy { it.id }
-            val logBySessionExercise = logSessions.flatMap { it.exercises }.groupBy { log ->
-                LogKey(log.sessionId, log.exerciseId)
-            }.mapValues { (_, list) -> list.sortedBy { it.startInstant } }.toMutableMap()
+            val allLogExercises = logSessions.flatMap { it.exercises }.sortedBy { it.startInstant }
+            val logBySessionExercise = allLogExercises
+                .groupBy { log -> LogKey(log.sessionId, log.exerciseId) }
+                .mapValues { (_, list) -> list.toMutableList() }
+                .toMutableMap()
+            val logByExercise = allLogExercises
+                .groupBy { it.exerciseId }
+                .mapValues { (_, list) -> list.toMutableList() }
+                .toMutableMap()
 
             // Map schedules to exercise lines
             val lines = schedules.sortedBy { it.scheduledAt }
                 .mapNotNull { schedule ->
                     val rowId = schedule.rowId ?: return@mapNotNull null
-                    val logEntry = consumeLogEntry(schedule, logBySessionExercise)
+                    val logEntry = consumeLogEntry(
+                        schedule = schedule,
+                        logBySessionExercise = logBySessionExercise,
+                        logByExercise = logByExercise,
+                    )
                     val (startInstant, setBreakdownLabel, caloriesLabel, caloriesKcal) =
                         resolveWorkoutLineMetrics(schedule, logEntry)
                     val catalog = exerciseById[schedule.exerciseId]
@@ -104,22 +114,35 @@ class GetWorkoutDetailsUseCase @Inject constructor(
 
 private fun consumeLogEntry(
     schedule: WorkoutSchedule,
-    logBySessionExercise: MutableMap<LogKey, List<WorkoutLogExerciseDetail>>,
+    logBySessionExercise: MutableMap<LogKey, MutableList<WorkoutLogExerciseDetail>>,
+    logByExercise: MutableMap<String, MutableList<WorkoutLogExerciseDetail>>,
 ): WorkoutLogExerciseDetail? {
-    val key = schedule.sessionId?.let { LogKey(it, schedule.exerciseId) }
-    if (key != null) {
-        val list = logBySessionExercise[key]
-        if (!list.isNullOrEmpty()) {
-            logBySessionExercise[key] = list.drop(1)
-            val entry = list.first()
-            Log.d(TAG, "consumeLogEntry: Matched by sessionId+exerciseId key=$key -> entry.id=${entry.id}")
-            return entry
+    val strictKey = schedule.sessionId?.let { LogKey(it, schedule.exerciseId) }
+    if (strictKey != null) {
+        val strictBucket = logBySessionExercise[strictKey]
+        val strictHit = if (!strictBucket.isNullOrEmpty()) strictBucket.removeAt(0) else null
+        if (strictHit != null) {
+            logByExercise[schedule.exerciseId]?.removeAll { it.id == strictHit.id }
+            Log.d(TAG, "consumeLogEntry: Strict hit key=$strictKey -> entry.id=${strictHit.id}")
+            return strictHit
         }
     }
-    // Strict session binding: never cross-match by exerciseId alone.
+
+    val fallbackBucket = logByExercise[schedule.exerciseId]
+    val fallbackHit = if (!fallbackBucket.isNullOrEmpty()) fallbackBucket.removeAt(0) else null
+    if (fallbackHit != null) {
+        val fallbackKey = LogKey(fallbackHit.sessionId, fallbackHit.exerciseId)
+        logBySessionExercise[fallbackKey]?.removeAll { it.id == fallbackHit.id }
+        Log.d(
+            TAG,
+            "consumeLogEntry: Fallback hit exerciseId=${schedule.exerciseId} -> entry.id=${fallbackHit.id}",
+        )
+        return fallbackHit
+    }
+
     Log.d(
         TAG,
-        "consumeLogEntry: No strict session match for exerciseId=${schedule.exerciseId}, " +
+        "consumeLogEntry: No log match for exerciseId=${schedule.exerciseId}, " +
             "sessionId=${schedule.sessionId}",
     )
     return null
@@ -190,12 +213,7 @@ private fun buildDurationLinearProgression(logSets: List<WorkoutLogSetDetail>): 
         }
     if (validSets.isEmpty()) return ""
     return validSets.mapIndexed { index, (durationSeconds, reps) ->
-        val detail = if (reps > 0) {
-            "$reps × ${durationSeconds}s"
-        } else {
-            "${durationSeconds}s"
-        }
-        formatProgressionItem(index + 1, detail)
+        formatProgressionItem(index + 1, "$reps × ${durationSeconds}s")
     }.joinToString(separator = " \u2192 ")
 }
 
