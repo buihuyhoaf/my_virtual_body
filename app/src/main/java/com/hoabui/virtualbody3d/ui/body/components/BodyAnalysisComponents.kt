@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillParentMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -48,7 +47,6 @@ import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.core.extensions.formatMeasurement
 import com.hoabui.virtualbody3d.core.utils.Constants
 import com.hoabui.virtualbody3d.ui.body.data.UpcomingWorkoutUiItem
-import com.hoabui.virtualbody3d.ui.body.screen.BodyModelPreview
 import com.hoabui.virtualbody3d.ui.body.screen.BodyScoreChip
 import com.hoabui.virtualbody3d.ui.body.screen.FloatingMetricChip
 import com.hoabui.virtualbody3d.ui.body.state.BodyRegion
@@ -258,7 +256,6 @@ fun UpcomingExercisesRow(
                 title = stringResource(R.string.workout_calendar_rest_day_title),
                 subtitle = stringResource(R.string.workout_calendar_rest_day_subtitle),
                 modifier = Modifier
-                    .fillParentMaxHeight(REST_DAY_PANEL_HEIGHT_FRACTION)
                     .fillMaxWidth()
                     .clickable(enabled = onSeeMoreClick != null) { onSeeMoreClick?.invoke() },
                 icon = {
@@ -274,7 +271,6 @@ fun UpcomingExercisesRow(
     }
 }
 
-private const val REST_DAY_PANEL_HEIGHT_FRACTION = 0.6f
 
 @Composable
 fun StaticHeroSection(

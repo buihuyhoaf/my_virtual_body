@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
@@ -59,12 +60,14 @@ fun GStatePanel(
             }
             GText(
                 text = title,
+                textAlign = TextAlign.Center,
                 style = token.typography.titleMedium,
                 color = token.colors.textPrimary,
             )
             if (subtitle != null) {
                 GText(
                     text = subtitle,
+                    textAlign = TextAlign.Center,
                     style = token.typography.bodyMedium,
                     color = token.colors.textSecondary,
                 )
