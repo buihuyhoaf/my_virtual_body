@@ -1,5 +1,6 @@
 package com.hoabui.virtualbody3d.ui.workoutcalendar
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -78,6 +79,7 @@ fun WorkoutCalendarScreen(
             }
         }
     }
+    BackHandler(onBack = onBack)
 
     GScaffold(
         modifier = modifier.fillMaxSize(),
