@@ -68,6 +68,7 @@ class WorkoutLogRepositoryImpl @Inject constructor(
                         ExerciseMeasurementMode.Duration -> (set.durationSeconds ?: 0) > 0
                     }
                 }
+                .mapIndexed { index, set -> set.copy(setIndex = index + 1) }
             sets.forEach { set ->
                 setEntities += WorkoutLogSetEntity(
                     id = UUID.randomUUID().toString(),
