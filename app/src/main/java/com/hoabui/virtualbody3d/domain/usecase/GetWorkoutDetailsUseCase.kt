@@ -200,8 +200,8 @@ private fun buildStrengthLinearProgression(logSets: List<WorkoutLogSetDetail>): 
     val validSets = logSets
         .filter { it.reps > 0 && it.weightKg > 0.0 }
     if (validSets.isEmpty()) return ""
-    return validSets.mapIndexed { index, set ->
-        formatProgressionItem(index + 1, "${set.reps} × ${formatWeight(set.weightKg)}kg")
+    return validSets.mapIndexed { visualIndex, set ->
+        formatProgressionItem(visualIndex + 1, "${set.reps} × ${formatWeight(set.weightKg)}kg")
     }.joinToString(separator = " \u2192 ")
 }
 
@@ -212,8 +212,8 @@ private fun buildDurationLinearProgression(logSets: List<WorkoutLogSetDetail>): 
             duration to set.reps
         }
     if (validSets.isEmpty()) return ""
-    return validSets.mapIndexed { index, (durationSeconds, reps) ->
-        formatProgressionItem(index + 1, "$reps × ${durationSeconds}s")
+    return validSets.mapIndexed { visualIndex, (durationSeconds, reps) ->
+        formatProgressionItem(visualIndex + 1, "$reps × ${durationSeconds}s")
     }.joinToString(separator = " \u2192 ")
 }
 
