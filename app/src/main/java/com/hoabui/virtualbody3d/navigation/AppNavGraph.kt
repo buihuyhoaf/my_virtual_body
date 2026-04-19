@@ -61,6 +61,9 @@ fun AppNavGraph(
                 onViewBodyDetailClick = {
                     navController.navigate(BodyDetailAnalystRoute)
                 },
+                onNavigateToWorkoutCalendarClick = {
+                    navController.navigate(WorkoutCalendarRoute)
+                },
             )
         }
         composable<BodyRegionDetailRoute> { backStackEntry ->
