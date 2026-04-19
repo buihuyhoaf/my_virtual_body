@@ -203,7 +203,7 @@
     <string name="exercise_library_console_minutes_placeholder">Phút</string>
     <string name="exercise_library_console_seconds_placeholder">Giây</string>
     <string name="exercise_library_console_timer_cd">Duration timer</string>
-    <string name="exercise_library_cart_clear_all">xóa tất cả</string>
+    <string name="exercise_library_cart_clear_all">Xóa tất cả</string>
     <string name="exercise_library_cart_remove_item_cd">Xóa khỏi giỏ chọn</string>
     <string name="exercise_library_cart_pick_date_time">Chọn ngày và giờ</string>
     <string name="exercise_library_cart_choose_date">Chọn ngày</string>
