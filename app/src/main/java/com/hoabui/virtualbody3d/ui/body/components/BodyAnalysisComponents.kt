@@ -258,14 +258,14 @@ fun UpcomingExercisesRow(
                 title = stringResource(R.string.workout_calendar_rest_day_title),
                 subtitle = stringResource(R.string.workout_calendar_rest_day_subtitle),
                 modifier = Modifier
-                    .fillParentMaxHeight(0.6f)
+                    .fillParentMaxHeight(REST_DAY_PANEL_HEIGHT_FRACTION)
                     .fillMaxWidth()
                     .clickable(enabled = onSeeMoreClick != null) { onSeeMoreClick?.invoke() },
                 icon = {
                     Icon(
                         imageVector = Icons.Default.FitnessCenter,
                         contentDescription = null,
-                        modifier = Modifier.size(48.dp),
+                        modifier = Modifier.size(token.spacing.xl),
                         tint = token.colors.textMuted,
                     )
                 },
@@ -273,6 +273,8 @@ fun UpcomingExercisesRow(
         }
     }
 }
+
+private const val REST_DAY_PANEL_HEIGHT_FRACTION = 0.6f
 
 @Composable
 fun StaticHeroSection(

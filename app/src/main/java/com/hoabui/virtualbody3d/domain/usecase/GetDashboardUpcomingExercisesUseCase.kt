@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.combine
 
 /**
  * Exercises for the nearest day that has a scheduled workout.
+ * If there are no upcoming days, falls back to the most recent scheduled past day.
  */
 class GetDashboardUpcomingExercisesUseCase @Inject constructor(
     private val exercisesRepository: ExercisesRepository,
