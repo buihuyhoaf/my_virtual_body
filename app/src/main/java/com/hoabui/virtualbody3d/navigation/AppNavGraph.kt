@@ -82,16 +82,12 @@ fun AppNavGraph(
             )
         }
         composable<WorkoutCalendarRoute> {
-            val onWorkoutCalendarBack = {
-                val poppedToExerciseLibrary = navController.popBackStack(ExerciseLibraryRoute, inclusive = false)
-                if (!poppedToExerciseLibrary) {
-                    val poppedToCoach = navController.popBackStack(CenfitCoachRoute, inclusive = false)
-                    if (!poppedToCoach) {
-                        navController.navigate(ExerciseLibraryRoute) {
-                            popUpTo<WorkoutCalendarRoute> { inclusive = true }
-                            launchSingleTop = true
-                        }
-                    }
+            val onWorkoutCalendarBack = back@{
+                if (navController.popBackStack(ExerciseLibraryRoute, inclusive = false)) return@back
+                if (navController.popBackStack(CenfitCoachRoute, inclusive = false)) return@back
+                navController.navigate(ExerciseLibraryRoute) {
+                    popUpTo<WorkoutCalendarRoute> { inclusive = true }
+                    launchSingleTop = true
                 }
             }
             WorkoutCalendarScreen(
