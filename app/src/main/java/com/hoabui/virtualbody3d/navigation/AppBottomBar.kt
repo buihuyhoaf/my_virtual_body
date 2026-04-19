@@ -58,6 +58,13 @@ private fun isBottomBarTabSelected(
     return false
 }
 
+private fun isBottomBarTabRoute(current: NavDestination?): Boolean {
+    if (current == null) return false
+    return AppDestination.bottomBarDestinations.any { destination ->
+        current.hierarchy.any { it.hasRoute(destination.route::class) }
+    }
+}
+
 @Composable
 private fun RowScope.BottomBarItem(
     destination: AppDestination,
@@ -170,12 +177,19 @@ fun AppBottomBar(
                     selected = selected,
                     token = token,
                     onClick = {
-                        navController.navigate(destination.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+                        if (isBottomBarTabRoute(currentDestination)) {
+                            navController.navigate(destination.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
+                        } else {
+                            navController.navigate(destination.route) {
+                                popUpTo(navController.graph.findStartDestination().id)
+                                launchSingleTop = true
+                            }
                         }
                     }
                 )
