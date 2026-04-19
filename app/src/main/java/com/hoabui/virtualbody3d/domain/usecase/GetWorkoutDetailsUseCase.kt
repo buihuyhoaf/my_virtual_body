@@ -221,17 +221,19 @@ private fun buildStrengthLinearProgression(logSets: List<WorkoutLogSetDetail>): 
         .sortedBy { it.setIndex }
         .filter { it.reps > 0 || it.weightKg > 0.0 }
     if (validSets.isEmpty()) return null
-    return validSets.mapIndexed { index, set ->
+    val items = validSets.mapIndexedNotNull { index, set ->
         val repsPart = set.reps.takeIf { it > 0 }?.toString()
         val weightPart = set.weightKg.takeIf { it > 0.0 }?.let { "${formatWeight(it)}kg" }
         val detail = when {
             repsPart != null && weightPart != null -> "${repsPart}x$weightPart"
             repsPart != null -> "$repsPart reps"
             weightPart != null -> weightPart
-            else -> "-"
+            else -> null
         }
-        "${index + 1}: $detail"
-    }.joinToString(separator = " \u2192 ")
+        detail?.let { formatProgressionItem(index + 1, it) }
+    }
+    if (items.isEmpty()) return null
+    return items.joinToString(separator = " \u2192 ")
 }
 
 private fun buildStrengthLinearProgressionFromSchedule(schedule: WorkoutSchedule): String? {
@@ -245,7 +247,9 @@ private fun buildStrengthLinearProgressionFromSchedule(schedule: WorkoutSchedule
         weightPart != null -> weightPart
         else -> return null
     }
-    return (1..setCount).joinToString(separator = " \u2192 ") { visualIndex -> "$visualIndex: $detail" }
+    return (1..setCount).joinToString(separator = " \u2192 ") { visualIndex ->
+        formatProgressionItem(visualIndex, detail)
+    }
 }
 
 private fun buildDurationLinearProgression(logSets: List<WorkoutLogSetDetail>): String? {
@@ -254,7 +258,7 @@ private fun buildDurationLinearProgression(logSets: List<WorkoutLogSetDetail>): 
         .mapNotNull { it.durationSeconds?.takeIf { d -> d > 0 } }
     if (validDurations.isEmpty()) return null
     return validDurations.mapIndexed { index, duration ->
-        "${index + 1}: ${formatDurationSeconds(duration)}"
+        formatProgressionItem(index + 1, formatDurationSeconds(duration))
     }.joinToString(separator = " \u2192 ")
 }
 
@@ -263,8 +267,12 @@ private fun buildDurationLinearProgressionFromSchedule(schedule: WorkoutSchedule
     val duration = schedule.durationSeconds?.takeIf { it > 0 } ?: return null
     if (setCount <= 0) return null
     val detail = formatDurationSeconds(duration)
-    return (1..setCount).joinToString(separator = " \u2192 ") { visualIndex -> "$visualIndex: $detail" }
+    return (1..setCount).joinToString(separator = " \u2192 ") { visualIndex ->
+        formatProgressionItem(visualIndex, detail)
+    }
 }
+
+private fun formatProgressionItem(visualIndex: Int, detail: String): String = "$visualIndex: $detail"
 
 private fun formatStrengthSetBreakdown(
     setCount: Int,
