@@ -104,6 +104,7 @@ fun WorkoutCalendarDayExerciseListOrganism(
     val token = GymTheme.token
     val cal = token.workoutCalendar
     val locale = LocalConfiguration.current.locales.get(0) ?: Locale.getDefault()
+    // Keep explicit "weekday, dd/MM" structure to match requested header format (e.g., "Sunday, 19/04").
     val headerFormat = DateTimeFormatter.ofPattern("EEEE, dd/MM", locale)
     val firstExerciseRowId = remember(sessionBlocks) {
         sessionBlocks.asSequence()
