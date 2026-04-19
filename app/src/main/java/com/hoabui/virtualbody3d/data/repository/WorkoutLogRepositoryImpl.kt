@@ -9,12 +9,12 @@ import com.hoabui.virtualbody3d.data.local.db.WorkoutLogSetEntity
 import com.hoabui.virtualbody3d.data.mapper.toDomain
 import com.hoabui.virtualbody3d.data.mapper.toLogStorageValue
 import com.hoabui.virtualbody3d.di.IoDispatcher
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.workoutlog.WorkoutLogSessionDetail
 import com.hoabui.virtualbody3d.domain.model.workoutlog.WorkoutLogSessionInput
 import com.hoabui.virtualbody3d.domain.repository.WorkoutLogRepository
 import com.hoabui.virtualbody3d.domain.util.CaloriesCalculator
-import java.time.Clock
-import java.time.format.DateTimeFormatter
+import com.hoabui.virtualbody3d.domain.util.toIsoDayKey
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -34,10 +34,7 @@ class WorkoutLogRepositoryImpl @Inject constructor(
             .map { sessions -> sessions.map { it.toDomain() } }
 
     override suspend fun saveWorkoutLogSession(session: WorkoutLogSessionInput) = withContext(ioDispatcher) {
-        val dayKey = session.startInstant
-            .atZone(Clock.systemDefaultZone().zone)
-            .toLocalDate()
-            .format(DateTimeFormatter.ISO_LOCAL_DATE)
+        val dayKey = session.startInstant.toIsoDayKey()
         val snapshotWeight = progressTimelineLocalDataSource
             .getLatestSnapshotOnOrBefore(dayKey)
             ?.weightKg
@@ -63,7 +60,14 @@ class WorkoutLogRepositoryImpl @Inject constructor(
                 startTimeMillis = exercise.startInstant.toEpochMilli(),
                 orderIndex = exercise.orderIndex,
             )
-            val sets = exercise.sets.sortedBy { it.setIndex }
+            val sets = exercise.sets
+                .sortedBy { it.setIndex }
+                .filter { set ->
+                    when (exercise.measurementMode) {
+                        ExerciseMeasurementMode.Strength -> set.weightKg > 0.0
+                        ExerciseMeasurementMode.Duration -> (set.durationSeconds ?: 0) > 0
+                    }
+                }
             sets.forEach { set ->
                 setEntities += WorkoutLogSetEntity(
                     id = UUID.randomUUID().toString(),

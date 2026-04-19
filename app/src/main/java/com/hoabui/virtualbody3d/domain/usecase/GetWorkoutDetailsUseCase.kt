@@ -15,6 +15,7 @@ import com.hoabui.virtualbody3d.domain.repository.WorkoutLogRepository
 import com.hoabui.virtualbody3d.domain.repository.WorkoutScheduleRepository
 import com.hoabui.virtualbody3d.domain.repository.WorkoutSessionRepository
 import com.hoabui.virtualbody3d.domain.util.CaloriesCalculator
+import com.hoabui.virtualbody3d.domain.util.toIsoDayKey
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
@@ -38,7 +39,7 @@ class GetWorkoutDetailsUseCase @Inject constructor(
      */
     operator fun invoke(day: LocalDate): Flow<List<WorkoutCalendarSessionBlock>> {
         val dayKey = day.toEpochDay()
-        val logDayKey = day.format(DateTimeFormatter.ISO_LOCAL_DATE)
+        val logDayKey = day.toIsoDayKey()
         return combine(
             workoutScheduleRepository.observeSchedulesInDayRange(dayKey, dayKey),
             workoutSessionRepository.observeWorkoutSessionsInDayRange(dayKey, dayKey),
@@ -147,11 +148,7 @@ private fun resolveWorkoutLineMetrics(
     // **BUG FIX**: Always prioritize actual log data over schedule data when log exists.
     // This fixes the "20 kg vs 80 kg" weight mismatch bug where schedule.weightKg was
     // incorrectly used as fallback even when the user had logged a different weight.
-    val setBreakdownLabel = buildSetBreakdownLabel(
-        measurementMode = logEntry?.measurementMode ?: schedule.measurementMode,
-        logEntry = logEntry,
-        schedule = schedule,
-    )
+    val setBreakdownLabel = buildSetBreakdownLabel(logEntry)
 
     // Prioritize logged calories (actual performance) over estimated schedule calories
     val calories = logEntry?.energy?.kcal ?: estimateScheduleCalories(schedule, logEntry)
@@ -166,165 +163,45 @@ private fun resolveWorkoutLineMetrics(
 }
 
 private fun buildSetBreakdownLabel(
-    measurementMode: ExerciseMeasurementMode,
     logEntry: WorkoutLogExerciseDetail?,
-    schedule: WorkoutSchedule,
 ): String {
-    val logSets = logEntry?.sets?.sortedBy { it.setIndex }.orEmpty()
-
-    return when (measurementMode) {
-        ExerciseMeasurementMode.Strength -> {
-            if (logEntry != null) {
-                buildStrengthLinearProgression(logSets)
-                    ?: formatStrengthSetBreakdown(
-                        setCount = logSets.size,
-                        reps = logSets.map { it.reps }.filter { it > 0 },
-                        weights = logSets.map { it.weightKg }.filter { it > 0.0 },
-                    )
-            } else {
-                buildStrengthLinearProgressionFromSchedule(schedule)
-                    ?: formatStrengthSetBreakdown(
-                        setCount = schedule.sets,
-                        reps = listOf(schedule.reps).filter { it > 0 },
-                        weights = emptyList(),
-                    )
-            }
-        }
-        ExerciseMeasurementMode.Duration -> {
-            if (logEntry != null && logSets.isNotEmpty()) {
-                buildDurationLinearProgression(logSets)
-                    ?: run {
-                        val durations = logSets.mapNotNull { it.durationSeconds }.filter { it > 0 }
-                        formatDurationSetBreakdown(
-                            setCount = logSets.size,
-                            durations = durations,
-                            fallbackDurationSeconds = null,
-                        )
-                    }
-            } else {
-                buildDurationLinearProgressionFromSchedule(schedule)
-                    ?: run {
-                        val fallbackDuration = schedule.durationSeconds?.takeIf { it > 0 }
-                        formatDurationSetBreakdown(
-                            setCount = schedule.sets,
-                            durations = emptyList(),
-                            fallbackDurationSeconds = fallbackDuration,
-                        )
-                    }
-            }
-        }
+    if (logEntry == null) return ""
+    val logSets = logEntry.sets.sortedBy { it.setIndex }
+    return when (logEntry.measurementMode) {
+        ExerciseMeasurementMode.Strength -> buildStrengthLinearProgression(logSets)
+        ExerciseMeasurementMode.Duration -> buildDurationLinearProgression(logSets)
     }
 }
 
-private fun buildStrengthLinearProgression(logSets: List<WorkoutLogSetDetail>): String? {
+private fun buildStrengthLinearProgression(logSets: List<WorkoutLogSetDetail>): String {
     val validSets = logSets
         .sortedBy { it.setIndex }
-        .filter { it.reps > 0 || it.weightKg > 0.0 }
-    if (validSets.isEmpty()) return null
-    val items = validSets.mapIndexedNotNull { index, set ->
-        val repsPart = set.reps.takeIf { it > 0 }?.toString()
-        val weightPart = set.weightKg.takeIf { it > 0.0 }?.let { "${formatWeight(it)}kg" }
-        val detail = when {
-            repsPart != null && weightPart != null -> "${repsPart}x$weightPart"
-            repsPart != null -> "$repsPart reps"
-            weightPart != null -> weightPart
-            else -> null
-        }
-        detail?.let { formatProgressionItem(index + 1, it) }
-    }
-    if (items.isEmpty()) return null
-    return items.joinToString(separator = " \u2192 ")
-}
-
-private fun buildStrengthLinearProgressionFromSchedule(schedule: WorkoutSchedule): String? {
-    val setCount = schedule.sets.coerceAtLeast(0)
-    if (setCount <= 0) return null
-    val repsPart = schedule.reps.takeIf { it > 0 }?.toString()
-    val weightPart = schedule.weightKg.takeIf { it > 0.0 }?.let { "${formatWeight(it)}kg" }
-    val detail = when {
-        repsPart != null && weightPart != null -> "${repsPart}x$weightPart"
-        repsPart != null -> "$repsPart reps"
-        weightPart != null -> weightPart
-        else -> return null
-    }
-    return (1..setCount).joinToString(separator = " \u2192 ") { visualIndex ->
-        formatProgressionItem(visualIndex, detail)
-    }
-}
-
-private fun buildDurationLinearProgression(logSets: List<WorkoutLogSetDetail>): String? {
-    val validDurations = logSets
-        .sortedBy { it.setIndex }
-        .mapNotNull { it.durationSeconds?.takeIf { d -> d > 0 } }
-    if (validDurations.isEmpty()) return null
-    return validDurations.mapIndexed { index, duration ->
-        formatProgressionItem(index + 1, formatDurationSeconds(duration))
+        .filter { it.reps > 0 && it.weightKg > 0.0 }
+    if (validSets.isEmpty()) return ""
+    return validSets.mapIndexed { index, set ->
+        formatProgressionItem(index + 1, "${set.reps} × ${formatWeight(set.weightKg)}kg")
     }.joinToString(separator = " \u2192 ")
 }
 
-private fun buildDurationLinearProgressionFromSchedule(schedule: WorkoutSchedule): String? {
-    val setCount = schedule.sets.coerceAtLeast(0)
-    val duration = schedule.durationSeconds?.takeIf { it > 0 } ?: return null
-    if (setCount <= 0) return null
-    val detail = formatDurationSeconds(duration)
-    return (1..setCount).joinToString(separator = " \u2192 ") { visualIndex ->
-        formatProgressionItem(visualIndex, detail)
-    }
+private fun buildDurationLinearProgression(logSets: List<WorkoutLogSetDetail>): String {
+    val validSets = logSets
+        .sortedBy { it.setIndex }
+        .mapNotNull { set ->
+            val duration = set.durationSeconds?.takeIf { it > 0 } ?: return@mapNotNull null
+            duration to set.reps
+        }
+    if (validSets.isEmpty()) return ""
+    return validSets.mapIndexed { index, (durationSeconds, reps) ->
+        val detail = if (reps > 0) {
+            "$reps × ${durationSeconds}s"
+        } else {
+            "${durationSeconds}s"
+        }
+        formatProgressionItem(index + 1, detail)
+    }.joinToString(separator = " \u2192 ")
 }
 
 private fun formatProgressionItem(visualIndex: Int, detail: String): String = "$visualIndex: $detail"
-
-private fun formatStrengthSetBreakdown(
-    setCount: Int,
-    reps: List<Int>,
-    weights: List<Double>,
-): String {
-    val safeSetCount = setCount.coerceAtLeast(0)
-    if (safeSetCount == 0) return "0 Sets"
-    val repsRange = reps.takeIf { it.isNotEmpty() }?.let { repsList ->
-        val min = repsList.minOrNull() ?: 0
-        val max = repsList.maxOrNull() ?: min
-        min to max
-    }
-    val avgWeight = weights.takeIf { it.isNotEmpty() }?.average()
-    val isUniformReps = repsRange?.let { it.first == it.second } ?: false
-    val isUniformWeight = weights.distinctBy { it.normalizeWeightForGrouping() }.size <= 1
-    val weightLabel = avgWeight?.let { formatWeight(it) }
-    return if (isUniformReps && isUniformWeight && repsRange != null && avgWeight != null) {
-        "$safeSetCount Sets • $weightLabel kg x ${repsRange.first}"
-    } else {
-        val repsLabel = repsRange?.let { range ->
-            if (range.first == range.second) range.first.toString() else "${range.first}-${range.second}"
-        }
-        when {
-            weightLabel != null && repsLabel != null ->
-                "$safeSetCount Sets • $weightLabel kg avg x $repsLabel"
-            weightLabel != null ->
-                "$safeSetCount Sets • $weightLabel kg avg"
-            repsLabel != null ->
-                "$safeSetCount Sets • $repsLabel reps"
-            else -> "$safeSetCount Sets"
-        }
-    }
-}
-
-private fun formatDurationSetBreakdown(
-    setCount: Int,
-    durations: List<Int>,
-    fallbackDurationSeconds: Int?,
-): String {
-    val safeSetCount = setCount.coerceAtLeast(0)
-    val durationsSafe = durations.filter { it > 0 }
-    val totalDuration = durationsSafe.sum()
-    val effectiveDuration = if (totalDuration > 0) totalDuration else fallbackDurationSeconds ?: 0
-    if (safeSetCount == 0 && effectiveDuration <= 0) return "0 Sets"
-    val durationLabel = formatDurationSeconds(effectiveDuration)
-    return if (safeSetCount > 0) {
-        "$safeSetCount Sets • $durationLabel"
-    } else {
-        "Duration • $durationLabel"
-    }
-}
 
 private fun estimateScheduleCalories(schedule: WorkoutSchedule, logEntry: WorkoutLogExerciseDetail? = null): Float {
     // If we have log data, use actual logged values for estimation
@@ -364,20 +241,6 @@ private fun estimateScheduleCalories(schedule: WorkoutSchedule, logEntry: Workou
 
 private fun formatCaloriesLabel(kcal: Float): String =
     "${kcal.roundToInt()} kcal"
-
-private fun formatDurationSeconds(seconds: Int): String {
-    val safeSeconds = seconds.coerceAtLeast(0)
-    val mins = safeSeconds / 60
-    val secs = safeSeconds % 60
-    return if (secs == 0) {
-        "${mins}m"
-    } else {
-        String.format(Locale.ROOT, "%d:%02d", mins, secs)
-    }
-}
-
-private fun Double.normalizeWeightForGrouping(): String =
-    String.format(Locale.ROOT, "%.1f", this)
 
 private fun formatWeight(weightKg: Double): String {
     val rounded = String.format(Locale.ROOT, "%.1f", weightKg)
