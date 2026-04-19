@@ -51,11 +51,6 @@ android {
             isReturnDefaultValues = true
         }
     }
-    sourceSets {
-        getByName("androidTest") {
-            assets.srcDir("$projectDir/schemas")
-        }
-    }
 }
 
 ksp {
@@ -106,9 +101,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.androidx.arch.core.testing)
     testImplementation(libs.mockk)
-    testImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

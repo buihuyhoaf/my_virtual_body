@@ -10,7 +10,7 @@ import javax.inject.Singleton
 
 /**
  * Single place for catalog / dashboard seed data. Used from [androidx.room.RoomDatabase.Callback.onCreate]
- * (fresh v3 install) and from the 2→3 migration (legacy upgrades).
+ * after Room creates tables, and from [androidx.room.RoomDatabase.Callback.onOpen] to refresh exercise images.
  *
  * All inserts are idempotent (`INSERT OR IGNORE` / `INSERT OR REPLACE`) inside a transaction.
  */
@@ -40,21 +40,7 @@ class DatabaseSeeder @Inject constructor(
         }
 
     /**
-     * Legacy path: DB was at v2 without catalog tables. Creates catalog DDL then seeds rows.
-     */
-    fun seedCatalogAfterVersion2Upgrade(db: SupportSQLiteDatabase) {
-        db.beginTransaction()
-        try {
-            createCatalogTablesIfNotExist(db)
-            insertCatalogSeedDataIdempotent(db)
-            db.setTransactionSuccessful()
-        } finally {
-            db.endTransaction()
-        }
-    }
-
-    /**
-     * Fresh install at v3: Room has already created all entity tables. Only populate rows.
+     * Room has already created all entity tables. Only populate rows.
      */
     fun seedCatalogFreshDatabase(db: SupportSQLiteDatabase) {
         db.beginTransaction()
@@ -64,64 +50,6 @@ class DatabaseSeeder @Inject constructor(
         } finally {
             db.endTransaction()
         }
-    }
-
-    private fun createCatalogTablesIfNotExist(db: SupportSQLiteDatabase) {
-        db.execSQL(
-            """
-            CREATE TABLE IF NOT EXISTS `exercises` (
-              `id` TEXT NOT NULL,
-              `name` TEXT NOT NULL,
-              `local_image_name` TEXT,
-              `image_res_url` TEXT,
-              `body_region` TEXT,
-              `category` TEXT,
-              `description` TEXT,
-              `equipment` TEXT,
-              `safety_notes` TEXT,
-              `last_weight_kg` REAL,
-              `sets` INTEGER,
-              `reps` INTEGER,
-              `measurement_mode` TEXT,
-              PRIMARY KEY(`id`)
-            )
-            """.trimIndent(),
-        )
-        db.execSQL(
-            """
-            CREATE TABLE IF NOT EXISTS `progress_snapshots` (
-              `row_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-              `date_iso` TEXT NOT NULL,
-              `image_url` TEXT,
-              `weight_kg` REAL,
-              `body_fat_percent` REAL,
-              `muscle_mass_kg` REAL
-            )
-            """.trimIndent(),
-        )
-        db.execSQL(
-            "CREATE UNIQUE INDEX IF NOT EXISTS `index_progress_snapshots_date_iso` ON `progress_snapshots` (`date_iso`)",
-        )
-        db.execSQL(
-            """
-            CREATE TABLE IF NOT EXISTS `nutrition_summary` (
-              `id` INTEGER NOT NULL,
-              `intake` INTEGER NOT NULL,
-              `burned` INTEGER NOT NULL,
-              `goal` INTEGER NOT NULL,
-              PRIMARY KEY(`id`)
-            )
-            """.trimIndent(),
-        )
-        db.execSQL(
-            """
-            CREATE TABLE IF NOT EXISTS `body_scan_results` (
-              `id` INTEGER NOT NULL,
-              `payload_json` TEXT NOT NULL,
-              PRIMARY KEY(`id`)
-            )
-            """.trimIndent(),
-        )
     }
 
     private fun insertCatalogSeedDataIdempotent(db: SupportSQLiteDatabase) {
