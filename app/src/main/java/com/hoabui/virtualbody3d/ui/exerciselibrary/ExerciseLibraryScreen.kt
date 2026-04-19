@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -69,7 +68,6 @@ fun ExerciseLibraryScreen(
     val actions = remember(viewModel, onNavigateToWorkoutCalendar) {
         ExerciseLibraryActions(
             onQueryChange = viewModel::updateSearchQuery,
-            onQuickChipSelect = viewModel::selectQuickChip,
             onExerciseClick = { exerciseId ->
                 viewModel.dismissAddExerciseSuccess()
                 viewModel.selectExerciseForDetail(exerciseId)
@@ -159,15 +157,10 @@ fun ExerciseLibraryScreenContent(
     state: ExerciseLibraryUiState,
     actions: ExerciseLibraryActions,
 ) {
-    val isSearchFocused = remember { mutableStateOf(false) }
     val token = GymTheme.token
     val listToggleAddCd = stringResource(R.string.exercise_library_list_toggle_add_cd)
     val listToggleRemoveCd = stringResource(R.string.exercise_library_cart_remove_item_cd)
     val fadeSpec = tween<Float>(
-        durationMillis = token.motion.duration.standard,
-        easing = token.motion.easing.standard,
-    )
-    val slideSpec = tween<IntOffset>(
         durationMillis = token.motion.duration.standard,
         easing = token.motion.easing.standard,
     )
@@ -192,9 +185,6 @@ fun ExerciseLibraryScreenContent(
                 keyboardController?.hide()
             }
     }
-    val onSearchFocusChanged = remember {
-        { focused: Boolean -> isSearchFocused.value = focused }
-    }
     val cartVisible = state.cart.itemDrafts.isNotEmpty()
     val cartCollapsedInset = token.bodyAnalysis.exerciseLibrarySelectionBarCollapsedListBottomInset
     val listBottomPadding = if (cartVisible) cartCollapsedInset else token.spacing.none
@@ -213,10 +203,6 @@ fun ExerciseLibraryScreenContent(
                 ExerciseLibrarySearchLayer(
                     state = state,
                     actions = actions,
-                    isSearchFocused = isSearchFocused.value,
-                    onSearchFocusChanged = onSearchFocusChanged,
-                    fadeSpec = fadeSpec,
-                    slideSpec = slideSpec,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
