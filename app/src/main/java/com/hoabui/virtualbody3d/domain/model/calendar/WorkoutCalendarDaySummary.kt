@@ -16,11 +16,18 @@ data class WorkoutCalendarDaySummary(
     val cellStatus: WorkoutCalendarDayCellStatus,
     val totalCaloriesKcal: Float,
 ) {
+    /**
+     * Heatmap intensity thresholds are shared with exercise/session intensity mapping:
+     * light < 100 kcal, moderate 100..250 kcal, high > 250 kcal.
+     */
     val intensityLevel: WorkoutIntensityLevel?
         get() = when {
             totalCaloriesKcal <= 0f -> null
-            totalCaloriesKcal < 100f -> WorkoutIntensityLevel.Light
-            totalCaloriesKcal <= 250f -> WorkoutIntensityLevel.Moderate
+            totalCaloriesKcal < LIGHT_INTENSITY_UPPER_BOUND_KCAL -> WorkoutIntensityLevel.Light
+            totalCaloriesKcal <= MODERATE_INTENSITY_UPPER_BOUND_KCAL -> WorkoutIntensityLevel.Moderate
             else -> WorkoutIntensityLevel.High
         }
 }
+
+private const val LIGHT_INTENSITY_UPPER_BOUND_KCAL = 100f
+private const val MODERATE_INTENSITY_UPPER_BOUND_KCAL = 250f

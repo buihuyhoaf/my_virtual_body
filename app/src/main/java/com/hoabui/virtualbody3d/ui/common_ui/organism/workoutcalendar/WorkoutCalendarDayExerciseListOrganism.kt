@@ -103,6 +103,7 @@ fun WorkoutCalendarDayExerciseListOrganism(
     val token = GymTheme.token
     val cal = token.workoutCalendar
     val locale = LocalConfiguration.current.locales.get(0) ?: Locale.getDefault()
+    // Keep day/month compact to match the calendar header design requirement ("19/04 • Total: ...").
     val headerFormat = DateTimeFormatter.ofPattern("dd/MM", locale)
     val firstExerciseRowId = remember(sessionBlocks) {
         sessionBlocks.asSequence()
