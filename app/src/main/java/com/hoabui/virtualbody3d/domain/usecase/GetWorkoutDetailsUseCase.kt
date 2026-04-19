@@ -175,7 +175,6 @@ private fun buildSetBreakdownLabel(
 
 private fun buildStrengthLinearProgression(logSets: List<WorkoutLogSetDetail>): String {
     val validSets = logSets
-        .sortedBy { it.setIndex }
         .filter { it.reps > 0 && it.weightKg > 0.0 }
     if (validSets.isEmpty()) return ""
     return validSets.mapIndexed { index, set ->
@@ -185,7 +184,6 @@ private fun buildStrengthLinearProgression(logSets: List<WorkoutLogSetDetail>): 
 
 private fun buildDurationLinearProgression(logSets: List<WorkoutLogSetDetail>): String {
     val validSets = logSets
-        .sortedBy { it.setIndex }
         .mapNotNull { set ->
             val duration = set.durationSeconds?.takeIf { it > 0 } ?: return@mapNotNull null
             duration to set.reps
