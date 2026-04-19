@@ -526,7 +526,6 @@ private fun WorkoutCalendarExerciseRow(
                         text = line.caloriesLabel,
                         style = token.typography.labelSmall,
                         color = token.colors.textMuted,
-                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
