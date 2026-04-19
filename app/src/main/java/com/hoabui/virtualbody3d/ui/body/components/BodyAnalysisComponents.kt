@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillParentMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,8 +22,11 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
@@ -53,6 +57,7 @@ import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
 import com.hoabui.virtualbody3d.ui.common_ui.image.toImageModel
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GUpcomingExerciseCard
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.state.GStatePanel
 import com.hoabui.virtualbody3d.ui.mealcapture.MealPageUiModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
@@ -204,6 +209,7 @@ fun UpcomingExercisesRow(
     onSeeMoreClick: (() -> Unit)? = null
 ) {
     val token = GymTheme.token
+    val hasExercises = exercises.isNotEmpty()
     val resourceProvider = LocalResourceProvider.current
     Column(
         modifier = modifier,
@@ -211,36 +217,59 @@ fun UpcomingExercisesRow(
     ) {
         GSectionHeader(
             title = stringResource(R.string.home_section_incomming_exercises),
-            actionText = if (onSeeMoreClick != null) stringResource(R.string.home_section_see_more) else null,
+            actionText = if (hasExercises && onSeeMoreClick != null) {
+                stringResource(R.string.home_section_see_more)
+            } else {
+                null
+            },
             onActionClick = onSeeMoreClick,
         )
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(token.spacing.sm),
-        ) {
-            items(
-                items = exercises,
-                key = { it.id }
-            ) { item ->
-                GUpcomingExerciseCard(
-                    model = item.image.toImageModel(resourceProvider),
-                    title = item.name,
-                    subtitle = when (item.measurementMode) {
-                        ExerciseMeasurementMode.Duration -> {
-                            val total = item.durationSeconds ?: 0
-                            val m = total / 60
-                            val s = total % 60
-                            stringResource(R.string.home_upcoming_duration_subtitle, m, s)
-                        }
-                        ExerciseMeasurementMode.Strength ->
-                            stringResource(
-                                R.string.home_upcoming_chip_subtitle,
-                                item.reps,
-                                item.sets,
-                            )
-                    },
-                    onClick = {},
-                )
+        if (hasExercises) {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(token.spacing.sm),
+            ) {
+                items(
+                    items = exercises,
+                    key = { it.id }
+                ) { item ->
+                    GUpcomingExerciseCard(
+                        model = item.image.toImageModel(resourceProvider),
+                        title = item.name,
+                        subtitle = when (item.measurementMode) {
+                            ExerciseMeasurementMode.Duration -> {
+                                val total = item.durationSeconds ?: 0
+                                val m = total / 60
+                                val s = total % 60
+                                stringResource(R.string.home_upcoming_duration_subtitle, m, s)
+                            }
+                            ExerciseMeasurementMode.Strength ->
+                                stringResource(
+                                    R.string.home_upcoming_chip_subtitle,
+                                    item.reps,
+                                    item.sets,
+                                )
+                        },
+                        onClick = {},
+                    )
+                }
             }
+        } else {
+            GStatePanel(
+                title = stringResource(R.string.workout_calendar_rest_day_title),
+                subtitle = stringResource(R.string.workout_calendar_rest_day_subtitle),
+                modifier = Modifier
+                    .fillParentMaxHeight(0.6f)
+                    .fillMaxWidth()
+                    .clickable(enabled = onSeeMoreClick != null) { onSeeMoreClick?.invoke() },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.FitnessCenter,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                        tint = token.colors.textMuted,
+                    )
+                },
+            )
         }
     }
 }
