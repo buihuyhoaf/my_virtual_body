@@ -27,6 +27,7 @@ class GetDashboardUpcomingExercisesUseCase @Inject constructor(
             val nearestEpochDay = schedulesByDay.keys
                 .filter { it >= todayEpochDay }
                 .minOrNull()
+                // If no upcoming day exists, fall back to the most recent past scheduled day.
                 ?: schedulesByDay.keys.maxOrNull()
                 ?: return@combine emptyList()
 
