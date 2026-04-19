@@ -90,6 +90,7 @@ private enum class SwipeDeleteAnchor { Closed, Open }
 fun WorkoutCalendarDayExerciseListOrganism(
     selectedDate: LocalDate,
     dailyTotalCaloriesKcal: Int,
+    dailyCaloriesVisualLevel: WorkoutCaloriesVisualLevel,
     sessionBlocks: List<WorkoutCalendarSessionBlockUiModel>,
     modifier: Modifier = Modifier,
     openSwipeRowId: Long? = null,
@@ -126,6 +127,7 @@ fun WorkoutCalendarDayExerciseListOrganism(
                     selectedDate.format(headerFormat),
                     dailyTotalCaloriesKcal,
                 ),
+                color = dailyCaloriesVisualLevel.toColor(token),
             )
         }
 
@@ -163,6 +165,7 @@ fun WorkoutCalendarDayExerciseListOrganism(
                         SessionHeaderRow(
                             timeLabel = block.sessionTimeLabel,
                             totalCaloriesLabel = block.totalCaloriesLabel,
+                            totalCaloriesVisualLevel = block.caloriesVisualLevel,
                             intensityLevel = block.intensityLevel,
                             token = token,
                             modifier = Modifier
@@ -203,11 +206,13 @@ fun WorkoutCalendarDayExerciseListOrganism(
 private fun SessionHeaderRow(
     timeLabel: String,
     totalCaloriesLabel: String,
+    totalCaloriesVisualLevel: WorkoutCaloriesVisualLevel,
     intensityLevel: WorkoutIntensityLevel,
     token: GymToken,
     modifier: Modifier = Modifier,
 ) {
     val intensityColor = intensityLevel.toColor(token)
+    val caloriesColor = totalCaloriesVisualLevel.toColor(token)
     val sessionLabel = stringResource(
         id = R.string.workout_calendar_session_header,
         timeLabel,
@@ -241,7 +246,7 @@ private fun SessionHeaderRow(
         GText(
             text = totalCaloriesLabel,
             style = token.typography.labelMedium,
-            color = intensityColor,
+            color = caloriesColor,
         )
     }
 }
@@ -592,6 +597,7 @@ private fun DayListPreviewLight() {
                                 ),
                             ),
                             totalCaloriesLabel = "405 kcal",
+                            caloriesVisualLevel = WorkoutCaloriesVisualLevel.High,
                             intensityLevel = WorkoutIntensityLevel.High,
                         ),
                         WorkoutCalendarSessionBlockUiModel(
@@ -609,10 +615,12 @@ private fun DayListPreviewLight() {
                                 ),
                             ),
                             totalCaloriesLabel = "45 kcal",
+                            caloriesVisualLevel = WorkoutCaloriesVisualLevel.High,
                             intensityLevel = WorkoutIntensityLevel.Light,
                         ),
                     ),
                     modifier = Modifier.fillMaxSize(),
+                    dailyCaloriesVisualLevel = WorkoutCaloriesVisualLevel.High,
                 )
             }
         }
@@ -640,6 +648,7 @@ private fun DayListPreviewEmpty() {
                 WorkoutCalendarDayExerciseListOrganism(
                     selectedDate = LocalDate.of(2024, 4, 10),
                     dailyTotalCaloriesKcal = 0,
+                    dailyCaloriesVisualLevel = WorkoutCaloriesVisualLevel.Low,
                     sessionBlocks = emptyList(),
                     modifier = Modifier.fillMaxSize(),
                 )

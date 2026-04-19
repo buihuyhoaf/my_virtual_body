@@ -201,6 +201,7 @@ private fun WorkoutCalendarSuccessContent(
         WorkoutCalendarDayExerciseListOrganism(
             selectedDate = data.selectedDate,
             dailyTotalCaloriesKcal = data.dailyTotalCaloriesKcal,
+            dailyCaloriesVisualLevel = data.dailyCaloriesVisualLevel,
             sessionBlocks = sessionBlockUiModels,
             openSwipeRowId = openSwipeRowId,
             pendingSwipeCloseRowId = pendingSwipeCloseRowId,
