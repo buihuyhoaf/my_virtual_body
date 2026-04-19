@@ -61,6 +61,9 @@ fun AppNavGraph(
                 onViewBodyDetailClick = {
                     navController.navigate(BodyDetailAnalystRoute)
                 },
+                onNavigateToWorkoutCalendarClick = {
+                    navController.navigate(WorkoutCalendarRoute)
+                },
             )
         }
         composable<BodyRegionDetailRoute> { backStackEntry ->
@@ -79,8 +82,16 @@ fun AppNavGraph(
             )
         }
         composable<WorkoutCalendarRoute> {
+            val onWorkoutCalendarBack = back@{
+                if (navController.popBackStack(ExerciseLibraryRoute, inclusive = false)) return@back
+                if (navController.popBackStack(CenfitCoachRoute, inclusive = false)) return@back
+                navController.navigate(ExerciseLibraryRoute) {
+                    popUpTo<WorkoutCalendarRoute> { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
             WorkoutCalendarScreen(
-                onBack = { navController.popBackStack() },
+                onBack = onWorkoutCalendarBack,
             )
         }
         composable<AddRoute> {

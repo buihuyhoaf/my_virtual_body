@@ -54,6 +54,7 @@ fun HomeContent(
     selectedProgressIndex: Int,
     onProgressTimelineIndexSelected: (Int) -> Unit = {},
     onViewBodyDetailClick: () -> Unit = {},
+    onNavigateToWorkoutCalendarClick: () -> Unit = {},
 ) {
     val token = GymTheme.token
     val contentHeight = LocalConfiguration.current.screenHeightDp.dp
@@ -122,6 +123,7 @@ fun HomeContent(
                 UpcomingExercisesRow(
                     modifier = Modifier.fillMaxWidth(),
                     exercises = upcomingWorkouts,
+                    onSeeMoreClick = onNavigateToWorkoutCalendarClick,
                 )
                 ProgressTimelineRow(
                     modifier = Modifier
