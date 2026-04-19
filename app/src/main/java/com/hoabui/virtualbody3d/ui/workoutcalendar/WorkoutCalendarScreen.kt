@@ -1,6 +1,13 @@
 package com.hoabui.virtualbody3d.ui.workoutcalendar
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -15,14 +22,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.core.base.UiState
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarSessionBlockUiModel
 import com.hoabui.virtualbody3d.domain.model.calendar.toUiModel
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
@@ -35,6 +45,11 @@ import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
 import com.hoabui.virtualbody3d.ui.common_ui.organism.workoutcalendar.WorkoutCalendarDayExerciseListOrganism
 import com.hoabui.virtualbody3d.ui.common_ui.organism.workoutcalendar.WorkoutCalendarMonthGridOrganism
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
+import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySelectionBar
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.CartSetField
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryActions
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel.ExerciseLibraryViewModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.workoutcalendar.model.buildMonthGridCells
 import com.hoabui.virtualbody3d.ui.workoutcalendar.viewmodel.WorkoutCalendarContent
@@ -48,9 +63,9 @@ import java.util.Locale
 @Composable
 fun WorkoutCalendarScreen(
     onBack: () -> Unit,
-    onNavigateToEditScheduleRow: (Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: WorkoutCalendarViewModel = hiltViewModel(),
+    exerciseLibraryViewModel: ExerciseLibraryViewModel = hiltViewModel(),
 ) {
     val today = LocalDate.now()
     val screen by viewModel.state.collectAsStateWithLifecycle()
@@ -107,7 +122,7 @@ fun WorkoutCalendarScreen(
                     data = data,
                     today = today,
                     viewModel = viewModel,
-                    onNavigateToEditScheduleRow = onNavigateToEditScheduleRow,
+                    exerciseLibraryViewModel = exerciseLibraryViewModel,
                 )
             },
         )
@@ -120,7 +135,7 @@ private fun WorkoutCalendarSuccessContent(
     data: WorkoutCalendarContent,
     today: LocalDate,
     viewModel: WorkoutCalendarViewModel,
-    onNavigateToEditScheduleRow: (Long) -> Unit,
+    exerciseLibraryViewModel: ExerciseLibraryViewModel,
 ) {
     val cal = GymTheme.token.workoutCalendar
     val token = GymTheme.token
@@ -143,6 +158,60 @@ private fun WorkoutCalendarSuccessContent(
     val openSwipeRowId by viewModel.openSwipeRowId.collectAsStateWithLifecycle()
     val pendingSwipeCloseRowId by viewModel.pendingSwipeCloseRowId.collectAsStateWithLifecycle()
     val swipeHintSeen by viewModel.swipeHintSeen.collectAsStateWithLifecycle()
+
+    val libraryScreen by exerciseLibraryViewModel.state.collectAsStateWithLifecycle()
+    val libraryData: ExerciseLibraryUiState? =
+        (libraryScreen as? UiState.Success)?.data
+    val cartVisible = libraryData?.cart?.itemDrafts?.isNotEmpty() == true
+    val listBottomPadding =
+        if (cartVisible) token.bodyAnalysis.exerciseLibrarySelectionBarCollapsedListBottomInset else token.spacing.none
+
+    val selectionBarActions = remember(exerciseLibraryViewModel) {
+        ExerciseLibraryActions(
+            onQueryChange = {},
+            onExerciseClick = {},
+            onLibraryListToggle = {},
+            onDetailAddToCart = {},
+            onSelectCartItem = exerciseLibraryViewModel::setActiveCartExercise,
+            onRemoveCartItem = exerciseLibraryViewModel::removeFromCart,
+            onClearCart = exerciseLibraryViewModel::clearAll,
+            onActiveDraftChange = exerciseLibraryViewModel::updateActiveDraft,
+            onAddToSession = {},
+            onDismissSessionBooking = {},
+            onBookingDateSelected = {},
+            onBookingLocationSelected = {},
+            onBookingSlotToggled = {},
+            onBookingClearTimeSelection = {},
+            onConfirmSessionBooking = {},
+            onLongSessionEdit = {},
+            onLongSessionProceedAnyway = {},
+            onClearExerciseDetail = {},
+            onDismissAddExerciseSuccess = {},
+            onNavigateToWorkoutCalendar = {},
+            onStepCartField = exerciseLibraryViewModel::stepCartField,
+            onAddCartSetRow = { exerciseId ->
+                exerciseLibraryViewModel.stepCartField(exerciseId, 0, CartSetField.SETS, 1)
+            },
+            onSetCartFieldManual = exerciseLibraryViewModel::setCartFieldManual,
+            onToggleCartExpanded = exerciseLibraryViewModel::toggleCartExpanded,
+            onConfirmSelectionBarEdit = exerciseLibraryViewModel::onConfirmSelectionBarEdit,
+            onCancelSelectionBarEdit = exerciseLibraryViewModel::onCancelSelectionBarEdit,
+        )
+    }
+
+    val fadeSpec = tween<Float>(
+        durationMillis = token.motion.duration.standard,
+        easing = token.motion.easing.standard,
+    )
+    val cartEnterSlide = tween<IntOffset>(
+        durationMillis = token.motion.duration.standard,
+        easing = token.motion.easing.standard,
+    )
+
+    BackHandler(
+        enabled = libraryData?.chrome?.isSelectionBarEditMode == true,
+        onBack = exerciseLibraryViewModel::onCancelSelectionBarEdit,
+    )
 
     deleteDialog?.let { dialog ->
         val dateLabel = data.selectedDate.format(fullDateFormat)
@@ -179,43 +248,66 @@ private fun WorkoutCalendarSuccessContent(
         )
     }
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = cal.screenHorizontalPadding, vertical = cal.screenVerticalPadding),
     ) {
-        WorkoutCalendarMonthGridOrganism(
-            yearMonth = data.visibleYearMonth,
-            cells = cells,
-            onPreviousMonth = {
-                viewModel.onVisibleMonthChanged(data.visibleYearMonth.minusMonths(1))
-            },
-            onNextMonth = {
-                viewModel.onVisibleMonthChanged(data.visibleYearMonth.plusMonths(1))
-            },
-            onDayClick = viewModel::onDaySelected,
-        )
-        WorkoutCalendarDayExerciseListOrganism(
-            selectedDate = data.selectedDate,
-            dailyTotalCaloriesKcal = data.dailyTotalCaloriesKcal,
-            dailyCaloriesVisualLevel = data.dailyCaloriesVisualLevel,
-            sessionBlocks = sessionBlockUiModels,
-            openSwipeRowId = openSwipeRowId,
-            pendingSwipeCloseRowId = pendingSwipeCloseRowId,
-            playSwipeHintNudge = sessionBlockUiModels.flatMap { it.exercises }.isNotEmpty() && !swipeHintSeen,
-            onSwipeRowOpened = viewModel::onSwipeRowOpened,
-            onSwipeRowSettledClosed = viewModel::onSwipeRowSettledClosed,
-            onConsumePendingSwipeClose = viewModel::consumePendingSwipeCloseRow,
-            onDeleteAffordanceClick = viewModel::onDeleteAffordanceClicked,
-            onEditAffordanceClick = { rowId, _ ->
-                viewModel.onEditAffordanceClicked(rowId)
-                onNavigateToEditScheduleRow(rowId)
-            },
-            onSwipeHintConsumed = viewModel::markSwipeHintSeen,
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .weight(1f),
-        )
+        Column(modifier = Modifier.fillMaxSize()) {
+            WorkoutCalendarMonthGridOrganism(
+                yearMonth = data.visibleYearMonth,
+                cells = cells,
+                onPreviousMonth = {
+                    viewModel.onVisibleMonthChanged(data.visibleYearMonth.minusMonths(1))
+                },
+                onNextMonth = {
+                    viewModel.onVisibleMonthChanged(data.visibleYearMonth.plusMonths(1))
+                },
+                onDayClick = viewModel::onDaySelected,
+            )
+            WorkoutCalendarDayExerciseListOrganism(
+                selectedDate = data.selectedDate,
+                dailyTotalCaloriesKcal = data.dailyTotalCaloriesKcal,
+                dailyCaloriesVisualLevel = data.dailyCaloriesVisualLevel,
+                sessionBlocks = sessionBlockUiModels,
+                listContentBottomInset = listBottomPadding,
+                openSwipeRowId = openSwipeRowId,
+                pendingSwipeCloseRowId = pendingSwipeCloseRowId,
+                playSwipeHintNudge = sessionBlockUiModels.flatMap { it.exercises }.isNotEmpty() && !swipeHintSeen,
+                onSwipeRowOpened = viewModel::onSwipeRowOpened,
+                onSwipeRowSettledClosed = viewModel::onSwipeRowSettledClosed,
+                onConsumePendingSwipeClose = viewModel::consumePendingSwipeCloseRow,
+                onDeleteAffordanceClick = viewModel::onDeleteAffordanceClicked,
+                onEditAffordanceClick = { rowId, _ ->
+                    viewModel.onEditAffordanceClicked(rowId)
+                    exerciseLibraryViewModel.startSelectionBarEditFromScheduleRow(rowId)
+                },
+                onSwipeHintConsumed = viewModel::markSwipeHintSeen,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .weight(1f),
+            )
+        }
+        if (libraryData != null) {
+            AnimatedVisibility(
+                visible = cartVisible,
+                modifier = Modifier.align(Alignment.BottomCenter),
+                enter = fadeIn(fadeSpec) + slideInVertically(
+                    animationSpec = cartEnterSlide,
+                    initialOffsetY = { it },
+                ),
+                exit = fadeOut(fadeSpec) + slideOutVertically(
+                    animationSpec = cartEnterSlide,
+                    targetOffsetY = { it },
+                ),
+            ) {
+                ExerciseLibrarySelectionBar(
+                    libraryState = libraryData,
+                    actions = selectionBarActions,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
     }
 }

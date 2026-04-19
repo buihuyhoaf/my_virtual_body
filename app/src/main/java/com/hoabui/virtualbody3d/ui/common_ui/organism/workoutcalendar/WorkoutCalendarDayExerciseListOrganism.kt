@@ -57,6 +57,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -95,6 +96,7 @@ fun WorkoutCalendarDayExerciseListOrganism(
     dailyTotalCaloriesKcal: Int,
     dailyCaloriesVisualLevel: WorkoutCaloriesVisualLevel,
     sessionBlocks: List<WorkoutCalendarSessionBlockUiModel>,
+    listContentBottomInset: Dp,
     modifier: Modifier = Modifier,
     openSwipeRowId: Long? = null,
     pendingSwipeCloseRowId: Long? = null,
@@ -135,7 +137,7 @@ fun WorkoutCalendarDayExerciseListOrganism(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            contentPadding = PaddingValues(token.spacing.none),
+            contentPadding = PaddingValues(bottom = listContentBottomInset),
             verticalArrangement = Arrangement.spacedBy(token.spacing.xs),
         ) {
             if (sessionBlocks.isEmpty()) {
@@ -619,6 +621,7 @@ private fun DayListPreviewLight() {
                 WorkoutCalendarDayExerciseListOrganism(
                     selectedDate = LocalDate.of(2024, 4, 10),
                     dailyTotalCaloriesKcal = 450,
+                    dailyCaloriesVisualLevel = WorkoutCaloriesVisualLevel.High,
                     sessionBlocks = listOf(
                         WorkoutCalendarSessionBlockUiModel(
                             sessionId = "session_1",
@@ -666,8 +669,8 @@ private fun DayListPreviewLight() {
                             intensityLevel = WorkoutIntensityLevel.Light,
                         ),
                     ),
+                    listContentBottomInset = GymTheme.token.spacing.none,
                     modifier = Modifier.fillMaxSize(),
-                    dailyCaloriesVisualLevel = WorkoutCaloriesVisualLevel.High,
                 )
             }
         }
@@ -697,6 +700,7 @@ private fun DayListPreviewEmpty() {
                     dailyTotalCaloriesKcal = 0,
                     dailyCaloriesVisualLevel = WorkoutCaloriesVisualLevel.Low,
                     sessionBlocks = emptyList(),
+                    listContentBottomInset = GymTheme.token.spacing.none,
                     modifier = Modifier.fillMaxSize(),
                 )
             }

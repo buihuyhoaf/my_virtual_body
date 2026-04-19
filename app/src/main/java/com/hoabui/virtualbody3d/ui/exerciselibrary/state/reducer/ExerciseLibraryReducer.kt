@@ -76,6 +76,8 @@ class ExerciseLibraryReducer @Inject constructor(
                     isSelectionBarEditMode = false,
                     editingScheduleRowId = null,
                     selectionBarEditBaselineCart = null,
+                    isIsolatedScheduleRowSelectionEdit = false,
+                    selectionBarEditMeasurementMode = null,
                 ),
                 sessionBooking = SessionBookingSheetState(),
             )
@@ -84,6 +86,8 @@ class ExerciseLibraryReducer @Inject constructor(
                     isSelectionBarEditMode = true,
                     editingScheduleRowId = update.scheduleRowId,
                     selectionBarEditBaselineCart = state.cart,
+                    isIsolatedScheduleRowSelectionEdit = false,
+                    selectionBarEditMeasurementMode = null,
                 ),
                 cart = state.cart.copy(isCartExpanded = true),
             )
@@ -102,34 +106,54 @@ class ExerciseLibraryReducer @Inject constructor(
                         isSelectionBarEditMode = true,
                         editingScheduleRowId = update.scheduleRowId,
                         selectionBarEditBaselineCart = cart,
+                        isIsolatedScheduleRowSelectionEdit = true,
+                        selectionBarEditMeasurementMode = update.schedule.measurementMode,
                     ),
                 )
             }
             ExerciseLibraryUpdate.SelectionBarEditCancelled -> {
-                val baseline = state.chrome.selectionBarEditBaselineCart ?: return@reduce state.copy(
-                    chrome = state.chrome.copy(
-                        isSelectionBarEditMode = false,
-                        editingScheduleRowId = null,
-                        selectionBarEditBaselineCart = null,
-                    ),
-                )
-                state.copy(
-                    cart = baseline.copy(isCartExpanded = false),
-                    chrome = state.chrome.copy(
-                        isSelectionBarEditMode = false,
-                        editingScheduleRowId = null,
-                        selectionBarEditBaselineCart = null,
-                    ),
-                )
-            }
-            ExerciseLibraryUpdate.SelectionBarEditFinished -> state.copy(
-                cart = state.cart.copy(isCartExpanded = false),
-                chrome = state.chrome.copy(
+                val clearedChrome = state.chrome.copy(
                     isSelectionBarEditMode = false,
                     editingScheduleRowId = null,
                     selectionBarEditBaselineCart = null,
-                ),
-            )
+                    isIsolatedScheduleRowSelectionEdit = false,
+                    selectionBarEditMeasurementMode = null,
+                )
+                if (state.chrome.isIsolatedScheduleRowSelectionEdit) {
+                    state.copy(
+                        cart = emptyLibraryCart(),
+                        chrome = clearedChrome,
+                    )
+                } else {
+                    val baseline = state.chrome.selectionBarEditBaselineCart ?: return@reduce state.copy(
+                        chrome = clearedChrome,
+                    )
+                    state.copy(
+                        cart = baseline.copy(isCartExpanded = false),
+                        chrome = clearedChrome,
+                    )
+                }
+            }
+            ExerciseLibraryUpdate.SelectionBarEditFinished -> {
+                val clearedChrome = state.chrome.copy(
+                    isSelectionBarEditMode = false,
+                    editingScheduleRowId = null,
+                    selectionBarEditBaselineCart = null,
+                    isIsolatedScheduleRowSelectionEdit = false,
+                    selectionBarEditMeasurementMode = null,
+                )
+                if (state.chrome.isIsolatedScheduleRowSelectionEdit) {
+                    state.copy(
+                        cart = emptyLibraryCart(),
+                        chrome = clearedChrome,
+                    )
+                } else {
+                    state.copy(
+                        cart = state.cart.copy(isCartExpanded = false),
+                        chrome = clearedChrome,
+                    )
+                }
+            }
         }
     }
 
@@ -193,12 +217,21 @@ class ExerciseLibraryReducer @Inject constructor(
                             isSelectionBarEditMode = false,
                             editingScheduleRowId = null,
                             selectionBarEditBaselineCart = null,
+                            isIsolatedScheduleRowSelectionEdit = false,
+                            selectionBarEditMeasurementMode = null,
                         ),
                     )
                 }
             }
         }
     }
+
+    private fun emptyLibraryCart(): LibraryCartState = LibraryCartState(
+        itemDrafts = persistentMapOf(),
+        draftOrder = persistentListOf(),
+        activeExerciseId = null,
+        isCartExpanded = false,
+    )
 
     private fun reduceUserIntent(
         state: ExerciseLibraryUiState,

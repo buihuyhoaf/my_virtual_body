@@ -94,9 +94,6 @@ fun AppNavGraph(
             }
             WorkoutCalendarScreen(
                 onBack = onWorkoutCalendarBack,
-                onNavigateToEditScheduleRow = { rowId ->
-                    navController.navigate(ExerciseLibraryRoute(scheduleRowIdToEdit = rowId))
-                },
             )
         }
         composable<AddRoute> {

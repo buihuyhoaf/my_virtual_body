@@ -11,7 +11,9 @@ import com.hoabui.virtualbody3d.domain.model.exercise.normalizeDurationMinutesSe
 fun ExerciseLibraryUiState.isCartDraftValidForSessionConfirm(): Boolean {
     if (cart.itemDrafts.isEmpty()) return false
     return cart.itemDrafts.all { (id, draft) ->
-        val mode = libraryList.exerciseMeasurementById[id] ?: ExerciseMeasurementMode.Strength
+        val mode = libraryList.exerciseMeasurementById[id]
+            ?: chrome.selectionBarEditMeasurementMode
+            ?: ExerciseMeasurementMode.Strength
         when (mode) {
             ExerciseMeasurementMode.Strength -> {
                 draft.setRows.isNotEmpty() && draft.setRows.all { row -> row.reps > 0 }

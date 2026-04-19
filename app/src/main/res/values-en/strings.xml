@@ -10,7 +10,7 @@
     <string name="exercise_library_console_reps_placeholder">Reps</string>
     <string name="exercise_library_console_minutes_placeholder">Minutes</string>
     <string name="exercise_library_console_seconds_placeholder">Seconds</string>
-    <string name="exercise_library_cart_clear_all">clear all</string>
+    <string name="exercise_library_cart_clear_all">Clear all</string>
     <string name="exercise_library_cart_choose_date">Choose date</string>
     <string name="exercise_library_cart_choose_time">Choose time</string>
     <string name="exercise_library_cart_add_short">Add</string>
@@ -63,7 +63,7 @@
     <!-- Workout calendar -->
     <string name="workout_calendar_title">Workout plan</string>
     <string name="workout_calendar_empty_day">No exercises scheduled for this day.</string>
-    <string name="workout_calendar_rest_day_title">Rest Day! 💪</string>
+    <string name="workout_calendar_rest_day_title">Rest Day!</string>
     <string name="workout_calendar_rest_day_subtitle">Rest is an important part of your fitness journey</string>
     <string name="workout_calendar_prev_month_cd">Previous month</string>
     <string name="workout_calendar_next_month_cd">Next month</string>

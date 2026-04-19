@@ -11,7 +11,6 @@ import com.hoabui.virtualbody3d.data.local.db.VirtualBodyDatabase
 import com.hoabui.virtualbody3d.data.local.db.WorkoutScheduleDao
 import com.hoabui.virtualbody3d.data.local.db.seed.DatabaseSeeder
 import com.hoabui.virtualbody3d.data.local.db.WorkoutSessionDao
-import com.hoabui.virtualbody3d.data.local.db.WorkoutLogDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -52,11 +51,6 @@ object DatabaseModule {
     @Singleton
     fun provideWorkoutSessionDao(db: VirtualBodyDatabase): WorkoutSessionDao =
         db.workoutSessionDao()
-
-    @Provides
-    @Singleton
-    fun provideWorkoutLogDao(db: VirtualBodyDatabase): WorkoutLogDao =
-        db.workoutLogDao()
 
     @Provides
     @Singleton

@@ -85,6 +85,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Locale
 
 private fun sessionBookingSheetTextStyle(base: TextStyle): TextStyle = base.merge(TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)))
@@ -182,9 +183,12 @@ private fun SessionBookingSheetContent(
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
-    val dayHorizon = remember(input.selectedDateMillis, resumeKey) {
-        val today = LocalDate.now()
+    val dayHorizon = remember(input.selectedDateMillis, resumeKey, systemZone) {
+        val today = LocalDate.now(systemZone)
         (0 until SESSION_BOOKING_DAY_HORIZON).map { today.plusDays(it.toLong()) }
+    }
+    val (bookingToday, bookingNowMinute) = remember(selectedLocalDate, resumeKey, systemZone) {
+        LocalDate.now(systemZone) to LocalTime.now(systemZone).truncatedTo(ChronoUnit.MINUTES)
     }
     val selectedLocationName = booking.selectedLocationDisplayName
     var locationMenuExpanded by remember { mutableStateOf(false) }
@@ -353,10 +357,17 @@ private fun SessionBookingSheetContent(
                 items = booking.timeSlotCells,
                 key = { it.slotStart.toString() },
             ) { cell ->
+                val slotEnabled = isSessionBookingSlotEnabled(
+                    selectedDay = selectedLocalDate,
+                    today = bookingToday,
+                    slotStart = cell.slotStart,
+                    nowMinute = bookingNowMinute,
+                )
                 TimeSlotGridItem(
                     cell = cell,
                     minHeight = gridCellMinH,
                     minWidth = slotChipMinW,
+                    enabled = slotEnabled,
                     onSlotToggled = onSlotToggled,
                 )
             }
@@ -574,6 +585,7 @@ private fun TimeSlotGridItem(
     cell: TimeSlotCellUiModel,
     minHeight: Dp,
     minWidth: Dp,
+    enabled: Boolean,
     onSlotToggled: (LocalTime) -> Unit,
 ) {
     val click = remember(cell.slotStart, onSlotToggled) {
@@ -583,6 +595,7 @@ private fun TimeSlotGridItem(
         cell = cell,
         minHeight = minHeight,
         minWidth = minWidth,
+        enabled = enabled,
         onClick = click,
     )
 }
@@ -637,12 +650,43 @@ private fun TimeSlotHorizontalCell(
     cell: TimeSlotCellUiModel,
     minHeight: Dp,
     minWidth: Dp,
+    enabled: Boolean,
     onClick: () -> Unit,
 ) {
     val token = GymTheme.token
     val corner = token.radius.sm
     val flatCorner = token.spacing.none
     val selected = cell.selected
+    if (!enabled) {
+        val shape = RoundedCornerShape(corner)
+        Column(
+            modifier = Modifier
+                .widthIn(min = minWidth)
+                .heightIn(min = minHeight)
+                .border(BorderStroke(token.borderWidth.thin, token.colors.borderSubtle), shape)
+                .clip(shape)
+                .background(token.colors.surfaceSubtle)
+                .clickable(
+                    enabled = false,
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    role = Role.Button,
+                    onClick = onClick,
+                )
+                .padding(token.spacing.xs),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            GText(
+                text = cell.label,
+                style = sessionBookingSheetTextStyle(token.typography.labelSmall),
+                color = token.colors.textMuted,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        return
+    }
     val shape = when {
         !selected -> RoundedCornerShape(corner)
         cell.rangeRole == TimeSlotSelectionRangeRole.Single -> RoundedCornerShape(corner)
@@ -695,6 +739,7 @@ private fun TimeSlotHorizontalCell(
             .clip(shape)
             .background(bg)
             .clickable(
+                enabled = true,
                 interactionSource = remember { MutableInteractionSource() },
                 indication = ripple(),
                 role = Role.Button,
