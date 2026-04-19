@@ -28,6 +28,7 @@ data class WorkoutCalendarContent(
     val summariesByEpochDay: Map<Long, WorkoutCalendarDaySummary>,
     /** Session blocks grouped by sessionId for the selected day. */
     val sessionBlocks: List<WorkoutCalendarSessionBlock>,
+    val dailyTotalCaloriesKcal: Int,
 )
 
 data class WorkoutCalendarDeleteDialogState(
@@ -93,6 +94,9 @@ class WorkoutCalendarViewModel @Inject constructor(
                     selectedDate = sd,
                     summariesByEpochDay = summaries,
                     sessionBlocks = sessionBlocks,
+                    dailyTotalCaloriesKcal = sessionBlocks
+                        .sumOf { it.totalCaloriesKcal.toDouble() }
+                        .toInt(),
                 )
             }.collect { content ->
                 setSuccess(content)

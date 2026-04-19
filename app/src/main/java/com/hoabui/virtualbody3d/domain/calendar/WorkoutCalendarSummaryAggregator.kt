@@ -4,6 +4,7 @@ import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarDayCellStat
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarDaySummary
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutExecutionStatus
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
+import com.hoabui.virtualbody3d.domain.util.CaloriesCalculator
 import java.time.Clock
 
 fun groupSchedulesToDaySummaries(
@@ -16,6 +17,19 @@ fun groupSchedulesToDaySummaries(
         WorkoutCalendarDaySummary(
             epochDay = epochDay,
             cellStatus = rows.toCellStatus(),
+            totalCaloriesKcal = rows.sumOf { schedule ->
+                val durationMinutes = (schedule.durationSeconds ?: 0) / 60.0
+                val totalReps = schedule.sets.coerceAtLeast(0) * schedule.reps.coerceAtLeast(0)
+                CaloriesCalculator.estimateCalories(
+                    exerciseId = schedule.exerciseId,
+                    measurementMode = schedule.measurementMode,
+                    durationMinutes = durationMinutes,
+                    totalReps = totalReps,
+                    averageLoadKg = schedule.weightKg.coerceAtLeast(0.0),
+                    bodyWeightKg = DEFAULT_BODY_WEIGHT_KG,
+                    leanBodyMassKg = null,
+                ).toDouble()
+            }.toFloat(),
         )
     }
 }
@@ -33,3 +47,5 @@ fun List<WorkoutSchedule>.toCellStatus(): WorkoutCalendarDayCellStatus {
     }
     return WorkoutCalendarDayCellStatus.Mixed
 }
+
+private const val DEFAULT_BODY_WEIGHT_KG = 70.0

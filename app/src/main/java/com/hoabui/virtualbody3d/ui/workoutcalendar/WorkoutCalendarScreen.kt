@@ -200,6 +200,7 @@ private fun WorkoutCalendarSuccessContent(
         Spacer(modifier = Modifier.height(cal.sectionGapMajor))
         WorkoutCalendarDayExerciseListOrganism(
             selectedDate = data.selectedDate,
+            dailyTotalCaloriesKcal = data.dailyTotalCaloriesKcal,
             sessionBlocks = sessionBlockUiModels,
             openSwipeRowId = openSwipeRowId,
             pendingSwipeCloseRowId = pendingSwipeCloseRowId,

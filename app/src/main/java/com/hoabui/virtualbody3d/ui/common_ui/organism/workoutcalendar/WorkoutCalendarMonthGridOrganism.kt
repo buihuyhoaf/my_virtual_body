@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -32,8 +32,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarDayCellStatus
+import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutIntensityLevel
 import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
@@ -193,64 +195,33 @@ private fun MonthDayCell(
             color = if (cell.inCurrentMonth) token.colors.textPrimary else token.colors.textMuted,
             textAlign = TextAlign.Center,
         )
-        StatusDots(cellStatus = cell.cellStatus)
-    }
-}
-
-@Composable
-private fun StatusDots(cellStatus: WorkoutCalendarDayCellStatus) {
-    val token = GymTheme.token
-    when (cellStatus) {
-        WorkoutCalendarDayCellStatus.Empty -> Spacer(modifier = Modifier.height(token.spacing.xxs))
-        WorkoutCalendarDayCellStatus.Scheduled -> DotRow(
-            token.colors.primary,
-            token.colors.backgroundTransparent,
-            token.colors.backgroundTransparent,
-        )
-        WorkoutCalendarDayCellStatus.Completed -> DotRow(
-            token.colors.success,
-            token.colors.backgroundTransparent,
-            token.colors.backgroundTransparent,
-        )
-        WorkoutCalendarDayCellStatus.Missed -> DotRow(
-            token.colors.error,
-            token.colors.backgroundTransparent,
-            token.colors.backgroundTransparent,
-        )
-        WorkoutCalendarDayCellStatus.Mixed -> DotRow(
-            token.colors.success,
-            token.colors.primary,
-            token.colors.error,
+        Spacer(modifier = Modifier.height(token.spacing.xxxs))
+        IntensityBar(
+            intensityLevel = cell.intensityLevel,
+            modifier = Modifier
+                .width(cellSide * 0.65f)
+                .height(2.dp),
         )
     }
 }
 
 @Composable
-private fun DotRow(a: androidx.compose.ui.graphics.Color, b: androidx.compose.ui.graphics.Color, c: androidx.compose.ui.graphics.Color) {
+private fun IntensityBar(
+    intensityLevel: WorkoutIntensityLevel?,
+    modifier: Modifier = Modifier,
+) {
     val token = GymTheme.token
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(token.spacing.xxxs),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(token.spacing.xxxs)
-                .clip(CircleShape)
-                .background(a),
-        )
-        Box(
-            modifier = Modifier
-                .size(token.spacing.xxxs)
-                .clip(CircleShape)
-                .background(b),
-        )
-        Box(
-            modifier = Modifier
-                .size(token.spacing.xxxs)
-                .clip(CircleShape)
-                .background(c),
-        )
+    val color = when (intensityLevel) {
+        WorkoutIntensityLevel.Light -> token.colors.success
+        WorkoutIntensityLevel.Moderate -> token.colors.warning
+        WorkoutIntensityLevel.High -> token.colors.error
+        null -> token.colors.backgroundTransparent
     }
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(1.dp))
+            .background(color),
+    )
 }
 
 private fun monthTitle(ym: YearMonth, locale: Locale): String {
@@ -303,6 +274,8 @@ private fun sampleCells(): List<WorkoutCalendarDayCellUiModel> {
                 date = null,
                 inCurrentMonth = false,
                 cellStatus = WorkoutCalendarDayCellStatus.Empty,
+                totalCaloriesKcal = 0f,
+                intensityLevel = null,
                 isSelected = false,
                 isToday = false,
             ),
@@ -316,11 +289,24 @@ private fun sampleCells(): List<WorkoutCalendarDayCellUiModel> {
             7 -> WorkoutCalendarDayCellStatus.Scheduled
             else -> WorkoutCalendarDayCellStatus.Empty
         }
+        val intensity = when (i) {
+            5 -> WorkoutIntensityLevel.Light
+            6 -> WorkoutIntensityLevel.Moderate
+            7 -> WorkoutIntensityLevel.High
+            else -> null
+        }
         list.add(
             WorkoutCalendarDayCellUiModel(
                 date = d,
                 inCurrentMonth = true,
                 cellStatus = st,
+                totalCaloriesKcal = when (intensity) {
+                    WorkoutIntensityLevel.Light -> 80f
+                    WorkoutIntensityLevel.Moderate -> 180f
+                    WorkoutIntensityLevel.High -> 320f
+                    null -> 0f
+                },
+                intensityLevel = intensity,
                 isSelected = d == d1,
                 isToday = d == d2,
             ),
@@ -332,6 +318,8 @@ private fun sampleCells(): List<WorkoutCalendarDayCellUiModel> {
                 date = null,
                 inCurrentMonth = false,
                 cellStatus = WorkoutCalendarDayCellStatus.Empty,
+                totalCaloriesKcal = 0f,
+                intensityLevel = null,
                 isSelected = false,
                 isToday = false,
             ),

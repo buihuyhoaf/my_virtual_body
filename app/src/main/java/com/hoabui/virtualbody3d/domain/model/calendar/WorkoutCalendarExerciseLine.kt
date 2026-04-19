@@ -110,6 +110,6 @@ fun WorkoutCalendarSessionBlock.toUiModel(): WorkoutCalendarSessionBlockUiModel 
     sessionId = sessionId,
     sessionTimeLabel = sessionTimeLabel,
     exercises = exercises.map { it.toUiModel() },
-    totalCaloriesLabel = "🔥 ${totalCaloriesKcal.toInt()} kcal",
+    totalCaloriesLabel = "${totalCaloriesKcal.toInt()} kcal",
     intensityLevel = intensityLevel,
 )

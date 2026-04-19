@@ -14,4 +14,13 @@ enum class WorkoutCalendarDayCellStatus {
 data class WorkoutCalendarDaySummary(
     val epochDay: Long,
     val cellStatus: WorkoutCalendarDayCellStatus,
-)
+    val totalCaloriesKcal: Float,
+) {
+    val intensityLevel: WorkoutIntensityLevel?
+        get() = when {
+            totalCaloriesKcal <= 0f -> null
+            totalCaloriesKcal < 100f -> WorkoutIntensityLevel.Light
+            totalCaloriesKcal <= 250f -> WorkoutIntensityLevel.Moderate
+            else -> WorkoutIntensityLevel.High
+        }
+}

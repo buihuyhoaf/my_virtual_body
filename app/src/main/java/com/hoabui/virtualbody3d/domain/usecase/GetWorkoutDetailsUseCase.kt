@@ -302,7 +302,7 @@ private fun estimateScheduleCalories(schedule: WorkoutSchedule, logEntry: Workou
 }
 
 private fun formatCaloriesLabel(kcal: Float): String =
-    "🔥 ${kcal.roundToInt()} kcal"
+    "${kcal.roundToInt()} kcal"
 
 private fun formatDurationSeconds(seconds: Int): String {
     val safeSeconds = seconds.coerceAtLeast(0)
@@ -361,7 +361,7 @@ private fun groupExercisesIntoSessionBlocks(
         val startTime = startInstant.atZone(systemZone).toLocalTime().format(timeFormatter)
         val endTime = endInstant.atZone(systemZone).toLocalTime().format(timeFormatter)
 
-        val sessionTimeLabel = if (sortedExercises.size == 1 || startTime == endTime) {
+        val sessionTimeLabel = if (startTime == endTime) {
             startTime
         } else {
             "$startTime - $endTime"
