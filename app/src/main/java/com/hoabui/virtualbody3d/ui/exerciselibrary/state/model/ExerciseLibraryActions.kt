@@ -1,6 +1,5 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.state.model
 
-import com.hoabui.virtualbody3d.ui.exerciselibrary.ExerciseLibraryQuickChip
 import java.time.LocalTime
 
 /**
@@ -12,7 +11,6 @@ import java.time.LocalTime
  */
 data class ExerciseLibraryActions(
     val onQueryChange: (String) -> Unit,
-    val onQuickChipSelect: (ExerciseLibraryQuickChip?) -> Unit,
     val onExerciseClick: (String) -> Unit,
     val onLibraryListToggle: (String) -> Unit,
     val onDetailAddToCart: (String) -> Unit,

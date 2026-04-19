@@ -1,9 +1,6 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.state.reducer
 
-import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
-import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.domain.usecase.CommitLibrarySessionBookingResult
-import com.hoabui.virtualbody3d.ui.exerciselibrary.ExerciseLibraryQuickChip
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.CommitLibrarySessionBookingSuccessUiMapper
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.withCartSnapshot
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
@@ -139,40 +136,6 @@ class ExerciseLibraryReducer @Inject constructor(
         return when (intent) {
             is ExerciseLibraryIntent.SetSearchQuery ->
                 state.copy(filters = state.filters.copy(searchQuery = intent.query))
-
-            is ExerciseLibraryIntent.SelectQuickChip ->
-                when (intent.chip) {
-                    null -> state.copy(
-                        filters = state.filters.copy(
-                            selectedExerciseCategory = null,
-                            selectedEquipment = null,
-                        ),
-                    )
-                    ExerciseLibraryQuickChip.Strength -> state.copy(
-                        filters = state.filters.copy(
-                            selectedExerciseCategory = ExerciseCategory.Strength,
-                            selectedEquipment = null,
-                        ),
-                    )
-                    ExerciseLibraryQuickChip.Mobility -> state.copy(
-                        filters = state.filters.copy(
-                            selectedExerciseCategory = ExerciseCategory.Mobility,
-                            selectedEquipment = null,
-                        ),
-                    )
-                    ExerciseLibraryQuickChip.Cardio -> state.copy(
-                        filters = state.filters.copy(
-                            selectedExerciseCategory = ExerciseCategory.Cardio,
-                            selectedEquipment = null,
-                        ),
-                    )
-                    ExerciseLibraryQuickChip.Bodyweight -> state.copy(
-                        filters = state.filters.copy(
-                            selectedExerciseCategory = null,
-                            selectedEquipment = EquipmentType.Bodyweight,
-                        ),
-                    )
-                }
 
             ExerciseLibraryIntent.DismissSessionBooking ->
                 state.copy(sessionBooking = state.sessionBooking.copy(input = null))

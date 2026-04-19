@@ -394,10 +394,6 @@ class ExerciseLibraryViewModel @Inject constructor(
         dispatchIntent(ExerciseLibraryIntent.SetSearchQuery(query))
     }
 
-    fun selectQuickChip(chip: com.hoabui.virtualbody3d.ui.exerciselibrary.ExerciseLibraryQuickChip?) {
-        dispatchIntent(ExerciseLibraryIntent.SelectQuickChip(chip))
-    }
-
     fun toggleExerciseInCartFromList(exerciseId: String) {
         val snap = toggleExerciseInCartUseCase(
             filterState.value.toCartSnapshot(),
