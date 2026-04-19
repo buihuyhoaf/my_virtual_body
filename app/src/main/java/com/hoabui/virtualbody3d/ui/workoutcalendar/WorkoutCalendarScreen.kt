@@ -177,7 +177,7 @@ private fun WorkoutCalendarSuccessContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = cal.screenHorizontalPadding),
+            .padding(horizontal = cal.screenHorizontalPadding, vertical = cal.screenVerticalPadding),
     ) {
         WorkoutCalendarMonthGridOrganism(
             yearMonth = data.visibleYearMonth,
