@@ -51,6 +51,7 @@ fun List<WorkoutSchedule>.toCellStatus(): WorkoutCalendarDayCellStatus {
 
 /**
  * Fallback body weight used only for schedule-based calorie estimation in month summaries,
- * where no per-user logged body-weight snapshot is available yet.
+ * where no per-user logged body-weight snapshot is available yet; 70kg is used as a neutral
+ * default for rough estimation when individual body metrics are unknown.
  */
 private const val DEFAULT_BODY_WEIGHT_KG = 70.0

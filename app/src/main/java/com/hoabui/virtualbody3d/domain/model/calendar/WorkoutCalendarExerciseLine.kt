@@ -23,6 +23,10 @@ enum class WorkoutCaloriesVisualLevel {
     High,
 }
 
+/**
+ * UI emphasis thresholds tuned for per-exercise cards:
+ * <15 kcal isolation/low-load moves, 15..40 kcal standard sets, >40 kcal heavy/high-intensity work.
+ */
 const val WORKOUT_CALORIES_VISUAL_LOW_UPPER_BOUND_KCAL = 15f
 const val WORKOUT_CALORIES_VISUAL_MEDIUM_UPPER_BOUND_KCAL = 40f
 
