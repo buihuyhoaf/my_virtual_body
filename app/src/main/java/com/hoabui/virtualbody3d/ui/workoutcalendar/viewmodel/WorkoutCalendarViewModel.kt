@@ -15,6 +15,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import java.time.LocalDate
 import java.time.YearMonth
+import kotlin.math.roundToInt
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -96,7 +97,7 @@ class WorkoutCalendarViewModel @Inject constructor(
                     sessionBlocks = sessionBlocks,
                     dailyTotalCaloriesKcal = sessionBlocks
                         .sumOf { it.totalCaloriesKcal.toDouble() }
-                        .toInt(),
+                        .roundToInt(),
                 )
             }.collect { content ->
                 setSuccess(content)

@@ -521,6 +521,7 @@ private fun WorkoutCalendarExerciseRow(
                     )
                 }
                 if (line.caloriesLabel.isNotBlank()) {
+                    // Intentionally stacked under set/rep detail for subtle, low-emphasis calories.
                     Spacer(modifier = Modifier.height(token.spacing.xxxs))
                     GText(
                         text = line.caloriesLabel,
