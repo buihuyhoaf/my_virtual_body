@@ -2,7 +2,9 @@ package com.hoabui.virtualbody3d.ui.exerciselibrary.state.reducer
 
 import com.hoabui.virtualbody3d.domain.usecase.CommitLibrarySessionBookingResult
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.CommitLibrarySessionBookingSuccessUiMapper
+import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toExerciseDraftForSelectionBarEdit
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.withCartSnapshot
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryCartState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingSheetState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibraryIntent
@@ -71,8 +73,62 @@ class ExerciseLibraryReducer @Inject constructor(
                 chrome = state.chrome.copy(
                     detailExerciseId = null,
                     addExerciseSuccess = null,
+                    isSelectionBarEditMode = false,
+                    editingScheduleRowId = null,
+                    selectionBarEditBaselineCart = null,
                 ),
                 sessionBooking = SessionBookingSheetState(),
+            )
+            is ExerciseLibraryUpdate.SelectionBarEditBegan -> state.copy(
+                chrome = state.chrome.copy(
+                    isSelectionBarEditMode = true,
+                    editingScheduleRowId = update.scheduleRowId,
+                    selectionBarEditBaselineCart = state.cart,
+                ),
+                cart = state.cart.copy(isCartExpanded = true),
+            )
+            is ExerciseLibraryUpdate.SelectionBarEditFromScheduleRowLoaded -> {
+                val exerciseId = update.schedule.exerciseId
+                val draft = update.schedule.toExerciseDraftForSelectionBarEdit()
+                val cart = LibraryCartState(
+                    itemDrafts = persistentMapOf(exerciseId to draft),
+                    draftOrder = persistentListOf(exerciseId),
+                    activeExerciseId = exerciseId,
+                    isCartExpanded = true,
+                )
+                state.copy(
+                    cart = cart,
+                    chrome = state.chrome.copy(
+                        isSelectionBarEditMode = true,
+                        editingScheduleRowId = update.scheduleRowId,
+                        selectionBarEditBaselineCart = cart,
+                    ),
+                )
+            }
+            ExerciseLibraryUpdate.SelectionBarEditCancelled -> {
+                val baseline = state.chrome.selectionBarEditBaselineCart ?: return@reduce state.copy(
+                    chrome = state.chrome.copy(
+                        isSelectionBarEditMode = false,
+                        editingScheduleRowId = null,
+                        selectionBarEditBaselineCart = null,
+                    ),
+                )
+                state.copy(
+                    cart = baseline.copy(isCartExpanded = false),
+                    chrome = state.chrome.copy(
+                        isSelectionBarEditMode = false,
+                        editingScheduleRowId = null,
+                        selectionBarEditBaselineCart = null,
+                    ),
+                )
+            }
+            ExerciseLibraryUpdate.SelectionBarEditFinished -> state.copy(
+                cart = state.cart.copy(isCartExpanded = false),
+                chrome = state.chrome.copy(
+                    isSelectionBarEditMode = false,
+                    editingScheduleRowId = null,
+                    selectionBarEditBaselineCart = null,
+                ),
             )
         }
     }
@@ -134,6 +190,9 @@ class ExerciseLibraryReducer @Inject constructor(
                         sessionBooking = SessionBookingSheetState(),
                         chrome = state.chrome.copy(
                             addExerciseSuccess = summary,
+                            isSelectionBarEditMode = false,
+                            editingScheduleRowId = null,
+                            selectionBarEditBaselineCart = null,
                         ),
                     )
                 }

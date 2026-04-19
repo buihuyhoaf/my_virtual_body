@@ -11,6 +11,7 @@ import com.hoabui.virtualbody3d.data.mapper.toEntity
 import com.hoabui.virtualbody3d.data.mapper.toDto
 import com.hoabui.virtualbody3d.data.mapper.toStorageString
 import com.hoabui.virtualbody3d.data.local.db.formatEpochDayRangeForLog
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutExecutionStatus
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutScheduleDeleteResult
@@ -97,6 +98,15 @@ class WorkoutScheduleRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getWorkoutScheduleByRowId(rowId: Long): WorkoutSchedule? = withContext(ioDispatcher) {
+        try {
+            localDataSource.getScheduleByRowId(rowId)?.toDomain()
+        } catch (t: Throwable) {
+            Log.e(WORKOUT_DB_TRACE_LOG_TAG, "getWorkoutScheduleByRowId failed id=$rowId", t)
+            throw t
+        }
+    }
+
     override suspend fun updateExecutionStatus(rowId: Long, status: WorkoutExecutionStatus) {
         withContext(ioDispatcher) {
             try {
@@ -120,6 +130,47 @@ class WorkoutScheduleRepositoryImpl @Inject constructor(
                 )
                 throw t
             }
+        }
+    }
+
+    override suspend fun updateWorkoutScheduleRow(
+        rowId: Long,
+        exerciseId: String,
+        measurementMode: ExerciseMeasurementMode,
+        sets: Int,
+        reps: Int,
+        weightKg: Double,
+        durationSeconds: Int?,
+    ): Boolean = withContext(ioDispatcher) {
+        try {
+            val entity = localDataSource.getScheduleByRowId(rowId) ?: return@withContext false
+            if (entity.exerciseId != exerciseId) return@withContext false
+            val now = System.currentTimeMillis()
+            val modeStr = when (measurementMode) {
+                ExerciseMeasurementMode.Strength -> "strength"
+                ExerciseMeasurementMode.Duration -> "duration"
+            }
+            val newDuration = when (measurementMode) {
+                ExerciseMeasurementMode.Duration -> durationSeconds
+                ExerciseMeasurementMode.Strength -> null
+            }
+            localDataSource.updateScheduleEntity(
+                entity.copy(
+                    sets = sets,
+                    reps = reps,
+                    weightKg = weightKg,
+                    measurementMode = modeStr,
+                    durationSeconds = newDuration,
+                    updatedAtEpochMillis = now,
+                ),
+            )
+            if (BuildConfig.DEBUG) {
+                Log.d(WORKOUT_DB_TRACE_LOG_TAG, "updateWorkoutScheduleRow ok id=$rowId exerciseId=$exerciseId")
+            }
+            true
+        } catch (t: Throwable) {
+            Log.e(WORKOUT_DB_TRACE_LOG_TAG, "updateWorkoutScheduleRow failed id=$rowId", t)
+            throw t
         }
     }
 

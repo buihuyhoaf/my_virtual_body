@@ -76,22 +76,27 @@ fun AppNavGraph(
         composable<BodyDetailAnalystRoute> {
             BodyDetailAnalystScreen(onBack = { navController.popBackStack() })
         }
-        composable<ExerciseLibraryRoute> {
+        composable<ExerciseLibraryRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<ExerciseLibraryRoute>()
             ExerciseLibraryScreen(
                 onNavigateToWorkoutCalendar = { navController.navigate(WorkoutCalendarRoute) },
+                scheduleRowIdToEdit = route.scheduleRowIdToEdit,
             )
         }
         composable<WorkoutCalendarRoute> {
             val onWorkoutCalendarBack = back@{
-                if (navController.popBackStack(ExerciseLibraryRoute, inclusive = false)) return@back
+                if (navController.popBackStack<ExerciseLibraryRoute>(inclusive = false)) return@back
                 if (navController.popBackStack(CenfitCoachRoute, inclusive = false)) return@back
-                navController.navigate(ExerciseLibraryRoute) {
+                navController.navigate(ExerciseLibraryRoute()) {
                     popUpTo<WorkoutCalendarRoute> { inclusive = true }
                     launchSingleTop = true
                 }
             }
             WorkoutCalendarScreen(
                 onBack = onWorkoutCalendarBack,
+                onNavigateToEditScheduleRow = { rowId ->
+                    navController.navigate(ExerciseLibraryRoute(scheduleRowIdToEdit = rowId))
+                },
             )
         }
         composable<AddRoute> {

@@ -40,6 +40,8 @@ internal fun SelectionBarSections(
     activeExerciseInfo: ActiveExerciseInfo?,
     isCartExpanded: Boolean,
     bookingEnabled: Boolean,
+    isSelectionBarEditMode: Boolean,
+    isSelectionBarConfirmEnabled: Boolean,
     actions: ExerciseLibraryActions,
     modifier: Modifier = Modifier,
 ) {
@@ -133,14 +135,19 @@ internal fun SelectionBarSections(
                     activeExerciseInfo = activeExerciseInfo,
                     actions = actions,
                     dragModifier = dragModifier,
+                    isSelectionBarEditMode = isSelectionBarEditMode,
                 )
                 SelectionBarBody(
                     activeExerciseInfo = activeExerciseInfo,
                     actions = actions,
                 )
                 SelectionBarFooter(
-                    enabled = bookingEnabled,
-                    onClick = actions.onAddToSession,
+                    isSelectionBarEditMode = isSelectionBarEditMode,
+                    bookingEnabled = bookingEnabled,
+                    isConfirmEnabled = isSelectionBarConfirmEnabled,
+                    onAddToSession = actions.onAddToSession,
+                    onConfirmSelectionBarEdit = actions.onConfirmSelectionBarEdit,
+                    onCancelSelectionBarEdit = actions.onCancelSelectionBarEdit,
                 )
             }
         }

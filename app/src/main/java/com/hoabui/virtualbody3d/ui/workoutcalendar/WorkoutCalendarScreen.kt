@@ -48,6 +48,7 @@ import java.util.Locale
 @Composable
 fun WorkoutCalendarScreen(
     onBack: () -> Unit,
+    onNavigateToEditScheduleRow: (Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: WorkoutCalendarViewModel = hiltViewModel(),
 ) {
@@ -106,6 +107,7 @@ fun WorkoutCalendarScreen(
                     data = data,
                     today = today,
                     viewModel = viewModel,
+                    onNavigateToEditScheduleRow = onNavigateToEditScheduleRow,
                 )
             },
         )
@@ -118,6 +120,7 @@ private fun WorkoutCalendarSuccessContent(
     data: WorkoutCalendarContent,
     today: LocalDate,
     viewModel: WorkoutCalendarViewModel,
+    onNavigateToEditScheduleRow: (Long) -> Unit,
 ) {
     val cal = GymTheme.token.workoutCalendar
     val token = GymTheme.token
@@ -204,6 +207,10 @@ private fun WorkoutCalendarSuccessContent(
             onSwipeRowSettledClosed = viewModel::onSwipeRowSettledClosed,
             onConsumePendingSwipeClose = viewModel::consumePendingSwipeCloseRow,
             onDeleteAffordanceClick = viewModel::onDeleteAffordanceClicked,
+            onEditAffordanceClick = { rowId, _ ->
+                viewModel.onEditAffordanceClicked(rowId)
+                onNavigateToEditScheduleRow(rowId)
+            },
             onSwipeHintConsumed = viewModel::markSwipeHintSeen,
             modifier = Modifier
                 .fillMaxWidth()

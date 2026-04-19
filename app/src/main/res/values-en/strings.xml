@@ -15,6 +15,8 @@
     <string name="exercise_library_cart_choose_time">Choose time</string>
     <string name="exercise_library_cart_add_short">Add</string>
     <string name="exercise_library_add_to_session">Add to workout session</string>
+    <string name="exercise_library_selection_confirm">Confirm</string>
+    <string name="exercise_library_selection_cancel">Cancel</string>
     <string name="exercise_library_booking_title">Book session</string>
     <string name="exercise_library_booking_confirm">Confirm</string>
     <string name="exercise_library_booking_cancel">Cancel</string>
@@ -81,6 +83,8 @@
     <string name="workout_calendar_metrics_strength">%1$d × %2$d</string>
     <string name="workout_calendar_metrics_duration">%1$d min</string>
     <string name="workout_calendar_swipe_delete">Delete</string>
+    <string name="workout_calendar_swipe_edit">Edit</string>
+    <string name="workout_calendar_edit_pending">Editing scheduled workouts isn\'t available yet.</string>
     <string name="workout_calendar_delete_confirm_title">Remove exercise?</string>
     <string name="workout_calendar_delete_confirm_message">Remove \"%1$s\" from the schedule for %2$s?</string>
     <string name="workout_calendar_delete_cancel">Cancel</string>

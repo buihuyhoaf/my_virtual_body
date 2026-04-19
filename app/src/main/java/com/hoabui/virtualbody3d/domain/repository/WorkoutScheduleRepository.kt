@@ -1,5 +1,6 @@
 package com.hoabui.virtualbody3d.domain.repository
 
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutExecutionStatus
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutScheduleDeleteResult
@@ -14,7 +15,23 @@ interface WorkoutScheduleRepository {
 
     suspend fun getAllSchedules(): List<WorkoutSchedule>
 
+    /** Returns a single schedule row by Room primary key, or null if missing. */
+    suspend fun getWorkoutScheduleByRowId(rowId: Long): WorkoutSchedule?
+
     suspend fun updateExecutionStatus(rowId: Long, status: WorkoutExecutionStatus)
+
+    /**
+     * Updates an existing schedule row from cart-style fields. Returns false if the row is missing or [exerciseId] does not match.
+     */
+    suspend fun updateWorkoutScheduleRow(
+        rowId: Long,
+        exerciseId: String,
+        measurementMode: ExerciseMeasurementMode,
+        sets: Int,
+        reps: Int,
+        weightKg: Double,
+        durationSeconds: Int?,
+    ): Boolean
 
     /**
      * Deletes the row by primary key. Returns payload for undo (schedule + optional removed session), or null if absent.

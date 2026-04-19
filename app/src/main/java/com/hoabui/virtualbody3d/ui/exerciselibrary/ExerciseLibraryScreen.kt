@@ -62,9 +62,14 @@ private object ExerciseLibraryListContentTypes {
 fun ExerciseLibraryScreen(
     modifier: Modifier = Modifier,
     onNavigateToWorkoutCalendar: () -> Unit,
+    scheduleRowIdToEdit: Long? = null,
     viewModel: ExerciseLibraryViewModel = hiltViewModel(),
 ) {
     val screenState by viewModel.state.collectAsStateWithLifecycle()
+    LaunchedEffect(scheduleRowIdToEdit) {
+        val rowId = scheduleRowIdToEdit ?: return@LaunchedEffect
+        viewModel.startSelectionBarEditFromScheduleRow(rowId)
+    }
     val actions = remember(viewModel, onNavigateToWorkoutCalendar) {
         ExerciseLibraryActions(
             onQueryChange = viewModel::updateSearchQuery,
@@ -103,6 +108,8 @@ fun ExerciseLibraryScreen(
             onAddCartSetRow = { exerciseId -> viewModel.stepCartField(exerciseId, 0, CartSetField.SETS, 1) },
             onSetCartFieldManual = viewModel::setCartFieldManual,
             onToggleCartExpanded = viewModel::toggleCartExpanded,
+            onConfirmSelectionBarEdit = viewModel::onConfirmSelectionBarEdit,
+            onCancelSelectionBarEdit = viewModel::onCancelSelectionBarEdit,
         )
     }
 

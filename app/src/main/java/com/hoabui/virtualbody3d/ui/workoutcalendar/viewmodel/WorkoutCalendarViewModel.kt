@@ -151,6 +151,10 @@ class WorkoutCalendarViewModel @Inject constructor(
         _deleteDialog.value = WorkoutCalendarDeleteDialogState(rowId = rowId, exerciseName = exerciseName)
     }
 
+    fun onEditAffordanceClicked(rowId: Long) {
+        _pendingSwipeCloseRowId.value = rowId
+    }
+
     fun onDeleteDialogDismiss() {
         val rowId = _deleteDialog.value?.rowId
         _deleteDialog.value = null

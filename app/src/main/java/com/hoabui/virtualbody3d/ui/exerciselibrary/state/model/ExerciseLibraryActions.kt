@@ -38,4 +38,8 @@ data class ExerciseLibraryActions(
     val onSetCartFieldManual: (exerciseId: String, setIndex: Int, field: CartSetField, value: String) -> Unit,
     /** Toggle the cart panel between collapsed and expanded states. */
     val onToggleCartExpanded: () -> Unit,
+    /** Confirm selection-bar edits (persist to Room) and dismiss edit chrome. */
+    val onConfirmSelectionBarEdit: () -> Unit,
+    /** Discard edits, restore baseline cart, dismiss edit chrome. */
+    val onCancelSelectionBarEdit: () -> Unit,
 )

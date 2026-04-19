@@ -28,6 +28,8 @@ import com.hoabui.virtualbody3d.domain.usecase.SessionBookingConfirmationWorkflo
 import com.hoabui.virtualbody3d.domain.usecase.SessionBookingWorkflowInput
 import com.hoabui.virtualbody3d.domain.usecase.ToggleExerciseInCartUseCase
 import com.hoabui.virtualbody3d.domain.usecase.UpdateExerciseDraftUseCase
+import com.hoabui.virtualbody3d.domain.usecase.UpdateWorkoutScheduleFromCartDraftUseCase
+import com.hoabui.virtualbody3d.domain.repository.WorkoutScheduleRepository
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseLibraryCatalogUiMapper
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toCartSnapshot
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toLibraryCartDraft
@@ -41,6 +43,7 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mapper.ExerciseLibraryU
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.CartSetField
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.isCartDraftValidForSessionConfirm
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryWeeklyHeatmapState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryCartState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SetRowDraft
@@ -92,6 +95,8 @@ class ExerciseLibraryViewModel @Inject constructor(
     private val canConfirmLibrarySessionBookingUseCase: CanConfirmLibrarySessionBookingUseCase,
     private val resolveNextSlotSelectionAfterToggleUseCase: ResolveNextSlotSelectionAfterToggleUseCase,
     private val saveWorkoutLogSessionUseCase: SaveWorkoutLogSessionUseCase,
+    private val updateWorkoutScheduleFromCartDraftUseCase: UpdateWorkoutScheduleFromCartDraftUseCase,
+    private val workoutScheduleRepository: WorkoutScheduleRepository,
 ) : UiStateViewModel<ExerciseLibraryUiState, Unit>() {
 
     private val confirmBookingMutex = Mutex()
@@ -632,6 +637,75 @@ class ExerciseLibraryViewModel @Inject constructor(
 
     fun toggleCartExpanded() {
         dispatchIntent(ExerciseLibraryIntent.ToggleCartExpanded)
+    }
+
+    fun beginSelectionBarEdit(scheduleRowId: Long) {
+        dispatch(ExerciseLibraryUpdate.SelectionBarEditBegan(scheduleRowId))
+    }
+
+    /**
+     * Loads the schedule row from Room and opens the selection bar in edit mode (e.g. after calendar Edit).
+     */
+    fun startSelectionBarEditFromScheduleRow(scheduleRowId: Long) {
+        launchSafely {
+            val schedule = workoutScheduleRepository.getWorkoutScheduleByRowId(scheduleRowId) ?: return@launchSafely
+            dispatch(
+                ExerciseLibraryUpdate.SelectionBarEditFromScheduleRowLoaded(
+                    scheduleRowId = scheduleRowId,
+                    schedule = schedule,
+                ),
+            )
+        }
+    }
+
+    fun onCancelSelectionBarEdit() {
+        dispatch(ExerciseLibraryUpdate.SelectionBarEditCancelled)
+    }
+
+    fun onConfirmSelectionBarEdit() {
+        launchSafely {
+            val s = filterState.value
+            if (!s.chrome.isSelectionBarEditMode) return@launchSafely
+            val rowId = s.chrome.editingScheduleRowId ?: return@launchSafely
+            if (!s.isCartDraftValidForSessionConfirm()) return@launchSafely
+            val exerciseId = s.cart.activeExerciseId ?: s.cart.draftOrder.firstOrNull() ?: return@launchSafely
+            val draft = s.cart.itemDrafts[exerciseId] ?: return@launchSafely
+            val mode = s.libraryList.exerciseMeasurementById[exerciseId] ?: ExerciseMeasurementMode.Strength
+            val sets: Int
+            val reps: Int
+            val weightKg: Double
+            val durationSeconds: Int?
+            when (mode) {
+                ExerciseMeasurementMode.Strength -> {
+                    if (draft.setRows.any { it.reps <= 0 }) return@launchSafely
+                    sets = draft.setRows.size
+                    reps = draft.setRows.first().reps
+                    weightKg = draft.setRows.first().weightKg
+                    durationSeconds = null
+                }
+                ExerciseMeasurementMode.Duration -> {
+                    val row = draft.setRows.firstOrNull() ?: return@launchSafely
+                    val sec = normalizeDurationMinutesSeconds(row.minutes, row.seconds)
+                    if (sec <= 0) return@launchSafely
+                    sets = 1
+                    reps = 0
+                    weightKg = 0.0
+                    durationSeconds = sec
+                }
+            }
+            val ok = updateWorkoutScheduleFromCartDraftUseCase(
+                rowId = rowId,
+                exerciseId = exerciseId,
+                measurementMode = mode,
+                sets = sets,
+                reps = reps,
+                weightKg = weightKg,
+                durationSeconds = durationSeconds,
+            )
+            if (ok) {
+                dispatch(ExerciseLibraryUpdate.SelectionBarEditFinished)
+            }
+        }
     }
 
     fun confirmSessionBooking() {

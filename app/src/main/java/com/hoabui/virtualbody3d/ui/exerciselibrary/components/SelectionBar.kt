@@ -57,6 +57,7 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toCoilModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.CartSetField
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryActions
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.isCartDraftValidForSessionConfirm
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SetRowDraft
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
@@ -74,6 +75,8 @@ fun CartThumbnailRow(
     onSelectCartItem: (String) -> Unit,
     onRemoveCartItem: (String) -> Unit,
     onClearAll: () -> Unit,
+    showClearAllButton: Boolean = true,
+    showRemoveOnThumbnail: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     val token = GymTheme.token
@@ -99,16 +102,19 @@ fun CartThumbnailRow(
                     isActive = item.id == activeExerciseId,
                     onSelectCartItem = selectHandler,
                     onRemoveCartItem = removeHandler,
+                    showRemoveControl = showRemoveOnThumbnail,
                 )
             }
         }
-        GButton(
-            text = stringResource(R.string.exercise_library_cart_clear_all),
-            onClick = onClearAll,
-            modifier = Modifier.padding(start = token.spacing.xs),
-            variant = GButtonVariant.Ghost,
-            contentColor = token.colors.error,
-        )
+        if (showClearAllButton) {
+            GButton(
+                text = stringResource(R.string.exercise_library_cart_clear_all),
+                onClick = onClearAll,
+                modifier = Modifier.padding(start = token.spacing.xs),
+                variant = GButtonVariant.Ghost,
+                contentColor = token.colors.error,
+            )
+        }
     }
 }
 
@@ -331,7 +337,29 @@ private fun CartSetRowItem(
 }
 
 // ─────────────────────────────────────────────────────────
-// Full stepper section: Sets header + per-row inputs
+// Sets count stepper (composed beside exercise title in SelectionBarBody)
+// ─────────────────────────────────────────────────────────
+@Composable
+internal fun CartSetsCountStepper(
+    exerciseId: String,
+    setRows: ImmutableList<SetRowDraft>,
+    onStepField: (exerciseId: String, setIndex: Int, field: CartSetField, delta: Int) -> Unit,
+    onSetFieldManual: (exerciseId: String, setIndex: Int, field: CartSetField, value: String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val setsLabel = stringResource(R.string.exercise_library_stepper_sets_label)
+    StepperControl(
+        label = setsLabel,
+        displayValue = setRows.size.toString(),
+        onDecrease = { onStepField(exerciseId, 0, CartSetField.SETS, -1) },
+        onIncrease = { onStepField(exerciseId, 0, CartSetField.SETS, +1) },
+        onManualInput = { onSetFieldManual(exerciseId, 0, CartSetField.SETS, it) },
+        modifier = modifier,
+    )
+}
+
+// ─────────────────────────────────────────────────────────
+// Per-set steppers: divider + rows (sets count is in the header row)
 // ─────────────────────────────────────────────────────────
 @Composable
 fun CartSetStepperSection(
@@ -343,26 +371,11 @@ fun CartSetStepperSection(
     modifier: Modifier = Modifier,
 ) {
     val token = GymTheme.token
-    val setsLabel = stringResource(R.string.exercise_library_stepper_sets_label)
 
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(token.spacing.xs),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-        ) {
-            StepperControl(
-                label = setsLabel,
-                displayValue = setRows.size.toString(),
-                onDecrease = { onStepField(exerciseId, 0, CartSetField.SETS, -1) },
-                onIncrease = { onStepField(exerciseId, 0, CartSetField.SETS, +1) },
-                onManualInput = { onSetFieldManual(exerciseId, 0, CartSetField.SETS, it) },
-            )
-        }
-
         GDivider(modifier = Modifier.fillMaxWidth(), color = token.colors.borderSubtle)
 
         // SỬA Ở ĐÂY: Dùng Column thường thay vì LazyColumn
@@ -431,6 +444,7 @@ private fun ExerciseLibraryCartThumbnail(
     isActive: Boolean,
     onSelectCartItem: () -> Unit,
     onRemoveCartItem: () -> Unit,
+    showRemoveControl: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     val token = GymTheme.token
@@ -471,12 +485,14 @@ private fun ExerciseLibraryCartThumbnail(
                 )
             }
         }
-        ExerciseLibraryCartRemoveSticker(
-            onRemove = onRemoveCartItem,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .size(removeTouch),
-        )
+        if (showRemoveControl) {
+            ExerciseLibraryCartRemoveSticker(
+                onRemove = onRemoveCartItem,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .size(removeTouch),
+            )
+        }
     }
 }
 
@@ -538,6 +554,8 @@ fun ExerciseLibrarySelectionBar(
             .associateBy { it.id }
         libraryState.cart.draftOrder.mapNotNull { byId[it] }
     }
+    val isSelectionBarEditMode = libraryState.chrome.isSelectionBarEditMode
+    val isSelectionBarConfirmEnabled = libraryState.isCartDraftValidForSessionConfirm()
     val activeExerciseInfo by remember(
         libraryState.cart.activeExerciseId,
         libraryState.cart.itemDrafts,
@@ -584,6 +602,8 @@ fun ExerciseLibrarySelectionBar(
         activeExerciseInfo = activeExerciseInfo,
         isCartExpanded = libraryState.cart.isCartExpanded,
         bookingEnabled = libraryState.libraryList.isAddToSessionEnabled,
+        isSelectionBarEditMode = isSelectionBarEditMode,
+        isSelectionBarConfirmEnabled = isSelectionBarConfirmEnabled,
         actions = actions,
         modifier = modifier,
     )

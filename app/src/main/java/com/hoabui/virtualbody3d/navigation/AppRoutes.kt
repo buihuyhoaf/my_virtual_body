@@ -27,7 +27,10 @@ data object BodyDetailAnalystRoute
 data class BodyRegionDetailRoute(val region: String)
 
 @Serializable
-data object ExerciseLibraryRoute
+data class ExerciseLibraryRoute(
+    /** When set, library opens with the selection bar expanded in edit mode for this Room row. */
+    val scheduleRowIdToEdit: Long? = null,
+)
 
 @Serializable
 data object WorkoutCalendarRoute

@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,7 +33,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -45,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -85,7 +86,7 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 
-private enum class SwipeDeleteAnchor { Closed, Open }
+private enum class SwipeRowAnchor { Closed, DeleteOpen, EditOpen }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -102,6 +103,7 @@ fun WorkoutCalendarDayExerciseListOrganism(
     onSwipeRowSettledClosed: (Long) -> Unit = {},
     onConsumePendingSwipeClose: (Long) -> Unit = {},
     onDeleteAffordanceClick: (rowId: Long, exerciseName: String) -> Unit = { _, _ -> },
+    onEditAffordanceClick: (rowId: Long, exerciseName: String) -> Unit = { _, _ -> },
     onSwipeHintConsumed: () -> Unit = {},
 ) {
     val token = GymTheme.token
@@ -187,6 +189,7 @@ fun WorkoutCalendarDayExerciseListOrganism(
                             onSwipeRowSettledClosed = onSwipeRowSettledClosed,
                             onConsumePendingSwipeClose = onConsumePendingSwipeClose,
                             onDeleteAffordanceClick = onDeleteAffordanceClick,
+                            onEditAffordanceClick = onEditAffordanceClick,
                             onSwipeHintConsumed = onSwipeHintConsumed,
                             modifier = Modifier.animateItem(),
                         )
@@ -279,12 +282,13 @@ private fun SwipeToDeleteExerciseRow(
     onSwipeRowSettledClosed: (Long) -> Unit,
     onConsumePendingSwipeClose: (Long) -> Unit,
     onDeleteAffordanceClick: (rowId: Long, exerciseName: String) -> Unit,
+    onEditAffordanceClick: (rowId: Long, exerciseName: String) -> Unit,
     onSwipeHintConsumed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
-    val anchoredState = remember { AnchoredDraggableState(SwipeDeleteAnchor.Closed) }
+    val anchoredState = remember { AnchoredDraggableState(SwipeRowAnchor.Closed) }
     val snapSpec = tween<Float>(
         durationMillis = token.motion.duration.standard,
         easing = token.motion.easing.standard,
@@ -304,11 +308,13 @@ private fun SwipeToDeleteExerciseRow(
         density.fontScale,
     ) {
         val w = with(density) { cal.swipeDeleteTrackWidth.toPx() }
-        val openX = if (layoutDirection == LayoutDirection.Rtl) w else -w
+        val deleteOpenX = if (layoutDirection == LayoutDirection.Rtl) w else -w
+        val editOpenX = if (layoutDirection == LayoutDirection.Rtl) -w else w
         anchoredState.updateAnchors(
             DraggableAnchors {
-                SwipeDeleteAnchor.Closed at 0f
-                SwipeDeleteAnchor.Open at openX
+                SwipeRowAnchor.Closed at 0f
+                SwipeRowAnchor.DeleteOpen at deleteOpenX
+                SwipeRowAnchor.EditOpen at editOpenX
             },
         )
         onDispose { }
@@ -324,8 +330,8 @@ private fun SwipeToDeleteExerciseRow(
                     return@collect
                 }
                 when (anchor) {
-                    SwipeDeleteAnchor.Open -> onSwipeRowOpened(line.rowId)
-                    SwipeDeleteAnchor.Closed -> onSwipeRowSettledClosed(line.rowId)
+                    SwipeRowAnchor.DeleteOpen, SwipeRowAnchor.EditOpen -> onSwipeRowOpened(line.rowId)
+                    SwipeRowAnchor.Closed -> onSwipeRowSettledClosed(line.rowId)
                 }
             }
     }
@@ -333,15 +339,15 @@ private fun SwipeToDeleteExerciseRow(
     LaunchedEffect(openSwipeRowId, line.rowId, anchoredState) {
         if (openSwipeRowId != null &&
             openSwipeRowId != line.rowId &&
-            anchoredState.currentValue == SwipeDeleteAnchor.Open
+            anchoredState.currentValue != SwipeRowAnchor.Closed
         ) {
-            anchoredState.animateTo(SwipeDeleteAnchor.Closed)
+            anchoredState.animateTo(SwipeRowAnchor.Closed)
         }
     }
 
     LaunchedEffect(pendingSwipeCloseRowId, line.rowId, anchoredState) {
         if (pendingSwipeCloseRowId == line.rowId) {
-            anchoredState.animateTo(SwipeDeleteAnchor.Closed)
+            anchoredState.animateTo(SwipeRowAnchor.Closed)
             onConsumePendingSwipeClose(line.rowId)
         }
     }
@@ -349,8 +355,8 @@ private fun SwipeToDeleteExerciseRow(
     LaunchedEffect(playSwipeHintNudge, anchoredState, cal, token) {
         if (!playSwipeHintNudge) return@LaunchedEffect
         delay(LayoutSwipeFractions.NUDGE_START_DELAY_MS)
-        val openX = openAnchorOffsetOrNull(anchoredState) ?: return@LaunchedEffect
-        val peek = openX * cal.swipeDeleteNudgeFraction
+        val deleteOpenX = deleteOpenAnchorOffsetOrNull(anchoredState) ?: return@LaunchedEffect
+        val peek = deleteOpenX * cal.swipeDeleteNudgeFraction
         var applied = 0f
         animate(
             initialValue = 0f,
@@ -376,7 +382,7 @@ private fun SwipeToDeleteExerciseRow(
             applied = v
             anchoredState.dispatchRawDelta(delta)
         }
-        anchoredState.animateTo(SwipeDeleteAnchor.Closed)
+        anchoredState.animateTo(SwipeRowAnchor.Closed)
         onSwipeHintConsumed()
     }
 
@@ -386,10 +392,11 @@ private fun SwipeToDeleteExerciseRow(
             .fillMaxWidth()
             .clip(clipShape),
     ) {
-        SwipeDeleteUnderlay(
+        SwipeActionsUnderlay(
             cal = cal,
             token = token,
             modifier = Modifier.matchParentSize(),
+            onEditClick = { onEditAffordanceClick(line.rowId, line.title) },
             onDeleteClick = { onDeleteAffordanceClick(line.rowId, line.title) },
         )
         Box(
@@ -418,8 +425,8 @@ private fun SwipeToDeleteExerciseRow(
 }
 
 @OptIn(ExperimentalFoundationApi::class)
-private fun openAnchorOffsetOrNull(state: AnchoredDraggableState<SwipeDeleteAnchor>): Float? {
-    val x = state.anchors.positionOf(SwipeDeleteAnchor.Open)
+private fun deleteOpenAnchorOffsetOrNull(state: AnchoredDraggableState<SwipeRowAnchor>): Float? {
+    val x = state.anchors.positionOf(SwipeRowAnchor.DeleteOpen)
     return x.takeUnless { it.isNaN() }
 }
 
@@ -428,36 +435,71 @@ private object LayoutSwipeFractions {
     const val NUDGE_START_DELAY_MS = 400L
 }
 
+/**
+ * Leading [Alignment.CenterStart] = edit (primary); trailing [Alignment.CenterEnd] = delete (error).
+ * Text-only affordances; track width and padding match [WorkoutCalendarTokens] swipe tokens.
+ */
 @Composable
-private fun SwipeDeleteUnderlay(
+private fun SwipeActionsUnderlay(
     cal: WorkoutCalendarTokens,
     token: GymToken,
     modifier: Modifier = Modifier,
+    onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
 ) {
+    val editLabel = stringResource(R.string.workout_calendar_swipe_edit)
     val deleteLabel = stringResource(R.string.workout_calendar_swipe_delete)
-    Row(
-        modifier = modifier
-            .fillMaxSize()
-            .background(token.colors.error)
-            .clickable(role = Role.Button, onClick = onDeleteClick)
-            .padding(horizontal = cal.exerciseItemInnerPadding),
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.Delete,
-            contentDescription = deleteLabel,
-            modifier = Modifier.size(cal.swipeDeleteIconSize),
-            tint = token.colors.onError,
-        )
-        GText(
-            text = deleteLabel,
-            style = token.typography.labelLarge,
-            color = token.colors.onError,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(start = cal.swipeDeleteIconLabelGap),
-        )
+    Box(modifier = modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .width(cal.swipeDeleteTrackWidth)
+                .fillMaxHeight()
+                .background(token.colors.primary)
+                .clickable(
+                    role = Role.Button,
+                    onClickLabel = editLabel,
+                    onClick = onEditClick,
+                )
+                .padding(
+                    start = cal.exerciseItemInnerPadding,
+                    end = token.spacing.none,
+                ),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            GText(
+                text = editLabel,
+                style = token.typography.labelLarge,
+                color = token.colors.onPrimary,
+                textAlign = TextAlign.Start,
+            )
+        }
+        Row(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .width(cal.swipeDeleteTrackWidth)
+                .fillMaxHeight()
+                .background(token.colors.error)
+                .clickable(
+                    role = Role.Button,
+                    onClickLabel = deleteLabel,
+                    onClick = onDeleteClick,
+                )
+                .padding(
+                    start = token.spacing.none,
+                    end = cal.exerciseItemInnerPadding,
+                ),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            GText(
+                text = deleteLabel,
+                style = token.typography.labelLarge,
+                color = token.colors.onError,
+                textAlign = TextAlign.End,
+            )
+        }
     }
 }
 
@@ -483,7 +525,7 @@ private fun WorkoutCalendarExerciseRow(
     GCard(
         modifier = Modifier.fillMaxWidth(),
         onClick = null,
-        shape = RoundedCornerShape(token.radius.sm),
+        shape = RectangleShape,
         containerColor = token.colors.surface,
         // Intensity color-coded border
         border = BorderStroke(token.borderWidth.thin, intensityColor.copy(alpha = 0.5f)),

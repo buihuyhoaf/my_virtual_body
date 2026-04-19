@@ -1,6 +1,7 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi
 
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseLibraryCartSnapshot
+import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
 import com.hoabui.virtualbody3d.domain.usecase.CommitLibrarySessionBookingResult
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryCatalogState
@@ -47,4 +48,21 @@ sealed interface ExerciseLibraryUpdate {
         data object PendingCommit : BookingConfirmation
         data class Completed(val result: CommitLibrarySessionBookingResult) : BookingConfirmation
     }
+
+    /** Enter selection-bar edit mode and capture the current cart for cancel-restore. */
+    data class SelectionBarEditBegan(val scheduleRowId: Long) : ExerciseLibraryUpdate
+
+    /**
+     * Replace the cart with [schedule], expand the selection bar, and enter edit mode for [scheduleRowId].
+     */
+    data class SelectionBarEditFromScheduleRowLoaded(
+        val scheduleRowId: Long,
+        val schedule: WorkoutSchedule,
+    ) : ExerciseLibraryUpdate
+
+    /** Restore [LibraryChromeState.selectionBarEditBaselineCart] and exit edit mode. */
+    data object SelectionBarEditCancelled : ExerciseLibraryUpdate
+
+    /** After successful Room persist of edits; exit edit mode without restoring baseline. */
+    data object SelectionBarEditFinished : ExerciseLibraryUpdate
 }

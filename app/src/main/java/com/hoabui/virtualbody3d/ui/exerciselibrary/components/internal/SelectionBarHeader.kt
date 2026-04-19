@@ -16,6 +16,7 @@ internal fun SelectionBarHeader(
     activeExerciseInfo: ActiveExerciseInfo?,
     actions: ExerciseLibraryActions,
     dragModifier: Modifier,
+    isSelectionBarEditMode: Boolean,
 ) {
     val token = GymTheme.token
     CartDragHandle(modifier = dragModifier)
@@ -25,6 +26,8 @@ internal fun SelectionBarHeader(
         onSelectCartItem = actions.onSelectCartItem,
         onRemoveCartItem = actions.onRemoveCartItem,
         onClearAll = actions.onClearCart,
+        showClearAllButton = !isSelectionBarEditMode,
+        showRemoveOnThumbnail = !isSelectionBarEditMode,
         modifier = Modifier.padding(horizontal = token.spacing.sm),
     )
 }
