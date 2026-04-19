@@ -11,20 +11,24 @@ enum class WorkoutCalendarDayCellStatus {
     Mixed,
 }
 
+enum class WorkoutCalendarVolumeLevel {
+    None,
+    ActiveRecovery,
+    SolidWorkout,
+    HighVolume,
+}
+
 data class WorkoutCalendarDaySummary(
     val epochDay: Long,
     val cellStatus: WorkoutCalendarDayCellStatus,
     val totalCaloriesKcal: Float,
+    val dailyExerciseCount: Int,
 ) {
-    /**
-     * Heatmap intensity thresholds are shared with exercise/session intensity mapping:
-     * light < 100 kcal, moderate 100..250 kcal, high > 250 kcal.
-     */
-    val intensityLevel: WorkoutIntensityLevel?
+    val volumeLevel: WorkoutCalendarVolumeLevel
         get() = when {
-            totalCaloriesKcal <= 0f -> null
-            totalCaloriesKcal < WORKOUT_INTENSITY_LIGHT_UPPER_BOUND_KCAL -> WorkoutIntensityLevel.Light
-            totalCaloriesKcal <= WORKOUT_INTENSITY_MODERATE_UPPER_BOUND_KCAL -> WorkoutIntensityLevel.Moderate
-            else -> WorkoutIntensityLevel.High
+            dailyExerciseCount in 1..2 -> WorkoutCalendarVolumeLevel.ActiveRecovery
+            dailyExerciseCount in 3..5 -> WorkoutCalendarVolumeLevel.SolidWorkout
+            dailyExerciseCount > 5 -> WorkoutCalendarVolumeLevel.HighVolume
+            else -> WorkoutCalendarVolumeLevel.None
         }
 }

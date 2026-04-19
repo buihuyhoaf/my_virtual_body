@@ -30,6 +30,7 @@ fun groupSchedulesToDaySummaries(
                     leanBodyMassKg = null,
                 )
             },
+            dailyExerciseCount = rows.size,
         )
     }
 }

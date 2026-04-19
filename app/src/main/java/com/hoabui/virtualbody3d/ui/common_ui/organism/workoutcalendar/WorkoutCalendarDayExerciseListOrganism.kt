@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCaloriesVisualLevel
 import com.hoabui.virtualbody3d.domain.model.calendar.WORKOUT_CALENDAR_FALLBACK_DRAWABLE_NAME
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarExerciseLineUiModel
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarSessionBlockUiModel
@@ -103,8 +104,7 @@ fun WorkoutCalendarDayExerciseListOrganism(
     val token = GymTheme.token
     val cal = token.workoutCalendar
     val locale = LocalConfiguration.current.locales.get(0) ?: Locale.getDefault()
-    // Keep day/month compact to match the calendar header design requirement ("19/04 • Total: ...").
-    val headerFormat = DateTimeFormatter.ofPattern("dd/MM", locale)
+    val headerFormat = DateTimeFormatter.ofPattern("EEEE, dd/MM", locale)
     val firstExerciseRowId = remember(sessionBlocks) {
         sessionBlocks.asSequence()
             .flatMap { it.exercises.asSequence() }
@@ -253,6 +253,13 @@ private fun WorkoutIntensityLevel.toColor(token: GymToken): Color = when (this) 
     WorkoutIntensityLevel.Light -> token.colors.success
     WorkoutIntensityLevel.Moderate -> token.colors.warning
     WorkoutIntensityLevel.High -> token.colors.error
+}
+
+@Composable
+private fun WorkoutCaloriesVisualLevel.toColor(token: GymToken): Color = when (this) {
+    WorkoutCaloriesVisualLevel.Low -> token.colors.textSecondary
+    WorkoutCaloriesVisualLevel.Medium -> token.colors.warning
+    WorkoutCaloriesVisualLevel.High -> token.colors.error
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -467,6 +474,7 @@ private fun WorkoutCalendarExerciseRow(
     }
     val fallbackPainter = painterResource(R.drawable.body_unsplash)
     val intensityColor = line.intensityLevel.toColor(token)
+    val caloriesColor = line.caloriesVisualLevel.toColor(token)
 
     GCard(
         modifier = Modifier.fillMaxWidth(),
@@ -520,15 +528,14 @@ private fun WorkoutCalendarExerciseRow(
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
-                if (line.caloriesLabel.isNotBlank()) {
-                    // Intentionally stacked under set/rep detail for subtle, low-emphasis calories.
-                    Spacer(modifier = Modifier.height(token.spacing.xxxs))
-                    GText(
-                        text = line.caloriesLabel,
-                        style = token.typography.labelSmall,
-                        color = token.colors.textMuted,
-                    )
-                }
+            }
+            if (line.caloriesLabel.isNotBlank()) {
+                GText(
+                    text = line.caloriesLabel,
+                    style = token.typography.labelMedium,
+                    color = caloriesColor,
+                    textAlign = TextAlign.End,
+                )
             }
         }
     }
@@ -569,6 +576,7 @@ private fun DayListPreviewLight() {
                                     title = "Squat",
                                     setBreakdownLabel = "3 Sets • 95 kg x 10",
                                     caloriesLabel = "125 kcal",
+                                    caloriesVisualLevel = WorkoutCaloriesVisualLevel.High,
                                     intensityLevel = WorkoutIntensityLevel.Moderate,
                                     image = ImageSource.LocalResource(WORKOUT_CALENDAR_FALLBACK_DRAWABLE_NAME),
                                 ),
@@ -577,6 +585,7 @@ private fun DayListPreviewLight() {
                                     title = "Romanian deadlift",
                                     setBreakdownLabel = "4 Sets • 75 kg x 8",
                                     caloriesLabel = "280 kcal",
+                                    caloriesVisualLevel = WorkoutCaloriesVisualLevel.High,
                                     intensityLevel = WorkoutIntensityLevel.High,
                                     image = ImageSource.LocalResource(WORKOUT_CALENDAR_FALLBACK_DRAWABLE_NAME),
                                 ),
@@ -593,6 +602,7 @@ private fun DayListPreviewLight() {
                                     title = "Bicep Curl",
                                     setBreakdownLabel = "3 Sets • 15 kg x 12",
                                     caloriesLabel = "45 kcal",
+                                    caloriesVisualLevel = WorkoutCaloriesVisualLevel.High,
                                     intensityLevel = WorkoutIntensityLevel.Light,
                                     image = ImageSource.LocalResource(WORKOUT_CALENDAR_FALLBACK_DRAWABLE_NAME),
                                 ),

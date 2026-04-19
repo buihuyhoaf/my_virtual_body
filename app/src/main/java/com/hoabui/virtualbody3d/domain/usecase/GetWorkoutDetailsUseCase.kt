@@ -361,12 +361,7 @@ private fun groupExercisesIntoSessionBlocks(
         val startTime = startInstant.atZone(systemZone).toLocalTime().format(timeFormatter)
         val endTime = endInstant.atZone(systemZone).toLocalTime().format(timeFormatter)
 
-        // Show a full range whenever start/end differ, including single-exercise sessions.
-        val sessionTimeLabel = if (startTime == endTime) {
-            startTime
-        } else {
-            "$startTime - $endTime"
-        }
+        val sessionTimeLabel = "$startTime - $endTime"
 
         WorkoutCalendarSessionBlock(
             sessionId = sessionId,

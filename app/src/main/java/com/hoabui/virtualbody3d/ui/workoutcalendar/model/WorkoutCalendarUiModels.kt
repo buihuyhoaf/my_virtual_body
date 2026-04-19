@@ -3,7 +3,7 @@ package com.hoabui.virtualbody3d.ui.workoutcalendar.model
 import androidx.compose.runtime.Immutable
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarDayCellStatus
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarDaySummary
-import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutIntensityLevel
+import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarVolumeLevel
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -13,7 +13,8 @@ data class WorkoutCalendarDayCellUiModel(
     val inCurrentMonth: Boolean,
     val cellStatus: WorkoutCalendarDayCellStatus,
     val totalCaloriesKcal: Float,
-    val intensityLevel: WorkoutIntensityLevel?,
+    val dailyExerciseCount: Int,
+    val volumeLevel: WorkoutCalendarVolumeLevel,
     val isSelected: Boolean,
     val isToday: Boolean,
 )
@@ -35,7 +36,8 @@ internal fun buildMonthGridCells(
                 inCurrentMonth = false,
                 cellStatus = WorkoutCalendarDayCellStatus.Empty,
                 totalCaloriesKcal = 0f,
-                intensityLevel = null,
+                dailyExerciseCount = 0,
+                volumeLevel = WorkoutCalendarVolumeLevel.None,
                 isSelected = false,
                 isToday = false,
             ),
@@ -52,7 +54,8 @@ internal fun buildMonthGridCells(
                 inCurrentMonth = true,
                 cellStatus = status,
                 totalCaloriesKcal = summary?.totalCaloriesKcal ?: 0f,
-                intensityLevel = summary?.intensityLevel,
+                dailyExerciseCount = summary?.dailyExerciseCount ?: 0,
+                volumeLevel = summary?.volumeLevel ?: WorkoutCalendarVolumeLevel.None,
                 isSelected = date == selected,
                 isToday = date == today,
             ),
@@ -65,7 +68,8 @@ internal fun buildMonthGridCells(
                 inCurrentMonth = false,
                 cellStatus = WorkoutCalendarDayCellStatus.Empty,
                 totalCaloriesKcal = 0f,
-                intensityLevel = null,
+                dailyExerciseCount = 0,
+                volumeLevel = WorkoutCalendarVolumeLevel.None,
                 isSelected = false,
                 isToday = false,
             ),
