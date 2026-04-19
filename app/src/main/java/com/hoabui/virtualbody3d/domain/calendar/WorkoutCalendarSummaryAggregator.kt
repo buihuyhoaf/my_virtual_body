@@ -17,10 +17,10 @@ fun groupSchedulesToDaySummaries(
         WorkoutCalendarDaySummary(
             epochDay = epochDay,
             cellStatus = rows.toCellStatus(),
-            totalCaloriesKcal = rows.sumOf { schedule ->
+            totalCaloriesKcal = rows.fold(0f) { acc, schedule ->
                 val durationMinutes = (schedule.durationSeconds ?: 0) / 60.0
                 val totalReps = schedule.sets.coerceAtLeast(0) * schedule.reps.coerceAtLeast(0)
-                CaloriesCalculator.estimateCalories(
+                acc + CaloriesCalculator.estimateCalories(
                     exerciseId = schedule.exerciseId,
                     measurementMode = schedule.measurementMode,
                     durationMinutes = durationMinutes,
@@ -28,8 +28,8 @@ fun groupSchedulesToDaySummaries(
                     averageLoadKg = schedule.weightKg.coerceAtLeast(0.0),
                     bodyWeightKg = DEFAULT_BODY_WEIGHT_KG,
                     leanBodyMassKg = null,
-                ).toDouble()
-            }.toFloat(),
+                )
+            },
         )
     }
 }
