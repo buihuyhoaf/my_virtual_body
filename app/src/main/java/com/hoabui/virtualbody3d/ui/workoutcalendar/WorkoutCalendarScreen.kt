@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
@@ -84,6 +85,7 @@ fun WorkoutCalendarScreen(
     GScaffold(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             GTopBar(
                 title = stringResource(R.string.workout_calendar_title),
@@ -180,7 +182,8 @@ private fun WorkoutCalendarSuccessContent(
             .fillMaxSize()
             .padding(
                 horizontal = cal.screenHorizontalPadding,
-                vertical = cal.screenVerticalPadding,
+                top = cal.screenVerticalPadding,
+                bottom = 0.dp,
             ),
     ) {
         WorkoutCalendarMonthGridOrganism(
