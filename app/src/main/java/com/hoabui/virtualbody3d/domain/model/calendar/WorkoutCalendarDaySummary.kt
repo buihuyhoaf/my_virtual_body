@@ -23,11 +23,8 @@ data class WorkoutCalendarDaySummary(
     val intensityLevel: WorkoutIntensityLevel?
         get() = when {
             totalCaloriesKcal <= 0f -> null
-            totalCaloriesKcal < LIGHT_INTENSITY_UPPER_BOUND_KCAL -> WorkoutIntensityLevel.Light
-            totalCaloriesKcal <= MODERATE_INTENSITY_UPPER_BOUND_KCAL -> WorkoutIntensityLevel.Moderate
+            totalCaloriesKcal < WORKOUT_INTENSITY_LIGHT_UPPER_BOUND_KCAL -> WorkoutIntensityLevel.Light
+            totalCaloriesKcal <= WORKOUT_INTENSITY_MODERATE_UPPER_BOUND_KCAL -> WorkoutIntensityLevel.Moderate
             else -> WorkoutIntensityLevel.High
         }
 }
-
-private const val LIGHT_INTENSITY_UPPER_BOUND_KCAL = 100f
-private const val MODERATE_INTENSITY_UPPER_BOUND_KCAL = 250f

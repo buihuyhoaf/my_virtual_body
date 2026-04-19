@@ -14,6 +14,9 @@ enum class WorkoutIntensityLevel {
     High,     // > 250 kcal
 }
 
+const val WORKOUT_INTENSITY_LIGHT_UPPER_BOUND_KCAL = 100f
+const val WORKOUT_INTENSITY_MODERATE_UPPER_BOUND_KCAL = 250f
+
 /**
  * One exercise entry for the workout calendar day detail list (domain layer).
  * Time-related labels are now handled by the parent [WorkoutCalendarSessionBlock].
@@ -38,8 +41,8 @@ data class WorkoutCalendarExerciseLine(
      */
     val intensityLevel: WorkoutIntensityLevel
         get() = when {
-            caloriesKcal < 100f -> WorkoutIntensityLevel.Light
-            caloriesKcal <= 250f -> WorkoutIntensityLevel.Moderate
+            caloriesKcal < WORKOUT_INTENSITY_LIGHT_UPPER_BOUND_KCAL -> WorkoutIntensityLevel.Light
+            caloriesKcal <= WORKOUT_INTENSITY_MODERATE_UPPER_BOUND_KCAL -> WorkoutIntensityLevel.Moderate
             else -> WorkoutIntensityLevel.High
         }
 }
@@ -59,8 +62,8 @@ data class WorkoutCalendarSessionBlock(
 ) {
     val intensityLevel: WorkoutIntensityLevel
         get() = when {
-            totalCaloriesKcal < 100f -> WorkoutIntensityLevel.Light
-            totalCaloriesKcal <= 250f -> WorkoutIntensityLevel.Moderate
+            totalCaloriesKcal < WORKOUT_INTENSITY_LIGHT_UPPER_BOUND_KCAL -> WorkoutIntensityLevel.Light
+            totalCaloriesKcal <= WORKOUT_INTENSITY_MODERATE_UPPER_BOUND_KCAL -> WorkoutIntensityLevel.Moderate
             else -> WorkoutIntensityLevel.High
         }
 }
