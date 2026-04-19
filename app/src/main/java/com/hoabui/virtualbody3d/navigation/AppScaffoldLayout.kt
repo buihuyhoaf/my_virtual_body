@@ -27,6 +27,7 @@ fun AppScaffoldLayout(
 
     val showBottomBar = showBars && (currentDestination.hasRoute(HomeRoute::class)
             || currentDestination.hasRoute(CenfitCoachRoute::class)
+            || currentDestination.hasRoute(ExerciseLibraryRoute::class)
             || currentDestination.hasRoute(MealCaptureRoute::class)
             || currentDestination.hasRoute(ProfileRoute::class)
             || currentDestination.hasRoute(BodyDetailAnalystRoute::class)
