@@ -30,6 +30,9 @@ fun WorkoutCalendarSectionLabel(
         softWrap = true,
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = cal.sectionTitleSafePaddingVertical),
+            .padding(
+                top = token.spacing.xxxs,
+                bottom = cal.sectionTitleSafePaddingVertical,
+            ),
     )
 }
