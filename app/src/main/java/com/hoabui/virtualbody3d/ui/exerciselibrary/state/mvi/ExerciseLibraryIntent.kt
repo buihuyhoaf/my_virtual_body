@@ -1,7 +1,5 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi
 
-import com.hoabui.virtualbody3d.ui.exerciselibrary.ExerciseLibraryQuickChip
-
 /**
  * User-driven intents. Cart and slot-toggle mutations are handled via [ExerciseLibraryUpdate]
  * after domain use cases run in the screen ViewModel.
@@ -9,8 +7,6 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.ExerciseLibraryQuickChip
 sealed interface ExerciseLibraryIntent {
 
     data class SetSearchQuery(val query: String) : ExerciseLibraryIntent
-
-    data class SelectQuickChip(val chip: ExerciseLibraryQuickChip?) : ExerciseLibraryIntent
 
     data object DismissSessionBooking : ExerciseLibraryIntent
 
