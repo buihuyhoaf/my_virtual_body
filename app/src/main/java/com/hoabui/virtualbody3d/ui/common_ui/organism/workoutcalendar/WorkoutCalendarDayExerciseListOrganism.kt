@@ -116,20 +116,16 @@ fun WorkoutCalendarDayExerciseListOrganism(
 
     Column(modifier = modifier.fillMaxSize()) {
         // Date header
-        Column(
+        WorkoutCalendarSectionLabel(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = cal.exerciseListHeaderToListGap),
-        ) {
-            WorkoutCalendarSectionLabel(
-                text = stringResource(
-                    R.string.workout_calendar_daily_total_header,
-                    selectedDate.format(headerFormat),
-                    dailyTotalCaloriesKcal,
-                ),
-                color = dailyCaloriesVisualLevel.toColor(token),
-            )
-        }
+                .fillMaxWidth(),
+            text = stringResource(
+                R.string.workout_calendar_daily_total_header,
+                selectedDate.format(headerFormat),
+                dailyTotalCaloriesKcal,
+            ),
+            color = dailyCaloriesVisualLevel.toColor(token),
+        )
 
         LazyColumn(
             modifier = Modifier
