@@ -198,7 +198,7 @@ private fun buildSetBreakdownLabel(
 
 private fun buildStrengthLinearProgression(logSets: List<WorkoutLogSetDetail>): String {
     val validSets = logSets
-        .filter { it.reps > 0 && it.weightKg > 0.0 }
+        .filter { it.weightKg > 0.0 }
     if (validSets.isEmpty()) return ""
     return validSets.mapIndexed { visualIndex, set ->
         formatProgressionItem(visualIndex + 1, "${set.reps} × ${formatWeight(set.weightKg)}kg")

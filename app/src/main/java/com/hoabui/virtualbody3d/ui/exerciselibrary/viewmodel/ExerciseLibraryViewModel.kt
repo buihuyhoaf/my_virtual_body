@@ -4,11 +4,16 @@ import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.hoabui.virtualbody3d.core.base.UiStateViewModel
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.GymLocation
 import com.hoabui.virtualbody3d.domain.model.exercise.bookingSlotStartsForDay
+import com.hoabui.virtualbody3d.domain.model.exercise.normalizeDurationMinutesSeconds
 import com.hoabui.virtualbody3d.domain.model.exercise.SESSION_BOOKING_GRID_FIRST_SLOT
 import com.hoabui.virtualbody3d.domain.model.exercise.SESSION_BOOKING_GRID_LAST_SLOT
 import com.hoabui.virtualbody3d.domain.model.exercise.SESSION_BOOKING_SLOT_STEP_MINUTES
+import com.hoabui.virtualbody3d.domain.model.workoutlog.WorkoutLogExerciseInput
+import com.hoabui.virtualbody3d.domain.model.workoutlog.WorkoutLogSessionInput
+import com.hoabui.virtualbody3d.domain.model.workoutlog.WorkoutLogSetInput
 import com.hoabui.virtualbody3d.domain.usecase.BookingConfirmationStatus
 import com.hoabui.virtualbody3d.domain.usecase.CommitLibrarySessionBookingResult
 import com.hoabui.virtualbody3d.domain.usecase.CanConfirmLibrarySessionBookingUseCase
@@ -18,6 +23,7 @@ import com.hoabui.virtualbody3d.domain.usecase.MigrateLegacyWorkoutSchedulesUseC
 import com.hoabui.virtualbody3d.domain.usecase.ObserveGymLocationsUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveExerciseLibraryWeeklySummaryUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ResolveNextSlotSelectionAfterToggleUseCase
+import com.hoabui.virtualbody3d.domain.usecase.SaveWorkoutLogSessionUseCase
 import com.hoabui.virtualbody3d.domain.usecase.SessionBookingConfirmationWorkflow
 import com.hoabui.virtualbody3d.domain.usecase.SessionBookingWorkflowInput
 import com.hoabui.virtualbody3d.domain.usecase.ToggleExerciseInCartUseCase
@@ -85,6 +91,7 @@ class ExerciseLibraryViewModel @Inject constructor(
     private val updateExerciseDraftUseCase: UpdateExerciseDraftUseCase,
     private val canConfirmLibrarySessionBookingUseCase: CanConfirmLibrarySessionBookingUseCase,
     private val resolveNextSlotSelectionAfterToggleUseCase: ResolveNextSlotSelectionAfterToggleUseCase,
+    private val saveWorkoutLogSessionUseCase: SaveWorkoutLogSessionUseCase,
 ) : UiStateViewModel<ExerciseLibraryUiState, Unit>() {
 
     private val confirmBookingMutex = Mutex()
@@ -378,8 +385,20 @@ class ExerciseLibraryViewModel @Inject constructor(
                         }
                         is BookingConfirmationStatus.Completed -> {
                             when (val r = status.result) {
-                                is CommitLibrarySessionBookingResult.Success ->
+                                is CommitLibrarySessionBookingResult.Success -> {
+                                    buildWorkoutLogSessionInput(
+                                        result = r,
+                                        filters = filters,
+                                        exercisesById = exercisesById,
+                                    )?.let { logInput ->
+                                        saveWorkoutLogSessionUseCase(logInput)
+                                        Log.d(
+                                            BOOKING_LOG_TAG,
+                                            "workout log saved sessionId=${logInput.id} exercises=${logInput.exercises.size}",
+                                        )
+                                    }
                                     Log.d(BOOKING_LOG_TAG, "commit Success scheduledCount=${r.scheduledCount}")
+                                }
                                 CommitLibrarySessionBookingResult.Conflict ->
                                     Log.w(BOOKING_LOG_TAG, "commit Conflict (DB error)")
                                 CommitLibrarySessionBookingResult.InvalidDraft ->
@@ -618,6 +637,55 @@ class ExerciseLibraryViewModel @Inject constructor(
     fun confirmSessionBooking() {
         Log.d(BOOKING_LOG_TAG, "confirmSessionBooking: enqueue RunBookingConfirmation")
         sideEffects.trySend(ExerciseLibrarySideEffect.RunBookingConfirmation)
+    }
+
+    private fun buildWorkoutLogSessionInput(
+        result: CommitLibrarySessionBookingResult.Success,
+        filters: ExerciseLibraryUiState,
+        exercisesById: Map<String, Exercise>,
+    ): WorkoutLogSessionInput? {
+        val exercises = filters.cart.draftOrder.mapIndexedNotNull { orderIndex, exerciseId ->
+            val draft = filters.cart.itemDrafts[exerciseId] ?: return@mapIndexedNotNull null
+            val measurementMode = filters.libraryList.exerciseMeasurementById[exerciseId]
+                ?: exercisesById[exerciseId]?.measurementMode
+                ?: ExerciseMeasurementMode.Strength
+            val setInputs = when (measurementMode) {
+                ExerciseMeasurementMode.Strength -> draft.setRows.mapIndexed { setIndex, row ->
+                    WorkoutLogSetInput(
+                        reps = row.reps.coerceAtLeast(0),
+                        weightKg = row.weightKg.coerceAtLeast(0.0),
+                        durationSeconds = null,
+                        setIndex = setIndex + 1,
+                    )
+                }
+                ExerciseMeasurementMode.Duration -> draft.setRows.mapIndexedNotNull { setIndex, row ->
+                    val durationSeconds = normalizeDurationMinutesSeconds(row.minutes, row.seconds)
+                    if (durationSeconds <= 0) return@mapIndexedNotNull null
+                    WorkoutLogSetInput(
+                        reps = row.reps.coerceAtLeast(0),
+                        weightKg = row.weightKg.coerceAtLeast(0.0),
+                        durationSeconds = durationSeconds,
+                        setIndex = setIndex + 1,
+                    )
+                }
+            }
+            if (setInputs.isEmpty()) return@mapIndexedNotNull null
+            WorkoutLogExerciseInput(
+                exerciseId = exerciseId,
+                displayNameSnapshot = exercisesById[exerciseId]?.name?.takeIf { it.isNotBlank() } ?: exerciseId,
+                measurementMode = measurementMode,
+                startInstant = result.session.startInstant,
+                orderIndex = orderIndex,
+                sets = setInputs,
+            )
+        }
+        if (exercises.isEmpty()) return null
+        return WorkoutLogSessionInput(
+            id = result.session.id,
+            startInstant = result.session.startInstant,
+            endInstant = result.session.endInstant,
+            exercises = exercises,
+        )
     }
 
     private companion object {
