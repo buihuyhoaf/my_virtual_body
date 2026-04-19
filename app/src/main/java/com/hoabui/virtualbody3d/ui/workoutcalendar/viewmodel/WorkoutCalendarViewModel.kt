@@ -4,8 +4,10 @@ import android.content.SharedPreferences
 import androidx.lifecycle.viewModelScope
 import com.hoabui.virtualbody3d.core.base.UiStateViewModel
 import com.hoabui.virtualbody3d.core.utils.Constants
+import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCaloriesVisualLevel
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarDaySummary
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarSessionBlock
+import com.hoabui.virtualbody3d.domain.model.calendar.caloriesToVisualLevel
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutScheduleDeleteResult
 import com.hoabui.virtualbody3d.domain.usecase.DeleteWorkoutScheduleUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetWorkoutDetailsUseCase
@@ -15,6 +17,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import java.time.LocalDate
 import java.time.YearMonth
+import kotlin.math.roundToInt
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,6 +31,8 @@ data class WorkoutCalendarContent(
     val summariesByEpochDay: Map<Long, WorkoutCalendarDaySummary>,
     /** Session blocks grouped by sessionId for the selected day. */
     val sessionBlocks: List<WorkoutCalendarSessionBlock>,
+    val dailyTotalCaloriesKcal: Int,
+    val dailyCaloriesVisualLevel: WorkoutCaloriesVisualLevel,
 )
 
 data class WorkoutCalendarDeleteDialogState(
@@ -88,11 +93,16 @@ class WorkoutCalendarViewModel @Inject constructor(
                 _visibleMonth,
                 _selectedDate,
             ) { summaries, sessionBlocks, vm, sd ->
+                val dailyCaloriesKcal = sessionBlocks
+                    .sumOf { it.totalCaloriesKcal.toDouble() }
+                    .roundToInt()
                 WorkoutCalendarContent(
                     visibleYearMonth = vm,
                     selectedDate = sd,
                     summariesByEpochDay = summaries,
                     sessionBlocks = sessionBlocks,
+                    dailyTotalCaloriesKcal = dailyCaloriesKcal,
+                    dailyCaloriesVisualLevel = caloriesToVisualLevel(dailyCaloriesKcal.toFloat()),
                 )
             }.collect { content ->
                 setSuccess(content)

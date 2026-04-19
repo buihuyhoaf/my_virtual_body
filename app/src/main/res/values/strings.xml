@@ -487,6 +487,8 @@
     <string name="workout_calendar_weekday_fr">T6</string>
     <string name="workout_calendar_weekday_sa">T7</string>
     <string name="workout_calendar_weekday_su">CN</string>
+    <string name="workout_calendar_daily_total_header">%1$s • %2$d kcal</string>
+    <string name="workout_calendar_session_header">Buổi tập %1$s</string>
     <string name="workout_execution_scheduled">Đã lên lịch</string>
     <string name="workout_execution_completed">Hoàn thành</string>
     <string name="workout_execution_missed">Bỏ lỡ</string>

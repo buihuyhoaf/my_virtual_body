@@ -3,6 +3,7 @@ package com.hoabui.virtualbody3d.ui.workoutcalendar.model
 import androidx.compose.runtime.Immutable
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarDayCellStatus
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarDaySummary
+import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarVolumeLevel
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -11,6 +12,9 @@ data class WorkoutCalendarDayCellUiModel(
     val date: LocalDate?,
     val inCurrentMonth: Boolean,
     val cellStatus: WorkoutCalendarDayCellStatus,
+    val totalCaloriesKcal: Float,
+    val dailyExerciseCount: Int,
+    val volumeLevel: WorkoutCalendarVolumeLevel,
     val isSelected: Boolean,
     val isToday: Boolean,
 )
@@ -31,6 +35,9 @@ internal fun buildMonthGridCells(
                 date = null,
                 inCurrentMonth = false,
                 cellStatus = WorkoutCalendarDayCellStatus.Empty,
+                totalCaloriesKcal = 0f,
+                dailyExerciseCount = 0,
+                volumeLevel = WorkoutCalendarVolumeLevel.None,
                 isSelected = false,
                 isToday = false,
             ),
@@ -39,12 +46,16 @@ internal fun buildMonthGridCells(
     for (dom in 1..length) {
         val date = yearMonth.atDay(dom)
         val epoch = date.toEpochDay()
-        val status = summaries[epoch]?.cellStatus ?: WorkoutCalendarDayCellStatus.Empty
+        val summary = summaries[epoch]
+        val status = summary?.cellStatus ?: WorkoutCalendarDayCellStatus.Empty
         cells.add(
             WorkoutCalendarDayCellUiModel(
                 date = date,
                 inCurrentMonth = true,
                 cellStatus = status,
+                totalCaloriesKcal = summary?.totalCaloriesKcal ?: 0f,
+                dailyExerciseCount = summary?.dailyExerciseCount ?: 0,
+                volumeLevel = summary?.volumeLevel ?: WorkoutCalendarVolumeLevel.None,
                 isSelected = date == selected,
                 isToday = date == today,
             ),
@@ -56,6 +67,9 @@ internal fun buildMonthGridCells(
                 date = null,
                 inCurrentMonth = false,
                 cellStatus = WorkoutCalendarDayCellStatus.Empty,
+                totalCaloriesKcal = 0f,
+                dailyExerciseCount = 0,
+                volumeLevel = WorkoutCalendarVolumeLevel.None,
                 isSelected = false,
                 isToday = false,
             ),

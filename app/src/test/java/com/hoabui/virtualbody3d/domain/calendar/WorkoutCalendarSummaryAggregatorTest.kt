@@ -48,8 +48,12 @@ class WorkoutCalendarSummaryAggregatorTest {
         assertEquals(2, summaries.size)
         val key1 = day1Morning.atZone(systemZone).toLocalDate().toEpochDay()
         assertEquals(WorkoutCalendarDayCellStatus.Mixed, summaries[key1]?.cellStatus)
+        assertEquals(true, (summaries[key1]?.totalCaloriesKcal ?: 0f) > 0f)
+        assertEquals(2, summaries[key1]?.dailyExerciseCount)
         val key2 = day2.atZone(systemZone).toLocalDate().toEpochDay()
         assertEquals(WorkoutCalendarDayCellStatus.Missed, summaries[key2]?.cellStatus)
+        assertEquals(true, (summaries[key2]?.totalCaloriesKcal ?: 0f) > 0f)
+        assertEquals(1, summaries[key2]?.dailyExerciseCount)
     }
 
     private fun schedule(

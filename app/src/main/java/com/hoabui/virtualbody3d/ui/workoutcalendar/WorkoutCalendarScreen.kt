@@ -1,12 +1,10 @@
 package com.hoabui.virtualbody3d.ui.workoutcalendar
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -84,6 +82,7 @@ fun WorkoutCalendarScreen(
     GScaffold(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             GTopBar(
                 title = stringResource(R.string.workout_calendar_title),
@@ -178,10 +177,7 @@ private fun WorkoutCalendarSuccessContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(
-                horizontal = cal.screenHorizontalPadding,
-                vertical = cal.screenVerticalPadding,
-            ),
+            .padding(horizontal = cal.screenHorizontalPadding),
     ) {
         WorkoutCalendarMonthGridOrganism(
             yearMonth = data.visibleYearMonth,
@@ -194,9 +190,10 @@ private fun WorkoutCalendarSuccessContent(
             },
             onDayClick = viewModel::onDaySelected,
         )
-        Spacer(modifier = Modifier.height(cal.sectionGapMajor))
         WorkoutCalendarDayExerciseListOrganism(
             selectedDate = data.selectedDate,
+            dailyTotalCaloriesKcal = data.dailyTotalCaloriesKcal,
+            dailyCaloriesVisualLevel = data.dailyCaloriesVisualLevel,
             sessionBlocks = sessionBlockUiModels,
             openSwipeRowId = openSwipeRowId,
             pendingSwipeCloseRowId = pendingSwipeCloseRowId,

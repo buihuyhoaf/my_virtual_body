@@ -53,7 +53,7 @@ class ObserveWorkoutCalendarDayDetailUseCase @Inject constructor(
                     exerciseId = sch.exerciseId,
                     exerciseDisplayName = catalog?.name ?: sch.exerciseId,
                     setBreakdownLabel = setBreakdownLabel,
-                    caloriesLabel = "🔥 ${calories.roundToInt()} kcal",
+                    caloriesLabel = "${calories.roundToInt()} kcal",
                     caloriesKcal = calories,
                     sets = sch.sets,
                     reps = sch.reps,

@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCaloriesVisualLevel
 import com.hoabui.virtualbody3d.domain.model.calendar.WORKOUT_CALENDAR_FALLBACK_DRAWABLE_NAME
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarExerciseLineUiModel
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarSessionBlockUiModel
@@ -77,7 +78,6 @@ import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.WorkoutCalendarTokens
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import java.util.Locale
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
@@ -89,6 +89,8 @@ private enum class SwipeDeleteAnchor { Closed, Open }
 @Composable
 fun WorkoutCalendarDayExerciseListOrganism(
     selectedDate: LocalDate,
+    dailyTotalCaloriesKcal: Int,
+    dailyCaloriesVisualLevel: WorkoutCaloriesVisualLevel,
     sessionBlocks: List<WorkoutCalendarSessionBlockUiModel>,
     modifier: Modifier = Modifier,
     openSwipeRowId: Long? = null,
@@ -103,7 +105,8 @@ fun WorkoutCalendarDayExerciseListOrganism(
     val token = GymTheme.token
     val cal = token.workoutCalendar
     val locale = LocalConfiguration.current.locales.get(0) ?: Locale.getDefault()
-    val headerFormat = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(locale)
+    // Keep explicit "weekday, dd/MM" structure to match requested header format (e.g., "Sunday, 19/04").
+    val headerFormat = DateTimeFormatter.ofPattern("EEEE, dd/MM", locale)
     val firstExerciseRowId = remember(sessionBlocks) {
         sessionBlocks.asSequence()
             .flatMap { it.exercises.asSequence() }
@@ -113,13 +116,16 @@ fun WorkoutCalendarDayExerciseListOrganism(
 
     Column(modifier = modifier.fillMaxSize()) {
         // Date header
-        Column(
+        WorkoutCalendarSectionLabel(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = cal.exerciseListHeaderToListGap),
-        ) {
-            WorkoutCalendarSectionLabel(text = selectedDate.format(headerFormat))
-        }
+                .fillMaxWidth(),
+            text = stringResource(
+                R.string.workout_calendar_daily_total_header,
+                selectedDate.format(headerFormat),
+                dailyTotalCaloriesKcal,
+            ),
+            color = dailyCaloriesVisualLevel.toColor(token),
+        )
 
         LazyColumn(
             modifier = Modifier
@@ -155,6 +161,7 @@ fun WorkoutCalendarDayExerciseListOrganism(
                         SessionHeaderRow(
                             timeLabel = block.sessionTimeLabel,
                             totalCaloriesLabel = block.totalCaloriesLabel,
+                            totalCaloriesVisualLevel = block.caloriesVisualLevel,
                             intensityLevel = block.intensityLevel,
                             token = token,
                             modifier = Modifier
@@ -195,11 +202,17 @@ fun WorkoutCalendarDayExerciseListOrganism(
 private fun SessionHeaderRow(
     timeLabel: String,
     totalCaloriesLabel: String,
+    totalCaloriesVisualLevel: WorkoutCaloriesVisualLevel,
     intensityLevel: WorkoutIntensityLevel,
     token: GymToken,
     modifier: Modifier = Modifier,
 ) {
     val intensityColor = intensityLevel.toColor(token)
+    val caloriesColor = totalCaloriesVisualLevel.toColor(token)
+    val sessionLabel = stringResource(
+        id = R.string.workout_calendar_session_header,
+        timeLabel,
+    )
 
     Row(
         modifier = modifier
@@ -221,7 +234,7 @@ private fun SessionHeaderRow(
                     .background(intensityColor),
             )
             GText(
-                text = timeLabel,
+                text = sessionLabel,
                 style = workoutCalendarUnifiedSectionTitleStyle(token),
                 color = token.colors.textPrimary,
             )
@@ -229,7 +242,7 @@ private fun SessionHeaderRow(
         GText(
             text = totalCaloriesLabel,
             style = token.typography.labelMedium,
-            color = intensityColor,
+            color = caloriesColor,
         )
     }
 }
@@ -242,6 +255,13 @@ private fun WorkoutIntensityLevel.toColor(token: GymToken): Color = when (this) 
     WorkoutIntensityLevel.Light -> token.colors.success
     WorkoutIntensityLevel.Moderate -> token.colors.warning
     WorkoutIntensityLevel.High -> token.colors.error
+}
+
+@Composable
+private fun WorkoutCaloriesVisualLevel.toColor(token: GymToken): Color = when (this) {
+    WorkoutCaloriesVisualLevel.Low -> token.colors.textSecondary
+    WorkoutCaloriesVisualLevel.Medium -> token.colors.warning
+    WorkoutCaloriesVisualLevel.High -> token.colors.error
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -456,6 +476,7 @@ private fun WorkoutCalendarExerciseRow(
     }
     val fallbackPainter = painterResource(R.drawable.body_unsplash)
     val intensityColor = line.intensityLevel.toColor(token)
+    val caloriesColor = line.caloriesVisualLevel.toColor(token)
 
     GCard(
         modifier = Modifier.fillMaxWidth(),
@@ -510,12 +531,12 @@ private fun WorkoutCalendarExerciseRow(
                     )
                 }
             }
-            // Calories badge on the right
             if (line.caloriesLabel.isNotBlank()) {
                 GText(
                     text = line.caloriesLabel,
-                    style = token.typography.labelSmall,
-                    color = intensityColor,
+                    style = token.typography.labelMedium,
+                    color = caloriesColor,
+                    textAlign = TextAlign.End,
                 )
             }
         }
@@ -546,6 +567,7 @@ private fun DayListPreviewLight() {
             ) {
                 WorkoutCalendarDayExerciseListOrganism(
                     selectedDate = LocalDate.of(2024, 4, 10),
+                    dailyTotalCaloriesKcal = 450,
                     sessionBlocks = listOf(
                         WorkoutCalendarSessionBlockUiModel(
                             sessionId = "session_1",
@@ -555,7 +577,8 @@ private fun DayListPreviewLight() {
                                     rowId = 1L,
                                     title = "Squat",
                                     setBreakdownLabel = "3 Sets • 95 kg x 10",
-                                    caloriesLabel = "🔥 125 kcal",
+                                    caloriesLabel = "125 kcal",
+                                    caloriesVisualLevel = WorkoutCaloriesVisualLevel.High,
                                     intensityLevel = WorkoutIntensityLevel.Moderate,
                                     image = ImageSource.LocalResource(WORKOUT_CALENDAR_FALLBACK_DRAWABLE_NAME),
                                 ),
@@ -563,12 +586,14 @@ private fun DayListPreviewLight() {
                                     rowId = 2L,
                                     title = "Romanian deadlift",
                                     setBreakdownLabel = "4 Sets • 75 kg x 8",
-                                    caloriesLabel = "🔥 280 kcal",
+                                    caloriesLabel = "280 kcal",
+                                    caloriesVisualLevel = WorkoutCaloriesVisualLevel.High,
                                     intensityLevel = WorkoutIntensityLevel.High,
                                     image = ImageSource.LocalResource(WORKOUT_CALENDAR_FALLBACK_DRAWABLE_NAME),
                                 ),
                             ),
-                            totalCaloriesLabel = "🔥 405 kcal",
+                            totalCaloriesLabel = "405 kcal",
+                            caloriesVisualLevel = WorkoutCaloriesVisualLevel.High,
                             intensityLevel = WorkoutIntensityLevel.High,
                         ),
                         WorkoutCalendarSessionBlockUiModel(
@@ -579,16 +604,19 @@ private fun DayListPreviewLight() {
                                     rowId = 3L,
                                     title = "Bicep Curl",
                                     setBreakdownLabel = "3 Sets • 15 kg x 12",
-                                    caloriesLabel = "🔥 45 kcal",
+                                    caloriesLabel = "45 kcal",
+                                    caloriesVisualLevel = WorkoutCaloriesVisualLevel.High,
                                     intensityLevel = WorkoutIntensityLevel.Light,
                                     image = ImageSource.LocalResource(WORKOUT_CALENDAR_FALLBACK_DRAWABLE_NAME),
                                 ),
                             ),
-                            totalCaloriesLabel = "🔥 45 kcal",
+                            totalCaloriesLabel = "45 kcal",
+                            caloriesVisualLevel = WorkoutCaloriesVisualLevel.High,
                             intensityLevel = WorkoutIntensityLevel.Light,
                         ),
                     ),
                     modifier = Modifier.fillMaxSize(),
+                    dailyCaloriesVisualLevel = WorkoutCaloriesVisualLevel.High,
                 )
             }
         }
@@ -615,6 +643,8 @@ private fun DayListPreviewEmpty() {
             ) {
                 WorkoutCalendarDayExerciseListOrganism(
                     selectedDate = LocalDate.of(2024, 4, 10),
+                    dailyTotalCaloriesKcal = 0,
+                    dailyCaloriesVisualLevel = WorkoutCaloriesVisualLevel.Low,
                     sessionBlocks = emptyList(),
                     modifier = Modifier.fillMaxSize(),
                 )

@@ -14,6 +14,29 @@ enum class WorkoutIntensityLevel {
     High,     // > 250 kcal
 }
 
+const val WORKOUT_INTENSITY_LIGHT_UPPER_BOUND_KCAL = 100f
+const val WORKOUT_INTENSITY_MODERATE_UPPER_BOUND_KCAL = 250f
+
+enum class WorkoutCaloriesVisualLevel {
+    Low,
+    Medium,
+    High,
+}
+
+/**
+ * UI emphasis thresholds tuned for per-exercise cards:
+ * <15 kcal isolation/low-load moves, 15-40 kcal (inclusive) standard sets, >40 kcal heavy/high-intensity work.
+ * (15 kcal falls into the medium bucket by design.)
+ */
+const val WORKOUT_CALORIES_VISUAL_LOW_UPPER_BOUND_KCAL = 15f
+const val WORKOUT_CALORIES_VISUAL_MEDIUM_UPPER_BOUND_KCAL = 40f
+
+fun caloriesToVisualLevel(caloriesKcal: Float): WorkoutCaloriesVisualLevel = when {
+    caloriesKcal < WORKOUT_CALORIES_VISUAL_LOW_UPPER_BOUND_KCAL -> WorkoutCaloriesVisualLevel.Low
+    caloriesKcal <= WORKOUT_CALORIES_VISUAL_MEDIUM_UPPER_BOUND_KCAL -> WorkoutCaloriesVisualLevel.Medium
+    else -> WorkoutCaloriesVisualLevel.High
+}
+
 /**
  * One exercise entry for the workout calendar day detail list (domain layer).
  * Time-related labels are now handled by the parent [WorkoutCalendarSessionBlock].
@@ -38,10 +61,13 @@ data class WorkoutCalendarExerciseLine(
      */
     val intensityLevel: WorkoutIntensityLevel
         get() = when {
-            caloriesKcal < 100f -> WorkoutIntensityLevel.Light
-            caloriesKcal <= 250f -> WorkoutIntensityLevel.Moderate
+            caloriesKcal < WORKOUT_INTENSITY_LIGHT_UPPER_BOUND_KCAL -> WorkoutIntensityLevel.Light
+            caloriesKcal <= WORKOUT_INTENSITY_MODERATE_UPPER_BOUND_KCAL -> WorkoutIntensityLevel.Moderate
             else -> WorkoutIntensityLevel.High
         }
+
+    val caloriesVisualLevel: WorkoutCaloriesVisualLevel
+        get() = caloriesToVisualLevel(caloriesKcal)
 }
 
 /**
@@ -57,10 +83,13 @@ data class WorkoutCalendarSessionBlock(
     val exercises: List<WorkoutCalendarExerciseLine>,
     val totalCaloriesKcal: Float,
 ) {
+    val caloriesVisualLevel: WorkoutCaloriesVisualLevel
+        get() = caloriesToVisualLevel(totalCaloriesKcal)
+
     val intensityLevel: WorkoutIntensityLevel
         get() = when {
-            totalCaloriesKcal < 100f -> WorkoutIntensityLevel.Light
-            totalCaloriesKcal <= 250f -> WorkoutIntensityLevel.Moderate
+            totalCaloriesKcal < WORKOUT_INTENSITY_LIGHT_UPPER_BOUND_KCAL -> WorkoutIntensityLevel.Light
+            totalCaloriesKcal <= WORKOUT_INTENSITY_MODERATE_UPPER_BOUND_KCAL -> WorkoutIntensityLevel.Moderate
             else -> WorkoutIntensityLevel.High
         }
 }
@@ -75,6 +104,7 @@ data class WorkoutCalendarExerciseLineUiModel(
     val title: String,
     val setBreakdownLabel: String,
     val caloriesLabel: String,
+    val caloriesVisualLevel: WorkoutCaloriesVisualLevel,
     val intensityLevel: WorkoutIntensityLevel,
     val image: ImageSource,
 )
@@ -88,6 +118,7 @@ data class WorkoutCalendarSessionBlockUiModel(
     val sessionTimeLabel: String,
     val exercises: List<WorkoutCalendarExerciseLineUiModel>,
     val totalCaloriesLabel: String,
+    val caloriesVisualLevel: WorkoutCaloriesVisualLevel,
     val intensityLevel: WorkoutIntensityLevel,
 )
 
@@ -99,6 +130,7 @@ fun WorkoutCalendarExerciseLine.toUiModel(): WorkoutCalendarExerciseLineUiModel 
     title = exerciseDisplayName,
     setBreakdownLabel = setBreakdownLabel,
     caloriesLabel = caloriesLabel,
+    caloriesVisualLevel = caloriesVisualLevel,
     intensityLevel = intensityLevel,
     image = image,
 )
@@ -110,6 +142,7 @@ fun WorkoutCalendarSessionBlock.toUiModel(): WorkoutCalendarSessionBlockUiModel 
     sessionId = sessionId,
     sessionTimeLabel = sessionTimeLabel,
     exercises = exercises.map { it.toUiModel() },
-    totalCaloriesLabel = "🔥 ${totalCaloriesKcal.toInt()} kcal",
+    totalCaloriesLabel = "${totalCaloriesKcal.toInt()} kcal",
+    caloriesVisualLevel = caloriesVisualLevel,
     intensityLevel = intensityLevel,
 )
