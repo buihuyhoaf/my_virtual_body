@@ -10,6 +10,7 @@ import com.hoabui.virtualbody3d.data.local.db.MIGRATION_3_4
 import com.hoabui.virtualbody3d.data.local.db.MIGRATION_4_5
 import com.hoabui.virtualbody3d.data.local.db.MIGRATION_5_6
 import com.hoabui.virtualbody3d.data.local.db.MIGRATION_6_7
+import com.hoabui.virtualbody3d.data.local.db.MIGRATION_7_8
 import com.hoabui.virtualbody3d.data.local.db.migration2To3
 import com.hoabui.virtualbody3d.data.local.db.NutritionSummaryDao
 import com.hoabui.virtualbody3d.data.local.db.ProgressTimelineDao
@@ -42,6 +43,9 @@ object DatabaseModule {
             VirtualBodyDatabase::class.java,
             DB_NAME,
         )
+            // NOTE: Keep destructive fallback disabled.
+            // Any schema removal (e.g. dropping a column such as zoneId) must use
+            // an explicit version bump + migration (create new table -> copy -> drop -> rename -> re-index).
             .addMigrations(
                 MIGRATION_1_2,
                 migration2To3(databaseSeeder),
@@ -49,6 +53,7 @@ object DatabaseModule {
                 MIGRATION_4_5,
                 MIGRATION_5_6,
                 MIGRATION_6_7,
+                MIGRATION_7_8,
             )
             .addCallback(databaseSeeder.roomCallback())
             .build()

@@ -134,3 +134,137 @@ val MIGRATION_6_7: Migration = object : Migration(6, 7) {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_workout_log_sessions_dayKey` ON `workout_log_sessions` (`dayKey`)")
     }
 }
+
+val MIGRATION_7_8: Migration = object : Migration(7, 8) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `workout_sessions_new` (
+                `id` TEXT NOT NULL,
+                `locationId` TEXT NOT NULL,
+                `startEpochMillis` INTEGER NOT NULL,
+                `endEpochMillis` INTEGER NOT NULL,
+                `dayKey` INTEGER NOT NULL,
+                PRIMARY KEY(`id`)
+            )
+            """.trimIndent(),
+        )
+        db.execSQL(
+            """
+            INSERT INTO `workout_sessions_new` (`id`, `locationId`, `startEpochMillis`, `endEpochMillis`, `dayKey`)
+            SELECT `id`, `locationId`, `startEpochMillis`, `endEpochMillis`, `dayKey`
+            FROM `workout_sessions`
+            """.trimIndent(),
+        )
+        db.execSQL("DROP TABLE `workout_sessions`")
+        db.execSQL("ALTER TABLE `workout_sessions_new` RENAME TO `workout_sessions`")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_workout_sessions_dayKey` ON `workout_sessions` (`dayKey`)")
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_workout_sessions_locationId_dayKey` ON `workout_sessions` (`locationId`, `dayKey`)",
+        )
+        db.execSQL(
+            """
+            CREATE INDEX IF NOT EXISTS `index_workout_sessions_location_day_start_end`
+            ON `workout_sessions` (`locationId`, `dayKey`, `startEpochMillis`, `endEpochMillis`)
+            """.trimIndent(),
+        )
+
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `workout_schedules_new` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `clientId` TEXT NOT NULL,
+                `dayKey` INTEGER NOT NULL,
+                `exerciseId` TEXT NOT NULL,
+                `sessionId` TEXT,
+                `scheduledAtEpochMillis` INTEGER NOT NULL,
+                `sets` INTEGER NOT NULL,
+                `reps` INTEGER NOT NULL,
+                `weightKg` REAL NOT NULL,
+                `restSeconds` INTEGER NOT NULL,
+                `notes` TEXT,
+                `measurementMode` TEXT NOT NULL,
+                `durationSeconds` INTEGER,
+                `locationId` TEXT NOT NULL,
+                `executionStatus` TEXT NOT NULL,
+                `createdAtEpochMillis` INTEGER NOT NULL,
+                `updatedAtEpochMillis` INTEGER NOT NULL,
+                `exercise_image_res_url` TEXT,
+                `exercise_local_image_name` TEXT
+            )
+            """.trimIndent(),
+        )
+        db.execSQL(
+            """
+            INSERT INTO `workout_schedules_new` (
+                `id`,
+                `clientId`,
+                `dayKey`,
+                `exerciseId`,
+                `sessionId`,
+                `scheduledAtEpochMillis`,
+                `sets`,
+                `reps`,
+                `weightKg`,
+                `restSeconds`,
+                `notes`,
+                `measurementMode`,
+                `durationSeconds`,
+                `locationId`,
+                `executionStatus`,
+                `createdAtEpochMillis`,
+                `updatedAtEpochMillis`,
+                `exercise_image_res_url`,
+                `exercise_local_image_name`
+            )
+            SELECT
+                `id`,
+                `clientId`,
+                `dayKey`,
+                `exerciseId`,
+                `sessionId`,
+                `scheduledAtEpochMillis`,
+                `sets`,
+                `reps`,
+                `weightKg`,
+                `restSeconds`,
+                `notes`,
+                `measurementMode`,
+                `durationSeconds`,
+                `locationId`,
+                `executionStatus`,
+                `createdAtEpochMillis`,
+                `updatedAtEpochMillis`,
+                `exercise_image_res_url`,
+                `exercise_local_image_name`
+            FROM `workout_schedules`
+            """.trimIndent(),
+        )
+        db.execSQL("DROP TABLE `workout_schedules`")
+        db.execSQL("ALTER TABLE `workout_schedules_new` RENAME TO `workout_schedules`")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_workout_schedules_dayKey` ON `workout_schedules` (`dayKey`)")
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_workout_schedules_clientId` ON `workout_schedules` (`clientId`)")
+
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `workout_log_sessions_new` (
+                `id` TEXT NOT NULL,
+                `startEpochMillis` INTEGER NOT NULL,
+                `endEpochMillis` INTEGER NOT NULL,
+                `dayKey` TEXT NOT NULL,
+                PRIMARY KEY(`id`)
+            )
+            """.trimIndent(),
+        )
+        db.execSQL(
+            """
+            INSERT INTO `workout_log_sessions_new` (`id`, `startEpochMillis`, `endEpochMillis`, `dayKey`)
+            SELECT `id`, `startEpochMillis`, `endEpochMillis`, `dayKey`
+            FROM `workout_log_sessions`
+            """.trimIndent(),
+        )
+        db.execSQL("DROP TABLE `workout_log_sessions`")
+        db.execSQL("ALTER TABLE `workout_log_sessions_new` RENAME TO `workout_log_sessions`")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_workout_log_sessions_dayKey` ON `workout_log_sessions` (`dayKey`)")
+    }
+}

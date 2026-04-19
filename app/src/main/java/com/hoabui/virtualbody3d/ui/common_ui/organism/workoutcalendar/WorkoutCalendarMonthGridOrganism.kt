@@ -197,7 +197,7 @@ private fun MonthDayCell(
         )
         Spacer(modifier = Modifier.height(token.spacing.xxxs))
         IntensityBar(
-            volumeLevel = cell.volumeLevel,
+            dailyExerciseCount = cell.dailyExerciseCount,
             modifier = Modifier
                 .width(cellSide * 0.65f)
                 .height(2.dp),
@@ -207,15 +207,15 @@ private fun MonthDayCell(
 
 @Composable
 private fun IntensityBar(
-    volumeLevel: WorkoutCalendarVolumeLevel,
+    dailyExerciseCount: Int,
     modifier: Modifier = Modifier,
 ) {
     val token = GymTheme.token
-    val color = when (volumeLevel) {
-        WorkoutCalendarVolumeLevel.ActiveRecovery -> token.colors.successContainer
-        WorkoutCalendarVolumeLevel.SolidWorkout -> token.colors.warning
-        WorkoutCalendarVolumeLevel.HighVolume -> token.colors.error
-        WorkoutCalendarVolumeLevel.None -> token.colors.backgroundTransparent
+    val color = when (dailyExerciseCount) {
+        in 1..2 -> token.colors.success
+        in 3..5 -> token.colors.warning
+        in 6..Int.MAX_VALUE -> token.colors.error
+        else -> token.colors.backgroundTransparent
     }
     Box(
         modifier = modifier
