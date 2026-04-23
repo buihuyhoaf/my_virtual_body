@@ -8,11 +8,14 @@ import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
+import com.hoabui.virtualbody3d.domain.repository.ResourceProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.util.Locale
 import javax.inject.Inject
 
 class ExerciseMapper @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val resourceProvider: ResourceProvider,
 ) {
     fun toDomain(dto: ExerciseDto): Exercise = Exercise(
         id = dto.id.orEmpty(),
@@ -29,7 +32,9 @@ class ExerciseMapper @Inject constructor(
 
     private fun ExerciseDto.toImageSource(): ImageSource {
         imageResUrl?.takeIf { it.isNotBlank() }?.let { return ImageSource.Network(it) }
-        localImageName?.takeIf { it.isNotBlank() }?.let { return ImageSource.LocalResource(it) }
+        resolveDrawableNameFromExerciseLabel(name.orEmpty(), resourceProvider)?.let {
+            return ImageSource.LocalResource(it)
+        }
         val resolvedName = imageResId?.let { context.safeResourceEntryName(it) }
         return ImageSource.LocalResource(resolvedName ?: FALLBACK_IMAGE_NAME)
     }
@@ -38,6 +43,35 @@ class ExerciseMapper @Inject constructor(
         resources.getResourceEntryName(resId)
     }.getOrNull()
 }
+
+private val ExerciseNameToDrawableNonAlphanumeric = Regex("[^a-z0-9]+")
+
+/**
+ * Basenames to try for `res/drawable` and `assets/gif` `.gif` files, derived from display [exerciseName].
+ * Order: snake_case (e.g. `lat_pulldown`) then compact (`latpulldown`).
+ */
+internal fun exerciseNameToDrawableBasenameCandidates(exerciseName: String): List<String> {
+    val trimmed = exerciseName.trim()
+    if (trimmed.isEmpty()) return emptyList()
+    val snake = trimmed.lowercase(Locale.US)
+        .replace(ExerciseNameToDrawableNonAlphanumeric, "_")
+        .trim('_')
+    if (snake.isEmpty()) return emptyList()
+    val compact = snake.replace("_", "")
+    return buildList {
+        add(snake)
+        if (compact != snake) add(compact)
+    }.distinct()
+}
+
+/**
+ * First drawable basename that exists under `res/drawable`, derived from display [exerciseName].
+ */
+internal fun resolveDrawableNameFromExerciseLabel(
+    exerciseName: String,
+    resourceProvider: ResourceProvider,
+): String? = exerciseNameToDrawableBasenameCandidates(exerciseName)
+    .firstOrNull { resourceProvider.drawableResId(it) != null }
 
 private const val FALLBACK_IMAGE_NAME = "body_unsplash"
 

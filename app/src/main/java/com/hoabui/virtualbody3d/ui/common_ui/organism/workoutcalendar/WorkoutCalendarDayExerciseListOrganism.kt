@@ -77,6 +77,7 @@ import com.hoabui.virtualbody3d.ui.common_ui.molecule.state.GStatePanel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toCoilModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toExerciseLibraryCardImage
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
+import com.hoabui.virtualbody3d.ui.theme.toCaloriesVisualLevelColor
 import com.hoabui.virtualbody3d.ui.theme.tokens.GymToken
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.WorkoutCalendarTokens
@@ -130,7 +131,7 @@ fun WorkoutCalendarDayExerciseListOrganism(
                 selectedDate.format(headerFormat),
                 dailyTotalCaloriesKcal,
             ),
-            color = dailyCaloriesVisualLevel.toColor(token),
+            color = dailyCaloriesVisualLevel.toCaloriesVisualLevelColor(token),
         )
 
         LazyColumn(
@@ -215,7 +216,7 @@ private fun SessionHeaderRow(
     modifier: Modifier = Modifier,
 ) {
     val intensityColor = intensityLevel.toColor(token)
-    val caloriesColor = totalCaloriesVisualLevel.toColor(token)
+    val caloriesColor = totalCaloriesVisualLevel.toCaloriesVisualLevelColor(token)
     val sessionLabel = stringResource(
         id = R.string.workout_calendar_session_header,
         timeLabel,
@@ -262,13 +263,6 @@ private fun WorkoutIntensityLevel.toColor(token: GymToken): Color = when (this) 
     WorkoutIntensityLevel.Light -> token.colors.success
     WorkoutIntensityLevel.Moderate -> token.colors.warning
     WorkoutIntensityLevel.High -> token.colors.error
-}
-
-@Composable
-private fun WorkoutCaloriesVisualLevel.toColor(token: GymToken): Color = when (this) {
-    WorkoutCaloriesVisualLevel.Low -> token.colors.textSecondary
-    WorkoutCaloriesVisualLevel.Medium -> token.colors.warning
-    WorkoutCaloriesVisualLevel.High -> token.colors.error
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -522,7 +516,7 @@ private fun WorkoutCalendarExerciseRow(
     }
     val fallbackPainter = painterResource(R.drawable.body_unsplash)
     val intensityColor = line.intensityLevel.toColor(token)
-    val caloriesColor = line.caloriesVisualLevel.toColor(token)
+    val caloriesColor = line.caloriesVisualLevel.toCaloriesVisualLevelColor(token)
 
     GCard(
         modifier = Modifier.fillMaxWidth(),

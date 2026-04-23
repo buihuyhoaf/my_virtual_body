@@ -33,9 +33,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -176,6 +178,13 @@ fun GImageCard(
     modifier: Modifier = Modifier,
     firstLineText: String,
     secondLineText: String,
+    /**
+     * When non-null, replaces plain [secondLineText] for the second line (e.g. multi-color [AnnotatedString]).
+     * [secondLineColor] is ignored in that case.
+     */
+    secondLineAnnotatedText: AnnotatedString? = null,
+    /** When non-null, used for [secondLineText] instead of the default muted subtitle color. */
+    secondLineColor: Color? = null,
     cardSize: CardSize = CardSize.Medium,
     badge: (@Composable BoxScope.() -> Unit)? = null,
     badgeChrome: GImageCardBadgeChrome = GImageCardBadgeChrome.Holistic,
@@ -255,6 +264,8 @@ fun GImageCard(
                     sizeStyle = sizeStyle,
                     firstLineText = firstLineText,
                     secondLineText = secondLineText,
+                    secondLineAnnotatedText = secondLineAnnotatedText,
+                    secondLineColor = secondLineColor,
                     badge = badge,
                     badgeChrome = badgeChrome,
                     imageOverlayEnd = imageOverlayEnd,
@@ -288,6 +299,8 @@ fun GImageCard(
                     sizeStyle = sizeStyle,
                     firstLineText = firstLineText,
                     secondLineText = secondLineText,
+                    secondLineAnnotatedText = secondLineAnnotatedText,
+                    secondLineColor = secondLineColor,
                     badge = badge,
                     badgeChrome = badgeChrome,
                     imageOverlayEnd = imageOverlayEnd,
@@ -315,6 +328,8 @@ private fun GImageCardStack(
     sizeStyle: CardSizeStyle,
     firstLineText: String,
     secondLineText: String,
+    secondLineAnnotatedText: AnnotatedString?,
+    secondLineColor: Color?,
     badge: (@Composable BoxScope.() -> Unit)?,
     badgeChrome: GImageCardBadgeChrome,
     imageOverlayEnd: (@Composable BoxScope.() -> Unit)?,
@@ -363,6 +378,8 @@ private fun GImageCardStack(
             sizeStyle = sizeStyle,
             firstLineText = firstLineText,
             secondLineText = secondLineText,
+            secondLineAnnotatedText = secondLineAnnotatedText,
+            secondLineColor = secondLineColor,
             badge = badge,
             badgeChrome = badgeChrome,
             imageOverlayEnd = imageOverlayEnd,
@@ -386,6 +403,8 @@ private fun GImageCardContent(
     sizeStyle: CardSizeStyle,
     firstLineText: String,
     secondLineText: String,
+    secondLineAnnotatedText: AnnotatedString?,
+    secondLineColor: Color?,
     badge: (@Composable BoxScope.() -> Unit)?,
     badgeChrome: GImageCardBadgeChrome,
     imageOverlayEnd: (@Composable BoxScope.() -> Unit)?,
@@ -399,11 +418,12 @@ private fun GImageCardContent(
     val textTopInset = if (isLibraryTile) token.spacing.xxs else token.bodyAnalysis.gImageCardTextSectionTopPadding
     val textHorizontalPadding = if (isLibraryTile) token.spacing.xxs else token.spacing.xs
     val glassBorderColor = token.colors.outlineSoft
-    val subtitleColor = if (isLibraryTile) {
+    val defaultSubtitleColor = if (isLibraryTile) {
         token.colors.textSecondary
     } else {
         token.colors.textSecondary.copy(alpha = PrimitiveAlphaTokens.IMAGE_CARD_OVERLAY_MEDIUM)
     }
+    val subtitleColor = secondLineColor ?: defaultSubtitleColor
     val textRowEndPadding = if (reserveQuickAddEndInset) {
         token.bodyAnalysis.exerciseLibraryQuickAddTextInset
     } else {
@@ -501,13 +521,22 @@ private fun GImageCardContent(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                GText(
-                    text = secondLineText,
-                    style = sizeStyle.secondLineStyle,
-                    color = subtitleColor,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                if (secondLineAnnotatedText != null) {
+                    GText(
+                        text = secondLineAnnotatedText,
+                        style = sizeStyle.secondLineStyle,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                } else {
+                    GText(
+                        text = secondLineText,
+                        style = sizeStyle.secondLineStyle,
+                        color = subtitleColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
         }
     }

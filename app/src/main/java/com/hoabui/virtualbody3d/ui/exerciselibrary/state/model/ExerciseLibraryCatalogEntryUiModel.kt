@@ -19,6 +19,4 @@ data class ExerciseLibraryCatalogEntryUiModel(
     val bodyRegion: BodyRegion,
     val measurementMode: ExerciseMeasurementMode,
     val image: ExerciseLibraryCardImage,
-    /** Subtitle for list cards, resolved at catalog load (region + optional equipment). */
-    val libraryCardStaticSubtitle: String,
 )

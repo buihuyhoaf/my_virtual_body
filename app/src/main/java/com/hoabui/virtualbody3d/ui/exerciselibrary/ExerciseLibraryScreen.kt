@@ -6,15 +6,19 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -22,8 +26,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -213,6 +220,23 @@ fun ExerciseLibraryScreenContent(
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
+            // Heatmap and latfocus image (sticky)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = token.spacing.md,
+                        end = token.spacing.md,
+                        top = token.spacing.xs,
+                        bottom = bodyTok.exerciseLibrarySearchToSummaryGap,
+                    ),
+            ) {
+                ExerciseLibraryWeeklyHeatmapCard(
+                    state = state.weeklyHeatmap,
+                    onClick = actions.onNavigateToWorkoutCalendar,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -223,28 +247,6 @@ fun ExerciseLibraryScreenContent(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = listBottomPadding),
                 ) {
-                    // Weekly heatmap as first scrollable item
-                    item(
-                        key = "exercise_library_weekly_heatmap",
-                        contentType = ExerciseLibraryListContentTypes.WeeklyHeatmap,
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(
-                                    start = token.spacing.md,
-                                    end = token.spacing.md,
-                                    top = token.spacing.xs,
-                                    bottom = bodyTok.exerciseLibrarySearchToSummaryGap,
-                                ),
-                        ) {
-                            ExerciseLibraryWeeklyHeatmapCard(
-                                state = state.weeklyHeatmap,
-                                onClick = actions.onNavigateToWorkoutCalendar,
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                        }
-                    }
                     if (state.libraryList.sections.isEmpty()) {
                         item(
                             key = "exercise_library_empty",

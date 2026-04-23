@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import coil.compose.AsyncImage
@@ -43,8 +44,8 @@ import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
 import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
+import com.hoabui.virtualbody3d.ui.exerciselibrary.data.exerciseDetailHeroCoilModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.ExerciseLibraryCardImage
-import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toCoilModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseDetailSheetUiModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
@@ -275,7 +276,10 @@ fun ExerciseDetailDialog(
         (configuration.screenHeightDp.toFloat() * token.bodyDetail.exerciseDetailDialogMaxHeightFraction).dp
     val cardWidthFraction = token.bodyDetail.exerciseDetailCardWidthFraction
     val resourceProvider = LocalResourceProvider.current
-    val heroCoilModel = remember(detail.heroImage) { detail.heroImage.toCoilModel(resourceProvider) }
+    val context = LocalContext.current
+    val heroCoilModel = remember(detail.name, detail.heroImage) {
+        exerciseDetailHeroCoilModel(context, detail, resourceProvider)
+    }
 
     Dialog(
         onDismissRequest = onDismiss,

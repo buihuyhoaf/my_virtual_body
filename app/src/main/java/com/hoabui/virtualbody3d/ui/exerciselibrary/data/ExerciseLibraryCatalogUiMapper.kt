@@ -15,7 +15,7 @@ import javax.inject.Inject
  * Maps domain catalog output to UI-only [ExerciseLibraryCatalogState] at the screen boundary.
  */
 class ExerciseLibraryCatalogUiMapper @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @ApplicationContext @Suppress("UNUSED_PARAMETER") private val appContext: Context,
 ) {
 
     fun mapGroupedToCatalogState(grouped: Map<BodyRegion, List<Exercise>>): ExerciseLibraryCatalogState =
@@ -36,6 +36,5 @@ class ExerciseLibraryCatalogUiMapper @Inject constructor(
             bodyRegion = bodyRegion,
             measurementMode = measurementMode,
             image = image.toExerciseLibraryCardImage(),
-            libraryCardStaticSubtitle = exerciseLibraryCardStaticSubtitle(appContext),
         )
 }

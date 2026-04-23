@@ -2,7 +2,9 @@ package com.hoabui.virtualbody3d.ui.exerciselibrary.data
 
 import android.content.Context
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.domain.model.calendar.caloriesToVisualLevel
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
+import com.hoabui.virtualbody3d.domain.util.CaloriesCalculator
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toExerciseLibraryCardImage
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryCatalogEntryUiModel
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
@@ -18,11 +20,17 @@ fun Exercise.toLibraryCardUiModel(
     activeExerciseId: String?,
 ): GExerciseCardUiModel {
     val inCart = id in cartExerciseIds
+    val uptoKcal = CaloriesCalculator.estimateLibraryUptoKcal(id, measurementMode)
     return GExerciseCardUiModel(
         id = id,
         image = image.toExerciseLibraryCardImage(),
         title = name,
-        subtitle = exerciseLibraryCardStaticSubtitle(context),
+        subtitle = context.getString(
+            R.string.exercise_library_card_upto_kcal,
+            uptoKcal,
+        ),
+        libraryUptoKcal = uptoKcal,
+        subtitleCaloriesVisualLevel = caloriesToVisualLevel(uptoKcal.toFloat()),
         badgeText = null,
         isSelected = inCart && id == activeExerciseId,
         isInCartInactive = inCart && id != activeExerciseId,
@@ -30,28 +38,24 @@ fun Exercise.toLibraryCardUiModel(
 }
 
 fun ExerciseLibraryCatalogEntryUiModel.toGExerciseCardUiModel(
+    context: Context,
     cartExerciseIds: Set<String>,
     activeExerciseId: String?,
 ): GExerciseCardUiModel {
     val inCart = id in cartExerciseIds
+    val uptoKcal = CaloriesCalculator.estimateLibraryUptoKcal(id, measurementMode)
     return GExerciseCardUiModel(
         id = id,
         image = image,
         title = name,
-        subtitle = libraryCardStaticSubtitle,
+        subtitle = context.getString(
+            R.string.exercise_library_card_upto_kcal,
+            uptoKcal,
+        ),
+        libraryUptoKcal = uptoKcal,
+        subtitleCaloriesVisualLevel = caloriesToVisualLevel(uptoKcal.toFloat()),
         badgeText = null,
         isSelected = inCart && id == activeExerciseId,
         isInCartInactive = inCart && id != activeExerciseId,
     )
-}
-
-internal fun Exercise.exerciseLibraryCardStaticSubtitle(context: Context): String = libraryCardSubtitle(context)
-
-private fun Exercise.libraryCardSubtitle(context: Context): String {
-    val region = context.getString(ExerciseDisplayResources.bodyRegionResId(bodyRegion))
-    if (equipment != null) {
-        val equip = context.getString(ExerciseDisplayResources.equipmentResId(equipment))
-        return context.getString(R.string.exercise_library_card_region_equipment, region, equip)
-    }
-    return region
 }

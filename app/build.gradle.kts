@@ -74,6 +74,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.phosphor.icon)
     implementation(libs.coil.compose)
+    implementation(libs.coil.gif)
     implementation(libs.sceneview)
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)

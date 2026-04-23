@@ -3,6 +3,7 @@ package com.hoabui.virtualbody3d.domain.util
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import java.util.Locale
 import kotlin.math.max
+import kotlin.math.round
 
 data class ExerciseCaloriesMetadata(
     val met: Double,
@@ -34,6 +35,31 @@ object ExerciseCaloriesMetadataProvider {
 }
 
 object CaloriesCalculator {
+    /**
+     * Upper-bound style estimate for exercise-library cards ("up to" messaging).
+     *
+     * Uses a high-intensity profile: reference body weight [LIBRARY_UPTO_BODY_WEIGHT_KG],
+     * resistance [LIBRARY_UPTO_LOAD_KG], [LIBRARY_UPTO_REPS] for strength TUT, and
+     * [LIBRARY_UPTO_DURATION_MINUTES] for duration mode. Strength applies load + EPOC scaling;
+     * duration uses the minute window and MET only (load/reps are ignored by the model).
+     * Result is rounded to the nearest 5 kcal for cleaner display.
+     */
+    fun estimateLibraryUptoKcal(
+        exerciseId: String,
+        measurementMode: ExerciseMeasurementMode,
+    ): Int {
+        val raw = estimateCalories(
+            exerciseId = exerciseId,
+            measurementMode = measurementMode,
+            durationMinutes = LIBRARY_UPTO_DURATION_MINUTES,
+            totalReps = LIBRARY_UPTO_REPS,
+            averageLoadKg = LIBRARY_UPTO_LOAD_KG,
+            bodyWeightKg = LIBRARY_UPTO_BODY_WEIGHT_KG,
+            leanBodyMassKg = null,
+        ).toDouble()
+        return (round(raw / LIBRARY_UPTO_KCAL_ROUND_STEP) * LIBRARY_UPTO_KCAL_ROUND_STEP).toInt()
+    }
+
     @Suppress("UNUSED_PARAMETER")
     fun estimateCalories(
         exerciseId: String,
@@ -136,6 +162,12 @@ private const val DEFAULT_CARDIO_MET = 6.0
 private const val DEFAULT_STRENGTH_MET = 5.0
 // Fallback when user body weight is missing or invalid; may skew estimates for users far from 70kg.
 private const val DEFAULT_BODY_WEIGHT_KG = 70.0
+// Library "up to" card profile: higher reference weight, load, and reps for an upper-bound style estimate.
+private const val LIBRARY_UPTO_BODY_WEIGHT_KG = 90.0
+private const val LIBRARY_UPTO_LOAD_KG = 70.0
+private const val LIBRARY_UPTO_REPS = 12
+private const val LIBRARY_UPTO_DURATION_MINUTES = 1.0
+private const val LIBRARY_UPTO_KCAL_ROUND_STEP = 5.0
 // Minimum MET for heavy compounds, calibrated to hit ~25-40 kcal for 10 reps @ 95kg, 4.5s tempo, 70kg body weight.
 private const val HEAVY_COMPOUND_BASE_MET = 7.5
 // Higher k for heavy compounds to reflect stronger afterburn vs. isolation lifts (calibrated to target range above).

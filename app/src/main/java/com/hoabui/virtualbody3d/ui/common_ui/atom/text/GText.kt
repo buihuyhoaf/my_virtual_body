@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -52,6 +53,35 @@ fun GText(
         overflow = overflow,
         softWrap = softWrap,
         textAlign = textAlign
+    )
+}
+
+/**
+ * [AnnotatedString] variant: span [androidx.compose.ui.text.SpanStyle] colors apply; pass no top-level [color] override.
+ */
+@Composable
+fun GText(
+    modifier: Modifier = Modifier,
+    text: AnnotatedString,
+    style: TextStyle? = null,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    textAlign: TextAlign? = null,
+    fontWeight: FontWeight? = null,
+) {
+    val token = GymTheme.token
+    val resolvedStyle = (style ?: token.typography.bodyMedium)
+        .let { if (fontWeight != null) it.copy(fontWeight = fontWeight) else it }
+    Text(
+        text = text,
+        modifier = modifier,
+        style = resolvedStyle,
+        color = Color.Unspecified,
+        maxLines = maxLines,
+        overflow = overflow,
+        softWrap = softWrap,
+        textAlign = textAlign,
     )
 }
 

@@ -160,7 +160,7 @@ class ExerciseLibraryUiMapper @Inject constructor(
                         (equipment == null || entry.equipment == equipment)
                 }
                 ?.map { entry ->
-                    entry.toGExerciseCardUiModel(cartIds, activeId)
+                    entry.toGExerciseCardUiModel(appContext, cartIds, activeId)
                 }
                 ?: emptyList()
             if (items.isEmpty()) null else ExerciseLibrarySectionRowUiModel(region, items.toImmutableList())

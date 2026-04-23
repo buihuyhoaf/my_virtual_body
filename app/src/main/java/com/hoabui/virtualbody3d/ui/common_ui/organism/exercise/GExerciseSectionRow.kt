@@ -19,6 +19,10 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
@@ -31,9 +35,12 @@ import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCardHolisticCap
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.ExerciseLibraryCardImage
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toCoilModel
+import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.common_ui.atom.icon.GIcon
 import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
+import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCaloriesVisualLevel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
+import com.hoabui.virtualbody3d.ui.theme.toCaloriesVisualLevelColor
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
 
 @Immutable
@@ -42,6 +49,10 @@ data class GExerciseCardUiModel(
     val image: ExerciseLibraryCardImage,
     val title: String,
     val subtitle: String,
+    /** When set with [subtitleCaloriesVisualLevel], the library row paints only this value with intensity color. */
+    val libraryUptoKcal: Int? = null,
+    /** When set, subtitle uses calendar-aligned calorie intensity colors on library cards. */
+    val subtitleCaloriesVisualLevel: WorkoutCaloriesVisualLevel? = null,
     val badgeText: String? = null,
     /** Strong highlight: active line in the cart. */
     val isSelected: Boolean = false,
@@ -124,7 +135,7 @@ fun GExerciseSectionCardRow(
     val latestOnToggleSelection = rememberUpdatedState(onToggleSelection)
     LazyRow(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(token.spacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
         contentPadding = PaddingValues(horizontal = token.spacing.xxs, vertical = token.spacing.xxs),
     ) {
         items(section.items, key = { it.id }, contentType = { _ -> "exercise_card" }) { item ->
@@ -146,6 +157,30 @@ fun GExerciseSectionCardRow(
                 { latestOnNavigateDetail.value(item.id) }
             }
             val inCart = item.isSelected || item.isInCartInactive
+            val uptoPrefix = stringResource(R.string.exercise_library_card_upto_prefix)
+            val uptoSuffix = stringResource(R.string.exercise_library_card_upto_suffix)
+            val secondLineAnnotated = if (
+                item.libraryUptoKcal != null && item.subtitleCaloriesVisualLevel != null
+            ) {
+                val kcal = item.libraryUptoKcal
+                val level = item.subtitleCaloriesVisualLevel
+                val muted =
+                    token.colors.textSecondary.copy(alpha = PrimitiveAlphaTokens.IMAGE_CARD_OVERLAY_MEDIUM)
+                val highlight = level.toCaloriesVisualLevelColor(token)
+                buildAnnotatedString {
+                    withStyle(SpanStyle(color = muted)) { append(uptoPrefix) }
+                    withStyle(SpanStyle(color = highlight)) { append(kcal.toString()) }
+                    withStyle(SpanStyle(color = muted)) { append(uptoSuffix) }
+                }
+            } else {
+                null
+            }
+            val secondLineColor =
+                if (secondLineAnnotated == null) {
+                    item.subtitleCaloriesVisualLevel?.toCaloriesVisualLevelColor(token)
+                } else {
+                    null
+                }
             val imageOverlayTop: (@Composable BoxScope.() -> Unit)? =
                 if (onToggleSelection != null) {
                     {
@@ -167,7 +202,9 @@ fun GExerciseSectionCardRow(
                 contentDescription = item.title,
                 firstLineText = item.title,
                 secondLineText = item.subtitle,
-                cardSize = CardSize.ExerciseLibraryTile,
+                secondLineAnnotatedText = secondLineAnnotated,
+                secondLineColor = secondLineColor,
+                cardSize = CardSize.Small,
                 badge = badgeSlot,
                 badgeChrome = chrome,
                 imageOverlayTopEnd = imageOverlayTop,

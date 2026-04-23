@@ -57,8 +57,12 @@
     <string name="exercise_detail_safety_section">Notes</string>
     <string name="exercise_detail_ok">OK</string>
     <string name="exercise_detail_hero_image_cd">Exercise illustration for %1$s</string>
+    <string name="exercise_detail_hero_animation_cd">%1$s animation</string>
     <string name="exercise_detail_last_weight">Last weight: %1$.0f kg</string>
     <string name="exercise_library_card_region_equipment">%1$s · %2$s</string>
+    <string name="exercise_library_card_upto_kcal">Up to %1$d kcal</string>
+    <string name="exercise_library_card_upto_prefix">Up to </string>
+    <string name="exercise_library_card_upto_suffix"> kcal</string>
 
     <!-- Workout calendar -->
     <string name="workout_calendar_title">Workout plan</string>

@@ -187,6 +187,9 @@
     <string name="exercise_library_empty_message">Thử đổi bộ lọc hoặc từ khóa tìm kiếm.</string>
     <string name="exercise_library_card_subtitle_fallback">—</string>
     <string name="exercise_library_card_region_equipment">%1$s · %2$s</string>
+    <string name="exercise_library_card_upto_kcal">Lên tới %1$d kcal</string>
+    <string name="exercise_library_card_upto_prefix">Lên tới    </string>
+    <string name="exercise_library_card_upto_suffix">     kcal</string>
     <string name="exercise_quick_add_cd">Thêm nhanh vào buổi tập</string>
     <string name="exercise_library_list_toggle_add_cd">Thêm vào giỏ chọn bài tập</string>
     <string name="exercise_library_cart_sets">Hiệp</string>
@@ -286,6 +289,7 @@
     <string name="exercise_detail_safety_section">Lưu ý</string>
     <string name="exercise_detail_ok">OK</string>
     <string name="exercise_detail_hero_image_cd">Ảnh minh họa bài tập %1$s</string>
+    <string name="exercise_detail_hero_animation_cd">Hoạt ảnh minh họa %1$s</string>
     <string name="exercise_detail_safety_tips">Lưu ý an toàn</string>
     <string name="exercise_detail_add_to_workout_plan">Thêm vào kế hoạch tập</string>
     <string name="exercise_detail_last_weight">Trọng lượng gần nhất: %1$.0f kg</string>
