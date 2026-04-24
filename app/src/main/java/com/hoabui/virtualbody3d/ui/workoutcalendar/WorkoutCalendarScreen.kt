@@ -39,8 +39,6 @@ import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
 import com.hoabui.virtualbody3d.ui.common_ui.atom.dialog.GDialog
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
-import com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBar
-import com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBarBackIcon
 import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
 import com.hoabui.virtualbody3d.ui.common_ui.organism.workoutcalendar.WorkoutCalendarDayExerciseListOrganism
 import com.hoabui.virtualbody3d.ui.common_ui.organism.workoutcalendar.WorkoutCalendarMonthGridOrganism
@@ -101,15 +99,6 @@ fun WorkoutCalendarScreen(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         contentWindowInsets = WindowInsets(0),
-        topBar = {
-            GTopBar(
-                title = stringResource(R.string.workout_calendar_title),
-                windowInsets = WindowInsets(0),
-                navigationIcon = {
-                    GTopBarBackIcon(onBack = onBack)
-                },
-            )
-        },
     ) { padding ->
         UiStateContent(
             state = screen,

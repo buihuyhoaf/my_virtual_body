@@ -41,6 +41,8 @@ fun AppScaffoldLayout(
         currentDestination.hasRoute(ExerciseLibraryGraphRoute::class) -> TopBarConfig.Home
         currentDestination.hasRoute(MealCaptureRoute::class) -> TopBarConfig.Home
         currentDestination.hasRoute(AddRoute::class) -> TopBarConfig.Home
+        currentDestination.hasRoute(WorkoutCalendarRoute::class) -> TopBarConfig.Home
+        currentDestination.hasRoute(ExerciseLibraryRoute::class) -> TopBarConfig.Home
         else -> TopBarConfig.None
     }
 
