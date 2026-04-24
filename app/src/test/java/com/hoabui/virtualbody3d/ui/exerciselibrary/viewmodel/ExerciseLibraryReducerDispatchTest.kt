@@ -6,7 +6,9 @@ import com.hoabui.virtualbody3d.domain.usecase.ResolveNextSlotSelectionAfterTogg
 import com.hoabui.virtualbody3d.domain.usecase.SessionBookingConfirmationWorkflow
 import com.hoabui.virtualbody3d.domain.usecase.ToggleExerciseInCartUseCase
 import com.hoabui.virtualbody3d.domain.usecase.UpdateExerciseDraftUseCase
+import com.hoabui.virtualbody3d.domain.usecase.UpdateWorkoutScheduleFromCartDraftUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ValidateSessionBookingUseCase
+import com.hoabui.virtualbody3d.domain.repository.WorkoutScheduleRepository
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.CommitLibrarySessionBookingSuccessUiMapper
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseLibraryCatalogUiMapper
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mapper.ExerciseLibraryUiMapper
@@ -25,6 +27,8 @@ import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
+import com.hoabui.virtualbody3d.domain.model.exercise.Muscle
+import com.hoabui.virtualbody3d.domain.model.exercise.TestMuscleDictionary
 import com.hoabui.virtualbody3d.domain.model.common.ImageSource
 import com.hoabui.virtualbody3d.domain.usecase.GetExerciseLibraryUseCase
 import com.hoabui.virtualbody3d.domain.usecase.MigrateLegacyWorkoutSchedulesUseCase
@@ -49,6 +53,7 @@ import java.time.LocalDate
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ExerciseLibraryReducerDispatchTest {
+    private val testMuscleDictionary = TestMuscleDictionary()
 
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
@@ -73,6 +78,7 @@ class ExerciseLibraryReducerDispatchTest {
             image = ImageSource.LocalResource("p"),
             category = ExerciseCategory.Strength,
             bodyRegion = BodyRegion.Chest,
+            focusMuscles = listOf(Muscle.UPPER_PECTORALIS),
             description = "",
             equipment = EquipmentType.Barbell,
             safetyNotes = "",
@@ -86,9 +92,9 @@ class ExerciseLibraryReducerDispatchTest {
             awaitCancellation()
         }
         val migrate = mockk<MigrateLegacyWorkoutSchedulesUseCase>()
-        coEvery { migrate(any()) } returns Unit
+        coEvery { migrate() } returns Unit
         val observeWeeklySummary = mockk<ObserveExerciseLibraryWeeklySummaryUseCase>()
-        every { observeWeeklySummary(any(), any()) } returns flow {
+        every { observeWeeklySummary(any()) } returns flow {
             emit(
                 (0L..6L).map { offset ->
                     ExerciseLibraryWeeklyDayItem(
@@ -108,7 +114,12 @@ class ExerciseLibraryReducerDispatchTest {
         val catalogMapper = ExerciseLibraryCatalogUiMapper(appContext)
         val workflow = mockk<SessionBookingConfirmationWorkflow>()
         every { workflow.run(any()) } returns kotlinx.coroutines.flow.flowOf()
-        val reducer = ExerciseLibraryReducer(CommitLibrarySessionBookingSuccessUiMapper())
+        val reducer = ExerciseLibraryReducer(
+            commitSuccessUiMapper = CommitLibrarySessionBookingSuccessUiMapper(),
+            muscleDictionary = testMuscleDictionary,
+        )
+        val updateSchedule = mockk<UpdateWorkoutScheduleFromCartDraftUseCase>(relaxed = true)
+        val scheduleRepo = mockk<WorkoutScheduleRepository>(relaxed = true)
         val vm = ExerciseLibraryViewModel(
             getLibrary,
             workflow,
@@ -122,6 +133,9 @@ class ExerciseLibraryReducerDispatchTest {
             UpdateExerciseDraftUseCase(),
             CanConfirmLibrarySessionBookingUseCase(ValidateSessionBookingUseCase()),
             ResolveNextSlotSelectionAfterToggleUseCase(),
+            updateSchedule,
+            scheduleRepo,
+            testMuscleDictionary,
         )
         vm.updateSearchQuery("bench")
         verify(exactly = 0) { workflow.run(any()) }

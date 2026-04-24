@@ -6,13 +6,14 @@ package com.hoabui.virtualbody3d.domain.model.exercise
 fun normalizeExerciseLibraryQuery(raw: String): String = raw.trim().lowercase()
 
 /**
- * Whether [this] exercise matches [normalizedQuery] by name, [bodyRegion], or [equipment].
+ * Whether [this] exercise matches [normalizedQuery] by name, [bodyRegion], [focusMuscles], or [equipment].
  * Empty [normalizedQuery] matches all.
  */
 fun Exercise.matchesLibrarySearch(normalizedQuery: String): Boolean {
     if (normalizedQuery.isEmpty()) return true
     if (name.lowercase().contains(normalizedQuery)) return true
     if (bodyRegion.name.lowercase().contains(normalizedQuery)) return true
+    if (focusMuscles.any { it.wireKey.contains(normalizedQuery) }) return true
     val equipmentName = equipment?.name?.lowercase() ?: return false
     return equipmentName.contains(normalizedQuery)
 }

@@ -17,6 +17,10 @@ data class ExerciseEntity(
     val imageResUrl: String?,
     @ColumnInfo(name = "body_region")
     val bodyRegion: String?,
+    @ColumnInfo(name = "region_group")
+    val regionGroup: String?,
+    @ColumnInfo(name = "focus_muscles")
+    val focusMuscles: List<String>,
     @ColumnInfo(name = "category")
     val category: String?,
     @ColumnInfo(name = "description")

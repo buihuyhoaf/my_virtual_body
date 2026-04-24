@@ -26,8 +26,9 @@ fun AppScaffoldLayout(
         !currentDestination.hasRoute(LoginRoute::class)
 
     val showBottomBar = showBars && (currentDestination.hasRoute(HomeRoute::class)
-            || currentDestination.hasRoute(CenfitCoachRoute::class)
+            || currentDestination.hasRoute(ExerciseLibraryGraphRoute::class)
             || currentDestination.hasRoute(ExerciseLibraryRoute::class)
+            || currentDestination.hasRoute(SessionBookingEditorRoute::class)
             || currentDestination.hasRoute(MealCaptureRoute::class)
             || currentDestination.hasRoute(ProfileRoute::class)
             || currentDestination.hasRoute(BodyDetailAnalystRoute::class)
@@ -37,7 +38,7 @@ fun AppScaffoldLayout(
         !showBars -> TopBarConfig.None
         currentDestination.hasRoute(HomeRoute::class) -> TopBarConfig.Home
         currentDestination.hasRoute(ProfileRoute::class) -> TopBarConfig.Home
-        currentDestination.hasRoute(CenfitCoachRoute::class) -> TopBarConfig.Home
+        currentDestination.hasRoute(ExerciseLibraryGraphRoute::class) -> TopBarConfig.Home
         currentDestination.hasRoute(MealCaptureRoute::class) -> TopBarConfig.Home
         currentDestination.hasRoute(AddRoute::class) -> TopBarConfig.Home
         else -> TopBarConfig.None

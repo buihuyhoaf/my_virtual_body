@@ -52,8 +52,8 @@ public class VirtualBodyDatabase_Impl : VirtualBodyDatabase() {
   }
 
   protected override fun createOpenDelegate(): RoomOpenDelegate {
-    val _openDelegate: RoomOpenDelegate = object : RoomOpenDelegate(5,
-        "8a5a007576f104e6b3080483e8f39bbd", "1356ead0b3169b38871f8497fc56cb19") {
+    val _openDelegate: RoomOpenDelegate = object : RoomOpenDelegate(3,
+        "f3654d3408b17567b8d7fd669f7f5f00", "7be4f4c98527cd4cdd0097ceabc8bb1a") {
       public override fun createAllTables(connection: SQLiteConnection) {
         connection.execSQL("CREATE TABLE IF NOT EXISTS `workout_schedules` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clientId` TEXT NOT NULL, `dayKey` INTEGER NOT NULL, `exerciseId` TEXT NOT NULL, `sessionId` TEXT, `scheduledAtEpochMillis` INTEGER NOT NULL, `sets` INTEGER NOT NULL, `reps` INTEGER NOT NULL, `weightKg` REAL NOT NULL, `restSeconds` INTEGER NOT NULL, `notes` TEXT, `measurementMode` TEXT NOT NULL, `durationSeconds` INTEGER, `locationId` TEXT NOT NULL, `executionStatus` TEXT NOT NULL, `createdAtEpochMillis` INTEGER NOT NULL, `updatedAtEpochMillis` INTEGER NOT NULL, `exercise_image_res_url` TEXT, `exercise_local_image_name` TEXT)")
         connection.execSQL("CREATE INDEX IF NOT EXISTS `index_workout_schedules_dayKey` ON `workout_schedules` (`dayKey`)")
@@ -62,13 +62,13 @@ public class VirtualBodyDatabase_Impl : VirtualBodyDatabase() {
         connection.execSQL("CREATE INDEX IF NOT EXISTS `index_workout_sessions_dayKey` ON `workout_sessions` (`dayKey`)")
         connection.execSQL("CREATE INDEX IF NOT EXISTS `index_workout_sessions_locationId_dayKey` ON `workout_sessions` (`locationId`, `dayKey`)")
         connection.execSQL("CREATE INDEX IF NOT EXISTS `index_workout_sessions_location_day_start_end` ON `workout_sessions` (`locationId`, `dayKey`, `startEpochMillis`, `endEpochMillis`)")
-        connection.execSQL("CREATE TABLE IF NOT EXISTS `exercises` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `local_image_name` TEXT, `image_res_url` TEXT, `body_region` TEXT, `category` TEXT, `description` TEXT, `equipment` TEXT, `safety_notes` TEXT, `last_weight_kg` REAL, `sets` INTEGER, `reps` INTEGER, `measurement_mode` TEXT, PRIMARY KEY(`id`))")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `exercises` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `local_image_name` TEXT, `image_res_url` TEXT, `body_region` TEXT, `region_group` TEXT, `focus_muscles` TEXT NOT NULL, `category` TEXT, `description` TEXT, `equipment` TEXT, `safety_notes` TEXT, `last_weight_kg` REAL, `sets` INTEGER, `reps` INTEGER, `measurement_mode` TEXT, PRIMARY KEY(`id`))")
         connection.execSQL("CREATE TABLE IF NOT EXISTS `progress_snapshots` (`row_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date_iso` TEXT NOT NULL, `image_url` TEXT, `weight_kg` REAL, `body_fat_percent` REAL, `muscle_mass_kg` REAL)")
         connection.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_progress_snapshots_date_iso` ON `progress_snapshots` (`date_iso`)")
         connection.execSQL("CREATE TABLE IF NOT EXISTS `nutrition_summary` (`id` INTEGER NOT NULL, `intake` INTEGER NOT NULL, `burned` INTEGER NOT NULL, `goal` INTEGER NOT NULL, PRIMARY KEY(`id`))")
         connection.execSQL("CREATE TABLE IF NOT EXISTS `body_scan_results` (`id` INTEGER NOT NULL, `payload_json` TEXT NOT NULL, PRIMARY KEY(`id`))")
         connection.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)")
-        connection.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8a5a007576f104e6b3080483e8f39bbd')")
+        connection.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f3654d3408b17567b8d7fd669f7f5f00')")
       }
 
       public override fun dropAllTables(connection: SQLiteConnection) {
@@ -201,6 +201,10 @@ public class VirtualBodyDatabase_Impl : VirtualBodyDatabase() {
             null, TableInfo.CREATED_FROM_ENTITY))
         _columnsExercises.put("body_region", TableInfo.Column("body_region", "TEXT", false, 0, null,
             TableInfo.CREATED_FROM_ENTITY))
+        _columnsExercises.put("region_group", TableInfo.Column("region_group", "TEXT", false, 0,
+            null, TableInfo.CREATED_FROM_ENTITY))
+        _columnsExercises.put("focus_muscles", TableInfo.Column("focus_muscles", "TEXT", true, 0,
+            null, TableInfo.CREATED_FROM_ENTITY))
         _columnsExercises.put("category", TableInfo.Column("category", "TEXT", false, 0, null,
             TableInfo.CREATED_FROM_ENTITY))
         _columnsExercises.put("description", TableInfo.Column("description", "TEXT", false, 0, null,

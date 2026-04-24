@@ -1,0 +1,61 @@
+{
+  "upper_front": {
+    "chest": [
+      "upper_pectoralis",
+      "middle_pectoralis",
+      "lower_pectoralis",
+      "pectoralis_major"
+    ],
+    "belly": [
+      "rectus_abdominis",
+      "upper_abs",
+      "lower_abs",
+      "obliques",
+      "transverse_abdominis",
+      "serratus_anterior"
+    ],
+    "shoulders_front": [
+      "anterior_deltoid",
+      "lateral_deltoid"
+    ],
+    "arms_front": [
+      "biceps_brachii",
+      "brachialis",
+      "brachioradialis"
+    ]
+  },
+  "upper_back": {
+    "back": [
+      "latissimus_dorsi",
+      "middle_trapezius",
+      "upper_trapezius",
+      "infraspinatus",
+      "erector_spinae"
+    ],
+    "shoulders_back": [
+      "posterior_deltoid"
+    ],
+    "arms_back": [
+      "triceps_brachii"
+    ]
+  },
+  "lower_front": {
+    "legs_front": [
+      "quadriceps",
+      "rectus_femoris",
+      "vastus_lateralis",
+      "vastus_medialis",
+      "hip_flexors",
+      "iliopsoas"
+    ]
+  },
+  "lower_back": {
+    "legs_back": [
+      "gluteus_maximus",
+      "hamstrings",
+      "biceps_femoris",
+      "gastrocnemius",
+      "soleus"
+    ]
+  }
+}

@@ -10,6 +10,7 @@ fun ExerciseLibraryCatalogEntryUiModel.matchesLibrarySearch(normalizedQuery: Str
     if (normalizedQuery.isEmpty()) return true
     if (name.lowercase().contains(normalizedQuery)) return true
     if (bodyRegion.name.lowercase().contains(normalizedQuery)) return true
+    if (focusMuscles.any { it.wireKey.contains(normalizedQuery) }) return true
     val equipmentName = equipment?.name?.lowercase() ?: return false
     return equipmentName.contains(normalizedQuery)
 }

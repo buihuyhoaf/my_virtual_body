@@ -5,6 +5,7 @@ import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
 import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
+import com.hoabui.virtualbody3d.domain.model.exercise.Muscle
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.ExerciseLibraryCardImage
 
 /**
@@ -17,6 +18,7 @@ data class ExerciseLibraryCatalogEntryUiModel(
     val category: ExerciseCategory,
     val equipment: EquipmentType?,
     val bodyRegion: BodyRegion,
+    val focusMuscles: List<Muscle>,
     val measurementMode: ExerciseMeasurementMode,
     val image: ExerciseLibraryCardImage,
 )

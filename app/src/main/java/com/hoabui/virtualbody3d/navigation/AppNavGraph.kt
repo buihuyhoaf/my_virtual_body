@@ -4,17 +4,22 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
 import com.hoabui.virtualbody3d.ui.body.screen.BodyDetailAnalystScreen
 import com.hoabui.virtualbody3d.ui.body.screen.BodyRegionDetailScreen
 import com.hoabui.virtualbody3d.ui.body.screen.HomeScreen
 import com.hoabui.virtualbody3d.ui.exerciselibrary.ExerciseLibraryScreen
+import com.hoabui.virtualbody3d.ui.exerciselibrary.sessionbooking.SessionBookingEditorScreen
+import com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel.ExerciseLibraryViewModel
 import com.hoabui.virtualbody3d.ui.workoutcalendar.WorkoutCalendarScreen
 import com.hoabui.virtualbody3d.ui.login.LoginScreen
 import com.hoabui.virtualbody3d.ui.mealcapture.MealCaptureScreen
@@ -76,18 +81,44 @@ fun AppNavGraph(
         composable<BodyDetailAnalystRoute> {
             BodyDetailAnalystScreen(onBack = { navController.popBackStack() })
         }
-        composable<ExerciseLibraryRoute> { backStackEntry ->
-            val route = backStackEntry.toRoute<ExerciseLibraryRoute>()
-            ExerciseLibraryScreen(
-                onNavigateToWorkoutCalendar = { navController.navigate(WorkoutCalendarRoute) },
-                scheduleRowIdToEdit = route.scheduleRowIdToEdit,
-            )
+        navigation<ExerciseLibraryGraphRoute>(startDestination = ExerciseLibraryRoute()) {
+            composable<ExerciseLibraryRoute> { backStackEntry ->
+                // Use the route *instance* (not KClass) — getBackStackEntry(KClass) triggers ClassReference serializer failure.
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(ExerciseLibraryGraphRoute)
+                }
+                val viewModel: ExerciseLibraryViewModel = hiltViewModel(parentEntry)
+                val route = backStackEntry.toRoute<ExerciseLibraryRoute>()
+                ExerciseLibraryScreen(
+                    viewModel = viewModel,
+                    onNavigateToWorkoutCalendar = { navController.navigate(WorkoutCalendarRoute) },
+                    onNavigateToSessionBookingEditor = { navController.navigate(SessionBookingEditorRoute) },
+                    scheduleRowIdToEdit = route.scheduleRowIdToEdit,
+                )
+            }
+            composable<SessionBookingEditorRoute> { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(ExerciseLibraryGraphRoute)
+                }
+                val viewModel: ExerciseLibraryViewModel = hiltViewModel(parentEntry)
+                SessionBookingEditorScreen(
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() },
+                    onNavigateToWorkoutCalendar = {
+                        val poppedToLibrary = navController.popBackStack<ExerciseLibraryRoute>(inclusive = false)
+                        if (!poppedToLibrary) {
+                            navController.popBackStack<ExerciseLibraryGraphRoute>(inclusive = false)
+                        }
+                        navController.navigate(WorkoutCalendarRoute)
+                    },
+                )
+            }
         }
         composable<WorkoutCalendarRoute> {
             val onWorkoutCalendarBack = back@{
                 if (navController.popBackStack<ExerciseLibraryRoute>(inclusive = false)) return@back
-                if (navController.popBackStack(CenfitCoachRoute, inclusive = false)) return@back
-                navController.navigate(ExerciseLibraryRoute()) {
+                if (navController.popBackStack<ExerciseLibraryGraphRoute>(inclusive = false)) return@back
+                navController.navigate(ExerciseLibraryGraphRoute) {
                     popUpTo<WorkoutCalendarRoute> { inclusive = true }
                     launchSingleTop = true
                 }
@@ -101,11 +132,6 @@ fun AppNavGraph(
         }
         composable<MealCaptureRoute> {
             MealCaptureScreen()
-        }
-        composable<CenfitCoachRoute> {
-            ExerciseLibraryScreen(
-                onNavigateToWorkoutCalendar = { navController.navigate(WorkoutCalendarRoute) },
-            )
         }
         composable<ProfileRoute> {
             ProfileScreen(

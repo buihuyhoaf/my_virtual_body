@@ -24,6 +24,7 @@ object CatalogSeedData {
             name = "Bench Press",
             imageResId = null,
             bodyRegion = "Chest",
+            focusMuscles = listOf("upper_pectoralis", "lower_pectoralis"),
             category = "Strength",
             description = "1. Nằm trên ghế, mắt thẳng dưới thanh đòn.\n2. Hạ tạ xuống giữa ngực, cùi chỏ tạo góc 45-75 độ.\n3. Đẩy tạ lên và thở ra mạnh.",
             equipment = "Barbell",
@@ -35,6 +36,7 @@ object CatalogSeedData {
             name = "Incline Dumbbell Press",
             imageResId = null,
             bodyRegion = "Chest",
+            focusMuscles = listOf("upper_pectoralis"),
             category = "Strength",
             description = "1. Chỉnh ghế dốc 30-45 độ.\n2. Hạ tạ xuống ngang ngực trên, giữ cổ tay thẳng.\n3. Ép ngực đẩy tạ lên cao nhưng không khóa khớp cùi chỏ.",
             equipment = "Dumbbell",
@@ -46,6 +48,7 @@ object CatalogSeedData {
             name = "Lat Pulldown",
             imageResId = null,
             bodyRegion = "Back",
+            focusMuscles = listOf("latissimus_dorsi"),
             category = "Strength",
             description = "1. Ngồi thẳng, tay cầm thanh xà rộng hơn vai.\n2. Kéo thanh xà xuống sát ngực trên, hướng cùi chỏ ra sau.\n3. Thả tạ lên chậm và cảm nhận cơ xô dãn ra.",
             equipment = "Cable",
@@ -57,6 +60,7 @@ object CatalogSeedData {
             name = "Seated Cable Row",
             imageResId = null,
             bodyRegion = "Back",
+            focusMuscles = listOf("latissimus_dorsi", "middle_trapezius"),
             category = "Strength",
             description = "1. Ngồi thẳng lưng, chân đặt vững trên bàn đạp.\n2. Kéo tay cầm về phía bụng dưới, ép chặt xương bả vai.\n3. Giữ lưng cố định, không ngả người quá sâu.",
             equipment = "Cable",
@@ -68,6 +72,7 @@ object CatalogSeedData {
             name = "Overhead Press",
             imageResId = null,
             bodyRegion = "Shoulders",
+            focusMuscles = listOf("Anterior Deltoid", "Upper Trapezius", "Triceps Brachii"),
             category = "Strength",
             description = "1. Đứng thẳng, tay cầm tạ rộng bằng vai.\n2. Đẩy tạ thẳng lên trên đầu cho đến khi tay thẳng.\n3. Gồng core và mông để giữ cơ thể ổn định.",
             equipment = "Barbell",
@@ -79,6 +84,7 @@ object CatalogSeedData {
             name = "Lateral Raise",
             imageResId = null,
             bodyRegion = "Shoulders",
+            focusMuscles = listOf("Lateral Deltoid"),
             category = "Strength",
             description = "1. Đứng thẳng, tay cầm tạ đơn hai bên hông.\n2. Nâng tạ sang hai bên cho đến khi ngang vai.\n3. Hạ tạ xuống chậm để tối ưu áp lực lên cơ vai giữa.",
             equipment = "Dumbbell",
@@ -90,6 +96,7 @@ object CatalogSeedData {
             name = "Barbell Curl",
             imageResId = null,
             bodyRegion = "Arms",
+            focusMuscles = listOf("Biceps Brachii", "Brachialis"),
             category = "Strength",
             description = "1. Đứng thẳng, lòng bàn tay hướng về phía trước.\n2. Cuộn tạ lên phía vai, giữ cùi chỏ cố định sát sườn.\n3. Thả tạ xuống chậm, không để tạ rơi tự do.",
             equipment = "Barbell",
@@ -101,6 +108,7 @@ object CatalogSeedData {
             name = "Triceps Pushdown",
             imageResId = null,
             bodyRegion = "Arms",
+            focusMuscles = listOf("Triceps Brachii"),
             category = "Strength",
             description = "1. Đứng hơi nghiêng người, tay cầm thanh xà hoặc dây cáp.\n2. Đẩy cáp xuống cho đến khi tay thẳng hoàn toàn.\n3. Giữ cùi chỏ cố định, chỉ di chuyển cẳng tay.",
             equipment = "Cable",
@@ -111,7 +119,8 @@ object CatalogSeedData {
             id = "9",
             name = "Plank",
             imageResId = null,
-            bodyRegion = "Core",
+            bodyRegion = "Belly",
+            focusMuscles = listOf("Rectus Abdominis", "Transverse Abdominis", "Erector Spinae"),
             category = "Mobility",
             description = "1. Chống cùi chỏ xuống sàn, cơ thể thẳng từ đầu đến gót chân.\n2. Siết chặt cơ bụng và mông.\n3. Duy trì nhịp thở đều đặn trong suốt thời gian giữ.",
             equipment = "Bodyweight",
@@ -122,7 +131,8 @@ object CatalogSeedData {
             id = "10",
             name = "Russian Twist",
             imageResId = null,
-            bodyRegion = "Core",
+            bodyRegion = "Belly",
+            focusMuscles = listOf("Obliques", "Rectus Abdominis"),
             category = "Stretching",
             description = "1. Ngồi hơi ngả người, chân nhấc khỏi sàn.\n2. Xoay thân người sang hai bên, tay chạm sàn hoặc cầm tạ.\n3. Tập trung vào sự co bóp của cơ bụng chéo.",
             equipment = "Bodyweight",
@@ -133,6 +143,7 @@ object CatalogSeedData {
             name = "Squat",
             imageResId = null,
             bodyRegion = "Legs",
+            focusMuscles = listOf("Quadriceps", "Gluteus Maximus", "Erector Spinae"),
             category = "Strength",
             description = "1. Đứng chân rộng bằng vai, mũi chân hướng nhẹ ra ngoài.\n2. Hạ hông xuống như đang ngồi vào ghế, giữ lưng thẳng.\n3. Đạp mạnh gót chân để đứng dậy.",
             equipment = "Barbell",
@@ -144,6 +155,7 @@ object CatalogSeedData {
             name = "Romanian Deadlift",
             imageResId = null,
             bodyRegion = "Legs",
+            focusMuscles = listOf("Hamstrings", "Gluteus Maximus", "Erector Spinae"),
             category = "Strength",
             description = "1. Hạ tạ xuống dọc theo chân bằng cách đẩy hông ra sau.\n2. Giữ lưng thẳng, hạ đến khi cảm thấy cơ đùi sau căng mạnh.\n3. Kéo hông về phía trước để đứng dậy.",
             equipment = "Barbell",
@@ -155,6 +167,7 @@ object CatalogSeedData {
             name = "Jumping Jacks",
             imageResId = null,
             bodyRegion = "Legs",
+            focusMuscles = listOf("Quadriceps", "Gastrocnemius", "Lateral Deltoid"),
             category = "Cardio",
             description = "1. Đứng thẳng, hai tay thả lỏng.\n2. Nhảy bật chân sang hai bên đồng thời vỗ tay trên đầu.\n3. Nhảy thu chân về vị trí ban đầu.",
             equipment = "Bodyweight",
@@ -165,6 +178,7 @@ object CatalogSeedData {
             name = "World's Greatest Stretch",
             imageResId = null,
             bodyRegion = "Legs",
+            focusMuscles = listOf("Hip Flexors", "Gluteus Maximus", "Quadriceps"),
             category = "Mobility",
             description = "1. Bước một chân dài lên phía trước (Lunge).\n2. Đặt tay đối diện xuống sàn, tay còn lại xoay hướng lên trời.\n3. Giữ 2-3 giây rồi thực hiện đổi bên.",
             equipment = "Bodyweight",
@@ -175,6 +189,7 @@ object CatalogSeedData {
             name = "Deadlift",
             imageResId = null,
             bodyRegion = "Back",
+            focusMuscles = listOf("latissimus_dorsi", "middle_trapezius"),
             category = "Strength",
             description = "1. Đứng chân rộng bằng vai, tay nắm thanh đòn.\n2. Đẩy hông ra sau, giữ lưng thẳng khi kéo tạ lên.\n3. Khóa hông ở vị trí đứng thẳng, sau đó hạ tạ có kiểm soát.",
             equipment = "Barbell",
@@ -186,6 +201,7 @@ object CatalogSeedData {
             name = "Leg Press",
             imageResId = null,
             bodyRegion = "Legs",
+            focusMuscles = listOf("Quadriceps", "Gluteus Maximus"),
             category = "Strength",
             description = "1. Đặt chân lên bàn đạp, lưng tựa chắc vào ghế.\n2. Đẩy bàn đạp ra cho đến khi chân gần thẳng.\n3. Hạ tạ xuống chậm cho đến khi gối tạo góc 90 độ.",
             equipment = "Machine",
@@ -197,6 +213,7 @@ object CatalogSeedData {
             name = "Walking Lunges",
             imageResId = null,
             bodyRegion = "Legs",
+            focusMuscles = listOf("Quadriceps", "Gluteus Maximus", "Hamstrings"),
             category = "Strength",
             description = "1. Bước dài về phía trước, hạ gối sau gần chạm sàn.\n2. Giữ thân người thẳng và đẩy bằng gót chân trước.\n3. Bước tiếp tục với chân còn lại.",
             equipment = "Dumbbell",
@@ -208,6 +225,7 @@ object CatalogSeedData {
             name = "Leg Extension",
             imageResId = null,
             bodyRegion = "Legs",
+            focusMuscles = listOf("Rectus Femoris", "Vastus Lateralis", "Vastus Medialis"),
             category = "Strength",
             description = "1. Ngồi vào máy, đặt cổ chân dưới đệm.\n2. Duỗi chân lên cho đến khi đùi trước co căng.\n3. Hạ tạ xuống chậm và có kiểm soát.",
             equipment = "Machine",
@@ -219,6 +237,7 @@ object CatalogSeedData {
             name = "Leg Curl",
             imageResId = null,
             bodyRegion = "Legs",
+            focusMuscles = listOf("Hamstrings", "Biceps Femoris"),
             category = "Strength",
             description = "1. Nằm trên máy, đặt gót chân dưới đệm.\n2. Co gối kéo đệm về phía mông.\n3. Hạ tạ xuống chậm để cảm nhận cơ đùi sau.",
             equipment = "Machine",
@@ -230,6 +249,7 @@ object CatalogSeedData {
             name = "Standing Calf Raise",
             imageResId = null,
             bodyRegion = "Legs",
+            focusMuscles = listOf("Gastrocnemius", "Soleus"),
             category = "Strength",
             description = "1. Đứng trên bục, gót chân rơi thấp xuống.\n2. Nhón gót lên cao hết mức.\n3. Hạ gót xuống chậm để kéo giãn cơ bắp chân.",
             equipment = "Machine",
@@ -241,6 +261,7 @@ object CatalogSeedData {
             name = "Hip Thrust",
             imageResId = null,
             bodyRegion = "Legs",
+            focusMuscles = listOf("Gluteus Maximus", "Hamstrings", "Rectus Femoris"),
             category = "Strength",
             description = "1. Tựa lưng trên ghế, thanh tạ đặt ngang hông.\n2. Đẩy hông lên đến khi cơ thể thẳng hàng.\n3. Siết mông ở điểm cao nhất rồi hạ xuống chậm.",
             equipment = "Barbell",
@@ -252,6 +273,7 @@ object CatalogSeedData {
             name = "Glute Bridge",
             imageResId = null,
             bodyRegion = "Legs",
+            focusMuscles = listOf("Gluteus Maximus", "Hamstrings"),
             category = "Strength",
             description = "1. Nằm ngửa, gập gối và đặt chân trên sàn.\n2. Đẩy hông lên cao, siết mông.\n3. Hạ hông xuống chậm và lặp lại.",
             equipment = "Bodyweight",
@@ -262,6 +284,7 @@ object CatalogSeedData {
             name = "Pull-up",
             imageResId = null,
             bodyRegion = "Back",
+            focusMuscles = listOf("latissimus_dorsi", "infraspinatus"),
             category = "Strength",
             description = "1. Treo người trên xà, tay rộng hơn vai.\n2. Kéo người lên cho đến khi cằm vượt qua xà.\n3. Hạ xuống chậm với kiểm soát.",
             equipment = "Bodyweight",
@@ -272,6 +295,7 @@ object CatalogSeedData {
             name = "Chin-up",
             imageResId = null,
             bodyRegion = "Back",
+            focusMuscles = listOf("latissimus_dorsi"),
             category = "Strength",
             description = "1. Treo người trên xà, lòng bàn tay hướng vào trong.\n2. Kéo lên cho đến khi cằm qua xà.\n3. Hạ xuống chậm, giữ vai ổn định.",
             equipment = "Bodyweight",
@@ -282,6 +306,7 @@ object CatalogSeedData {
             name = "Bent-Over Row",
             imageResId = null,
             bodyRegion = "Back",
+            focusMuscles = listOf("latissimus_dorsi", "middle_trapezius"),
             category = "Strength",
             description = "1. Gập hông, giữ lưng thẳng và ngực mở.\n2. Kéo thanh tạ về bụng, ép bả vai lại.\n3. Hạ tạ xuống chậm để cảm nhận cơ lưng.",
             equipment = "Barbell",
@@ -293,6 +318,7 @@ object CatalogSeedData {
             name = "T-Bar Row",
             imageResId = null,
             bodyRegion = "Back",
+            focusMuscles = listOf("latissimus_dorsi", "middle_trapezius"),
             category = "Strength",
             description = "1. Đứng gập người, tay cầm tay nắm máy.\n2. Kéo tạ về phía ngực dưới, siết lưng.\n3. Hạ tạ xuống chậm và kiểm soát.",
             equipment = "Machine",
@@ -304,6 +330,7 @@ object CatalogSeedData {
             name = "Face Pull",
             imageResId = null,
             bodyRegion = "Shoulders",
+            focusMuscles = listOf("Posterior Deltoid", "Infraspinatus", "Middle Trapezius"),
             category = "Strength",
             description = "1. Cầm dây cáp ngang mặt, khuỷu tay cao.\n2. Kéo dây về phía mặt, siết cơ vai sau.\n3. Trả dây về chậm với kiểm soát.",
             equipment = "Cable",
@@ -314,6 +341,7 @@ object CatalogSeedData {
             name = "Dumbbell Chest Fly",
             imageResId = null,
             bodyRegion = "Chest",
+            focusMuscles = listOf("lower_pectoralis"),
             category = "Strength",
             description = "1. Nằm trên ghế, tay cầm tạ mở rộng hai bên.\n2. Hạ tạ xuống cho đến khi ngực căng.\n3. Ép ngực đưa tạ trở lại vị trí ban đầu.",
             equipment = "Dumbbell",
@@ -325,6 +353,7 @@ object CatalogSeedData {
             name = "Push-up",
             imageResId = null,
             bodyRegion = "Chest",
+            focusMuscles = listOf("upper_pectoralis", "lower_pectoralis"),
             category = "Strength",
             description = "1. Chống tay rộng hơn vai, thân người thẳng.\n2. Hạ ngực xuống gần sàn.\n3. Đẩy người lên và thở ra mạnh.",
             equipment = "Bodyweight",
@@ -335,6 +364,7 @@ object CatalogSeedData {
             name = "Dips",
             imageResId = null,
             bodyRegion = "Chest",
+            focusMuscles = listOf("upper_pectoralis", "lower_pectoralis"),
             category = "Strength",
             description = "1. Chống tay trên thanh song song, thân người thẳng.\n2. Hạ người xuống đến khi khuỷu tay 90 độ.\n3. Đẩy người lên, siết cơ ngực và tay sau.",
             equipment = "Bodyweight",
@@ -345,6 +375,7 @@ object CatalogSeedData {
             name = "Cable Chest Press",
             imageResId = null,
             bodyRegion = "Chest",
+            focusMuscles = listOf("upper_pectoralis", "lower_pectoralis"),
             category = "Strength",
             description = "1. Đứng giữa hai ròng rọc, tay cầm tay nắm.\n2. Đẩy tay ra trước và ép cơ ngực.\n3. Thu tay về chậm, giữ vai ổn định.",
             equipment = "Cable",
@@ -356,6 +387,7 @@ object CatalogSeedData {
             name = "Pec Deck",
             imageResId = null,
             bodyRegion = "Chest",
+            focusMuscles = listOf("upper_pectoralis", "lower_pectoralis"),
             category = "Strength",
             description = "1. Ngồi vào máy, tay đặt lên đệm.\n2. Ép tay vào nhau cho đến khi ngực siết chặt.\n3. Mở tay ra chậm để kéo giãn cơ ngực.",
             equipment = "Machine",
@@ -367,6 +399,7 @@ object CatalogSeedData {
             name = "Arnold Press",
             imageResId = null,
             bodyRegion = "Shoulders",
+            focusMuscles = listOf("Anterior Deltoid", "Lateral Deltoid", "Triceps Brachii"),
             category = "Strength",
             description = "1. Ngồi thẳng, tạ trước ngực, lòng bàn tay hướng vào.\n2. Xoay tạ và đẩy lên trên đầu.\n3. Hạ tạ xuống chậm, xoay về vị trí ban đầu.",
             equipment = "Dumbbell",
@@ -378,6 +411,7 @@ object CatalogSeedData {
             name = "Front Raise",
             imageResId = null,
             bodyRegion = "Shoulders",
+            focusMuscles = listOf("Anterior Deltoid", "Serratus Anterior"),
             category = "Strength",
             description = "1. Đứng thẳng, cầm tạ trước đùi.\n2. Nâng tạ lên ngang vai, giữ khuỷu tay hơi cong.\n3. Hạ tạ xuống chậm và kiểm soát.",
             equipment = "Dumbbell",
@@ -389,6 +423,7 @@ object CatalogSeedData {
             name = "Rear Delt Fly",
             imageResId = null,
             bodyRegion = "Shoulders",
+            focusMuscles = listOf("Posterior Deltoid", "Infraspinatus", "Middle Trapezius"),
             category = "Strength",
             description = "1. Gập người, tay cầm tạ thả xuống.\n2. Mở tay sang hai bên cho đến khi ngang vai.\n3. Hạ tạ xuống chậm, siết cơ vai sau.",
             equipment = "Dumbbell",
@@ -400,6 +435,7 @@ object CatalogSeedData {
             name = "Hammer Curl",
             imageResId = null,
             bodyRegion = "Arms",
+            focusMuscles = listOf("Brachialis", "Brachioradialis", "Biceps Brachii"),
             category = "Strength",
             description = "1. Đứng thẳng, tay cầm tạ song song.\n2. Cuộn tạ lên phía vai, giữ khuỷu tay cố định.\n3. Hạ tạ xuống chậm và kiểm soát.",
             equipment = "Dumbbell",
@@ -411,6 +447,7 @@ object CatalogSeedData {
             name = "Preacher Curl",
             imageResId = null,
             bodyRegion = "Arms",
+            focusMuscles = listOf("Biceps Brachii", "Brachialis"),
             category = "Strength",
             description = "1. Đặt tay lên ghế preacher, cầm thanh tạ.\n2. Cuộn tạ lên chậm cho đến khi bắp tay siết.\n3. Hạ tạ xuống chậm đến khi tay gần thẳng.",
             equipment = "Barbell",
@@ -422,6 +459,7 @@ object CatalogSeedData {
             name = "Overhead Triceps Extension",
             imageResId = null,
             bodyRegion = "Arms",
+            focusMuscles = listOf("Triceps Brachii"),
             category = "Strength",
             description = "1. Cầm tạ qua đầu, khuỷu tay hướng lên.\n2. Duỗi tay lên cao cho đến khi thẳng.\n3. Hạ tạ xuống chậm, giữ khuỷu tay cố định.",
             equipment = "Dumbbell",
@@ -433,6 +471,7 @@ object CatalogSeedData {
             name = "Skull Crushers",
             imageResId = null,
             bodyRegion = "Arms",
+            focusMuscles = listOf("Triceps Brachii"),
             category = "Strength",
             description = "1. Nằm trên ghế, giữ thanh tạ thẳng trên ngực.\n2. Gập khuỷu tay, hạ tạ xuống gần trán.\n3. Duỗi tay lên lại, siết cơ tay sau.",
             equipment = "Barbell",
@@ -443,7 +482,8 @@ object CatalogSeedData {
             id = "40",
             name = "Bicycle Crunch",
             imageResId = null,
-            bodyRegion = "Core",
+            bodyRegion = "Belly",
+            focusMuscles = listOf("Obliques", "Rectus Abdominis", "Hip Flexors"),
             category = "Strength",
             description = "1. Nằm ngửa, nâng vai khỏi sàn.\n2. Đưa khuỷu tay chạm gối đối diện.\n3. Luân phiên đổi bên với nhịp thở đều.",
             equipment = "Bodyweight",
@@ -453,7 +493,8 @@ object CatalogSeedData {
             id = "41",
             name = "Hanging Leg Raise",
             imageResId = null,
-            bodyRegion = "Core",
+            bodyRegion = "Belly",
+            focusMuscles = listOf("Rectus Abdominis", "Hip Flexors", "Iliopsoas"),
             category = "Strength",
             description = "1. Treo người trên xà, chân thả thẳng.\n2. Nâng chân lên cao đến khi hông gập.\n3. Hạ chân xuống chậm với kiểm soát.",
             equipment = "Bodyweight",
@@ -463,7 +504,8 @@ object CatalogSeedData {
             id = "42",
             name = "Mountain Climbers",
             imageResId = null,
-            bodyRegion = "Core",
+            bodyRegion = "Belly",
+            focusMuscles = listOf("Rectus Abdominis", "Quadriceps", "Hip Flexors"),
             category = "Cardio",
             description = "1. Vào tư thế plank, tay chống thẳng.\n2. Kéo gối về phía ngực luân phiên nhanh.\n3. Giữ thân người ổn định trong suốt bài tập.",
             equipment = "Bodyweight",
@@ -475,6 +517,13 @@ object CatalogSeedData {
             name = "Burpees",
             imageResId = null,
             bodyRegion = "Full Body",
+            focusMuscles = listOf(
+                "Pectoralis Major",
+                "Anterior Deltoid",
+                "Quadriceps",
+                "Gluteus Maximus",
+                "Rectus Abdominis"
+            ),
             category = "Cardio",
             description = "1. Ngồi xổm, đặt tay xuống sàn.\n2. Bật chân ra sau, hạ ngực xuống.\n3. Bật chân về, nhảy lên cao và vỗ tay.",
             equipment = "Bodyweight",
@@ -486,6 +535,7 @@ object CatalogSeedData {
             name = "Treadmill Run",
             imageResId = null,
             bodyRegion = "Legs",
+            focusMuscles = listOf("Quadriceps", "Hamstrings", "Gluteus Maximus", "Gastrocnemius"),
             category = "Cardio",
             description = "1. Khởi động với tốc độ chậm.\n2. Tăng tốc đến mức mục tiêu và giữ nhịp.\n3. Hạ tốc độ dần để thả lỏng.",
             equipment = "Machine",
@@ -497,6 +547,14 @@ object CatalogSeedData {
             name = "Rowing Machine",
             imageResId = null,
             bodyRegion = "Full Body",
+            focusMuscles = listOf(
+                "Latissimus Dorsi",
+                "Biceps Brachii",
+                "Quadriceps",
+                "Gluteus Maximus",
+                "Erector Spinae",
+                "Rectus Abdominis"
+            ),
             category = "Cardio",
             description = "1. Đạp chân mạnh, kéo tay về bụng dưới.\n2. Ngả thân người nhẹ về sau khi kéo.\n3. Trượt ghế về trước và lặp lại nhịp.",
             equipment = "Machine",
@@ -508,6 +566,7 @@ object CatalogSeedData {
             name = "Jump Rope",
             imageResId = null,
             bodyRegion = "Legs",
+            focusMuscles = listOf("Gastrocnemius", "Soleus", "Quadriceps", "Hip Flexors"),
             category = "Cardio",
             description = "1. Cầm dây, khuỷu tay gần thân người.\n2. Xoay dây bằng cổ tay và bật nhẹ bằng mũi chân.\n3. Giữ nhịp đều và thở ổn định.",
             equipment = "Bodyweight",
@@ -519,6 +578,7 @@ object CatalogSeedData {
             name = "Stationary Bike",
             imageResId = null,
             bodyRegion = "Legs",
+            focusMuscles = listOf("Quadriceps", "Hamstrings", "Gluteus Maximus", "Gastrocnemius"),
             category = "Cardio",
             description = "1. Điều chỉnh yên phù hợp, lưng thẳng.\n2. Đạp đều theo nhịp mục tiêu.\n3. Giảm tốc dần để kết thúc buổi tập.",
             equipment = "Machine",
@@ -530,6 +590,7 @@ object CatalogSeedData {
             name = "Child's Pose",
             imageResId = null,
             bodyRegion = "Full Body",
+            focusMuscles = listOf("Erector Spinae", "Gluteus Maximus", "Latissimus Dorsi"),
             category = "Stretching",
             description = "1. Quỳ gối, ngồi lên gót chân.\n2. Cúi người về trước, tay duỗi thẳng.\n3. Thả lỏng và giữ nhịp thở chậm.",
             equipment = "Bodyweight",
@@ -540,6 +601,7 @@ object CatalogSeedData {
             name = "Cat-Cow Stretch",
             imageResId = null,
             bodyRegion = "Core",
+            focusMuscles = listOf("Erector Spinae", "Rectus Abdominis"),
             category = "Mobility",
             description = "1. Vào tư thế bò, tay dưới vai.\n2. Võng lưng xuống (Cow), sau đó cuộn lưng lên (Cat).\n3. Lặp lại nhịp nhàng theo hơi thở.",
             equipment = "Bodyweight",
@@ -550,12 +612,48 @@ object CatalogSeedData {
             name = "Shoulder Dislocates",
             imageResId = null,
             bodyRegion = "Shoulders",
+            focusMuscles = listOf("Pectoralis Major", "Anterior Deltoid", "Lateral Deltoid", "Serratus Anterior"),
             category = "Mobility",
             description = "1. Cầm dây thun rộng hơn vai.\n2. Nâng tay qua đầu ra sau lưng.\n3. Quay tay về lại phía trước với kiểm soát.",
             equipment = "Resistance Band",
             safetyNotes = "Không kéo quá đau, tăng biên độ từ từ."
         ),
-    )
+        ExerciseDto(
+            id = "51",
+            name = "Ab Wheel Rollout",
+            imageResId = null,
+            bodyRegion = "Belly",
+            focusMuscles = listOf("upper_abs", "lower_abs", "transverse_abdominis", "serratus_anterior"),
+            category = "Strength",
+            description = "1. Quỳ gối, cầm bánh bụng, giữ bả vai.\n2. Lăn bánh dần về trước, giữ thắt lưng ổn định.\n3. Kéo bánh về tư thế quỳ bằng cơ bụng.",
+            equipment = "Ab Wheel",
+            safetyNotes = "Dừng nếu thấy đau cột sống; không với quá sâu khi còn yếu.",
+        ),
+        ExerciseDto(
+            id = "52",
+            name = "Hollow Body Hold",
+            imageResId = null,
+            bodyRegion = "Belly",
+            focusMuscles = listOf("transverse_abdominis", "lower_abs"),
+            category = "Strength",
+            description = "1. Nằm ngửa, bàn tay cạnh bẹn.\n2. Nhấc bả vai và chân, cong cơ bụng thành hình tàu thuyền.\n3. Lưng ép sát sàn, thở đều, giữ tư thế.",
+            equipment = "Bodyweight",
+            safetyNotes = "Không kéo cổ; tăng thời gian giữ từ từ.",
+            measurementMode = "duration",
+        ),
+        ExerciseDto(
+            id = "53",
+            name = "Side Plank",
+            imageResId = null,
+            bodyRegion = "Belly",
+            focusMuscles = listOf("obliques", "transverse_abdominis"),
+            category = "Strength",
+            description = "1. Nằm nghiêng, cùi chỏ dưới vai, chân xếp lên nhau.\n2. Nâng hông, thành thẳng từ gót tới đầu.\n3. Giữ hông ổn định, hạ từ từ sau khi hết thời gian.",
+            equipment = "Bodyweight",
+            safetyNotes = "Vai ổn định, không lệch hông; đổi bên cân đối.",
+            measurementMode = "duration",
+        ),
+    ).map(::canonicalizeSeedExercise).map(::applyRegionGroupFallback)
 
     fun progressSnapshotsForSeed(): List<ProgressSnapshotDto> = listOf(
         ProgressSnapshotDto("2025-03-01", null, 75.0f, 20.0f, 32.4f),
@@ -608,4 +706,66 @@ object CatalogSeedData {
                 recommendedCalorieIntake = "2,280"
             ),
         )
+}
+
+private fun applyRegionGroupFallback(dto: ExerciseDto): ExerciseDto {
+    if (!dto.regionGroup.isNullOrBlank()) return dto
+    return dto.copy(regionGroup = inferRegionGroup(dto))
+}
+
+private fun canonicalizeSeedExercise(dto: ExerciseDto): ExerciseDto {
+    val canonicalFocus = dto.focusMuscles.orEmpty().map(::canonicalSeedFocusMuscleToken)
+    return dto.copy(focusMuscles = canonicalFocus)
+}
+
+private fun canonicalSeedFocusMuscleToken(raw: String): String = when (raw) {
+    "Anterior Deltoid" -> "anterior_deltoid"
+    "Biceps Brachii" -> "biceps_brachii"
+    "Biceps Femoris" -> "biceps_femoris"
+    "Brachialis" -> "brachialis"
+    "Brachioradialis" -> "brachioradialis"
+    "Erector Spinae" -> "erector_spinae"
+    "Gastrocnemius" -> "gastrocnemius"
+    "Gluteus Maximus" -> "gluteus_maximus"
+    "Hamstrings" -> "hamstrings"
+    "Hip Flexors" -> "hip_flexors"
+    "Iliopsoas" -> "iliopsoas"
+    "Infraspinatus" -> "infraspinatus"
+    "Lateral Deltoid" -> "lateral_deltoid"
+    "Latissimus Dorsi" -> "latissimus_dorsi"
+    "Middle Trapezius" -> "middle_trapezius"
+    "Obliques" -> "obliques"
+    "Pectoralis Major" -> "pectoralis_major"
+    "Posterior Deltoid" -> "posterior_deltoid"
+    "Quadriceps" -> "quadriceps"
+    "Rectus Abdominis" -> "rectus_abdominis"
+    "Rectus Femoris" -> "rectus_femoris"
+    "Serratus Anterior" -> "serratus_anterior"
+    "Soleus" -> "soleus"
+    "Transverse Abdominis" -> "transverse_abdominis"
+    "Triceps Brachii" -> "triceps_brachii"
+    "Upper Trapezius" -> "upper_trapezius"
+    "Vastus Lateralis" -> "vastus_lateralis"
+    "Vastus Medialis" -> "vastus_medialis"
+    else -> raw
+}
+
+private fun inferRegionGroup(dto: ExerciseDto): String {
+    val focus = dto.focusMuscles.orEmpty().toSet()
+    val hasBackOnlyHints = focus.any { it == "posterior_deltoid" || it == "triceps_brachii" }
+    val hasFrontHints = focus.any {
+        it == "anterior_deltoid" || it == "biceps_brachii" || it == "brachialis" || it == "brachioradialis"
+    }
+    return when (dto.bodyRegion) {
+        "Chest", "Belly", "Core" -> "upper_front"
+        "Back" -> "upper_back"
+        "Shoulders", "Arms" -> if (hasBackOnlyHints && !hasFrontHints) "upper_back" else "upper_front"
+        "Legs" -> {
+            val hasLowerBackHints = focus.any {
+                it == "gluteus_maximus" || it == "hamstrings" || it == "gastrocnemius" || it == "soleus"
+            }
+            if (hasLowerBackHints) "lower_back" else "lower_front"
+        }
+        else -> "upper_front"
+    }
 }

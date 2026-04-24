@@ -56,9 +56,9 @@ class DatabaseSeeder @Inject constructor(
         val insertExercise = db.compileStatement(
             """
             INSERT OR IGNORE INTO exercises (
-              id, name, local_image_name, image_res_url, body_region, category,
+              id, name, local_image_name, image_res_url, body_region, region_group, focus_muscles, category,
               description, equipment, safety_notes, last_weight_kg, sets, reps, measurement_mode
-            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             """.trimIndent(),
         )
         CatalogSeedData.exerciseRowsForSeed().forEach { e ->
@@ -158,14 +158,17 @@ class DatabaseSeeder @Inject constructor(
         bindStringOrNull(this, 3, e.localImageName)
         bindStringOrNull(this, 4, e.imageResUrl)
         bindStringOrNull(this, 5, e.bodyRegion)
-        bindStringOrNull(this, 6, e.category)
-        bindStringOrNull(this, 7, e.description)
-        bindStringOrNull(this, 8, e.equipment)
-        bindStringOrNull(this, 9, e.safetyNotes)
-        if (e.lastWeightKg != null) bindDouble(10, e.lastWeightKg!!) else bindNull(10)
-        if (e.sets != null) bindLong(11, e.sets!!.toLong()) else bindNull(11)
-        if (e.reps != null) bindLong(12, e.reps!!.toLong()) else bindNull(12)
-        bindStringOrNull(this, 13, e.measurementMode)
+        bindStringOrNull(this, 6, e.regionGroup)
+        val focusJson = gson.toJson(e.focusMuscles.orEmpty())
+        bindString(7, focusJson)
+        bindStringOrNull(this, 8, e.category)
+        bindStringOrNull(this, 9, e.description)
+        bindStringOrNull(this, 10, e.equipment)
+        bindStringOrNull(this, 11, e.safetyNotes)
+        if (e.lastWeightKg != null) bindDouble(12, e.lastWeightKg!!) else bindNull(12)
+        if (e.sets != null) bindLong(13, e.sets!!.toLong()) else bindNull(13)
+        if (e.reps != null) bindLong(14, e.reps!!.toLong()) else bindNull(14)
+        bindStringOrNull(this, 15, e.measurementMode)
     }
 
     private fun bindStringOrNull(stmt: SupportSQLiteStatement, index: Int, value: String?) {

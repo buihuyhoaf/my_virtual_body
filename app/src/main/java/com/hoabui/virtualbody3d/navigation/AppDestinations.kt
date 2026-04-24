@@ -30,7 +30,7 @@ sealed class AppDestination(
         bottomBarIcon = PhosphorIcons.Light.Camera,
     )
     data object CenfitCoach : AppDestination(
-        CenfitCoachRoute,
+        ExerciseLibraryGraphRoute,
         R.string.tab_cenfit_coach,
         bottomBarIcon = PhosphorIcons.Light.Barbell,
     )
@@ -40,7 +40,7 @@ sealed class AppDestination(
         bottomBarIcon = PhosphorIcons.Light.User,
     )
     data object BodyDetailAnalyst : AppDestination(BodyDetailAnalystRoute, R.string.body_detail_analyst_title)
-    data object ExerciseLibrary : AppDestination(ExerciseLibraryRoute(), R.string.exercise_library_title, R.drawable.dumbbell_fitness)
+    data object ExerciseLibrary : AppDestination(ExerciseLibraryGraphRoute, R.string.exercise_library_title, R.drawable.dumbbell_fitness)
     data class BodyRegionDetail(private val bodyRegion: BodyRegion) : AppDestination(
         BodyRegionDetailRoute(bodyRegion.name),
         R.string.body_scan_result_title

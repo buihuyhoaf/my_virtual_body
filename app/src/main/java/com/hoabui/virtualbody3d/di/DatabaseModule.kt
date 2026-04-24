@@ -35,6 +35,7 @@ object DatabaseModule {
             VirtualBodyDatabase::class.java,
             DB_NAME,
         )
+            .fallbackToDestructiveMigration()
             .addCallback(databaseSeeder.roomCallback())
             .build()
 

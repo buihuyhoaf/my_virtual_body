@@ -19,6 +19,8 @@ data class ExerciseLibraryActions(
     val onClearCart: () -> Unit,
     val onActiveDraftChange: (sets: String, reps: String) -> Unit,
     val onAddToSession: () -> Unit,
+    /** Navigate to combined rep/set/min + booking screen (replaces opening bottom sheet from library). */
+    val onNavigateToSessionBookingEditor: () -> Unit,
     val onDismissSessionBooking: () -> Unit,
     val onBookingDateSelected: (Long) -> Unit,
     val onBookingLocationSelected: (String) -> Unit,
@@ -38,6 +40,8 @@ data class ExerciseLibraryActions(
     val onSetCartFieldManual: (exerciseId: String, setIndex: Int, field: CartSetField, value: String) -> Unit,
     /** Toggle the cart panel between collapsed and expanded states. */
     val onToggleCartExpanded: () -> Unit,
+    /** Toggle RegionGroup selection by strip quadrant tap (0..3). */
+    val onFocusStripQuadrantTap: (Int) -> Unit,
     /** Confirm selection-bar edits (persist to Room) and dismiss edit chrome. */
     val onConfirmSelectionBarEdit: () -> Unit,
     /** Discard edits, restore baseline cart, dismiss edit chrome. */

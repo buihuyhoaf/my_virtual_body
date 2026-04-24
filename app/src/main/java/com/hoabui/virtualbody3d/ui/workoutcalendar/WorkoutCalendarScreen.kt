@@ -177,6 +177,7 @@ private fun WorkoutCalendarSuccessContent(
             onClearCart = exerciseLibraryViewModel::clearAll,
             onActiveDraftChange = exerciseLibraryViewModel::updateActiveDraft,
             onAddToSession = {},
+            onNavigateToSessionBookingEditor = {},
             onDismissSessionBooking = {},
             onBookingDateSelected = {},
             onBookingLocationSelected = {},
@@ -194,6 +195,7 @@ private fun WorkoutCalendarSuccessContent(
             },
             onSetCartFieldManual = exerciseLibraryViewModel::setCartFieldManual,
             onToggleCartExpanded = exerciseLibraryViewModel::toggleCartExpanded,
+            onFocusStripQuadrantTap = {},
             onConfirmSelectionBarEdit = exerciseLibraryViewModel::onConfirmSelectionBarEdit,
             onCancelSelectionBarEdit = exerciseLibraryViewModel::onCancelSelectionBarEdit,
         )

@@ -21,6 +21,9 @@ public class ExerciseDao_Impl(
   __db: RoomDatabase,
 ) : ExerciseDao {
   private val __db: RoomDatabase
+
+  private val __roomStringListTypeConverter: RoomStringListTypeConverter =
+      RoomStringListTypeConverter()
   init {
     this.__db = __db
   }
@@ -35,6 +38,8 @@ public class ExerciseDao_Impl(
         val _columnIndexOfLocalImageName: Int = getColumnIndexOrThrow(_stmt, "local_image_name")
         val _columnIndexOfImageResUrl: Int = getColumnIndexOrThrow(_stmt, "image_res_url")
         val _columnIndexOfBodyRegion: Int = getColumnIndexOrThrow(_stmt, "body_region")
+        val _columnIndexOfRegionGroup: Int = getColumnIndexOrThrow(_stmt, "region_group")
+        val _columnIndexOfFocusMuscles: Int = getColumnIndexOrThrow(_stmt, "focus_muscles")
         val _columnIndexOfCategory: Int = getColumnIndexOrThrow(_stmt, "category")
         val _columnIndexOfDescription: Int = getColumnIndexOrThrow(_stmt, "description")
         val _columnIndexOfEquipment: Int = getColumnIndexOrThrow(_stmt, "equipment")
@@ -68,6 +73,16 @@ public class ExerciseDao_Impl(
           } else {
             _tmpBodyRegion = _stmt.getText(_columnIndexOfBodyRegion)
           }
+          val _tmpRegionGroup: String?
+          if (_stmt.isNull(_columnIndexOfRegionGroup)) {
+            _tmpRegionGroup = null
+          } else {
+            _tmpRegionGroup = _stmt.getText(_columnIndexOfRegionGroup)
+          }
+          val _tmpFocusMuscles: List<String>
+          val _tmp: String
+          _tmp = _stmt.getText(_columnIndexOfFocusMuscles)
+          _tmpFocusMuscles = __roomStringListTypeConverter.fromJson(_tmp)
           val _tmpCategory: String?
           if (_stmt.isNull(_columnIndexOfCategory)) {
             _tmpCategory = null
@@ -117,7 +132,7 @@ public class ExerciseDao_Impl(
             _tmpMeasurementMode = _stmt.getText(_columnIndexOfMeasurementMode)
           }
           _item =
-              ExerciseEntity(_tmpId,_tmpName,_tmpLocalImageName,_tmpImageResUrl,_tmpBodyRegion,_tmpCategory,_tmpDescription,_tmpEquipment,_tmpSafetyNotes,_tmpLastWeightKg,_tmpSets,_tmpReps,_tmpMeasurementMode)
+              ExerciseEntity(_tmpId,_tmpName,_tmpLocalImageName,_tmpImageResUrl,_tmpBodyRegion,_tmpRegionGroup,_tmpFocusMuscles,_tmpCategory,_tmpDescription,_tmpEquipment,_tmpSafetyNotes,_tmpLastWeightKg,_tmpSets,_tmpReps,_tmpMeasurementMode)
           _result.add(_item)
         }
         _result

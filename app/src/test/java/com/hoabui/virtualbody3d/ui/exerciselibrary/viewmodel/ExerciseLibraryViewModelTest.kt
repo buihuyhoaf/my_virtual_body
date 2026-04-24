@@ -10,6 +10,9 @@ import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.GymLocation
+import com.hoabui.virtualbody3d.domain.model.exercise.Muscle
+import com.hoabui.virtualbody3d.domain.model.exercise.RegionGroup
+import com.hoabui.virtualbody3d.domain.model.exercise.TestMuscleDictionary
 import com.hoabui.virtualbody3d.domain.usecase.BookWorkoutSessionUseCase
 import com.hoabui.virtualbody3d.domain.usecase.CommitLibrarySessionBookingResult
 import com.hoabui.virtualbody3d.domain.usecase.ConfirmExerciseLibrarySessionUseCase
@@ -25,7 +28,9 @@ import com.hoabui.virtualbody3d.domain.usecase.SessionBookingConfirmationWorkflo
 import com.hoabui.virtualbody3d.domain.usecase.ResolveNextSlotSelectionAfterToggleUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ToggleExerciseInCartUseCase
 import com.hoabui.virtualbody3d.domain.usecase.UpdateExerciseDraftUseCase
+import com.hoabui.virtualbody3d.domain.usecase.UpdateWorkoutScheduleFromCartDraftUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ValidateSessionBookingUseCase
+import com.hoabui.virtualbody3d.domain.repository.WorkoutScheduleRepository
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.CommitLibrarySessionBookingSuccessUiMapper
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseLibraryCatalogUiMapper
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mapper.ExerciseLibraryUiMapper
@@ -65,6 +70,7 @@ import java.time.LocalTime
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ExerciseLibraryViewModelTest {
+    private val testMuscleDictionary = TestMuscleDictionary()
 
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
@@ -87,6 +93,7 @@ class ExerciseLibraryViewModelTest {
         image = ImageSource.LocalResource("placeholder"),
         category = ExerciseCategory.Strength,
         bodyRegion = BodyRegion.Chest,
+        focusMuscles = listOf(Muscle.UPPER_PECTORALIS),
         description = "",
         equipment = EquipmentType.Barbell,
         safetyNotes = "",
@@ -104,9 +111,9 @@ class ExerciseLibraryViewModelTest {
             awaitCancellation()
         }
         val migrate = mockk<MigrateLegacyWorkoutSchedulesUseCase>()
-        coEvery { migrate(any()) } returns Unit
+        coEvery { migrate() } returns Unit
         val observeWeeklySummary = mockk<ObserveExerciseLibraryWeeklySummaryUseCase>()
-        every { observeWeeklySummary(any(), any()) } returns flow {
+        every { observeWeeklySummary(any()) } returns flow {
             emit(
                 (0L..6L).map { offset ->
                     ExerciseLibraryWeeklyDayItem(
@@ -126,12 +133,12 @@ class ExerciseLibraryViewModelTest {
         val catalogMapper = ExerciseLibraryCatalogUiMapper(appContext)
         val confirmUseCase = mockk<ConfirmExerciseLibrarySessionUseCase>()
         every {
-            confirmUseCase.prepare(any(), any(), any(), any(), any(), any(), any())
+            confirmUseCase.prepare(any(), any(), any(), any(), any(), any())
         } answers {
             PrepareLibrarySessionConfirmResult.NoOp
         }
         coEvery {
-            confirmUseCase.commit(any(), any(), any(), any(), any(), any())
+            confirmUseCase.commit(any(), any(), any(), any(), any())
         } returns CommitLibrarySessionBookingResult.Success(
             scheduledCount = 1,
             session = WorkoutSession(
@@ -146,7 +153,12 @@ class ExerciseLibraryViewModelTest {
             incrementFabBadgeBy = 1,
         )
         val workflow = SessionBookingConfirmationWorkflow(confirmUseCase)
-        val reducer = ExerciseLibraryReducer(CommitLibrarySessionBookingSuccessUiMapper())
+        val reducer = ExerciseLibraryReducer(
+            commitSuccessUiMapper = CommitLibrarySessionBookingSuccessUiMapper(),
+            muscleDictionary = testMuscleDictionary,
+        )
+        val updateSchedule = mockk<UpdateWorkoutScheduleFromCartDraftUseCase>(relaxed = true)
+        val scheduleRepo = mockk<WorkoutScheduleRepository>(relaxed = true)
         return ExerciseLibraryViewModel(
             getLibrary,
             workflow,
@@ -160,6 +172,9 @@ class ExerciseLibraryViewModelTest {
             UpdateExerciseDraftUseCase(),
             CanConfirmLibrarySessionBookingUseCase(ValidateSessionBookingUseCase()),
             ResolveNextSlotSelectionAfterToggleUseCase(),
+            updateSchedule,
+            scheduleRepo,
+            testMuscleDictionary,
         )
     }
 
@@ -175,9 +190,9 @@ class ExerciseLibraryViewModelTest {
             awaitCancellation()
         }
         val migrate = mockk<MigrateLegacyWorkoutSchedulesUseCase>()
-        coEvery { migrate(any()) } returns Unit
+        coEvery { migrate() } returns Unit
         val observeWeeklySummary = mockk<ObserveExerciseLibraryWeeklySummaryUseCase>()
-        every { observeWeeklySummary(any(), any()) } returns flow {
+        every { observeWeeklySummary(any()) } returns flow {
             emit(
                 (0L..6L).map { offset ->
                     ExerciseLibraryWeeklyDayItem(
@@ -197,12 +212,12 @@ class ExerciseLibraryViewModelTest {
         val catalogMapper = ExerciseLibraryCatalogUiMapper(appContext)
         val confirmUseCase = mockk<ConfirmExerciseLibrarySessionUseCase>()
         every {
-            confirmUseCase.prepare(any(), any(), any(), any(), any(), any(), any())
+            confirmUseCase.prepare(any(), any(), any(), any(), any(), any())
         } answers {
             PrepareLibrarySessionConfirmResult.NoOp
         }
         coEvery {
-            confirmUseCase.commit(any(), any(), any(), any(), any(), any())
+            confirmUseCase.commit(any(), any(), any(), any(), any())
         } returns CommitLibrarySessionBookingResult.Success(
             scheduledCount = 1,
             session = WorkoutSession(
@@ -217,7 +232,12 @@ class ExerciseLibraryViewModelTest {
             incrementFabBadgeBy = 1,
         )
         val workflow = SessionBookingConfirmationWorkflow(confirmUseCase)
-        val reducer = ExerciseLibraryReducer(CommitLibrarySessionBookingSuccessUiMapper())
+        val reducer = ExerciseLibraryReducer(
+            commitSuccessUiMapper = CommitLibrarySessionBookingSuccessUiMapper(),
+            muscleDictionary = testMuscleDictionary,
+        )
+        val updateSchedule = mockk<UpdateWorkoutScheduleFromCartDraftUseCase>(relaxed = true)
+        val scheduleRepo = mockk<WorkoutScheduleRepository>(relaxed = true)
         return ExerciseLibraryViewModel(
             getLibrary,
             workflow,
@@ -231,6 +251,9 @@ class ExerciseLibraryViewModelTest {
             UpdateExerciseDraftUseCase(),
             canConfirmLibrarySessionBookingUseCase,
             ResolveNextSlotSelectionAfterToggleUseCase(),
+            updateSchedule,
+            scheduleRepo,
+            testMuscleDictionary,
         )
     }
 
@@ -308,6 +331,19 @@ class ExerciseLibraryViewModelTest {
     }
 
     @Test
+    fun focusStripQuadrantTap_togglesRegionGroupSelectionAndUpdatesStrip() {
+        val vm = createViewModel()
+        vm.onFocusStripQuadrantTapped(1)
+        val selected = vm.successData()
+        assertTrue(selected.focusStripClickSelection.containsKey(RegionGroup.UpperBack))
+        assertEquals("back_full_back", selected.focusMusclesStrip[1])
+
+        vm.onFocusStripQuadrantTapped(1)
+        val cleared = vm.successData()
+        assertFalse(cleared.focusStripClickSelection.containsKey(RegionGroup.UpperBack))
+    }
+
+    @Test
     fun removeFromCart_unknownId_noop() {
         val vm = createViewModel()
         vm.toggleExerciseInCartFromList("ex1")
@@ -367,7 +403,7 @@ class ExerciseLibraryViewModelTest {
         delay(WAIT_FOR_COMBINE_MS)
 
         verify(exactly = 0) {
-            validate(any(), any(), any(), any(), any(), any(), any())
+            validate(any(), any(), any(), any(), any(), any())
         }
     }
 
@@ -391,7 +427,7 @@ class ExerciseLibraryViewModelTest {
         delay(WAIT_FOR_COMBINE_MS)
 
         verify(atLeast = 1) {
-            validate(any(), any(), any(), any(), any(), any(), any())
+            validate(any(), any(), any(), any(), any(), any())
         }
     }
 
@@ -438,9 +474,9 @@ class ExerciseLibraryViewModelTest {
             awaitCancellation()
         }
         val migrate = mockk<MigrateLegacyWorkoutSchedulesUseCase>()
-        coEvery { migrate(any()) } returns Unit
+        coEvery { migrate() } returns Unit
         val observeWeeklySummary = mockk<ObserveExerciseLibraryWeeklySummaryUseCase>()
-        every { observeWeeklySummary(any(), any()) } returns flow {
+        every { observeWeeklySummary(any()) } returns flow {
             emit(
                 (0L..6L).map { offset ->
                     ExerciseLibraryWeeklyDayItem(
@@ -465,10 +501,15 @@ class ExerciseLibraryViewModelTest {
             endInstant = Instant.parse("1970-01-01T11:00:00Z"),
             locationId = "default",
         )
-        coEvery { bookInner(any(), any(), any()) } returns BookWorkoutSessionResult.Success(1, resolvedFromRepo)
+        coEvery { bookInner(any(), any()) } returns BookWorkoutSessionResult.Success(1, resolvedFromRepo)
         val confirmUseCase = ConfirmExerciseLibrarySessionUseCase(bookInner, ValidateSessionBookingUseCase())
         val workflow = SessionBookingConfirmationWorkflow(confirmUseCase)
-        val reducer = ExerciseLibraryReducer(CommitLibrarySessionBookingSuccessUiMapper())
+        val reducer = ExerciseLibraryReducer(
+            commitSuccessUiMapper = CommitLibrarySessionBookingSuccessUiMapper(),
+            muscleDictionary = testMuscleDictionary,
+        )
+        val updateSchedule = mockk<UpdateWorkoutScheduleFromCartDraftUseCase>(relaxed = true)
+        val scheduleRepo = mockk<WorkoutScheduleRepository>(relaxed = true)
         val vm = ExerciseLibraryViewModel(
             getLibrary,
             workflow,
@@ -482,6 +523,9 @@ class ExerciseLibraryViewModelTest {
             UpdateExerciseDraftUseCase(),
             CanConfirmLibrarySessionBookingUseCase(ValidateSessionBookingUseCase()),
             ResolveNextSlotSelectionAfterToggleUseCase(),
+            updateSchedule,
+            scheduleRepo,
+            testMuscleDictionary,
         )
         vm.toggleExerciseInCartFromList("ex1")
         vm.updateActiveDraft("3", "10")

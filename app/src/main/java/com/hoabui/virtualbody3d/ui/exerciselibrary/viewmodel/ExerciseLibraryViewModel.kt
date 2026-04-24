@@ -6,6 +6,11 @@ import com.hoabui.virtualbody3d.core.base.UiStateViewModel
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.GymLocation
+import com.hoabui.virtualbody3d.domain.model.exercise.Muscle
+import com.hoabui.virtualbody3d.domain.model.exercise.MuscleDictionary
+import com.hoabui.virtualbody3d.domain.model.exercise.RegionBody
+import com.hoabui.virtualbody3d.domain.model.exercise.RegionBodyMuscleSelectionMap
+import com.hoabui.virtualbody3d.domain.model.exercise.RegionGroup
 import com.hoabui.virtualbody3d.domain.model.exercise.bookingSlotStartsForDay
 import com.hoabui.virtualbody3d.domain.model.exercise.normalizeDurationMinutesSeconds
 import com.hoabui.virtualbody3d.domain.model.exercise.SESSION_BOOKING_GRID_FIRST_SLOT
@@ -27,6 +32,8 @@ import com.hoabui.virtualbody3d.domain.usecase.UpdateExerciseDraftUseCase
 import com.hoabui.virtualbody3d.domain.usecase.UpdateWorkoutScheduleFromCartDraftUseCase
 import com.hoabui.virtualbody3d.domain.repository.WorkoutScheduleRepository
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseLibraryCatalogUiMapper
+import com.hoabui.virtualbody3d.ui.exerciselibrary.data.emptyFocusMusclesStripImageNames
+import com.hoabui.virtualbody3d.ui.exerciselibrary.data.focusMusclesStripImageNamesForCartExercises
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toCartSnapshot
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toLibraryCartDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toPendingSessionBooking
@@ -92,11 +99,13 @@ class ExerciseLibraryViewModel @Inject constructor(
     private val resolveNextSlotSelectionAfterToggleUseCase: ResolveNextSlotSelectionAfterToggleUseCase,
     private val updateWorkoutScheduleFromCartDraftUseCase: UpdateWorkoutScheduleFromCartDraftUseCase,
     private val workoutScheduleRepository: WorkoutScheduleRepository,
+    private val muscleDictionary: MuscleDictionary,
 ) : UiStateViewModel<ExerciseLibraryUiState, Unit>() {
 
     private val confirmBookingMutex = Mutex()
 
     private val filterState = MutableStateFlow(ExerciseLibraryUiState())
+    private val clickSelectionState = MutableStateFlow<RegionBodyMuscleSelectionMap>(emptyMap())
 
     private val bookingGridSlotStarts: List<LocalTime> = bookingSlotStartsForDay(
         firstSlot = SESSION_BOOKING_GRID_FIRST_SLOT,
@@ -197,16 +206,34 @@ class ExerciseLibraryViewModel @Inject constructor(
                 initialValue = null,
             )
 
+    private val focusMusclesStripFlow: StateFlow<ImmutableList<String>> =
+        combine(filterState, catalogExercisesById, clickSelectionState) { base, byId, clickState ->
+            focusMusclesStripImageNamesForCartExercises(
+                cartExerciseIds = base.cart.draftOrder,
+                exercisesById = byId,
+                muscleDictionary = muscleDictionary,
+                clickSelectionMap = clickState,
+            )
+        }
+            .distinctUntilChanged()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyFocusMusclesStripImageNames(),
+            )
+
     private val mergedScreenStateFlow: StateFlow<ExerciseLibraryUiState> =
         combine(
             librarySliceFlow,
             filterState,
             bookingProjectionFlow,
-        ) { librarySlice, base, sessionBookingUiModel ->
+            focusMusclesStripFlow,
+        ) { librarySlice, base, sessionBookingUiModel, focusStrip ->
             mergeExerciseLibraryPresentation(
                 base = base,
                 library = librarySlice,
                 sessionBookingUiModel = sessionBookingUiModel,
+                focusMusclesStrip = focusStrip,
             )
         }
             .distinctUntilChanged()
@@ -217,6 +244,7 @@ class ExerciseLibraryViewModel @Inject constructor(
                     base = ExerciseLibraryUiState(),
                     library = emptyLibrarySlice,
                     sessionBookingUiModel = null,
+                    focusMusclesStrip = emptyFocusMusclesStripImageNames(),
                 ),
             )
 
@@ -306,7 +334,9 @@ class ExerciseLibraryViewModel @Inject constructor(
 
     private fun dispatch(update: ExerciseLibraryUpdate) {
         filterState.update { current ->
-            exerciseLibraryReducer.reduce(current, update)
+            exerciseLibraryReducer.reduce(current, update).also { reduced ->
+                clickSelectionState.value = reduced.focusStripClickSelection
+            }
         }
     }
 
@@ -620,6 +650,44 @@ class ExerciseLibraryViewModel @Inject constructor(
 
     fun toggleCartExpanded() {
         dispatchIntent(ExerciseLibraryIntent.ToggleCartExpanded)
+    }
+
+    fun onFocusStripRegionGroupToggle(regionGroup: RegionGroup) {
+        dispatchIntent(ExerciseLibraryIntent.ToggleFocusStripRegionGroup(regionGroup))
+    }
+
+    fun onFocusStripRegionBodyToggle(regionGroup: RegionGroup, regionBody: RegionBody) {
+        dispatchIntent(
+            ExerciseLibraryIntent.ToggleFocusStripRegionBody(
+                regionGroup = regionGroup,
+                regionBody = regionBody,
+            ),
+        )
+    }
+
+    fun onFocusStripMuscleToggle(regionGroup: RegionGroup, regionBody: RegionBody, muscle: Muscle) {
+        dispatchIntent(
+            ExerciseLibraryIntent.ToggleFocusStripMuscle(
+                regionGroup = regionGroup,
+                regionBody = regionBody,
+                muscle = muscle,
+            ),
+        )
+    }
+
+    fun clearFocusStripSelection() {
+        dispatchIntent(ExerciseLibraryIntent.ClearFocusStripSelection)
+    }
+
+    fun onFocusStripQuadrantTapped(index: Int) {
+        val regionGroup = when (index) {
+            0 -> RegionGroup.UpperFront
+            1 -> RegionGroup.UpperBack
+            2 -> RegionGroup.LowerFront
+            3 -> RegionGroup.LowerBack
+            else -> return
+        }
+        onFocusStripRegionGroupToggle(regionGroup)
     }
 
     fun beginSelectionBarEdit(scheduleRowId: Long) {

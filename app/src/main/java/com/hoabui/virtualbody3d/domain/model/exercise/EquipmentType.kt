@@ -10,5 +10,6 @@ enum class EquipmentType {
     Cable,
     Bodyweight,
     Kettlebell,
-    ResistanceBand
+    ResistanceBand,
+    AbWheel,
 }

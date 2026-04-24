@@ -1,6 +1,7 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.presentation
 
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
+import com.hoabui.virtualbody3d.ui.exerciselibrary.data.emptyFocusMusclesStripImageNames
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryCartState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryFilterState
@@ -27,7 +28,12 @@ class ExerciseLibraryPresentationSlicesTest {
             selectedExerciseForDetail = null,
             isAddToSessionEnabled = true,
         )
-        val merged = mergeExerciseLibraryPresentation(base, lib, sessionBookingUiModel = null)
+        val merged = mergeExerciseLibraryPresentation(
+            base = base,
+            library = lib,
+            sessionBookingUiModel = null,
+            focusMusclesStrip = emptyFocusMusclesStripImageNames(),
+        )
         assertEquals("squat", merged.filters.searchQuery)
         assertEquals(lib.sections, merged.libraryList.sections)
         assertEquals(lib.exerciseMeasurementById, merged.libraryList.exerciseMeasurementById)

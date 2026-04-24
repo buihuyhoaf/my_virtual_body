@@ -27,6 +27,7 @@ internal fun mergeExerciseLibraryPresentation(
     base: ExerciseLibraryUiState,
     library: LibraryPresentationSlice,
     sessionBookingUiModel: SessionBookingUiModel?,
+    focusMusclesStrip: ImmutableList<String>,
 ): ExerciseLibraryUiState =
     base.copy(
         libraryList = base.libraryList.copy(
@@ -36,4 +37,5 @@ internal fun mergeExerciseLibraryPresentation(
             isAddToSessionEnabled = library.isAddToSessionEnabled,
         ),
         sessionBooking = base.sessionBooking.copy(uiModel = sessionBookingUiModel),
+        focusMusclesStrip = focusMusclesStrip,
     )

@@ -14,8 +14,12 @@ data object AddRoute
 @Serializable
 data object MealCaptureRoute
 
+/** Nested graph: [ExerciseLibraryRoute] + [SessionBookingEditorRoute] share [ExerciseLibraryViewModel]. */
 @Serializable
-data object CenfitCoachRoute
+data object ExerciseLibraryGraphRoute
+
+@Serializable
+data object SessionBookingEditorRoute
 
 @Serializable
 data object ProfileRoute

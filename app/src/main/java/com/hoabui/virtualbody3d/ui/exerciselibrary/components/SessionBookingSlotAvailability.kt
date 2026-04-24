@@ -7,7 +7,7 @@ import java.time.LocalTime
  * Whether a booking grid slot can be toggled for [selectedDay].
  * [nowMinute] must be [LocalTime] truncated to minutes (see [java.time.temporal.ChronoUnit.MINUTES]).
  */
-internal fun isSessionBookingSlotEnabled(
+fun isSessionBookingSlotEnabled(
     selectedDay: LocalDate,
     today: LocalDate,
     slotStart: LocalTime,

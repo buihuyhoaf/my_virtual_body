@@ -34,6 +34,7 @@ class ExerciseLibraryCatalogUiMapper @Inject constructor(
             category = category,
             equipment = equipment,
             bodyRegion = bodyRegion,
+            focusMuscles = focusMuscles,
             measurementMode = measurementMode,
             image = image.toExerciseLibraryCardImage(),
         )

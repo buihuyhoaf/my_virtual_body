@@ -124,6 +124,12 @@ data class BodyAnalysisTokens(
     val exerciseLibraryHeatmapDayItemCornerRadius: Dp,
     /** Horizontal gap between adjacent day cells in the weekly heatmap. */
     val exerciseLibraryHeatmapDayItemSpacing: Dp,
+    /**
+     * Thumbnail height for the four-across focus-muscle strip in the library (label + image stays under ~100dp).
+     */
+    val exerciseLibraryFocusMuscleStripImageHeight: Dp,
+    /** Horizontal gap between cells in the focus-muscle strip. */
+    val exerciseLibraryFocusMuscleStripItemSpacing: Dp,
     val exerciseLibraryQuickAddIconContainerSize: Dp,
     val exerciseLibraryQuickAddTextInset: Dp,
     val exerciseLibrarySelectionBarTopCornerRadius: Dp,
@@ -289,6 +295,8 @@ fun gymBodyAnalysisTokens(
         exerciseLibraryHeatmapDayItemHeight = spacing.xxl + spacing.sm,
         exerciseLibraryHeatmapDayItemCornerRadius = spacing.xs,
         exerciseLibraryHeatmapDayItemSpacing = spacing.xxs,
+        exerciseLibraryFocusMuscleStripImageHeight = spacing.lg + spacing.xl,
+        exerciseLibraryFocusMuscleStripItemSpacing = spacing.xxs,
         exerciseLibraryQuickAddIconContainerSize = layout.heroSlimChipHeight,
         exerciseLibraryQuickAddTextInset = spacing.xxl + spacing.xs,
         exerciseLibrarySelectionBarTopCornerRadius = layout.exerciseLibrarySelectionBarTopCornerRadius,

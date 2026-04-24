@@ -9,5 +9,6 @@ enum class BodyRegion {
     Shoulders,
     Arms,
     Core,
+    Belly,
     Legs
 }

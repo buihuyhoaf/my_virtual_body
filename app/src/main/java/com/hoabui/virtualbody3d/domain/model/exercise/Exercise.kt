@@ -6,7 +6,7 @@ import com.hoabui.virtualbody3d.domain.model.common.ImageSource
 /**
  * Domain model for an exercise with full information for library and detail screens.
  *
- * Classification pillars: [bodyRegion] and [equipment]. Supports library, detail, workout feed.
+ * Classification: [bodyRegion] and [equipment] for grouping; [focusMuscles] drives the focus-muscle strip. Used in library, detail, and workout feed.
  */
 @Immutable
 data class Exercise(
@@ -15,9 +15,11 @@ data class Exercise(
     val image: ImageSource,
     val category: ExerciseCategory,
     val bodyRegion: BodyRegion,
+    val focusMuscles: List<Muscle> = emptyList(),
     val description: String,
     val equipment: EquipmentType?,
     val safetyNotes: String,
     val lastWeightKg: Double? = null,
     val measurementMode: ExerciseMeasurementMode = ExerciseMeasurementMode.Strength,
+    val regionGroup: RegionGroup? = null,
 )

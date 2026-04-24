@@ -1,4 +1,4 @@
-package com.hoabui.virtualbody3d.ui.exerciselibrary.components
+package com.hoabui.virtualbody3d.ui.common_ui.organism.exerciselibrary
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -7,7 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,19 +18,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -46,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.PlatformTextStyle
@@ -54,21 +46,19 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.AsyncImage
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.domain.model.exercise.InstantInterval
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
 import com.hoabui.virtualbody3d.ui.common_ui.atom.icon.GIcon
 import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
+import com.hoabui.virtualbody3d.ui.exerciselibrary.components.isSessionBookingSlotEnabled
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toCoilModel
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.BookingExerciseSummaryUi
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingPeriodId
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingPeriodUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingUiModel
@@ -88,75 +78,23 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 
-private fun sessionBookingSheetTextStyle(base: TextStyle): TextStyle = base.merge(TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)))
+private fun sessionBookingEditorTextStyle(base: TextStyle): TextStyle =
+    base.merge(TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)))
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Day/time/location booking grid (extracted from the former bottom sheet). Cancel/Confirm live on the screen.
+ */
 @Composable
-fun ExerciseLibrarySessionBookingSheetHost(
-    booking: SessionBookingUiModel?,
-    draftCount: Int,
-    onDismissRequest: () -> Unit,
-    onDateMillisSelected: (Long) -> Unit,
-    onLocationSelected: (String) -> Unit,
-    onSlotToggled: (LocalTime) -> Unit,
-    onClearTimeSelection: () -> Unit,
-    onConfirm: () -> Unit,
-) {
-    if (booking == null) return
-    val token = GymTheme.token
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val sheetShape = remember(token.bodyAnalysis.exerciseLibraryBookingSheetTopCornerRadius) {
-        RoundedCornerShape(
-            topStart = token.bodyAnalysis.exerciseLibraryBookingSheetTopCornerRadius,
-            topEnd = token.bodyAnalysis.exerciseLibraryBookingSheetTopCornerRadius,
-        )
-    }
-    ModalBottomSheet(
-        onDismissRequest = onDismissRequest,
-        sheetState = sheetState,
-        shape = sheetShape,
-        containerColor = token.colors.surface,
-        dragHandle = null,
-    ) {
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            val configuration = LocalConfiguration.current
-            val screenHeight = configuration.screenHeightDp.dp
-            val sheetMaxHeight = minOf(
-                maxHeight,
-                screenHeight * token.bodyAnalysis.exerciseLibraryBookingSheetMaxHeightFraction,
-            )
-            SessionBookingSheetContent(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = sheetMaxHeight),
-                booking = booking,
-                draftCount = draftCount,
-                onDismissClick = onDismissRequest,
-                onDateMillisSelected = onDateMillisSelected,
-                onLocationSelected = onLocationSelected,
-                onSlotToggled = onSlotToggled,
-                onClearTimeSelection = onClearTimeSelection,
-                onConfirm = onConfirm,
-            )
-        }
-    }
-}
-
-@Composable
-private fun SessionBookingSheetContent(
-    modifier: Modifier = Modifier,
+fun SessionBookingEditorOrganism(
     booking: SessionBookingUiModel,
-    draftCount: Int,
-    onDismissClick: () -> Unit,
     onDateMillisSelected: (Long) -> Unit,
     onLocationSelected: (String) -> Unit,
     onSlotToggled: (LocalTime) -> Unit,
     onClearTimeSelection: () -> Unit,
-    onConfirm: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val systemZone = Clock.systemDefaultZone().zone
     val token = GymTheme.token
-    val scrollState = rememberScrollState()
     val slotRowState = rememberLazyListState()
     val sectionIcon = token.bodyAnalysis.exerciseLibraryBookingSectionIconSize
     val chipH = token.bodyAnalysis.exerciseLibraryBookingDateChipHeight
@@ -192,12 +130,12 @@ private fun SessionBookingSheetContent(
     }
     val selectedLocationName = booking.selectedLocationDisplayName
     var locationMenuExpanded by remember { mutableStateOf(false) }
-    val confirmOk = booking.isBookingConfirmEnabled
 
+    // No verticalScroll here: [SessionBookingEditorScreen] provides the page scroll. Nested scroll would get
+    // unbounded max height and crash.
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .verticalScroll(scrollState)
             .padding(
                 start = token.spacing.md,
                 end = token.spacing.md,
@@ -206,26 +144,13 @@ private fun SessionBookingSheetContent(
             ),
         verticalArrangement = Arrangement.spacedBy(token.spacing.md),
     ) {
-        BookingSheetHeaderRow(
-            title = stringResource(R.string.exercise_library_booking_title),
-            subtitle = stringResource(R.string.exercise_library_cart_selected_count, draftCount),
-            onDismiss = onDismissClick,
-        )
         if (input.showSlotConflict) {
             GText(
                 text = stringResource(R.string.exercise_library_booking_slot_conflict),
-                style = sessionBookingSheetTextStyle(token.typography.bodySmall),
+                style = sessionBookingEditorTextStyle(token.typography.bodySmall),
                 color = token.colors.error,
             )
         }
-        BookingSectionLabel(
-            icon = ExerciseLibraryPhosphorIcons.detailCategory,
-            label = stringResource(R.string.exercise_library_booking_exercises_in_session),
-            iconSize = sectionIcon,
-        )
-        BookingExerciseSnapshotRow(
-            exercises = input.bookingExerciseSnapshot,
-        )
         BookingSectionLabel(
             icon = ExerciseLibraryPhosphorIcons.bookingCalendar,
             label = stringResource(R.string.exercise_library_cart_pick_date),
@@ -264,7 +189,7 @@ private fun SessionBookingSheetContent(
                     )
                     GText(
                         text = stringResource(R.string.exercise_library_booking_location),
-                        style = sessionBookingSheetTextStyle(token.typography.labelLarge),
+                        style = sessionBookingEditorTextStyle(token.typography.labelLarge),
                         color = token.colors.textPrimary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -293,7 +218,7 @@ private fun SessionBookingSheetContent(
                     ) {
                         GText(
                             text = selectedLocationName,
-                            style = sessionBookingSheetTextStyle(token.typography.labelLarge),
+                            style = sessionBookingEditorTextStyle(token.typography.labelLarge),
                             color = token.colors.textPrimary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -311,7 +236,7 @@ private fun SessionBookingSheetContent(
                         text = {
                             GText(
                                 text = loc.displayName,
-                                style = sessionBookingSheetTextStyle(token.typography.bodyLarge),
+                                style = sessionBookingEditorTextStyle(token.typography.bodyLarge),
                                 color = token.colors.textPrimary,
                             )
                         },
@@ -372,90 +297,10 @@ private fun SessionBookingSheetContent(
                 )
             }
         }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(token.spacing.sm),
-        ) {
-            GButton(
-                text = stringResource(R.string.exercise_library_booking_cancel),
-                onClick = onDismissClick,
-                modifier = Modifier.weight(1f),
-                variant = GButtonVariant.Outlined,
-            )
-            GButton(
-                text = stringResource(R.string.exercise_library_booking_confirm),
-                onClick = onConfirm,
-                modifier = Modifier.weight(1f),
-                enabled = confirmOk,
-            )
-        }
     }
 }
 
 @Composable
-private fun BookingExerciseSnapshotRow(
-    exercises: ImmutableList<BookingExerciseSummaryUi>,
-) {
-    val token = GymTheme.token
-    val resourceProvider = LocalResourceProvider.current
-    val thumb = token.bodyAnalysis.exerciseLibraryBookingStripThumbnailSize
-    val gap = token.bodyAnalysis.exerciseLibraryBookingStripImageTextGap
-    val itemW = token.bodyAnalysis.exerciseLibraryBookingStripItemWidth
-    val shape = RoundedCornerShape(token.bodyAnalysis.upcomingExerciseChipImageCornerRadius)
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(token.spacing.sm),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        items(
-            items = exercises,
-            key = { it.id },
-        ) { ex ->
-            Row(
-                modifier = Modifier.width(itemW),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                AsyncImage(
-                    model = ex.image.toCoilModel(resourceProvider),
-                    contentDescription = ex.title,
-                    modifier = Modifier
-                        .size(thumb)
-                        .clip(shape)
-                        .background(token.colors.surfaceSubtle),
-                    contentScale = ContentScale.Crop,
-                )
-                Spacer(modifier = Modifier.width(gap))
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(token.spacing.xxs),
-                ) {
-                    GText(
-                        text = ex.title,
-                        style = sessionBookingSheetTextStyle(token.typography.labelLarge),
-                        color = token.colors.textPrimary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    if (ex.parametersSummary.isNotEmpty()) {
-                        GText(
-                            text = ex.parametersSummary,
-                            style = sessionBookingSheetTextStyle(token.typography.labelSmall),
-                            color = token.colors.textSecondary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-/**
- * Period shortcuts scroll the slot [LazyRow]. `LazyListState.animateScrollToItem` uses the framework
- * scroll animation (Compose Foundation does not yet expose a public [AnimationSpec] for this call on
- * our BOM). When an overload with a spec is available, wire `tween(durationMillis = token.motion.duration.long, easing = token.motion.easing.standard)` here.
- */
 private fun BookingPeriodJumpRow(
     periods: ImmutableList<SessionBookingPeriodUiModel>,
     periodStartIndex: ImmutableMap<SessionBookingPeriodId, Int>,
@@ -485,50 +330,6 @@ private fun BookingPeriodJumpRow(
 private const val SESSION_BOOKING_DAY_HORIZON = 14
 
 @Composable
-private fun BookingSheetHeaderRow(
-    title: String,
-    subtitle: String,
-    onDismiss: () -> Unit,
-) {
-    val token = GymTheme.token
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            GText(
-                text = title,
-                style = sessionBookingSheetTextStyle(token.typography.titleMedium),
-                color = token.colors.textPrimary,
-            )
-            GText(
-                text = subtitle,
-                style = sessionBookingSheetTextStyle(token.typography.bodySmall),
-                color = token.colors.textSecondary,
-            )
-        }
-        Box(
-            modifier = Modifier
-                .size(token.bodyAnalysis.exerciseLibraryQuickAddIconContainerSize)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = ripple(bounded = true),
-                    role = Role.Button,
-                    onClick = onDismiss,
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            GIcon(
-                imageVector = ExerciseLibraryPhosphorIcons.bookingSheetClose,
-                contentDescription = stringResource(R.string.exercise_library_booking_close_cd),
-                modifier = Modifier.size(token.bodyAnalysis.heroSlimChipIconSize),
-                tint = token.colors.textSecondary,
-            )
-        }
-    }
-}
-
-@Composable
 private fun BookingSectionLabel(
     icon: ImageVector,
     label: String,
@@ -547,7 +348,7 @@ private fun BookingSectionLabel(
         )
         GText(
             text = label,
-            style = sessionBookingSheetTextStyle(token.typography.labelLarge),
+            style = sessionBookingEditorTextStyle(token.typography.labelLarge),
             color = token.colors.textPrimary,
         )
     }
@@ -634,12 +435,12 @@ private fun BookingDateChip(
     ) {
         GText(
             text = dayOfWeek,
-            style = sessionBookingSheetTextStyle(token.typography.labelSmall),
+            style = sessionBookingEditorTextStyle(token.typography.labelSmall),
             color = fg,
         )
         GText(
             text = dayOfMonth,
-            style = sessionBookingSheetTextStyle(token.typography.titleSmall),
+            style = sessionBookingEditorTextStyle(token.typography.titleSmall),
             color = fg,
         )
     }
@@ -679,7 +480,7 @@ private fun TimeSlotHorizontalCell(
         ) {
             GText(
                 text = cell.label,
-                style = sessionBookingSheetTextStyle(token.typography.labelSmall),
+                style = sessionBookingEditorTextStyle(token.typography.labelSmall),
                 color = token.colors.textMuted,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -751,7 +552,7 @@ private fun TimeSlotHorizontalCell(
     ) {
         GText(
             text = cell.label,
-            style = sessionBookingSheetTextStyle(token.typography.labelSmall),
+            style = sessionBookingEditorTextStyle(token.typography.labelSmall),
             color = timeFg,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

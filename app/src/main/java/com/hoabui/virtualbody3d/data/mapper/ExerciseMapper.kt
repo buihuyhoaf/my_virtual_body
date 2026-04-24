@@ -8,6 +8,8 @@ import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
+import com.hoabui.virtualbody3d.domain.model.exercise.Muscle
+import com.hoabui.virtualbody3d.domain.model.exercise.RegionGroup
 import com.hoabui.virtualbody3d.domain.repository.ResourceProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.Locale
@@ -17,18 +19,28 @@ class ExerciseMapper @Inject constructor(
     @ApplicationContext private val context: Context,
     private val resourceProvider: ResourceProvider,
 ) {
-    fun toDomain(dto: ExerciseDto): Exercise = Exercise(
-        id = dto.id.orEmpty(),
-        name = dto.name.orEmpty(),
-        image = dto.toImageSource(),
-        category = dto.category.toExerciseCategory(),
-        bodyRegion = dto.bodyRegion.orEmpty().toBodyRegion(),
-        description = dto.description.orEmpty(),
-        equipment = dto.equipment.orEmpty().toEquipmentTypeOrNull(),
-        safetyNotes = dto.safetyNotes.orEmpty(),
-        lastWeightKg = dto.lastWeightKg,
-        measurementMode = dto.measurementMode.toMeasurementMode(),
-    )
+    fun toDomain(dto: ExerciseDto): Exercise {
+        val bodyRegion = dto.bodyRegion.orEmpty().toBodyRegion()
+        val resolvedRegionGroup = dto.regionGroup.toRegionGroupOrFallback(bodyRegion = bodyRegion)
+        val parsedFocusMuscles = dto.focusMuscles
+            .orEmpty()
+            .map(Muscle::fromWireKeyStrict)
+            .distinct()
+        return Exercise(
+            id = dto.id.orEmpty(),
+            name = dto.name.orEmpty(),
+            image = dto.toImageSource(),
+            category = dto.category.toExerciseCategory(),
+            bodyRegion = bodyRegion,
+            focusMuscles = parsedFocusMuscles,
+            description = dto.description.orEmpty(),
+            equipment = dto.equipment.orEmpty().toEquipmentTypeOrNull(),
+            safetyNotes = dto.safetyNotes.orEmpty(),
+            lastWeightKg = dto.lastWeightKg,
+            measurementMode = dto.measurementMode.toMeasurementMode(),
+            regionGroup = resolvedRegionGroup,
+        )
+    }
 
     private fun ExerciseDto.toImageSource(): ImageSource {
         imageResUrl?.takeIf { it.isNotBlank() }?.let { return ImageSource.Network(it) }
@@ -99,6 +111,7 @@ private fun String.toBodyRegion(): BodyRegion = when (this.trim()) {
     "Shoulders", "SHOULDERS" -> BodyRegion.Shoulders
     "Arms", "ARMS" -> BodyRegion.Arms
     "Core", "CORE" -> BodyRegion.Core
+    "Belly", "BELLY" -> BodyRegion.Belly
     "Legs", "LEGS" -> BodyRegion.Legs
     "GLUTES" -> BodyRegion.Legs
     else -> BodyRegion.Chest
@@ -112,5 +125,21 @@ private fun String.toEquipmentTypeOrNull(): EquipmentType? = when (this.trim()) 
     "Bodyweight", "BODYWEIGHT" -> EquipmentType.Bodyweight
     "Kettlebell", "KETTLEBELL" -> EquipmentType.Kettlebell
     "ResistanceBand", "RESISTANCEBAND", "RESISTANCE_BAND" -> EquipmentType.ResistanceBand
+    "Ab Wheel", "AB WHEEL" -> EquipmentType.AbWheel
     else -> null
+}
+
+private fun String?.toRegionGroupOrFallback(bodyRegion: BodyRegion): RegionGroup? {
+    RegionGroup.fromWireKeyOrNull(this)?.let { return it }
+    return when (bodyRegion) {
+        BodyRegion.Chest,
+        BodyRegion.Belly,
+        BodyRegion.Core,
+        -> RegionGroup.UpperFront
+        BodyRegion.Back -> RegionGroup.UpperBack
+        BodyRegion.Shoulders,
+        BodyRegion.Arms,
+        -> RegionGroup.UpperFront
+        BodyRegion.Legs -> RegionGroup.LowerFront
+    }
 }

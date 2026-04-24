@@ -27,6 +27,7 @@ object ExerciseDisplayResources {
         BodyRegion.Shoulders -> R.string.exercise_region_shoulders
         BodyRegion.Arms -> R.string.exercise_region_arms
         BodyRegion.Core -> R.string.exercise_region_core
+        BodyRegion.Belly -> R.string.exercise_region_belly
         BodyRegion.Legs -> R.string.exercise_region_legs
     }
 
@@ -39,6 +40,7 @@ object ExerciseDisplayResources {
         EquipmentType.Bodyweight -> R.string.exercise_equipment_bodyweight
         EquipmentType.Kettlebell -> R.string.exercise_equipment_kettlebell
         EquipmentType.ResistanceBand -> R.string.exercise_equipment_resistance_band
+        EquipmentType.AbWheel -> R.string.exercise_equipment_ab_wheel
         null -> R.string.exercise_equipment_none
     }
 }

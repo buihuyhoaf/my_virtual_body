@@ -2,6 +2,7 @@ package com.hoabui.virtualbody3d.data.local.db
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 
 @Database(
     entities = [
@@ -12,9 +13,10 @@ import androidx.room.RoomDatabase
         NutritionSummaryEntity::class,
         BodyScanResultEntity::class,
     ],
-    version = 1,
+    version = 3,
     exportSchema = true,
 )
+@TypeConverters(RoomStringListTypeConverter::class)
 abstract class VirtualBodyDatabase : RoomDatabase() {
     abstract fun workoutScheduleDao(): WorkoutScheduleDao
     abstract fun workoutSessionDao(): WorkoutSessionDao

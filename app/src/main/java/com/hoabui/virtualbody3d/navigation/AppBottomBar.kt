@@ -41,8 +41,8 @@ import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.GymToken
 
 /**
- * [WorkoutCalendarRoute] / [ExerciseLibraryRoute] are siblings of [CenfitCoachRoute] in the nav graph
- * (stacked on top of the coach tab), so they do not appear in hierarchy under [CenfitCoachRoute].
+ * [WorkoutCalendarRoute] / [ExerciseLibraryGraphRoute] (and its children) are opened from the coach area;
+ * map them to the Cenfit coach bottom bar when computing selection.
  * Map them to the coach bottom bar item when computing selection.
  */
 private fun isBottomBarTabSelected(
@@ -53,7 +53,9 @@ private fun isBottomBarTabSelected(
     if (current.hierarchy.any { it.hasRoute(destination.route::class) }) return true
     if (destination == AppDestination.CenfitCoach) {
         return current.hasRoute(WorkoutCalendarRoute::class) ||
-            current.hasRoute(ExerciseLibraryRoute::class)
+            current.hasRoute(ExerciseLibraryGraphRoute::class) ||
+            current.hasRoute(ExerciseLibraryRoute::class) ||
+            current.hasRoute(SessionBookingEditorRoute::class)
     }
     return false
 }
