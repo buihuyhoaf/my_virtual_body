@@ -14,16 +14,17 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toGExerciseCardUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toLibraryCartDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.presentation.ExerciseLibraryBookingPresentationKey
 import com.hoabui.virtualbody3d.ui.exerciselibrary.presentation.ExerciseLibrarySectionRebuildKey
-import com.hoabui.virtualbody3d.ui.exerciselibrary.presentation.LibraryPresentationSlice
 import com.hoabui.virtualbody3d.ui.exerciselibrary.presentation.exerciseLibraryBookingPresentationKey
 import com.hoabui.virtualbody3d.ui.exerciselibrary.presentation.exerciseLibrarySectionRebuildKey
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.BookingExerciseSummaryUi
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryChromeMode
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryCatalogEntryUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibrarySectionRowUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryPresentationSlice
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingInput
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingUiModel
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.defaultExerciseLibraryCartDateMillis
+import com.hoabui.virtualbody3d.ui.exerciselibrary.util.defaultExerciseLibraryCartDateMillis
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
@@ -65,9 +66,7 @@ class ExerciseLibraryUiMapper @Inject constructor(
             selectedSlotStarts = persistentSetOf(),
             bookingExerciseSnapshot = buildBookingExerciseSnapshotForOpen(state, exercisesById),
             longSessionAcknowledged = false,
-            pendingLongSessionWarning = false,
             isConfirming = false,
-            showSlotConflict = false,
         )
 
     private var cachedSections: ImmutableList<ExerciseLibrarySectionRowUiModel> = persistentListOf()
@@ -99,7 +98,7 @@ class ExerciseLibraryUiMapper @Inject constructor(
             cachedMeasurementById = measurementById
             lastSectionRebuildKey = sectionKey
         }
-        val selectedDetail = filtersForUi.chrome.detailExerciseId?.let { id ->
+        val selectedDetail = (filtersForUi.chrome.mode as? ExerciseLibraryChromeMode.DetailOpen)?.exerciseId?.let { id ->
             exercisesById[id]?.toExerciseDetailSheetUiModel(appContext)
         }
         return LibraryPresentationSlice(

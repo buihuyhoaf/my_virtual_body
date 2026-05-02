@@ -36,8 +36,6 @@ sealed interface ExerciseLibraryUpdate {
 
     data class SessionBookingOpened(val input: SessionBookingInput) : ExerciseLibraryUpdate
 
-    data class SessionBookingPruned(val input: SessionBookingInput) : ExerciseLibraryUpdate
-
     data class SlotSelectionResolved(
         val selectedSlotStarts: Set<LocalTime>,
         val selectionChanged: Boolean,

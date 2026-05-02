@@ -84,7 +84,8 @@ fun buildSessionBookingUiModel(
     val locationDisplay = locations.find { it.id == input.selectedLocationId }?.displayName
         ?: input.selectedLocationId
     return SessionBookingUiModel(
-        input = input,
+        selectedDateMillis = input.selectedDateMillis,
+        selectedSlotStarts = input.selectedSlotStarts,
         locations = locations.toImmutableList(),
         timeSlotCells = cells.toImmutableList(),
         bookingPeriods = periods.toImmutableList(),

@@ -9,4 +9,5 @@ import androidx.compose.runtime.Immutable
 data class SessionBookingSheetState(
     val input: SessionBookingInput? = null,
     val uiModel: SessionBookingUiModel? = null,
+    val workflowPhase: SessionBookingWorkflowPhase = SessionBookingWorkflowPhase.Idle,
 )

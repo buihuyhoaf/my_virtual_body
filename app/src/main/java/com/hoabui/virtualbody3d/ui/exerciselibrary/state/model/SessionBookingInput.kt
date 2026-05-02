@@ -12,7 +12,5 @@ data class SessionBookingInput(
     val selectedSlotStarts: PersistentSet<LocalTime>,
     val bookingExerciseSnapshot: ImmutableList<BookingExerciseSummaryUi>,
     val longSessionAcknowledged: Boolean,
-    val pendingLongSessionWarning: Boolean,
     val isConfirming: Boolean,
-    val showSlotConflict: Boolean,
 )

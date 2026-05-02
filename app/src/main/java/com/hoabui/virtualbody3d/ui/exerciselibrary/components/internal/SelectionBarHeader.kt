@@ -7,14 +7,14 @@ import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiMo
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.CartDragHandle
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.CartThumbnailRow
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.ActiveExerciseInfo
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryActions
+import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.WorkoutBuilderActions
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 @Composable
 internal fun SelectionBarHeader(
     cartItems: List<GExerciseCardUiModel>,
     activeExerciseInfo: ActiveExerciseInfo?,
-    actions: ExerciseLibraryActions,
+    actions: WorkoutBuilderActions,
     dragModifier: Modifier,
     isSelectionBarEditMode: Boolean,
 ) {

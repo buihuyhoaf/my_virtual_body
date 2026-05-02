@@ -28,7 +28,7 @@ import com.hoabui.virtualbody3d.core.extensions.verticalDraggable
 import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.ActiveExerciseInfo
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryActions
+import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.WorkoutBuilderActions
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
 import kotlinx.coroutines.launch
@@ -42,7 +42,7 @@ internal fun SelectionBarSections(
     bookingEnabled: Boolean,
     isSelectionBarEditMode: Boolean,
     isSelectionBarConfirmEnabled: Boolean,
-    actions: ExerciseLibraryActions,
+    actions: WorkoutBuilderActions,
     modifier: Modifier = Modifier,
 ) {
     val token = GymTheme.token

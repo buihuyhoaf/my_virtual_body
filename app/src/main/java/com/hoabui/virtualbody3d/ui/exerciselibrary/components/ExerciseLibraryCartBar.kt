@@ -14,11 +14,10 @@ import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.CartSetField
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryActions
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.WorkoutBuilderActions
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
-import java.time.LocalTime
 
 /**
  * Slim bottom bar: cart thumbnails, clear all, and primary CTA to open session booking editor.
@@ -26,7 +25,7 @@ import java.time.LocalTime
 @Composable
 fun ExerciseLibraryCartBar(
     libraryState: ExerciseLibraryUiState,
-    actions: ExerciseLibraryActions,
+    actions: WorkoutBuilderActions,
     cartItems: List<GExerciseCardUiModel>,
     modifier: Modifier = Modifier,
 ) {
@@ -100,41 +99,20 @@ private fun PreviewExerciseLibraryCartBarDark() {
     }
 }
 
-private fun previewStubExerciseLibraryActions(): ExerciseLibraryActions {
+private fun previewStubExerciseLibraryActions(): WorkoutBuilderActions {
     val noop: () -> Unit = {}
     val noopS: (String) -> Unit = {}
     val noop2: (String, Int, CartSetField, Int) -> Unit = { _, _, _, _ -> }
     val noop3: (String, Int, CartSetField, String) -> Unit = { _, _, _, _ -> }
-    val noopI: (Int) -> Unit = {}
-    val noopT: (LocalTime) -> Unit = {}
-    val noopL: (Long) -> Unit = {}
-    return ExerciseLibraryActions(
-        onQueryChange = noopS,
-        onExerciseClick = noopS,
-        onLibraryListToggle = noopS,
-        onDetailAddToCart = noopS,
+    return WorkoutBuilderActions(
         onSelectCartItem = noopS,
         onRemoveCartItem = noopS,
         onClearCart = noop,
-        onActiveDraftChange = { _, _ -> },
         onAddToSession = noop,
         onNavigateToSessionBookingEditor = noop,
-        onDismissSessionBooking = noop,
-        onBookingDateSelected = noopL,
-        onBookingLocationSelected = noopS,
-        onBookingSlotToggled = noopT,
-        onBookingClearTimeSelection = noop,
-        onConfirmSessionBooking = noop,
-        onLongSessionEdit = noop,
-        onLongSessionProceedAnyway = noop,
-        onClearExerciseDetail = noop,
-        onDismissAddExerciseSuccess = noop,
-        onNavigateToWorkoutCalendar = noop,
         onStepCartField = noop2,
-        onAddCartSetRow = noopS,
         onSetCartFieldManual = noop3,
         onToggleCartExpanded = noop,
-        onFocusStripQuadrantTap = noopI,
         onConfirmSelectionBarEdit = noop,
         onCancelSelectionBarEdit = noop,
     )

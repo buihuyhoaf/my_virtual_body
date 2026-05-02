@@ -1,24 +1,9 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.presentation
 
-import androidx.compose.runtime.Immutable
-import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseDetailSheetUiModel
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibrarySectionRowUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryPresentationSlice
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingUiModel
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.ImmutableMap
-
-/**
- * Library list + measurement map derived from catalog + cart filters (narrow combine inputs).
- */
-@Immutable
-data class LibraryPresentationSlice(
-    val sections: ImmutableList<ExerciseLibrarySectionRowUiModel>,
-    val exerciseMeasurementById: ImmutableMap<String, ExerciseMeasurementMode>,
-    val selectedExerciseForDetail: ExerciseDetailSheetUiModel?,
-    val isAddToSessionEnabled: Boolean,
-)
 
 /**
  * Merges cart [base] with library + booking projections into the screen [ExerciseLibraryUiState].

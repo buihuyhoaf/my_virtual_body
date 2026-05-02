@@ -57,9 +57,7 @@ class ExerciseLibraryPresentationKeysTest {
             selectedSlotStarts = persistentSetOf(),
             bookingExerciseSnapshot = persistentListOf(),
             longSessionAcknowledged = false,
-            pendingLongSessionWarning = false,
             isConfirming = false,
-            showSlotConflict = false,
         )
         return ExerciseLibraryUiState(
             filters = LibraryFilterState(searchQuery = searchQuery),

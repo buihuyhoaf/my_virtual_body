@@ -1,17 +1,19 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.state.reducer
 
 import com.hoabui.virtualbody3d.domain.usecase.CommitLibrarySessionBookingResult
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.Muscle
 import com.hoabui.virtualbody3d.domain.model.exercise.MuscleDictionary
 import com.hoabui.virtualbody3d.domain.model.exercise.RegionGroup
 import com.hoabui.virtualbody3d.domain.model.exercise.RegionBodyMuscleSelectionMap
 import com.hoabui.virtualbody3d.domain.model.exercise.RegionBody
-import com.hoabui.virtualbody3d.ui.exerciselibrary.data.CommitLibrarySessionBookingSuccessUiMapper
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toExerciseDraftForSelectionBarEdit
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.withCartSnapshot
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryChromeMode
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryCartState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingSheetState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingWorkflowPhase
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibraryIntent
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibraryUpdate
 import kotlinx.collections.immutable.persistentListOf
@@ -22,7 +24,6 @@ import kotlinx.collections.immutable.toImmutableMap
 import javax.inject.Inject
 
 class ExerciseLibraryReducer @Inject constructor(
-    private val commitSuccessUiMapper: CommitLibrarySessionBookingSuccessUiMapper,
     private val muscleDictionary: MuscleDictionary,
 ) {
 
@@ -47,9 +48,12 @@ class ExerciseLibraryReducer @Inject constructor(
             is ExerciseLibraryUpdate.WeeklyHeatmapLoaded ->
                 state.copy(weeklyHeatmap = update.state)
             is ExerciseLibraryUpdate.SessionBookingOpened ->
-                state.copy(sessionBooking = state.sessionBooking.copy(input = update.input))
-            is ExerciseLibraryUpdate.SessionBookingPruned ->
-                state.copy(sessionBooking = state.sessionBooking.copy(input = update.input))
+                state.copy(
+                    sessionBooking = state.sessionBooking.copy(
+                        input = update.input,
+                        workflowPhase = SessionBookingWorkflowPhase.Idle,
+                    ),
+                )
             is ExerciseLibraryUpdate.SlotSelectionResolved -> {
                 val inp = state.sessionBooking.input ?: return state
                 state.copy(
@@ -61,9 +65,8 @@ class ExerciseLibraryReducer @Inject constructor(
                             } else {
                                 inp.longSessionAcknowledged
                             },
-                            pendingLongSessionWarning = false,
-                            showSlotConflict = false,
                         ),
+                        workflowPhase = SessionBookingWorkflowPhase.Idle,
                     ),
                 )
             }
@@ -77,23 +80,20 @@ class ExerciseLibraryReducer @Inject constructor(
                     isCartExpanded = false,
                 ),
                 chrome = state.chrome.copy(
-                    detailExerciseId = null,
-                    addExerciseSuccess = null,
-                    isSelectionBarEditMode = false,
-                    editingScheduleRowId = null,
-                    selectionBarEditBaselineCart = null,
-                    isIsolatedScheduleRowSelectionEdit = false,
-                    selectionBarEditMeasurementMode = null,
+                    mode = ExerciseLibraryChromeMode.Idle,
                 ),
                 sessionBooking = SessionBookingSheetState(),
             )
             is ExerciseLibraryUpdate.SelectionBarEditBegan -> state.copy(
                 chrome = state.chrome.copy(
-                    isSelectionBarEditMode = true,
-                    editingScheduleRowId = update.scheduleRowId,
-                    selectionBarEditBaselineCart = state.cart,
-                    isIsolatedScheduleRowSelectionEdit = false,
-                    selectionBarEditMeasurementMode = null,
+                    mode = ExerciseLibraryChromeMode.EditingScheduleRow(
+                        scheduleRowId = update.scheduleRowId,
+                        baselineCart = state.cart,
+                        isIsolatedScheduleRowSelectionEdit = false,
+                        measurementMode = (state.cart.activeExerciseId ?: state.cart.draftOrder.firstOrNull())
+                            ?.let { state.libraryList.exerciseMeasurementById[it] }
+                            ?: ExerciseMeasurementMode.Strength,
+                    ),
                 ),
                 cart = state.cart.copy(isCartExpanded = true),
             )
@@ -109,46 +109,34 @@ class ExerciseLibraryReducer @Inject constructor(
                 state.copy(
                     cart = cart,
                     chrome = state.chrome.copy(
-                        isSelectionBarEditMode = true,
-                        editingScheduleRowId = update.scheduleRowId,
-                        selectionBarEditBaselineCart = cart,
-                        isIsolatedScheduleRowSelectionEdit = true,
-                        selectionBarEditMeasurementMode = update.schedule.measurementMode,
+                        mode = ExerciseLibraryChromeMode.EditingScheduleRow(
+                            scheduleRowId = update.scheduleRowId,
+                            baselineCart = cart,
+                            isIsolatedScheduleRowSelectionEdit = true,
+                            measurementMode = update.schedule.measurementMode,
+                        ),
                     ),
                 )
             }
             ExerciseLibraryUpdate.SelectionBarEditCancelled -> {
-                val clearedChrome = state.chrome.copy(
-                    isSelectionBarEditMode = false,
-                    editingScheduleRowId = null,
-                    selectionBarEditBaselineCart = null,
-                    isIsolatedScheduleRowSelectionEdit = false,
-                    selectionBarEditMeasurementMode = null,
-                )
-                if (state.chrome.isIsolatedScheduleRowSelectionEdit) {
+                val mode = state.chrome.mode as? ExerciseLibraryChromeMode.EditingScheduleRow ?: return state
+                val clearedChrome = state.chrome.copy(mode = ExerciseLibraryChromeMode.Idle)
+                if (mode.isIsolatedScheduleRowSelectionEdit) {
                     state.copy(
                         cart = emptyLibraryCart(),
                         chrome = clearedChrome,
                     )
                 } else {
-                    val baseline = state.chrome.selectionBarEditBaselineCart ?: return@reduce state.copy(
-                        chrome = clearedChrome,
-                    )
                     state.copy(
-                        cart = baseline.copy(isCartExpanded = false),
+                        cart = mode.baselineCart.copy(isCartExpanded = false),
                         chrome = clearedChrome,
                     )
                 }
             }
             ExerciseLibraryUpdate.SelectionBarEditFinished -> {
-                val clearedChrome = state.chrome.copy(
-                    isSelectionBarEditMode = false,
-                    editingScheduleRowId = null,
-                    selectionBarEditBaselineCart = null,
-                    isIsolatedScheduleRowSelectionEdit = false,
-                    selectionBarEditMeasurementMode = null,
-                )
-                if (state.chrome.isIsolatedScheduleRowSelectionEdit) {
+                val mode = state.chrome.mode as? ExerciseLibraryChromeMode.EditingScheduleRow ?: return state
+                val clearedChrome = state.chrome.copy(mode = ExerciseLibraryChromeMode.Idle)
+                if (mode.isIsolatedScheduleRowSelectionEdit) {
                     state.copy(
                         cart = emptyLibraryCart(),
                         chrome = clearedChrome,
@@ -169,10 +157,9 @@ class ExerciseLibraryReducer @Inject constructor(
     ): ExerciseLibraryUiState {
         return when (update) {
             ExerciseLibraryUpdate.BookingConfirmation.AwaitingLongSessionAck -> {
-                val inp = state.sessionBooking.input ?: return state
                 state.copy(
                     sessionBooking = state.sessionBooking.copy(
-                        input = inp.copy(pendingLongSessionWarning = true),
+                        workflowPhase = SessionBookingWorkflowPhase.AwaitingLongSessionAck,
                     ),
                 )
             }
@@ -182,9 +169,8 @@ class ExerciseLibraryReducer @Inject constructor(
                     sessionBooking = state.sessionBooking.copy(
                         input = inp.copy(
                             isConfirming = true,
-                            showSlotConflict = false,
-                            pendingLongSessionWarning = false,
                         ),
+                        workflowPhase = SessionBookingWorkflowPhase.Idle,
                     ),
                 )
             }
@@ -195,8 +181,8 @@ class ExerciseLibraryReducer @Inject constructor(
                         sessionBooking = state.sessionBooking.copy(
                             input = inp.copy(
                                 isConfirming = false,
-                                showSlotConflict = true,
                             ),
+                            workflowPhase = SessionBookingWorkflowPhase.SlotConflict,
                         ),
                     )
                 }
@@ -205,11 +191,11 @@ class ExerciseLibraryReducer @Inject constructor(
                     state.copy(
                         sessionBooking = state.sessionBooking.copy(
                             input = inp.copy(isConfirming = false),
+                            workflowPhase = SessionBookingWorkflowPhase.Idle,
                         ),
                     )
                 }
                 is CommitLibrarySessionBookingResult.Success -> {
-                    val summary = commitSuccessUiMapper.toAddExerciseSuccessSummary(result)
                     state.copy(
                         cart = state.cart.copy(
                             itemDrafts = persistentMapOf(),
@@ -219,12 +205,7 @@ class ExerciseLibraryReducer @Inject constructor(
                         ),
                         sessionBooking = SessionBookingSheetState(),
                         chrome = state.chrome.copy(
-                            addExerciseSuccess = summary,
-                            isSelectionBarEditMode = false,
-                            editingScheduleRowId = null,
-                            selectionBarEditBaselineCart = null,
-                            isIsolatedScheduleRowSelectionEdit = false,
-                            selectionBarEditMeasurementMode = null,
+                            mode = ExerciseLibraryChromeMode.Idle,
                         ),
                     )
                 }
@@ -244,11 +225,25 @@ class ExerciseLibraryReducer @Inject constructor(
         intent: ExerciseLibraryIntent,
     ): ExerciseLibraryUiState {
         return when (intent) {
+            ExerciseLibraryIntent.OpenSessionBooking -> state
             is ExerciseLibraryIntent.SetSearchQuery ->
                 state.copy(filters = state.filters.copy(searchQuery = intent.query))
+            is ExerciseLibraryIntent.ExerciseClicked -> state
+            is ExerciseLibraryIntent.LibraryListToggle -> state
+            is ExerciseLibraryIntent.DetailAddToCart -> state
+            is ExerciseLibraryIntent.SelectCartItem -> state
+            is ExerciseLibraryIntent.RemoveCartItem -> state
+            ExerciseLibraryIntent.ClearCart -> state
+            is ExerciseLibraryIntent.StepCartField -> state
+            is ExerciseLibraryIntent.SetCartFieldManual -> state
 
             ExerciseLibraryIntent.DismissSessionBooking ->
-                state.copy(sessionBooking = state.sessionBooking.copy(input = null))
+                state.copy(
+                    sessionBooking = state.sessionBooking.copy(
+                        input = null,
+                        workflowPhase = SessionBookingWorkflowPhase.Idle,
+                    ),
+                )
 
             is ExerciseLibraryIntent.BookingDateSelected -> {
                 val inp = state.sessionBooking.input ?: return state
@@ -256,8 +251,8 @@ class ExerciseLibraryReducer @Inject constructor(
                     sessionBooking = state.sessionBooking.copy(
                         input = inp.copy(
                             selectedDateMillis = intent.dateMillis,
-                            showSlotConflict = false,
                         ),
+                        workflowPhase = SessionBookingWorkflowPhase.Idle,
                     ),
                 )
             }
@@ -268,11 +263,12 @@ class ExerciseLibraryReducer @Inject constructor(
                     sessionBooking = state.sessionBooking.copy(
                         input = inp.copy(
                             selectedLocationId = intent.locationId,
-                            showSlotConflict = false,
                         ),
+                        workflowPhase = SessionBookingWorkflowPhase.Idle,
                     ),
                 )
             }
+            is ExerciseLibraryIntent.BookingSlotToggled -> state
 
             ExerciseLibraryIntent.BookingClearTimeSelection -> {
                 val inp = state.sessionBooking.input ?: return state
@@ -282,18 +278,19 @@ class ExerciseLibraryReducer @Inject constructor(
                         input = inp.copy(
                             selectedSlotStarts = persistentSetOf(),
                             longSessionAcknowledged = false,
-                            pendingLongSessionWarning = false,
-                            showSlotConflict = false,
                         ),
+                        workflowPhase = SessionBookingWorkflowPhase.Idle,
                     ),
                 )
             }
+            ExerciseLibraryIntent.ConfirmSessionBooking -> state
 
             ExerciseLibraryIntent.LongSessionEdit -> {
                 val inp = state.sessionBooking.input ?: return state
                 state.copy(
                     sessionBooking = state.sessionBooking.copy(
-                        input = inp.copy(pendingLongSessionWarning = false),
+                        input = inp,
+                        workflowPhase = SessionBookingWorkflowPhase.Idle,
                     ),
                 )
             }
@@ -303,24 +300,36 @@ class ExerciseLibraryReducer @Inject constructor(
                 state.copy(
                     sessionBooking = state.sessionBooking.copy(
                         input = inp.copy(
-                            pendingLongSessionWarning = false,
                             longSessionAcknowledged = true,
                         ),
+                        workflowPhase = SessionBookingWorkflowPhase.Idle,
                     ),
                 )
             }
 
-            ExerciseLibraryIntent.DismissAddExerciseSuccess ->
-                state.copy(chrome = state.chrome.copy(addExerciseSuccess = null))
+            ExerciseLibraryIntent.DismissAddExerciseSuccess -> state
 
             is ExerciseLibraryIntent.SelectExerciseForDetail ->
-                state.copy(chrome = state.chrome.copy(detailExerciseId = intent.exerciseId))
+                state.copy(
+                    chrome = state.chrome.copy(
+                        mode = ExerciseLibraryChromeMode.DetailOpen(intent.exerciseId),
+                    ),
+                )
 
-            ExerciseLibraryIntent.ClearExerciseDetail ->
-                state.copy(chrome = state.chrome.copy(detailExerciseId = null))
+            ExerciseLibraryIntent.ClearExerciseDetail -> {
+                if (state.chrome.mode is ExerciseLibraryChromeMode.DetailOpen) {
+                    state.copy(chrome = state.chrome.copy(mode = ExerciseLibraryChromeMode.Idle))
+                } else {
+                    state
+                }
+            }
 
             ExerciseLibraryIntent.ToggleCartExpanded ->
                 state.copy(cart = state.cart.copy(isCartExpanded = !state.cart.isCartExpanded))
+            is ExerciseLibraryIntent.FocusStripQuadrantTapped -> state
+            ExerciseLibraryIntent.ConfirmSelectionBarEdit -> state
+            ExerciseLibraryIntent.CancelSelectionBarEdit -> state
+            is ExerciseLibraryIntent.StartSelectionBarEditFromScheduleRow -> state
             is ExerciseLibraryIntent.ToggleFocusStripRegionGroup ->
                 state.copy(
                     focusStripClickSelection = toggleRegionGroupSelection(

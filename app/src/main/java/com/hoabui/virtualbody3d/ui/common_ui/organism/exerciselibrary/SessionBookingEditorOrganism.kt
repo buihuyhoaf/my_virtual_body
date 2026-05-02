@@ -87,6 +87,7 @@ private fun sessionBookingEditorTextStyle(base: TextStyle): TextStyle =
 @Composable
 fun SessionBookingEditorOrganism(
     booking: SessionBookingUiModel,
+    showSlotConflict: Boolean,
     onDateMillisSelected: (Long) -> Unit,
     onLocationSelected: (String) -> Unit,
     onSlotToggled: (LocalTime) -> Unit,
@@ -101,14 +102,13 @@ fun SessionBookingEditorOrganism(
     val chipMinW = token.bodyAnalysis.exerciseLibraryBookingDateChipMinWidth
     val gridCellMinH = token.bodyAnalysis.exerciseLibraryBookingTimeGridCellMinHeight
     val slotChipMinW = token.bodyAnalysis.exerciseLibraryBookingTimeSlotHorizontalMinWidth
-    val input = booking.input
     val dayLabelsLocale = Locale.getDefault()
     val shortDayFmt = remember(dayLabelsLocale) {
         DateTimeFormatter.ofPattern("EEE", dayLabelsLocale)
     }
     val selectedLocalDate =
-        remember(input.selectedDateMillis, systemZone) {
-            Instant.ofEpochMilli(input.selectedDateMillis).atZone(systemZone).toLocalDate()
+        remember(booking.selectedDateMillis, systemZone) {
+            Instant.ofEpochMilli(booking.selectedDateMillis).atZone(systemZone).toLocalDate()
         }
     val lifecycleOwner = LocalLifecycleOwner.current
     var resumeKey by remember { mutableIntStateOf(0) }
@@ -121,7 +121,7 @@ fun SessionBookingEditorOrganism(
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
-    val dayHorizon = remember(input.selectedDateMillis, resumeKey, systemZone) {
+    val dayHorizon = remember(booking.selectedDateMillis, resumeKey, systemZone) {
         val today = LocalDate.now(systemZone)
         (0 until SESSION_BOOKING_DAY_HORIZON).map { today.plusDays(it.toLong()) }
     }
@@ -144,7 +144,7 @@ fun SessionBookingEditorOrganism(
             ),
         verticalArrangement = Arrangement.spacedBy(token.spacing.md),
     ) {
-        if (input.showSlotConflict) {
+        if (showSlotConflict) {
             GText(
                 text = stringResource(R.string.exercise_library_booking_slot_conflict),
                 style = sessionBookingEditorTextStyle(token.typography.bodySmall),
@@ -265,7 +265,7 @@ fun SessionBookingEditorOrganism(
                 modifier = Modifier.padding(start = token.spacing.xs),
                 variant = GButtonVariant.Ghost,
                 contentColor = token.colors.error,
-                enabled = input.selectedSlotStarts.isNotEmpty(),
+                enabled = booking.selectedSlotStarts.isNotEmpty(),
             )
         }
         BookingPeriodJumpRow(

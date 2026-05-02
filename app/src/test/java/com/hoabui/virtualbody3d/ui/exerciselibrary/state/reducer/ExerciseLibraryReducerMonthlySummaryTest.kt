@@ -1,7 +1,6 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.state.reducer
 
 import com.hoabui.virtualbody3d.domain.model.exercise.TestMuscleDictionary
-import com.hoabui.virtualbody3d.ui.exerciselibrary.data.CommitLibrarySessionBookingSuccessUiMapper
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryWeeklyHeatmapState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.WeeklyHeatmapDayUiModel
@@ -13,7 +12,6 @@ import org.junit.Test
 class ExerciseLibraryReducerMonthlySummaryTest {
 
     private val reducer = ExerciseLibraryReducer(
-        commitSuccessUiMapper = CommitLibrarySessionBookingSuccessUiMapper(),
         muscleDictionary = TestMuscleDictionary(),
     )
 

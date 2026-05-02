@@ -36,11 +36,7 @@ internal fun exerciseLibraryBookingPresentationKey(
         append('|')
         append(inp.longSessionAcknowledged)
         append('|')
-        append(inp.pendingLongSessionWarning)
-        append('|')
         append(inp.isConfirming)
-        append('|')
-        append(inp.showSlotConflict)
     }
     val cartDraftSignature = buildString {
         filtersWithMeasurement.cart.draftOrder.forEach { append(it).append(',') }

@@ -54,10 +54,11 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.components.internal.Selection
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.ActiveExerciseInfo
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toCoilModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.CartSetField
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryActions
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryChromeMode
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SetRowDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.isCartDraftValidForSessionConfirm
+import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.WorkoutBuilderActions
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
@@ -545,7 +546,7 @@ private fun ExerciseLibraryCartRemoveSticker(
 @Composable
 fun ExerciseLibrarySelectionBar(
     libraryState: ExerciseLibraryUiState,
-    actions: ExerciseLibraryActions,
+    actions: WorkoutBuilderActions,
     modifier: Modifier = Modifier,
 ) {
     val cartItems = remember(libraryState.libraryList.sections, libraryState.cart.draftOrder) {
@@ -553,7 +554,7 @@ fun ExerciseLibrarySelectionBar(
             .associateBy { it.id }
         libraryState.cart.draftOrder.mapNotNull { byId[it] }
     }
-    val isSelectionBarEditMode = libraryState.chrome.isSelectionBarEditMode
+    val isSelectionBarEditMode = libraryState.chrome.mode is ExerciseLibraryChromeMode.EditingScheduleRow
     val isSelectionBarConfirmEnabled = libraryState.isCartDraftValidForSessionConfirm()
     val activeExerciseInfo by remember(
         libraryState.cart.activeExerciseId,

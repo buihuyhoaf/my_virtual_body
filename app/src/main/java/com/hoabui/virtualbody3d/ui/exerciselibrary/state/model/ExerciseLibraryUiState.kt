@@ -13,7 +13,7 @@ data class ExerciseLibraryUiState(
     val filters: LibraryFilterState = LibraryFilterState(),
     val cart: LibraryCartState = LibraryCartState(),
     val catalog: ExerciseLibraryCatalogState = ExerciseLibraryCatalogState(),
-    val libraryList: ExerciseLibraryListProjectionState = ExerciseLibraryListProjectionState(),
+    val libraryList: LibraryPresentationSlice = LibraryPresentationSlice(),
     val sessionBooking: SessionBookingSheetState = SessionBookingSheetState(),
     val chrome: LibraryChromeState = LibraryChromeState(),
     val weeklyHeatmap: LibraryWeeklyHeatmapState = LibraryWeeklyHeatmapState.Loading,

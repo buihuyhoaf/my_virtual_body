@@ -14,8 +14,8 @@ import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.common_ui.atom.icon.GIcon
 import com.hoabui.virtualbody3d.ui.common_ui.atom.field.GTextField
 import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryActions
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.ExerciseCatalogActions
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
@@ -65,7 +65,7 @@ fun ExerciseSearchBar(
 @Composable
 fun ExerciseLibrarySearchLayer(
     state: ExerciseLibraryUiState,
-    actions: ExerciseLibraryActions,
+    actions: ExerciseCatalogActions,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {

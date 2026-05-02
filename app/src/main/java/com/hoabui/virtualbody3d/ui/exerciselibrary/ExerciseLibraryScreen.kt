@@ -43,10 +43,13 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySea
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySelectionBar
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseSection
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.CartSetField
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryActions
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryChromeMode
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibraryIntent
 import com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel.ExerciseLibraryViewModel
+import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.ExerciseCatalogActions
+import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.GymMapChromeActions
+import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.WorkoutBuilderActions
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -70,53 +73,62 @@ fun ExerciseLibraryScreen(
     val screenState by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(scheduleRowIdToEdit) {
         val rowId = scheduleRowIdToEdit ?: return@LaunchedEffect
-        viewModel.startSelectionBarEditFromScheduleRow(rowId)
+        viewModel.onEvent(ExerciseLibraryIntent.StartSelectionBarEditFromScheduleRow(rowId))
     }
-    val actions = remember(viewModel, onNavigateToWorkoutCalendar, onNavigateToSessionBookingEditor) {
-        ExerciseLibraryActions(
-            onQueryChange = viewModel::updateSearchQuery,
-            onExerciseClick = { exerciseId ->
-                viewModel.dismissAddExerciseSuccess()
-                viewModel.selectExerciseForDetail(exerciseId)
-            },
-            onLibraryListToggle = viewModel::toggleExerciseInCartFromList,
-            onDetailAddToCart = viewModel::ensureInCartAndFocusFromDetail,
-            onSelectCartItem = viewModel::setActiveCartExercise,
-            onRemoveCartItem = viewModel::removeFromCart,
-            onClearCart = viewModel::clearAll,
-            onActiveDraftChange = viewModel::updateActiveDraft,
+    val catalogActions = remember(viewModel) {
+        ExerciseCatalogActions(
+            onQueryChange = { viewModel.onEvent(ExerciseLibraryIntent.SetSearchQuery(it)) },
+            onExerciseClick = { viewModel.onEvent(ExerciseLibraryIntent.ExerciseClicked(it)) },
+            onLibraryListToggle = { viewModel.onEvent(ExerciseLibraryIntent.LibraryListToggle(it)) },
+            onDetailAddToCart = { viewModel.onEvent(ExerciseLibraryIntent.DetailAddToCart(it)) },
+            onClearExerciseDetail = { viewModel.onEvent(ExerciseLibraryIntent.ClearExerciseDetail) },
+        )
+    }
+    val workoutBuilderActions = remember(viewModel, onNavigateToSessionBookingEditor) {
+        WorkoutBuilderActions(
+            onSelectCartItem = { viewModel.onEvent(ExerciseLibraryIntent.SelectCartItem(it)) },
+            onRemoveCartItem = { viewModel.onEvent(ExerciseLibraryIntent.RemoveCartItem(it)) },
+            onClearCart = { viewModel.onEvent(ExerciseLibraryIntent.ClearCart) },
             onAddToSession = {
-                viewModel.dismissAddExerciseSuccess()
+                viewModel.onEvent(ExerciseLibraryIntent.DismissAddExerciseSuccess)
                 onNavigateToSessionBookingEditor()
             },
             onNavigateToSessionBookingEditor = {
-                viewModel.dismissAddExerciseSuccess()
+                viewModel.onEvent(ExerciseLibraryIntent.DismissAddExerciseSuccess)
                 onNavigateToSessionBookingEditor()
             },
-            onDismissSessionBooking = {
-                viewModel.dismissAddExerciseSuccess()
-                viewModel.dismissSessionBooking()
+            onStepCartField = { exerciseId, setIndex, field, delta ->
+                viewModel.onEvent(
+                    ExerciseLibraryIntent.StepCartField(
+                        exerciseId = exerciseId,
+                        setIndex = setIndex,
+                        field = field,
+                        delta = delta,
+                    ),
+                )
             },
-            onBookingDateSelected = viewModel::onBookingDateSelected,
-            onBookingLocationSelected = viewModel::onBookingLocationSelected,
-            onBookingSlotToggled = viewModel::onBookingSlotToggled,
-            onBookingClearTimeSelection = viewModel::onBookingClearTimeSelection,
-            onConfirmSessionBooking = viewModel::confirmSessionBooking,
-            onLongSessionEdit = viewModel::onLongSessionEdit,
-            onLongSessionProceedAnyway = viewModel::onLongSessionProceedAnyway,
-            onClearExerciseDetail = viewModel::clearExerciseDetail,
-            onDismissAddExerciseSuccess = viewModel::dismissAddExerciseSuccess,
+            onSetCartFieldManual = { exerciseId, setIndex, field, value ->
+                viewModel.onEvent(
+                    ExerciseLibraryIntent.SetCartFieldManual(
+                        exerciseId = exerciseId,
+                        setIndex = setIndex,
+                        field = field,
+                        value = value,
+                    ),
+                )
+            },
+            onToggleCartExpanded = { viewModel.onEvent(ExerciseLibraryIntent.ToggleCartExpanded) },
+            onConfirmSelectionBarEdit = { viewModel.onEvent(ExerciseLibraryIntent.ConfirmSelectionBarEdit) },
+            onCancelSelectionBarEdit = { viewModel.onEvent(ExerciseLibraryIntent.CancelSelectionBarEdit) },
+        )
+    }
+    val gymMapChromeActions = remember(viewModel, onNavigateToWorkoutCalendar) {
+        GymMapChromeActions(
+            onFocusStripQuadrantTap = { viewModel.onEvent(ExerciseLibraryIntent.FocusStripQuadrantTapped(it)) },
             onNavigateToWorkoutCalendar = {
-                viewModel.dismissAddExerciseSuccess()
+                viewModel.onEvent(ExerciseLibraryIntent.DismissAddExerciseSuccess)
                 onNavigateToWorkoutCalendar()
             },
-            onStepCartField = viewModel::stepCartField,
-            onAddCartSetRow = { exerciseId -> viewModel.stepCartField(exerciseId, 0, CartSetField.SETS, 1) },
-            onSetCartFieldManual = viewModel::setCartFieldManual,
-            onToggleCartExpanded = viewModel::toggleCartExpanded,
-            onFocusStripQuadrantTap = viewModel::onFocusStripQuadrantTapped,
-            onConfirmSelectionBarEdit = viewModel::onConfirmSelectionBarEdit,
-            onCancelSelectionBarEdit = viewModel::onCancelSelectionBarEdit,
         )
     }
 
@@ -128,12 +140,14 @@ fun ExerciseLibraryScreen(
                 ExerciseLibraryScreenContent(
                     modifier = Modifier.fillMaxSize(),
                     state = data,
-                    actions = actions,
+                    catalogActions = catalogActions,
+                    workoutBuilderActions = workoutBuilderActions,
+                    gymMapChromeActions = gymMapChromeActions,
                 )
                 data.libraryList.selectedExerciseForDetail?.let { detail ->
                     ExerciseDetailDialog(
                         detail = detail,
-                        onDismiss = actions.onClearExerciseDetail,
+                        onDismiss = catalogActions.onClearExerciseDetail,
                     )
                 }
             }
@@ -145,7 +159,9 @@ fun ExerciseLibraryScreen(
 fun ExerciseLibraryScreenContent(
     modifier: Modifier = Modifier,
     state: ExerciseLibraryUiState,
-    actions: ExerciseLibraryActions,
+    catalogActions: ExerciseCatalogActions,
+    workoutBuilderActions: WorkoutBuilderActions,
+    gymMapChromeActions: GymMapChromeActions,
 ) {
     val token = GymTheme.token
     val listToggleAddCd = stringResource(R.string.exercise_library_list_toggle_add_cd)
@@ -197,7 +213,7 @@ fun ExerciseLibraryScreenContent(
             ) {
                 ExerciseLibrarySearchLayer(
                     state = state,
-                    actions = actions,
+                    actions = catalogActions,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -214,14 +230,14 @@ fun ExerciseLibraryScreenContent(
             ) {
                 ExerciseLibraryWeeklyHeatmapCard(
                     state = state.weeklyHeatmap,
-                    onClick = actions.onNavigateToWorkoutCalendar,
+                    onClick = gymMapChromeActions.onNavigateToWorkoutCalendar,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Spacer(modifier = Modifier.height(token.spacing.md))
                     ExerciseLibraryFocusMusclesSection(
                         imageNames = state.focusMusclesStrip,
-                        onQuadrantClick = actions.onFocusStripQuadrantTap,
+                        onQuadrantClick = gymMapChromeActions.onFocusStripQuadrantTap,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -282,8 +298,8 @@ fun ExerciseLibraryScreenContent(
                                     modifier = Modifier
                                         .padding(horizontal = token.spacing.md),
                                     section = section,
-                                    onNavigateDetail = actions.onExerciseClick,
-                                    onToggleSelection = actions.onLibraryListToggle,
+                                    onNavigateDetail = catalogActions.onExerciseClick,
+                                    onToggleSelection = catalogActions.onLibraryListToggle,
                                     toggleAddContentDescription = listToggleAddCd,
                                     toggleRemoveContentDescription = listToggleRemoveCd,
                                 )
@@ -305,16 +321,16 @@ fun ExerciseLibraryScreenContent(
                 targetOffsetY = { it },
             ),
         ) {
-            if (state.chrome.isSelectionBarEditMode) {
+            if (state.chrome.mode is ExerciseLibraryChromeMode.EditingScheduleRow) {
                 ExerciseLibrarySelectionBar(
                     libraryState = state,
-                    actions = actions,
+                    actions = workoutBuilderActions,
                     modifier = Modifier.fillMaxWidth(),
                 )
             } else {
                 ExerciseLibraryCartBar(
                     libraryState = state,
-                    actions = actions,
+                    actions = workoutBuilderActions,
                     cartItems = cartItems,
                     modifier = Modifier.fillMaxWidth(),
                 )

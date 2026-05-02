@@ -23,7 +23,7 @@ import com.hoabui.virtualbody3d.ui.common_ui.atom.dialog.GDialog
 import com.hoabui.virtualbody3d.ui.common_ui.atom.icon.GIcon
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.AddExerciseSuccessSummary
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.defaultExerciseLibraryCartDateMillis
+import com.hoabui.virtualbody3d.ui.exerciselibrary.util.defaultExerciseLibraryCartDateMillis
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
 import java.time.Clock

@@ -8,14 +8,12 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 
 /**
- * Derived list projection (sections, measurement map, detail selection) merged from catalog + filters + cart.
+ * Library list + measurement map derived from catalog + cart filters (narrow combine inputs).
  */
 @Immutable
-data class ExerciseLibraryListProjectionState(
+data class LibraryPresentationSlice(
     val sections: ImmutableList<ExerciseLibrarySectionRowUiModel> = persistentListOf(),
-    val selectedExerciseForDetail: ExerciseDetailSheetUiModel? = null,
-    /** [Exercise.id] → measurement mode from the library catalog (for cart validation and console UI). */
     val exerciseMeasurementById: ImmutableMap<String, ExerciseMeasurementMode> = persistentMapOf(),
-    /** Precomputed: non-empty valid cart for opening the booking sheet. */
+    val selectedExerciseForDetail: ExerciseDetailSheetUiModel? = null,
     val isAddToSessionEnabled: Boolean = false,
 )

@@ -12,6 +12,7 @@ import com.hoabui.virtualbody3d.domain.repository.WorkoutScheduleRepository
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.CommitLibrarySessionBookingSuccessUiMapper
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseLibraryCatalogUiMapper
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mapper.ExerciseLibraryUiMapper
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibraryIntent
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.reducer.ExerciseLibraryReducer
 import io.mockk.every
 import io.mockk.mockk
@@ -115,7 +116,6 @@ class ExerciseLibraryReducerDispatchTest {
         val workflow = mockk<SessionBookingConfirmationWorkflow>()
         every { workflow.run(any()) } returns kotlinx.coroutines.flow.flowOf()
         val reducer = ExerciseLibraryReducer(
-            commitSuccessUiMapper = CommitLibrarySessionBookingSuccessUiMapper(),
             muscleDictionary = testMuscleDictionary,
         )
         val updateSchedule = mockk<UpdateWorkoutScheduleFromCartDraftUseCase>(relaxed = true)
@@ -123,6 +123,7 @@ class ExerciseLibraryReducerDispatchTest {
         val vm = ExerciseLibraryViewModel(
             getLibrary,
             workflow,
+            CommitLibrarySessionBookingSuccessUiMapper(),
             locations,
             observeWeeklySummary,
             migrate,
@@ -137,7 +138,7 @@ class ExerciseLibraryReducerDispatchTest {
             scheduleRepo,
             testMuscleDictionary,
         )
-        vm.updateSearchQuery("bench")
+        vm.onEvent(ExerciseLibraryIntent.SetSearchQuery("bench"))
         verify(exactly = 0) { workflow.run(any()) }
     }
 }

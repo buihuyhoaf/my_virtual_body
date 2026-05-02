@@ -1,8 +1,8 @@
 package com.hoabui.virtualbody3d.domain.model.exercise
 
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseDraft
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryListProjectionState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryPresentationSlice
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryCartState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SetRowDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.isCartDraftValidForSessionConfirm
@@ -60,7 +60,7 @@ class ExerciseDurationTest {
                 itemDrafts = drafts,
                 draftOrder = persistentListOf("a", "b"),
             ),
-            libraryList = ExerciseLibraryListProjectionState(
+            libraryList = LibraryPresentationSlice(
                 exerciseMeasurementById = modes,
             ),
         )
@@ -76,7 +76,7 @@ class ExerciseDurationTest {
                 itemDrafts = drafts,
                 draftOrder = persistentListOf("b"),
             ),
-            libraryList = ExerciseLibraryListProjectionState(
+            libraryList = LibraryPresentationSlice(
                 exerciseMeasurementById = modes,
             ),
         )

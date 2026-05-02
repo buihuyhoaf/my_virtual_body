@@ -44,10 +44,11 @@ import com.hoabui.virtualbody3d.ui.common_ui.organism.workoutcalendar.WorkoutCal
 import com.hoabui.virtualbody3d.ui.common_ui.organism.workoutcalendar.WorkoutCalendarMonthGridOrganism
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySelectionBar
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.CartSetField
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryActions
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryChromeMode
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibraryIntent
 import com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel.ExerciseLibraryViewModel
+import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.WorkoutBuilderActions
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.workoutcalendar.model.buildMonthGridCells
 import com.hoabui.virtualbody3d.ui.workoutcalendar.viewmodel.WorkoutCalendarContent
@@ -156,37 +157,45 @@ private fun WorkoutCalendarSuccessContent(
         if (cartVisible) token.bodyAnalysis.exerciseLibrarySelectionBarCollapsedListBottomInset else token.spacing.none
 
     val selectionBarActions = remember(exerciseLibraryViewModel) {
-        ExerciseLibraryActions(
-            onQueryChange = {},
-            onExerciseClick = {},
-            onLibraryListToggle = {},
-            onDetailAddToCart = {},
-            onSelectCartItem = exerciseLibraryViewModel::setActiveCartExercise,
-            onRemoveCartItem = exerciseLibraryViewModel::removeFromCart,
-            onClearCart = exerciseLibraryViewModel::clearAll,
-            onActiveDraftChange = exerciseLibraryViewModel::updateActiveDraft,
+        WorkoutBuilderActions(
+            onSelectCartItem = {
+                exerciseLibraryViewModel.onEvent(ExerciseLibraryIntent.SelectCartItem(it))
+            },
+            onRemoveCartItem = {
+                exerciseLibraryViewModel.onEvent(ExerciseLibraryIntent.RemoveCartItem(it))
+            },
+            onClearCart = { exerciseLibraryViewModel.onEvent(ExerciseLibraryIntent.ClearCart) },
             onAddToSession = {},
             onNavigateToSessionBookingEditor = {},
-            onDismissSessionBooking = {},
-            onBookingDateSelected = {},
-            onBookingLocationSelected = {},
-            onBookingSlotToggled = {},
-            onBookingClearTimeSelection = {},
-            onConfirmSessionBooking = {},
-            onLongSessionEdit = {},
-            onLongSessionProceedAnyway = {},
-            onClearExerciseDetail = {},
-            onDismissAddExerciseSuccess = {},
-            onNavigateToWorkoutCalendar = {},
-            onStepCartField = exerciseLibraryViewModel::stepCartField,
-            onAddCartSetRow = { exerciseId ->
-                exerciseLibraryViewModel.stepCartField(exerciseId, 0, CartSetField.SETS, 1)
+            onStepCartField = { exerciseId, setIndex, field, delta ->
+                exerciseLibraryViewModel.onEvent(
+                    ExerciseLibraryIntent.StepCartField(
+                        exerciseId = exerciseId,
+                        setIndex = setIndex,
+                        field = field,
+                        delta = delta,
+                    ),
+                )
             },
-            onSetCartFieldManual = exerciseLibraryViewModel::setCartFieldManual,
-            onToggleCartExpanded = exerciseLibraryViewModel::toggleCartExpanded,
-            onFocusStripQuadrantTap = {},
-            onConfirmSelectionBarEdit = exerciseLibraryViewModel::onConfirmSelectionBarEdit,
-            onCancelSelectionBarEdit = exerciseLibraryViewModel::onCancelSelectionBarEdit,
+            onSetCartFieldManual = { exerciseId, setIndex, field, value ->
+                exerciseLibraryViewModel.onEvent(
+                    ExerciseLibraryIntent.SetCartFieldManual(
+                        exerciseId = exerciseId,
+                        setIndex = setIndex,
+                        field = field,
+                        value = value,
+                    ),
+                )
+            },
+            onToggleCartExpanded = {
+                exerciseLibraryViewModel.onEvent(ExerciseLibraryIntent.ToggleCartExpanded)
+            },
+            onConfirmSelectionBarEdit = {
+                exerciseLibraryViewModel.onEvent(ExerciseLibraryIntent.ConfirmSelectionBarEdit)
+            },
+            onCancelSelectionBarEdit = {
+                exerciseLibraryViewModel.onEvent(ExerciseLibraryIntent.CancelSelectionBarEdit)
+            },
         )
     }
 
@@ -200,8 +209,10 @@ private fun WorkoutCalendarSuccessContent(
     )
 
     BackHandler(
-        enabled = libraryData?.chrome?.isSelectionBarEditMode == true,
-        onBack = exerciseLibraryViewModel::onCancelSelectionBarEdit,
+        enabled = libraryData?.chrome?.mode is ExerciseLibraryChromeMode.EditingScheduleRow,
+        onBack = {
+            exerciseLibraryViewModel.onEvent(ExerciseLibraryIntent.CancelSelectionBarEdit)
+        },
     )
 
     deleteDialog?.let { dialog ->
@@ -271,7 +282,9 @@ private fun WorkoutCalendarSuccessContent(
                 onDeleteAffordanceClick = viewModel::onDeleteAffordanceClicked,
                 onEditAffordanceClick = { rowId, _ ->
                     viewModel.onEditAffordanceClicked(rowId)
-                    exerciseLibraryViewModel.startSelectionBarEditFromScheduleRow(rowId)
+                    exerciseLibraryViewModel.onEvent(
+                        ExerciseLibraryIntent.StartSelectionBarEditFromScheduleRow(rowId),
+                    )
                 },
                 onSwipeHintConsumed = viewModel::markSwipeHintSeen,
                 modifier = Modifier

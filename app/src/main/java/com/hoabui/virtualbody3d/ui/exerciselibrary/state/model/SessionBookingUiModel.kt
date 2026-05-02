@@ -4,10 +4,13 @@ import androidx.compose.runtime.Immutable
 import com.hoabui.virtualbody3d.domain.model.exercise.GymLocation
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.PersistentSet
+import java.time.LocalTime
 
 @Immutable
 data class SessionBookingUiModel(
-    val input: SessionBookingInput,
+    val selectedDateMillis: Long,
+    val selectedSlotStarts: PersistentSet<LocalTime>,
     val locations: ImmutableList<GymLocation>,
     val timeSlotCells: ImmutableList<TimeSlotCellUiModel>,
     val bookingPeriods: ImmutableList<SessionBookingPeriodUiModel>,

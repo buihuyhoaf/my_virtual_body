@@ -9,7 +9,6 @@ import com.hoabui.virtualbody3d.domain.model.exercise.GymLocation
 import com.hoabui.virtualbody3d.domain.model.exercise.Muscle
 import com.hoabui.virtualbody3d.domain.model.exercise.MuscleDictionary
 import com.hoabui.virtualbody3d.domain.model.exercise.RegionBody
-import com.hoabui.virtualbody3d.domain.model.exercise.RegionBodyMuscleSelectionMap
 import com.hoabui.virtualbody3d.domain.model.exercise.RegionGroup
 import com.hoabui.virtualbody3d.domain.model.exercise.bookingSlotStartsForDay
 import com.hoabui.virtualbody3d.domain.model.exercise.normalizeDurationMinutesSeconds
@@ -31,6 +30,7 @@ import com.hoabui.virtualbody3d.domain.usecase.ToggleExerciseInCartUseCase
 import com.hoabui.virtualbody3d.domain.usecase.UpdateExerciseDraftUseCase
 import com.hoabui.virtualbody3d.domain.usecase.UpdateWorkoutScheduleFromCartDraftUseCase
 import com.hoabui.virtualbody3d.domain.repository.WorkoutScheduleRepository
+import com.hoabui.virtualbody3d.ui.exerciselibrary.data.CommitLibrarySessionBookingSuccessUiMapper
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseLibraryCatalogUiMapper
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.emptyFocusMusclesStripImageNames
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.focusMusclesStripImageNamesForCartExercises
@@ -38,22 +38,23 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toCartSnapshot
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toLibraryCartDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toPendingSessionBooking
 import com.hoabui.virtualbody3d.ui.exerciselibrary.presentation.BookingPipelineRow
-import com.hoabui.virtualbody3d.ui.exerciselibrary.presentation.LibraryPresentationSlice
 import com.hoabui.virtualbody3d.ui.exerciselibrary.presentation.exerciseLibraryBookingPresentationKey
 import com.hoabui.virtualbody3d.ui.exerciselibrary.presentation.exerciseLibrarySectionRebuildKey
 import com.hoabui.virtualbody3d.ui.exerciselibrary.presentation.mergeExerciseLibraryPresentation
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mapper.ExerciseLibraryUiMapper
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.CartSetField
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryChromeMode
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.isCartDraftValidForSessionConfirm
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryWeeklyHeatmapState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryCartState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryPresentationSlice
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SetRowDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.WeeklyHeatmapDayUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibraryIntent
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibrarySideEffect
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibraryUiEffect
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibraryUpdate
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.reducer.ExerciseLibraryReducer
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -63,7 +64,6 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -74,6 +74,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -87,6 +88,7 @@ import javax.inject.Inject
 class ExerciseLibraryViewModel @Inject constructor(
     private val getExerciseLibraryUseCase: GetExerciseLibraryUseCase,
     private val sessionBookingConfirmationWorkflow: SessionBookingConfirmationWorkflow,
+    private val commitSuccessUiMapper: CommitLibrarySessionBookingSuccessUiMapper,
     private val observeGymLocationsUseCase: ObserveGymLocationsUseCase,
     private val observeExerciseLibraryWeeklySummaryUseCase: ObserveExerciseLibraryWeeklySummaryUseCase,
     private val migrateLegacyWorkoutSchedulesUseCase: MigrateLegacyWorkoutSchedulesUseCase,
@@ -105,7 +107,6 @@ class ExerciseLibraryViewModel @Inject constructor(
     private val confirmBookingMutex = Mutex()
 
     private val filterState = MutableStateFlow(ExerciseLibraryUiState())
-    private val clickSelectionState = MutableStateFlow<RegionBodyMuscleSelectionMap>(emptyMap())
 
     private val bookingGridSlotStarts: List<LocalTime> = bookingSlotStartsForDay(
         firstSlot = SESSION_BOOKING_GRID_FIRST_SLOT,
@@ -113,7 +114,6 @@ class ExerciseLibraryViewModel @Inject constructor(
         slotStepMinutes = SESSION_BOOKING_SLOT_STEP_MINUTES,
     )
 
-    val cartStateFlow: Flow<LibraryCartState> = filterState.map { it.cart }.distinctUntilChanged()
     /**
      * Domain exercise index for booking and detail mapping; not part of [ExerciseLibraryUiState].
      * Updated only from [GetExerciseLibraryUseCase] alongside [ExerciseLibraryUpdate.CatalogLoaded].
@@ -143,7 +143,7 @@ class ExerciseLibraryViewModel @Inject constructor(
         combine(filterState, catalogExercisesById) { filters, exercisesById ->
             Triple(
                 exerciseLibrarySectionRebuildKey(filters.catalog, filters),
-                filters.chrome.detailExerciseId,
+                (filters.chrome.mode as? ExerciseLibraryChromeMode.DetailOpen)?.exerciseId,
                 Pair(filters, exercisesById),
             )
         }
@@ -207,12 +207,12 @@ class ExerciseLibraryViewModel @Inject constructor(
             )
 
     private val focusMusclesStripFlow: StateFlow<ImmutableList<String>> =
-        combine(filterState, catalogExercisesById, clickSelectionState) { base, byId, clickState ->
+        combine(filterState, catalogExercisesById) { base, byId ->
             focusMusclesStripImageNamesForCartExercises(
                 cartExerciseIds = base.cart.draftOrder,
                 exercisesById = byId,
                 muscleDictionary = muscleDictionary,
-                clickSelectionMap = clickState,
+                clickSelectionMap = base.focusStripClickSelection,
             )
         }
             .distinctUntilChanged()
@@ -249,6 +249,8 @@ class ExerciseLibraryViewModel @Inject constructor(
             )
 
     private val sideEffects = Channel<ExerciseLibrarySideEffect>(capacity = Channel.UNLIMITED)
+    private val _uiEffects = Channel<ExerciseLibraryUiEffect>(capacity = Channel.BUFFERED)
+    val uiEffects = _uiEffects.receiveAsFlow()
 
     init {
         viewModelScope.launch {
@@ -334,9 +336,7 @@ class ExerciseLibraryViewModel @Inject constructor(
 
     private fun dispatch(update: ExerciseLibraryUpdate) {
         filterState.update { current ->
-            exerciseLibraryReducer.reduce(current, update).also { reduced ->
-                clickSelectionState.value = reduced.focusStripClickSelection
-            }
+            exerciseLibraryReducer.reduce(current, update)
         }
     }
 
@@ -345,6 +345,176 @@ class ExerciseLibraryViewModel @Inject constructor(
         if (intent is ExerciseLibraryIntent.LongSessionProceedAnyway) {
             sideEffects.trySend(ExerciseLibrarySideEffect.RunBookingConfirmation)
         }
+    }
+
+    fun onEvent(intent: ExerciseLibraryIntent) {
+        when {
+            handleCatalogIntent(intent) -> Unit
+            handleWorkoutBuilderIntent(intent) -> Unit
+            handleSessionBookingIntent(intent) -> Unit
+            handleGymMapIntent(intent) -> Unit
+            handleSelectionBarIntent(intent) -> Unit
+        }
+    }
+
+    private fun handleCatalogIntent(intent: ExerciseLibraryIntent): Boolean = when (intent) {
+        is ExerciseLibraryIntent.SetSearchQuery -> {
+            updateSearchQuery(intent.query)
+            true
+        }
+        is ExerciseLibraryIntent.ExerciseClicked -> {
+            dismissAddExerciseSuccess()
+            selectExerciseForDetail(intent.exerciseId)
+            true
+        }
+        is ExerciseLibraryIntent.LibraryListToggle -> {
+            toggleExerciseInCartFromList(intent.exerciseId)
+            true
+        }
+        is ExerciseLibraryIntent.DetailAddToCart -> {
+            ensureInCartAndFocusFromDetail(intent.exerciseId)
+            true
+        }
+        ExerciseLibraryIntent.DismissAddExerciseSuccess -> {
+            dismissAddExerciseSuccess()
+            true
+        }
+        is ExerciseLibraryIntent.SelectExerciseForDetail -> {
+            selectExerciseForDetail(intent.exerciseId)
+            true
+        }
+        ExerciseLibraryIntent.ClearExerciseDetail -> {
+            clearExerciseDetail()
+            true
+        }
+        else -> false
+    }
+
+    private fun handleWorkoutBuilderIntent(intent: ExerciseLibraryIntent): Boolean = when (intent) {
+        is ExerciseLibraryIntent.SelectCartItem -> {
+            setActiveCartExercise(intent.exerciseId)
+            true
+        }
+        is ExerciseLibraryIntent.RemoveCartItem -> {
+            removeFromCart(intent.exerciseId)
+            true
+        }
+        ExerciseLibraryIntent.ClearCart -> {
+            clearAll()
+            true
+        }
+        is ExerciseLibraryIntent.StepCartField -> {
+            stepCartField(
+                exerciseId = intent.exerciseId,
+                setIndex = intent.setIndex,
+                field = intent.field,
+                delta = intent.delta,
+            )
+            true
+        }
+        is ExerciseLibraryIntent.SetCartFieldManual -> {
+            setCartFieldManual(
+                exerciseId = intent.exerciseId,
+                setIndex = intent.setIndex,
+                field = intent.field,
+                value = intent.value,
+            )
+            true
+        }
+        ExerciseLibraryIntent.ToggleCartExpanded -> {
+            toggleCartExpanded()
+            true
+        }
+        else -> false
+    }
+
+    private fun handleSessionBookingIntent(intent: ExerciseLibraryIntent): Boolean = when (intent) {
+        ExerciseLibraryIntent.OpenSessionBooking -> {
+            openSessionBooking()
+            true
+        }
+        ExerciseLibraryIntent.DismissSessionBooking -> {
+            dismissSessionBooking()
+            true
+        }
+        is ExerciseLibraryIntent.BookingDateSelected -> {
+            onBookingDateSelected(intent.dateMillis)
+            true
+        }
+        is ExerciseLibraryIntent.BookingLocationSelected -> {
+            onBookingLocationSelected(intent.locationId)
+            true
+        }
+        is ExerciseLibraryIntent.BookingSlotToggled -> {
+            // Intent routes to VM command path by design; reducer receives SlotSelectionResolved update.
+            onBookingSlotToggled(intent.slotStart)
+            true
+        }
+        ExerciseLibraryIntent.BookingClearTimeSelection -> {
+            onBookingClearTimeSelection()
+            true
+        }
+        ExerciseLibraryIntent.ConfirmSessionBooking -> {
+            confirmSessionBooking()
+            true
+        }
+        ExerciseLibraryIntent.LongSessionEdit -> {
+            onLongSessionEdit()
+            true
+        }
+        ExerciseLibraryIntent.LongSessionProceedAnyway -> {
+            onLongSessionProceedAnyway()
+            true
+        }
+        else -> false
+    }
+
+    private fun handleGymMapIntent(intent: ExerciseLibraryIntent): Boolean = when (intent) {
+        is ExerciseLibraryIntent.FocusStripQuadrantTapped -> {
+            onFocusStripQuadrantTapped(intent.index)
+            true
+        }
+        is ExerciseLibraryIntent.ToggleFocusStripRegionGroup -> {
+            onFocusStripRegionGroupToggle(intent.regionGroup)
+            true
+        }
+        is ExerciseLibraryIntent.ToggleFocusStripRegionBody -> {
+            onFocusStripRegionBodyToggle(
+                regionGroup = intent.regionGroup,
+                regionBody = intent.regionBody,
+            )
+            true
+        }
+        is ExerciseLibraryIntent.ToggleFocusStripMuscle -> {
+            onFocusStripMuscleToggle(
+                regionGroup = intent.regionGroup,
+                regionBody = intent.regionBody,
+                muscle = intent.muscle,
+            )
+            true
+        }
+        ExerciseLibraryIntent.ClearFocusStripSelection -> {
+            clearFocusStripSelection()
+            true
+        }
+        else -> false
+    }
+
+    private fun handleSelectionBarIntent(intent: ExerciseLibraryIntent): Boolean = when (intent) {
+        ExerciseLibraryIntent.ConfirmSelectionBarEdit -> {
+            // Intent routes to VM command path by design; reducer receives SelectionBarEditFinished/Cancelled.
+            onConfirmSelectionBarEdit()
+            true
+        }
+        ExerciseLibraryIntent.CancelSelectionBarEdit -> {
+            onCancelSelectionBarEdit()
+            true
+        }
+        is ExerciseLibraryIntent.StartSelectionBarEditFromScheduleRow -> {
+            startSelectionBarEditFromScheduleRow(intent.scheduleRowId)
+            true
+        }
+        else -> false
     }
 
     private fun runBookingConfirmationWorkflow() {
@@ -415,8 +585,14 @@ class ExerciseLibraryViewModel @Inject constructor(
                         }
                         is BookingConfirmationStatus.Completed -> {
                             when (val r = status.result) {
-                                is CommitLibrarySessionBookingResult.Success ->
+                                is CommitLibrarySessionBookingResult.Success -> {
                                     Log.d(BOOKING_LOG_TAG, "commit Success scheduledCount=${r.scheduledCount}")
+                                    _uiEffects.send(
+                                        ExerciseLibraryUiEffect.ShowAddExerciseSuccess(
+                                            summary = commitSuccessUiMapper.toAddExerciseSuccessSummary(r),
+                                        ),
+                                    )
+                                }
                                 CommitLibrarySessionBookingResult.Conflict ->
                                     Log.w(BOOKING_LOG_TAG, "commit Conflict (DB error)")
                                 CommitLibrarySessionBookingResult.InvalidDraft ->
@@ -430,11 +606,11 @@ class ExerciseLibraryViewModel @Inject constructor(
         }
     }
 
-    fun updateSearchQuery(query: String) {
+    private fun updateSearchQuery(query: String) {
         dispatchIntent(ExerciseLibraryIntent.SetSearchQuery(query))
     }
 
-    fun toggleExerciseInCartFromList(exerciseId: String) {
+    private fun toggleExerciseInCartFromList(exerciseId: String) {
         val wasInCart = exerciseId in filterState.value.cart.itemDrafts
         val snap = toggleExerciseInCartUseCase(
             filterState.value.toCartSnapshot(),
@@ -447,7 +623,7 @@ class ExerciseLibraryViewModel @Inject constructor(
         }
     }
 
-    fun ensureInCartAndFocusFromDetail(exerciseId: String) {
+    private fun ensureInCartAndFocusFromDetail(exerciseId: String) {
         val wasInCart = exerciseId in filterState.value.cart.itemDrafts
         val snap = toggleExerciseInCartUseCase(
             filterState.value.toCartSnapshot(),
@@ -459,7 +635,7 @@ class ExerciseLibraryViewModel @Inject constructor(
         }
     }
 
-    fun removeFromCart(exerciseId: String) {
+    private fun removeFromCart(exerciseId: String) {
         val snap = toggleExerciseInCartUseCase(
             filterState.value.toCartSnapshot(),
             ExerciseLibraryCartCommand.Remove(exerciseId),
@@ -467,7 +643,7 @@ class ExerciseLibraryViewModel @Inject constructor(
         dispatch(ExerciseLibraryUpdate.CartFromDomain(snap))
     }
 
-    fun setActiveCartExercise(exerciseId: String) {
+    private fun setActiveCartExercise(exerciseId: String) {
         val snap = toggleExerciseInCartUseCase(
             filterState.value.toCartSnapshot(),
             ExerciseLibraryCartCommand.SetActive(exerciseId),
@@ -475,11 +651,11 @@ class ExerciseLibraryViewModel @Inject constructor(
         dispatch(ExerciseLibraryUpdate.CartFromDomain(snap))
     }
 
-    fun clearAll() {
+    private fun clearAll() {
         dispatch(ExerciseLibraryUpdate.LibraryCleared)
     }
 
-    fun updateActiveDraft(sets: String, reps: String) {
+    private fun updateActiveDraft(sets: String, reps: String) {
         val snap = updateExerciseDraftUseCase(
             filterState.value.toCartSnapshot(),
             filterState.value.cart.activeExerciseId,
@@ -497,7 +673,7 @@ class ExerciseLibraryViewModel @Inject constructor(
      * - MINUTES: ±1 min per tap.
      * - SECONDS: ±30 s per tap (normalised across minutes).
      */
-    fun stepCartField(exerciseId: String, setIndex: Int, field: CartSetField, delta: Int) {
+    private fun stepCartField(exerciseId: String, setIndex: Int, field: CartSetField, delta: Int) {
         val draft = filterState.value.cart.itemDrafts[exerciseId] ?: return
         val newDraft = when (field) {
             CartSetField.SETS -> {
@@ -537,7 +713,7 @@ class ExerciseLibraryViewModel @Inject constructor(
      * Applies a manually entered numeric value to a specific field of a specific set row.
      * Called when the user confirms a value in the number-pad dialog.
      */
-    fun setCartFieldManual(exerciseId: String, setIndex: Int, field: CartSetField, value: String) {
+    private fun setCartFieldManual(exerciseId: String, setIndex: Int, field: CartSetField, value: String) {
         val draft = filterState.value.cart.itemDrafts[exerciseId] ?: return
         when (field) {
             CartSetField.SETS -> {
@@ -575,7 +751,7 @@ class ExerciseLibraryViewModel @Inject constructor(
      * Prefills the initial set row for [exerciseId] with the historical weight from [Exercise.lastWeightKg].
      * Called after a new exercise is added to the cart.
      */
-    fun prefillFromHistory(exerciseId: String) {
+    private fun prefillFromHistory(exerciseId: String) {
         val exercise = catalogExercisesById.value[exerciseId] ?: return
         val lastWeight = exercise.lastWeightKg ?: return
         val draft = filterState.value.cart.itemDrafts[exerciseId] ?: return
@@ -588,7 +764,7 @@ class ExerciseLibraryViewModel @Inject constructor(
         dispatch(ExerciseLibraryUpdate.CartDraftUpdated(exerciseId, prefilled))
     }
 
-    fun openSessionBooking() {
+    private fun openSessionBooking() {
         val input = exerciseLibraryUiMapper.initialSessionBookingInput(
             filterState.value,
             catalogExercisesById.value,
@@ -596,19 +772,19 @@ class ExerciseLibraryViewModel @Inject constructor(
         dispatch(ExerciseLibraryUpdate.SessionBookingOpened(input))
     }
 
-    fun dismissSessionBooking() {
+    private fun dismissSessionBooking() {
         dispatchIntent(ExerciseLibraryIntent.DismissSessionBooking)
     }
 
-    fun onBookingDateSelected(dateMillis: Long) {
+    private fun onBookingDateSelected(dateMillis: Long) {
         dispatchIntent(ExerciseLibraryIntent.BookingDateSelected(dateMillis))
     }
 
-    fun onBookingLocationSelected(locationId: String) {
+    private fun onBookingLocationSelected(locationId: String) {
         dispatchIntent(ExerciseLibraryIntent.BookingLocationSelected(locationId))
     }
 
-    fun onBookingSlotToggled(slotStart: LocalTime) {
+    private fun onBookingSlotToggled(slotStart: LocalTime) {
         val s = filterState.value
         val inp = s.sessionBooking.input ?: return
         val next = resolveNextSlotSelectionAfterToggleUseCase(
@@ -624,39 +800,39 @@ class ExerciseLibraryViewModel @Inject constructor(
         )
     }
 
-    fun onBookingClearTimeSelection() {
+    private fun onBookingClearTimeSelection() {
         dispatchIntent(ExerciseLibraryIntent.BookingClearTimeSelection)
     }
 
-    fun onLongSessionEdit() {
+    private fun onLongSessionEdit() {
         dispatchIntent(ExerciseLibraryIntent.LongSessionEdit)
     }
 
-    fun onLongSessionProceedAnyway() {
+    private fun onLongSessionProceedAnyway() {
         dispatchIntent(ExerciseLibraryIntent.LongSessionProceedAnyway)
     }
 
-    fun dismissAddExerciseSuccess() {
+    private fun dismissAddExerciseSuccess() {
         dispatchIntent(ExerciseLibraryIntent.DismissAddExerciseSuccess)
     }
 
-    fun selectExerciseForDetail(exerciseId: String) {
+    private fun selectExerciseForDetail(exerciseId: String) {
         dispatchIntent(ExerciseLibraryIntent.SelectExerciseForDetail(exerciseId))
     }
 
-    fun clearExerciseDetail() {
+    private fun clearExerciseDetail() {
         dispatchIntent(ExerciseLibraryIntent.ClearExerciseDetail)
     }
 
-    fun toggleCartExpanded() {
+    private fun toggleCartExpanded() {
         dispatchIntent(ExerciseLibraryIntent.ToggleCartExpanded)
     }
 
-    fun onFocusStripRegionGroupToggle(regionGroup: RegionGroup) {
+    private fun onFocusStripRegionGroupToggle(regionGroup: RegionGroup) {
         dispatchIntent(ExerciseLibraryIntent.ToggleFocusStripRegionGroup(regionGroup))
     }
 
-    fun onFocusStripRegionBodyToggle(regionGroup: RegionGroup, regionBody: RegionBody) {
+    private fun onFocusStripRegionBodyToggle(regionGroup: RegionGroup, regionBody: RegionBody) {
         dispatchIntent(
             ExerciseLibraryIntent.ToggleFocusStripRegionBody(
                 regionGroup = regionGroup,
@@ -665,7 +841,7 @@ class ExerciseLibraryViewModel @Inject constructor(
         )
     }
 
-    fun onFocusStripMuscleToggle(regionGroup: RegionGroup, regionBody: RegionBody, muscle: Muscle) {
+    private fun onFocusStripMuscleToggle(regionGroup: RegionGroup, regionBody: RegionBody, muscle: Muscle) {
         dispatchIntent(
             ExerciseLibraryIntent.ToggleFocusStripMuscle(
                 regionGroup = regionGroup,
@@ -675,11 +851,11 @@ class ExerciseLibraryViewModel @Inject constructor(
         )
     }
 
-    fun clearFocusStripSelection() {
+    private fun clearFocusStripSelection() {
         dispatchIntent(ExerciseLibraryIntent.ClearFocusStripSelection)
     }
 
-    fun onFocusStripQuadrantTapped(index: Int) {
+    private fun onFocusStripQuadrantTapped(index: Int) {
         val regionGroup = when (index) {
             0 -> RegionGroup.UpperFront
             1 -> RegionGroup.UpperBack
@@ -690,14 +866,10 @@ class ExerciseLibraryViewModel @Inject constructor(
         onFocusStripRegionGroupToggle(regionGroup)
     }
 
-    fun beginSelectionBarEdit(scheduleRowId: Long) {
-        dispatch(ExerciseLibraryUpdate.SelectionBarEditBegan(scheduleRowId))
-    }
-
     /**
      * Loads the schedule row from Room and opens the selection bar in edit mode (e.g. after calendar Edit).
      */
-    fun startSelectionBarEditFromScheduleRow(scheduleRowId: Long) {
+    private fun startSelectionBarEditFromScheduleRow(scheduleRowId: Long) {
         launchSafely {
             val schedule = workoutScheduleRepository.getWorkoutScheduleByRowId(scheduleRowId) ?: return@launchSafely
             dispatch(
@@ -709,20 +881,20 @@ class ExerciseLibraryViewModel @Inject constructor(
         }
     }
 
-    fun onCancelSelectionBarEdit() {
+    private fun onCancelSelectionBarEdit() {
         dispatch(ExerciseLibraryUpdate.SelectionBarEditCancelled)
     }
 
-    fun onConfirmSelectionBarEdit() {
+    private fun onConfirmSelectionBarEdit() {
         launchSafely {
             val s = filterState.value
-            if (!s.chrome.isSelectionBarEditMode) return@launchSafely
-            val rowId = s.chrome.editingScheduleRowId ?: return@launchSafely
+            val editMode = s.chrome.mode as? ExerciseLibraryChromeMode.EditingScheduleRow ?: return@launchSafely
+            val rowId = editMode.scheduleRowId
             if (!s.isCartDraftValidForSessionConfirm()) return@launchSafely
             val exerciseId = s.cart.activeExerciseId ?: s.cart.draftOrder.firstOrNull() ?: return@launchSafely
             val draft = s.cart.itemDrafts[exerciseId] ?: return@launchSafely
             val mode = s.libraryList.exerciseMeasurementById[exerciseId]
-                ?: s.chrome.selectionBarEditMeasurementMode
+                ?: editMode.measurementMode
                 ?: workoutScheduleRepository.getWorkoutScheduleByRowId(rowId)?.measurementMode
                 ?: ExerciseMeasurementMode.Strength
             val sets: Int
@@ -762,7 +934,7 @@ class ExerciseLibraryViewModel @Inject constructor(
         }
     }
 
-    fun confirmSessionBooking() {
+    private fun confirmSessionBooking() {
         Log.d(BOOKING_LOG_TAG, "confirmSessionBooking: enqueue RunBookingConfirmation")
         sideEffects.trySend(ExerciseLibrarySideEffect.RunBookingConfirmation)
     }
