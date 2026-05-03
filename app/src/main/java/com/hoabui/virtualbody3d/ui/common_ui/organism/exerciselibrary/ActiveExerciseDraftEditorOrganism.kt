@@ -15,8 +15,8 @@ import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.CartSetsCountStepper
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.CartSetStepperSection
-import com.hoabui.virtualbody3d.ui.exerciselibrary.model.ActiveExerciseInfo
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.CartSetField
+import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.ActiveExerciseInfo
+import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.CartSetField
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import android.content.res.Configuration
 import androidx.compose.ui.tooling.preview.Preview

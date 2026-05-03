@@ -6,7 +6,7 @@ import androidx.compose.ui.Modifier
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.CartDragHandle
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.CartThumbnailRow
-import com.hoabui.virtualbody3d.ui.exerciselibrary.model.ActiveExerciseInfo
+import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.ActiveExerciseInfo
 import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.WorkoutBuilderActions
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 

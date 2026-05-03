@@ -37,7 +37,8 @@ import java.time.LocalTime
 @Composable
 fun AppTopBar(
     modifier: Modifier = Modifier,
-    onNotificationClick: () -> Unit
+    applyStatusBarsPadding: Boolean = true,
+    onNotificationClick: () -> Unit,
 ) {
     val token = GymTheme.token
     val now = LocalTime.now()
@@ -69,7 +70,10 @@ fun AppTopBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .windowInsetsPadding(WindowInsets.statusBars)
+                .then(
+                    if (applyStatusBarsPadding) Modifier.windowInsetsPadding(WindowInsets.statusBars)
+                    else Modifier,
+                )
                 .padding(
                     start = token.spacing.lg,
                     end = token.spacing.lg,
@@ -132,13 +136,18 @@ fun AppTopBar(
 fun AppTopBarBack(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    content: @Composable RowScope.() -> Unit
+    applyStatusBarsPadding: Boolean = true,
+    content: @Composable RowScope.() -> Unit,
 ) {
     val token = GymTheme.token
     val iconSize = token.spacing.lg
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .then(
+                if (applyStatusBarsPadding) Modifier.windowInsetsPadding(WindowInsets.statusBars)
+                else Modifier,
+            )
             .padding(
                 start = token.spacing.lg,
                 end = token.spacing.lg,

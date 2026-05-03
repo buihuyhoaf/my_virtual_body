@@ -1,6 +1,5 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.presentation
 
-import android.content.Context
 import com.hoabui.virtualbody3d.domain.model.common.ImageSource
 import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
@@ -8,14 +7,12 @@ import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.GymLocation
-import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseLibraryCatalogUiMapper
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryFilterState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingInput
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingSheetState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.catalog.ExerciseLibraryCatalogGrouped
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.sessionbooking.SessionBookingInput
+import com.hoabui.virtualbody3d.ui.exerciselibrary.util.mapGroupedToCatalogGrouped
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import io.mockk.mockk
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
 import org.junit.Assert.assertEquals
@@ -29,10 +26,8 @@ class ExerciseLibraryPresentationKeysTest {
 
     private val zoneUtc = ZoneOffset.UTC
 
-    private val catalogMapper = ExerciseLibraryCatalogUiMapper(mockk<Context>(relaxed = true))
-
-    private fun catalogState(grouped: Map<BodyRegion, List<Exercise>>) =
-        catalogMapper.mapGroupedToCatalogState(grouped)
+    private fun catalogGrouped(grouped: Map<BodyRegion, List<Exercise>>): ExerciseLibraryCatalogGrouped =
+        mapGroupedToCatalogGrouped(grouped)
 
     private fun sampleExercise(id: String = "ex1") = Exercise(
         id = id,
@@ -60,8 +55,8 @@ class ExerciseLibraryPresentationKeysTest {
             isConfirming = false,
         )
         return ExerciseLibraryUiState(
-            filters = LibraryFilterState(searchQuery = searchQuery),
-            sessionBooking = SessionBookingSheetState(input = input),
+            searchQuery = searchQuery,
+            sessionBookingInput = input,
         )
     }
 
@@ -71,8 +66,8 @@ class ExerciseLibraryPresentationKeysTest {
         val groupedA = mapOf(BodyRegion.Chest to listOf(ex))
         val groupedB = mapOf(BodyRegion.Chest to listOf(ex.copy(name = "Renamed")))
         val filters = ExerciseLibraryUiState()
-        val k1 = exerciseLibrarySectionRebuildKey(catalogState(groupedA), filters)
-        val k2 = exerciseLibrarySectionRebuildKey(catalogState(groupedB), filters)
+        val k1 = exerciseLibrarySectionRebuildKey(catalogGrouped(groupedA), filters)
+        val k2 = exerciseLibrarySectionRebuildKey(catalogGrouped(groupedB), filters)
         assertEquals(k1.catalogContentSignature, k2.catalogContentSignature)
         assertEquals(k1, k2)
     }
@@ -81,11 +76,11 @@ class ExerciseLibraryPresentationKeysTest {
     fun sectionRebuildKey_differentExerciseId_notEqual() {
         val filters = ExerciseLibraryUiState()
         val k1 = exerciseLibrarySectionRebuildKey(
-            catalogState(mapOf(BodyRegion.Chest to listOf(sampleExercise("a")))),
+            catalogGrouped(mapOf(BodyRegion.Chest to listOf(sampleExercise("a")))),
             filters,
         )
         val k2 = exerciseLibrarySectionRebuildKey(
-            catalogState(mapOf(BodyRegion.Chest to listOf(sampleExercise("b")))),
+            catalogGrouped(mapOf(BodyRegion.Chest to listOf(sampleExercise("b")))),
             filters,
         )
         assertNotEquals(k1, k2)
@@ -93,11 +88,11 @@ class ExerciseLibraryPresentationKeysTest {
 
     @Test
     fun sectionRebuildKey_differentBodyRegions_notEqual() {
-        val grouped = catalogState(mapOf(BodyRegion.Chest to listOf(sampleExercise())))
+        val grouped = catalogGrouped(mapOf(BodyRegion.Chest to listOf(sampleExercise())))
         val filtersChest =
-            ExerciseLibraryUiState(filters = LibraryFilterState(selectedBodyRegions = persistentSetOf(BodyRegion.Chest)))
+            ExerciseLibraryUiState(selectedBodyRegions = persistentSetOf(BodyRegion.Chest))
         val filtersLegs =
-            ExerciseLibraryUiState(filters = LibraryFilterState(selectedBodyRegions = persistentSetOf(BodyRegion.Legs)))
+            ExerciseLibraryUiState(selectedBodyRegions = persistentSetOf(BodyRegion.Legs))
         val kChest = exerciseLibrarySectionRebuildKey(grouped, filtersChest)
         val kLegs = exerciseLibrarySectionRebuildKey(grouped, filtersLegs)
         assertNotEquals(kChest, kLegs)

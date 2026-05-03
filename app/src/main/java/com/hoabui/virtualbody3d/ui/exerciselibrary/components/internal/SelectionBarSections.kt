@@ -27,7 +27,7 @@ import com.hoabui.virtualbody3d.core.extensions.onHeightMeasured
 import com.hoabui.virtualbody3d.core.extensions.verticalDraggable
 import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
-import com.hoabui.virtualbody3d.ui.exerciselibrary.model.ActiveExerciseInfo
+import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.ActiveExerciseInfo
 import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.WorkoutBuilderActions
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment

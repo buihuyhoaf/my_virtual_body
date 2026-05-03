@@ -1,11 +1,10 @@
 package com.hoabui.virtualbody3d.domain.model.exercise
 
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseDraft
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryPresentationSlice
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryCartState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SetRowDraft
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.isCartDraftValidForSessionConfirm
+import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.ExerciseDraft
+import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.SetRowDraft
+import com.hoabui.virtualbody3d.ui.exerciselibrary.catalog.LibraryPresentationSlice
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.util.isCartDraftValidForSessionConfirm
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import org.junit.Assert.assertEquals
@@ -44,7 +43,6 @@ class ExerciseDurationTest {
             "b" to ExerciseMeasurementMode.Duration,
         )
         val drafts = persistentMapOf(
-            // Strength: 3 sets × 10 reps — valid
             "a" to ExerciseDraft(
                 setRows = persistentListOf(
                     SetRowDraft(reps = 10),
@@ -52,14 +50,11 @@ class ExerciseDurationTest {
                     SetRowDraft(reps = 10),
                 ),
             ),
-            // Duration: 1 min 30 sec — valid
             "b" to ExerciseDraft(setRows = persistentListOf(SetRowDraft(minutes = 1, seconds = 30))),
         )
         val state = ExerciseLibraryUiState(
-            cart = LibraryCartState(
-                itemDrafts = drafts,
-                draftOrder = persistentListOf("a", "b"),
-            ),
+            itemDrafts = drafts,
+            draftOrder = persistentListOf("a", "b"),
             libraryList = LibraryPresentationSlice(
                 exerciseMeasurementById = modes,
             ),
@@ -72,10 +67,8 @@ class ExerciseDurationTest {
         val modes = persistentMapOf("b" to ExerciseMeasurementMode.Duration)
         val drafts = persistentMapOf("b" to ExerciseDraft(setRows = persistentListOf(SetRowDraft(minutes = 0, seconds = 0))))
         val state = ExerciseLibraryUiState(
-            cart = LibraryCartState(
-                itemDrafts = drafts,
-                draftOrder = persistentListOf("b"),
-            ),
+            itemDrafts = drafts,
+            draftOrder = persistentListOf("b"),
             libraryList = LibraryPresentationSlice(
                 exerciseMeasurementById = modes,
             ),

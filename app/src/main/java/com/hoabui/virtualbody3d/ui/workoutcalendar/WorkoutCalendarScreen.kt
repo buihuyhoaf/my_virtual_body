@@ -39,14 +39,15 @@ import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
 import com.hoabui.virtualbody3d.ui.common_ui.atom.dialog.GDialog
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBar
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBarBackIcon
 import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
 import com.hoabui.virtualbody3d.ui.common_ui.organism.workoutcalendar.WorkoutCalendarDayExerciseListOrganism
 import com.hoabui.virtualbody3d.ui.common_ui.organism.workoutcalendar.WorkoutCalendarMonthGridOrganism
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySelectionBar
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryChromeMode
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibraryIntent
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryChromeMode
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel.ExerciseLibraryViewModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.WorkoutBuilderActions
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
@@ -62,9 +63,10 @@ import java.util.Locale
 @Composable
 fun WorkoutCalendarScreen(
     onBack: () -> Unit,
+    onNavigateToSessionBookingEditor: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: WorkoutCalendarViewModel = hiltViewModel(),
-    exerciseLibraryViewModel: ExerciseLibraryViewModel = hiltViewModel(),
+    exerciseLibraryViewModel: ExerciseLibraryViewModel,
 ) {
     val today = LocalDate.now()
     val screen by viewModel.state.collectAsStateWithLifecycle()
@@ -94,29 +96,36 @@ fun WorkoutCalendarScreen(
             }
         }
     }
-    BackHandler(onBack = onBack)
-
-    GScaffold(
-        modifier = modifier.fillMaxSize(),
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        contentWindowInsets = WindowInsets(0),
-    ) { padding ->
-        UiStateContent(
-            state = screen,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            successContent = { mod, data ->
+    UiStateContent(
+        state = screen,
+        modifier = Modifier
+            .fillMaxSize(),
+        successContent = { mod, data ->
+            GScaffold(
+                modifier = modifier,
+                snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+                contentWindowInsets = WindowInsets(0),
+                topBar = {
+                    GTopBar(
+                        title = stringResource(R.string.workout_calendar_title),
+                        windowInsets = WindowInsets(0),
+                        navigationIcon = { GTopBarBackIcon(onBack = onBack) }
+                    )
+                }
+            ) { padding ->
                 WorkoutCalendarSuccessContent(
                     modifier = mod,
                     data = data,
                     today = today,
                     viewModel = viewModel,
                     exerciseLibraryViewModel = exerciseLibraryViewModel,
+                    onNavigateToSessionBookingEditor = onNavigateToSessionBookingEditor,
                 )
-            },
-        )
-    }
+            }
+
+        },
+    )
+
 }
 
 @Composable
@@ -126,6 +135,7 @@ private fun WorkoutCalendarSuccessContent(
     today: LocalDate,
     viewModel: WorkoutCalendarViewModel,
     exerciseLibraryViewModel: ExerciseLibraryViewModel,
+    onNavigateToSessionBookingEditor: () -> Unit,
 ) {
     val cal = GymTheme.token.workoutCalendar
     val token = GymTheme.token
@@ -152,52 +162,52 @@ private fun WorkoutCalendarSuccessContent(
     val libraryScreen by exerciseLibraryViewModel.state.collectAsStateWithLifecycle()
     val libraryData: ExerciseLibraryUiState? =
         (libraryScreen as? UiState.Success)?.data
-    val cartVisible = libraryData?.cart?.itemDrafts?.isNotEmpty() == true
+    val cartVisible = libraryData?.itemDrafts?.isNotEmpty() == true
     val listBottomPadding =
         if (cartVisible) token.bodyAnalysis.exerciseLibrarySelectionBarCollapsedListBottomInset else token.spacing.none
 
-    val selectionBarActions = remember(exerciseLibraryViewModel) {
-        WorkoutBuilderActions(
-            onSelectCartItem = {
-                exerciseLibraryViewModel.onEvent(ExerciseLibraryIntent.SelectCartItem(it))
-            },
-            onRemoveCartItem = {
-                exerciseLibraryViewModel.onEvent(ExerciseLibraryIntent.RemoveCartItem(it))
-            },
-            onClearCart = { exerciseLibraryViewModel.onEvent(ExerciseLibraryIntent.ClearCart) },
-            onAddToSession = {},
-            onNavigateToSessionBookingEditor = {},
-            onStepCartField = { exerciseId, setIndex, field, delta ->
-                exerciseLibraryViewModel.onEvent(
-                    ExerciseLibraryIntent.StepCartField(
+    val selectionBarActions =
+        remember(exerciseLibraryViewModel, onNavigateToSessionBookingEditor) {
+            WorkoutBuilderActions(
+                onSelectCartItem = {
+                    exerciseLibraryViewModel.selectCartItem(it)
+                },
+                onRemoveCartItem = {
+                    exerciseLibraryViewModel.removeCartItem(it)
+                },
+                onClearCart = { exerciseLibraryViewModel.clearCart() },
+                onAddToSession = {
+                    exerciseLibraryViewModel.dismissAddExerciseSuccess()
+                    onNavigateToSessionBookingEditor()
+                },
+                onNavigateToWorkoutCalendar = {},
+                onStepCartField = { exerciseId, setIndex, field, delta ->
+                    exerciseLibraryViewModel.stepCartField(
                         exerciseId = exerciseId,
                         setIndex = setIndex,
                         field = field,
                         delta = delta,
-                    ),
-                )
-            },
-            onSetCartFieldManual = { exerciseId, setIndex, field, value ->
-                exerciseLibraryViewModel.onEvent(
-                    ExerciseLibraryIntent.SetCartFieldManual(
+                    )
+                },
+                onSetCartFieldManual = { exerciseId, setIndex, field, value ->
+                    exerciseLibraryViewModel.setCartFieldManual(
                         exerciseId = exerciseId,
                         setIndex = setIndex,
                         field = field,
                         value = value,
-                    ),
-                )
-            },
-            onToggleCartExpanded = {
-                exerciseLibraryViewModel.onEvent(ExerciseLibraryIntent.ToggleCartExpanded)
-            },
-            onConfirmSelectionBarEdit = {
-                exerciseLibraryViewModel.onEvent(ExerciseLibraryIntent.ConfirmSelectionBarEdit)
-            },
-            onCancelSelectionBarEdit = {
-                exerciseLibraryViewModel.onEvent(ExerciseLibraryIntent.CancelSelectionBarEdit)
-            },
-        )
-    }
+                    )
+                },
+                onToggleCartExpanded = {
+                    exerciseLibraryViewModel.toggleCartExpanded()
+                },
+                onConfirmSelectionBarEdit = {
+                    exerciseLibraryViewModel.confirmSelectionBarEdit()
+                },
+                onCancelSelectionBarEdit = {
+                    exerciseLibraryViewModel.cancelSelectionBarEdit()
+                },
+            )
+        }
 
     val fadeSpec = tween<Float>(
         durationMillis = token.motion.duration.standard,
@@ -209,9 +219,9 @@ private fun WorkoutCalendarSuccessContent(
     )
 
     BackHandler(
-        enabled = libraryData?.chrome?.mode is ExerciseLibraryChromeMode.EditingScheduleRow,
+        enabled = libraryData?.chromeMode is ExerciseLibraryChromeMode.EditingScheduleRow,
         onBack = {
-            exerciseLibraryViewModel.onEvent(ExerciseLibraryIntent.CancelSelectionBarEdit)
+            exerciseLibraryViewModel.cancelSelectionBarEdit()
         },
     )
 
@@ -253,7 +263,8 @@ private fun WorkoutCalendarSuccessContent(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = cal.screenHorizontalPadding, vertical = cal.screenVerticalPadding),
+            .padding(horizontal = cal.screenHorizontalPadding)
+            .padding(top = cal.screenVerticalPadding),
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             WorkoutCalendarMonthGridOrganism(
@@ -282,9 +293,7 @@ private fun WorkoutCalendarSuccessContent(
                 onDeleteAffordanceClick = viewModel::onDeleteAffordanceClicked,
                 onEditAffordanceClick = { rowId, _ ->
                     viewModel.onEditAffordanceClicked(rowId)
-                    exerciseLibraryViewModel.onEvent(
-                        ExerciseLibraryIntent.StartSelectionBarEditFromScheduleRow(rowId),
-                    )
+                    exerciseLibraryViewModel.startSelectionBarEditFromScheduleRow(rowId)
                 },
                 onSwipeHintConsumed = viewModel::markSwipeHintSeen,
                 modifier = Modifier

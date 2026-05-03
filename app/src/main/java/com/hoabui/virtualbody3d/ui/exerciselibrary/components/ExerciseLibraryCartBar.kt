@@ -13,14 +13,14 @@ import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.CartSetField
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.CartSetField
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.WorkoutBuilderActions
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
 
 /**
- * Slim bottom bar: cart thumbnails, clear all, and primary CTA to open session booking editor.
+ * Slim bottom bar: cart thumbnails, clear all, and primary CTA to continue on the workout calendar.
  */
 @Composable
 fun ExerciseLibraryCartBar(
@@ -46,7 +46,7 @@ fun ExerciseLibraryCartBar(
         Column(modifier = Modifier.fillMaxWidth()) {
             CartThumbnailRow(
                 cartItems = cartItems,
-                activeExerciseId = libraryState.cart.activeExerciseId,
+                activeExerciseId = libraryState.activeExerciseId,
                 onSelectCartItem = actions.onSelectCartItem,
                 onRemoveCartItem = actions.onRemoveCartItem,
                 onClearAll = actions.onClearCart,
@@ -61,7 +61,7 @@ fun ExerciseLibraryCartBar(
             )
             GButton(
                 text = stringResource(R.string.exercise_library_add_to_session),
-                onClick = actions.onNavigateToSessionBookingEditor,
+                onClick = actions.onNavigateToWorkoutCalendar,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = token.spacing.sm)
@@ -109,7 +109,7 @@ private fun previewStubExerciseLibraryActions(): WorkoutBuilderActions {
         onRemoveCartItem = noopS,
         onClearCart = noop,
         onAddToSession = noop,
-        onNavigateToSessionBookingEditor = noop,
+        onNavigateToWorkoutCalendar = noop,
         onStepCartField = noop2,
         onSetCartFieldManual = noop3,
         onToggleCartExpanded = noop,

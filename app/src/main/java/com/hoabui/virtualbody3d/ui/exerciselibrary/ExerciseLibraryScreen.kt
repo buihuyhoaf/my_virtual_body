@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -39,10 +40,11 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseSection
 import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBar
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBarBackIcon
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryChromeMode
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibraryIntent
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryChromeMode
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel.ExerciseLibraryViewModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.ExerciseCatalogActions
 import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.WorkoutBuilderActions
@@ -61,7 +63,8 @@ private object ExerciseLibraryListContentTypes {
 @Composable
 fun ExerciseLibraryScreen(
     modifier: Modifier = Modifier,
-    onNavigateToSessionBookingEditor: () -> Unit,
+    onNavigateToWorkoutCalendar: () -> Unit,
+    onBack: () -> Unit,
     scheduleRowIdToEdit: Long? = null,
     initialExerciseCategory: String? = null,
     initialBodyRegions: List<String>? = null,
@@ -73,70 +76,75 @@ fun ExerciseLibraryScreen(
     LaunchedEffect(filterAppliedKey, initialExerciseCategory, initialBodyRegions) {
         if (!initialBodyRegions.isNullOrEmpty()) {
             val regions = initialBodyRegions.map { BodyRegion.valueOf(it) }.toImmutableSet()
-            viewModel.onEvent(ExerciseLibraryIntent.SetInitialBodyRegionFilter(regions))
+            viewModel.setInitialBodyRegionFilter(regions)
         } else if (initialExerciseCategory != null) {
-            viewModel.onEvent(
-                ExerciseLibraryIntent.SetInitialExerciseCategoryFilter(
-                    ExerciseCategory.valueOf(initialExerciseCategory),
-                ),
+            viewModel.setInitialExerciseCategoryFilter(
+                ExerciseCategory.valueOf(initialExerciseCategory),
             )
         }
     }
     LaunchedEffect(scheduleRowIdToEdit) {
         val rowId = scheduleRowIdToEdit ?: return@LaunchedEffect
-        viewModel.onEvent(ExerciseLibraryIntent.StartSelectionBarEditFromScheduleRow(rowId))
+        viewModel.startSelectionBarEditFromScheduleRow(rowId)
     }
     val catalogActions = remember(viewModel) {
         ExerciseCatalogActions(
-            onQueryChange = { viewModel.onEvent(ExerciseLibraryIntent.SetSearchQuery(it)) },
-            onCardTap = { viewModel.onEvent(ExerciseLibraryIntent.CardSelectionToggled(it)) },
+            onQueryChange = { viewModel.setSearchQuery(it) },
+            onCardTap = { viewModel.toggleCardSelection(it) },
         )
     }
-    val workoutBuilderActions = remember(viewModel, onNavigateToSessionBookingEditor) {
+    val workoutBuilderActions = remember(viewModel, onNavigateToWorkoutCalendar) {
         WorkoutBuilderActions(
-            onSelectCartItem = { viewModel.onEvent(ExerciseLibraryIntent.SelectCartItem(it)) },
-            onRemoveCartItem = { viewModel.onEvent(ExerciseLibraryIntent.RemoveCartItem(it)) },
-            onClearCart = { viewModel.onEvent(ExerciseLibraryIntent.ClearCart) },
+            onSelectCartItem = { viewModel.selectCartItem(it) },
+            onRemoveCartItem = { viewModel.removeCartItem(it) },
+            onClearCart = { viewModel.clearCart() },
             onAddToSession = {
-                viewModel.onEvent(ExerciseLibraryIntent.DismissAddExerciseSuccess)
-                onNavigateToSessionBookingEditor()
+                viewModel.dismissAddExerciseSuccess()
+                onNavigateToWorkoutCalendar()
             },
-            onNavigateToSessionBookingEditor = {
-                viewModel.onEvent(ExerciseLibraryIntent.DismissAddExerciseSuccess)
-                onNavigateToSessionBookingEditor()
+            onNavigateToWorkoutCalendar = {
+                viewModel.dismissAddExerciseSuccess()
+                onNavigateToWorkoutCalendar()
             },
             onStepCartField = { exerciseId, setIndex, field, delta ->
-                viewModel.onEvent(
-                    ExerciseLibraryIntent.StepCartField(
-                        exerciseId = exerciseId,
-                        setIndex = setIndex,
-                        field = field,
-                        delta = delta,
-                    ),
+                viewModel.stepCartField(
+                    exerciseId = exerciseId,
+                    setIndex = setIndex,
+                    field = field,
+                    delta = delta,
                 )
             },
             onSetCartFieldManual = { exerciseId, setIndex, field, value ->
-                viewModel.onEvent(
-                    ExerciseLibraryIntent.SetCartFieldManual(
-                        exerciseId = exerciseId,
-                        setIndex = setIndex,
-                        field = field,
-                        value = value,
-                    ),
+                viewModel.setCartFieldManual(
+                    exerciseId = exerciseId,
+                    setIndex = setIndex,
+                    field = field,
+                    value = value,
                 )
             },
-            onToggleCartExpanded = { viewModel.onEvent(ExerciseLibraryIntent.ToggleCartExpanded) },
-            onConfirmSelectionBarEdit = { viewModel.onEvent(ExerciseLibraryIntent.ConfirmSelectionBarEdit) },
-            onCancelSelectionBarEdit = { viewModel.onEvent(ExerciseLibraryIntent.CancelSelectionBarEdit) },
+            onToggleCartExpanded = { viewModel.toggleCartExpanded() },
+            onConfirmSelectionBarEdit = { viewModel.confirmSelectionBarEdit() },
+            onCancelSelectionBarEdit = { viewModel.cancelSelectionBarEdit() },
         )
     }
     UiStateContent(
         state = screenState,
         modifier = modifier,
         successContent = { mod, data ->
-            GScaffold(modifier = mod) {
+            GScaffold(
+                modifier = mod,
+                contentWindowInsets = WindowInsets(0),
+                topBar = {
+                    GTopBar(
+                        title = stringResource(R.string.exercise_library_title),
+                        windowInsets = WindowInsets(0),
+                        navigationIcon = { GTopBarBackIcon(onBack = onBack) }
+                    )
+                }
+            ) { padding ->
                 ExerciseLibraryScreenContent(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize(),
                     state = data,
                     catalogActions = catalogActions,
                     workoutBuilderActions = workoutBuilderActions,
@@ -179,13 +187,13 @@ fun ExerciseLibraryScreenContent(
                 keyboardController?.hide()
             }
     }
-    val cartVisible = state.cart.itemDrafts.isNotEmpty()
+    val cartVisible = state.itemDrafts.isNotEmpty()
     val cartCollapsedInset = token.bodyAnalysis.exerciseLibrarySelectionBarCollapsedListBottomInset
     val listBottomPadding = if (cartVisible) cartCollapsedInset else token.spacing.none
-    val cartItems = remember(state.libraryList.sections, state.cart.draftOrder) {
+    val cartItems = remember(state.libraryList.sections, state.draftOrder) {
         val byId = state.libraryList.sections.asSequence().flatMap { it.items.asSequence() }
             .associateBy { it.id }
-        state.cart.draftOrder.mapNotNull { byId[it] }
+        state.draftOrder.mapNotNull { byId[it] }
     }
     Box(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -280,7 +288,7 @@ fun ExerciseLibraryScreenContent(
                 targetOffsetY = { it },
             ),
         ) {
-            if (state.chrome.mode is ExerciseLibraryChromeMode.EditingScheduleRow) {
+            if (state.chromeMode is ExerciseLibraryChromeMode.EditingScheduleRow) {
                 ExerciseLibrarySelectionBar(
                     libraryState = state,
                     actions = workoutBuilderActions,

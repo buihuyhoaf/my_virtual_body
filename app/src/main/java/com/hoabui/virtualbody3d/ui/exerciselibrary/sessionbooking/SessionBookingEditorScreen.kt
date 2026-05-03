@@ -34,14 +34,13 @@ import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.AddExerciseSuccessDialog
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.CartThumbnailRow
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.LongSessionWarningDialog
-import com.hoabui.virtualbody3d.ui.exerciselibrary.model.rememberActiveExerciseInfoFromLibraryState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.model.rememberCartItemsFromLibraryState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.AddExerciseSuccessSummary
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingWorkflowPhase
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.isCartDraftValidForSessionConfirm
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibraryIntent
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibraryUiEffect
+import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.AddExerciseSuccessSummary
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiEffect
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.rememberActiveExerciseInfoFromLibraryState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.rememberCartItemsFromLibraryState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.sessionbooking.SessionBookingWorkflowPhase
+import com.hoabui.virtualbody3d.ui.exerciselibrary.util.isCartDraftValidForSessionConfirm
 import com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel.ExerciseLibraryViewModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.SessionBookingActions
 import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.WorkoutBuilderActions
@@ -70,74 +69,70 @@ fun SessionBookingEditorScreen(
         }
     }
 
-    LaunchedEffect(data?.sessionBooking?.input) {
-        if (data != null && data.sessionBooking.input == null) {
-            viewModel.onEvent(ExerciseLibraryIntent.OpenSessionBooking)
+    LaunchedEffect(data?.sessionBookingInput) {
+        if (data != null && data.sessionBookingInput == null) {
+            viewModel.openSessionBooking()
         }
     }
 
     BackHandler {
-        viewModel.onEvent(ExerciseLibraryIntent.DismissSessionBooking)
+        viewModel.dismissSessionBooking()
         onBack()
     }
 
     val sessionBookingActions = remember(viewModel) {
         SessionBookingActions(
-            onOpenSessionBooking = { viewModel.onEvent(ExerciseLibraryIntent.OpenSessionBooking) },
-            onDismissSessionBooking = { viewModel.onEvent(ExerciseLibraryIntent.DismissSessionBooking) },
+            onOpenSessionBooking = { viewModel.openSessionBooking() },
+            onDismissSessionBooking = { viewModel.dismissSessionBooking() },
             onBookingDateSelected = {
-                viewModel.onEvent(ExerciseLibraryIntent.BookingDateSelected(it))
+                viewModel.onBookingDateSelected(it)
             },
             onBookingLocationSelected = {
-                viewModel.onEvent(ExerciseLibraryIntent.BookingLocationSelected(it))
+                viewModel.onBookingLocationSelected(it)
             },
             onBookingSlotToggled = {
-                viewModel.onEvent(ExerciseLibraryIntent.BookingSlotToggled(it))
+                viewModel.onBookingSlotToggled(it)
             },
             onBookingClearTimeSelection = {
-                viewModel.onEvent(ExerciseLibraryIntent.BookingClearTimeSelection)
+                viewModel.onBookingClearTimeSelection()
             },
             onConfirmSessionBooking = {
-                viewModel.onEvent(ExerciseLibraryIntent.ConfirmSessionBooking)
+                viewModel.confirmSessionBooking()
             },
-            onLongSessionEdit = { viewModel.onEvent(ExerciseLibraryIntent.LongSessionEdit) },
+            onLongSessionEdit = { viewModel.onLongSessionEdit() },
             onLongSessionProceedAnyway = {
-                viewModel.onEvent(ExerciseLibraryIntent.LongSessionProceedAnyway)
+                viewModel.onLongSessionProceedAnyway()
             },
             onDismissAddExerciseSuccess = {
-                viewModel.onEvent(ExerciseLibraryIntent.DismissAddExerciseSuccess)
+                viewModel.dismissAddExerciseSuccess()
             },
         )
     }
     val workoutBuilderActions = remember(viewModel) {
         WorkoutBuilderActions(
             onSelectCartItem = {
-                viewModel.onEvent(ExerciseLibraryIntent.SelectCartItem(it))
+                viewModel.selectCartItem(it)
             },
             onRemoveCartItem = {
-                viewModel.onEvent(ExerciseLibraryIntent.RemoveCartItem(it))
+                viewModel.removeCartItem(it)
             },
-            onClearCart = { viewModel.onEvent(ExerciseLibraryIntent.ClearCart) },
+            onClearCart = { viewModel.clearCart() },
             onAddToSession = {},
-            onNavigateToSessionBookingEditor = {},
+            onNavigateToWorkoutCalendar = {},
             onStepCartField = { exerciseId, setIndex, field, delta ->
-                viewModel.onEvent(
-                    ExerciseLibraryIntent.StepCartField(
-                        exerciseId = exerciseId,
-                        setIndex = setIndex,
-                        field = field,
-                        delta = delta,
-                    ),
+                viewModel.stepCartField(
+                    exerciseId = exerciseId,
+                    setIndex = setIndex,
+                    field = field,
+                    delta = delta,
                 )
             },
             onSetCartFieldManual = { exerciseId, setIndex, field, value ->
-                viewModel.onEvent(
-                    ExerciseLibraryIntent.SetCartFieldManual(
-                        exerciseId = exerciseId,
-                        setIndex = setIndex,
-                        field = field,
-                        value = value,
-                    ),
+                viewModel.setCartFieldManual(
+                    exerciseId = exerciseId,
+                    setIndex = setIndex,
+                    field = field,
+                    value = value,
                 )
             },
             onToggleCartExpanded = {},
@@ -153,7 +148,7 @@ fun SessionBookingEditorScreen(
             addSuccessSummary = addSuccessSummary,
             onDismissAddSuccess = { addSuccessSummary = null },
             onBack = {
-                viewModel.onEvent(ExerciseLibraryIntent.DismissSessionBooking)
+                viewModel.dismissSessionBooking()
                 onBack()
             },
             onNavigateToWorkoutCalendar = onNavigateToWorkoutCalendar,
@@ -180,8 +175,8 @@ private fun SessionBookingEditorScreenContent(
     val cartItems = rememberCartItemsFromLibraryState(data)
     val activeExerciseInfo = rememberActiveExerciseInfoFromLibraryState(data, cartItems)
     val scroll = rememberScrollState()
-    val bookingUi = data.sessionBooking.uiModel
-    val input = data.sessionBooking.input
+    val bookingUi = data.sessionBookingUiModel
+    val input = data.sessionBookingInput
     val confirmEnabled = data.isCartDraftValidForSessionConfirm() &&
         (bookingUi?.isBookingConfirmEnabled == true) &&
         (input?.isConfirming != true)
@@ -239,7 +234,7 @@ private fun SessionBookingEditorScreenContent(
             ) {
                 CartThumbnailRow(
                     cartItems = cartItems,
-                    activeExerciseId = data.cart.activeExerciseId,
+                    activeExerciseId = data.activeExerciseId,
                     onSelectCartItem = workoutBuilderActions.onSelectCartItem,
                     onRemoveCartItem = workoutBuilderActions.onRemoveCartItem,
                     onClearAll = workoutBuilderActions.onClearCart,
@@ -261,7 +256,7 @@ private fun SessionBookingEditorScreenContent(
                 if (bookingUi != null) {
                     SessionBookingEditorOrganism(
                         booking = bookingUi,
-                        showSlotConflict = data.sessionBooking.workflowPhase is SessionBookingWorkflowPhase.SlotConflict,
+                        showSlotConflict = data.sessionBookingWorkflowPhase is SessionBookingWorkflowPhase.SlotConflict,
                         onDateMillisSelected = sessionBookingActions.onBookingDateSelected,
                         onLocationSelected = sessionBookingActions.onBookingLocationSelected,
                         onSlotToggled = sessionBookingActions.onBookingSlotToggled,
@@ -270,7 +265,7 @@ private fun SessionBookingEditorScreenContent(
                     )
                 }
             }
-            if (data.sessionBooking.workflowPhase is SessionBookingWorkflowPhase.AwaitingLongSessionAck) {
+            if (data.sessionBookingWorkflowPhase is SessionBookingWorkflowPhase.AwaitingLongSessionAck) {
                 LongSessionWarningDialog(
                     onDismissRequest = sessionBookingActions.onLongSessionEdit,
                     onEditSession = sessionBookingActions.onLongSessionEdit,

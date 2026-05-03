@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -47,7 +48,10 @@ fun ExerciseDashboardScreen(
         state = state,
         modifier = modifier,
         successContent = { outerMod, ui ->
-            GScaffold(modifier = outerMod) {
+            GScaffold(
+                modifier = outerMod,
+                contentWindowInsets = WindowInsets(0),
+            ) {
                 ExerciseDashboardLoadedContent(ui = ui, onNavigateToExerciseLibrary = onNavigateToExerciseLibrary)
             }
         },
@@ -139,7 +143,7 @@ private fun PreviewDashboardBody() {
             categories = DashboardCategoryTiles.categories,
             heatmap = ExerciseLibraryWeekStripUiState.Loading,
         )
-    GScaffold {
+    GScaffold(contentWindowInsets = WindowInsets(0)) {
         ExerciseDashboardLoadedContent(ui = ui, onNavigateToExerciseLibrary = {})
     }
 }

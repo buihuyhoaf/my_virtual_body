@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Exercise Library & session booking (English) -->
+    <string name="exercise_library_title">All exercises</string>
     <string name="exercise_library_focus_muscle_front_upper">Front upper</string>
     <string name="exercise_library_focus_muscle_back_upper">Back upper</string>
     <string name="exercise_library_focus_muscle_front_lower">Front lower</string>

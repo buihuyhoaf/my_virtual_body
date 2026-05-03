@@ -51,13 +51,13 @@ import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.internal.SelectionBarSections
-import com.hoabui.virtualbody3d.ui.exerciselibrary.model.ActiveExerciseInfo
-import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toCoilModel
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.CartSetField
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryChromeMode
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SetRowDraft
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.isCartDraftValidForSessionConfirm
+import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.ActiveExerciseInfo
+import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.CartSetField
+import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.SetRowDraft
+import com.hoabui.virtualbody3d.ui.exerciselibrary.catalog.toCoilModel
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryChromeMode
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.util.isCartDraftValidForSessionConfirm
 import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.WorkoutBuilderActions
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
@@ -549,22 +549,22 @@ fun ExerciseLibrarySelectionBar(
     actions: WorkoutBuilderActions,
     modifier: Modifier = Modifier,
 ) {
-    val cartItems = remember(libraryState.libraryList.sections, libraryState.cart.draftOrder) {
+    val cartItems = remember(libraryState.libraryList.sections, libraryState.draftOrder) {
         val byId = libraryState.libraryList.sections.asSequence().flatMap { it.items.asSequence() }
             .associateBy { it.id }
-        libraryState.cart.draftOrder.mapNotNull { byId[it] }
+        libraryState.draftOrder.mapNotNull { byId[it] }
     }
-    val isSelectionBarEditMode = libraryState.chrome.mode is ExerciseLibraryChromeMode.EditingScheduleRow
+    val isSelectionBarEditMode = libraryState.chromeMode is ExerciseLibraryChromeMode.EditingScheduleRow
     val isSelectionBarConfirmEnabled = libraryState.isCartDraftValidForSessionConfirm()
     val activeExerciseInfo by remember(
-        libraryState.cart.activeExerciseId,
-        libraryState.cart.itemDrafts,
+        libraryState.activeExerciseId,
+        libraryState.itemDrafts,
         libraryState.libraryList.exerciseMeasurementById,
         cartItems,
     ) {
         derivedStateOf {
-            libraryState.cart.activeExerciseId?.let { id ->
-                val draft = libraryState.cart.itemDrafts[id]
+            libraryState.activeExerciseId?.let { id ->
+                val draft = libraryState.itemDrafts[id]
                 val measurementMode = libraryState.libraryList.exerciseMeasurementById[id]
                     ?: ExerciseMeasurementMode.Strength
                 val estimatedCalories = draft?.let {
@@ -600,7 +600,7 @@ fun ExerciseLibrarySelectionBar(
     SelectionBarSections(
         cartItems = cartItems,
         activeExerciseInfo = activeExerciseInfo,
-        isCartExpanded = libraryState.cart.isCartExpanded,
+        isCartExpanded = libraryState.isCartExpanded,
         bookingEnabled = libraryState.libraryList.isAddToSessionEnabled,
         isSelectionBarEditMode = isSelectionBarEditMode,
         isSelectionBarConfirmEnabled = isSelectionBarConfirmEnabled,

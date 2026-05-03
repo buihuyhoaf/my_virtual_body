@@ -99,7 +99,10 @@ fun AppNavGraph(
                 val route = backStackEntry.toRoute<ExerciseLibraryRoute>()
                 ExerciseLibraryScreen(
                     viewModel = viewModel,
-                    onNavigateToSessionBookingEditor = { navController.navigate(SessionBookingEditorRoute) },
+                    onBack = { navController.popBackStack() },
+                    onNavigateToWorkoutCalendar = {
+                        navController.navigate(WorkoutCalendarRoute)
+                    },
                     scheduleRowIdToEdit = route.scheduleRowIdToEdit,
                     initialExerciseCategory = route.initialExerciseCategory,
                     initialBodyRegions = route.initialBodyRegions,
@@ -114,7 +117,8 @@ fun AppNavGraph(
                     viewModel = viewModel,
                     onBack = { navController.popBackStack() },
                     onNavigateToWorkoutCalendar = {
-                        val poppedToLibrary = navController.popBackStack<ExerciseLibraryRoute>(inclusive = false)
+                        val poppedToLibrary =
+                            navController.popBackStack<ExerciseLibraryRoute>(inclusive = false)
                         if (!poppedToLibrary) {
                             navController.popBackStack<ExerciseLibraryGraphRoute>(inclusive = false)
                         }
@@ -123,18 +127,27 @@ fun AppNavGraph(
                 )
             }
         }
-        composable<WorkoutCalendarRoute> {
-            val onWorkoutCalendarBack = back@{
-                if (navController.popBackStack<ExerciseLibraryRoute>(inclusive = false)) return@back
-                if (navController.popBackStack<ExerciseDashboardRoute>(inclusive = false)) return@back
-                if (navController.popBackStack<ExerciseLibraryGraphRoute>(inclusive = false)) return@back
-                navController.navigate(ExerciseLibraryGraphRoute) {
-                    popUpTo<WorkoutCalendarRoute> { inclusive = true }
-                    launchSingleTop = true
+        composable<WorkoutCalendarRoute> { backStackEntry ->
+            val exerciseGraphEntry =
+                remember(backStackEntry) {
+                    runCatching { navController.getBackStackEntry(ExerciseLibraryGraphRoute) }
+                        .getOrNull()
                 }
+            val exerciseLibraryViewModel: ExerciseLibraryViewModel =
+                if (exerciseGraphEntry != null) {
+                    hiltViewModel(exerciseGraphEntry)
+                } else {
+                    hiltViewModel(backStackEntry)
+                }
+            val onWorkoutCalendarBack = {
+                navController.popWorkoutCalendarOrFallback()
             }
             WorkoutCalendarScreen(
                 onBack = onWorkoutCalendarBack,
+                onNavigateToSessionBookingEditor = {
+                    navigateToSessionBookingFromWorkoutCalendar(navController)
+                },
+                exerciseLibraryViewModel = exerciseLibraryViewModel,
             )
         }
         composable<AddRoute> {
@@ -156,6 +169,26 @@ fun AppNavGraph(
             )
         }
     }
+}
+
+fun NavHostController.popWorkoutCalendarOrFallback() {
+    if (!popBackStack()) {
+        navigate(ExerciseLibraryGraphRoute) {
+            popUpTo<WorkoutCalendarRoute> { inclusive = true }
+            launchSingleTop = true
+        }
+    }
+}
+
+private fun navigateToSessionBookingFromWorkoutCalendar(navController: NavHostController) {
+    try {
+        navController.getBackStackEntry(ExerciseLibraryGraphRoute)
+    } catch (_: IllegalArgumentException) {
+        navController.navigate(ExerciseLibraryGraphRoute) {
+            launchSingleTop = true
+        }
+    }
+    navController.navigate(SessionBookingEditorRoute)
 }
 
 @Composable

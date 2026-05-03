@@ -74,8 +74,8 @@ import com.hoabui.virtualbody3d.ui.common_ui.atom.card.GCard
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.state.GStatePanel
-import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toCoilModel
-import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toExerciseLibraryCardImage
+import com.hoabui.virtualbody3d.ui.exerciselibrary.catalog.toCoilModel
+import com.hoabui.virtualbody3d.ui.exerciselibrary.catalog.toExerciseLibraryCardImage
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.toCaloriesVisualLevelColor
 import com.hoabui.virtualbody3d.ui.theme.tokens.GymToken

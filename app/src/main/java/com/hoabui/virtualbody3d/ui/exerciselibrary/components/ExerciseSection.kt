@@ -7,7 +7,7 @@ import androidx.compose.ui.res.stringResource
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseSectionCardRow
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseSectionUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibrarySectionRowUiModel
+import com.hoabui.virtualbody3d.ui.exerciselibrary.catalog.ExerciseLibrarySectionRowUiModel
 
 @Composable
 fun ExerciseSection(

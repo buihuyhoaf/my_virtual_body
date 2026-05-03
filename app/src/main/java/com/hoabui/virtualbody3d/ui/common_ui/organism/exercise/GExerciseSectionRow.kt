@@ -26,8 +26,8 @@ import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.CardSize
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCard
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
-import com.hoabui.virtualbody3d.ui.exerciselibrary.model.ExerciseLibraryCardImage
-import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toCoilModel
+import com.hoabui.virtualbody3d.ui.exerciselibrary.catalog.ExerciseLibraryCardImage
+import com.hoabui.virtualbody3d.ui.exerciselibrary.catalog.toCoilModel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
 
