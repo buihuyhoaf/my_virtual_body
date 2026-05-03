@@ -10,10 +10,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -34,29 +32,27 @@ import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
 import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
-import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseDetailDialog
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryCartBar
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryEmptyState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryFocusMusclesSection
-import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryWeeklyHeatmapCard
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySearchLayer
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySelectionBar
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseSection
+import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryChromeMode
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibraryIntent
 import com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel.ExerciseLibraryViewModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.ExerciseCatalogActions
-import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.GymMapChromeActions
 import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.WorkoutBuilderActions
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
+import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 
 private object ExerciseLibraryListContentTypes {
-    const val WeeklyHeatmap = "exercise_library_weekly_heatmap"
     const val RegionHeader = "exercise_library_region_header"
     const val RegionRow = "exercise_library_region_row"
     const val Empty = "exercise_library_empty"
@@ -65,12 +61,27 @@ private object ExerciseLibraryListContentTypes {
 @Composable
 fun ExerciseLibraryScreen(
     modifier: Modifier = Modifier,
-    onNavigateToWorkoutCalendar: () -> Unit,
     onNavigateToSessionBookingEditor: () -> Unit,
     scheduleRowIdToEdit: Long? = null,
+    initialExerciseCategory: String? = null,
+    initialBodyRegions: List<String>? = null,
     viewModel: ExerciseLibraryViewModel = hiltViewModel(),
 ) {
     val screenState by viewModel.state.collectAsStateWithLifecycle()
+    val filterAppliedKey =
+        "${initialExerciseCategory.orEmpty()}|${initialBodyRegions?.sorted()?.joinToString()}"
+    LaunchedEffect(filterAppliedKey, initialExerciseCategory, initialBodyRegions) {
+        if (!initialBodyRegions.isNullOrEmpty()) {
+            val regions = initialBodyRegions.map { BodyRegion.valueOf(it) }.toImmutableSet()
+            viewModel.onEvent(ExerciseLibraryIntent.SetInitialBodyRegionFilter(regions))
+        } else if (initialExerciseCategory != null) {
+            viewModel.onEvent(
+                ExerciseLibraryIntent.SetInitialExerciseCategoryFilter(
+                    ExerciseCategory.valueOf(initialExerciseCategory),
+                ),
+            )
+        }
+    }
     LaunchedEffect(scheduleRowIdToEdit) {
         val rowId = scheduleRowIdToEdit ?: return@LaunchedEffect
         viewModel.onEvent(ExerciseLibraryIntent.StartSelectionBarEditFromScheduleRow(rowId))
@@ -78,10 +89,7 @@ fun ExerciseLibraryScreen(
     val catalogActions = remember(viewModel) {
         ExerciseCatalogActions(
             onQueryChange = { viewModel.onEvent(ExerciseLibraryIntent.SetSearchQuery(it)) },
-            onExerciseClick = { viewModel.onEvent(ExerciseLibraryIntent.ExerciseClicked(it)) },
-            onLibraryListToggle = { viewModel.onEvent(ExerciseLibraryIntent.LibraryListToggle(it)) },
-            onDetailAddToCart = { viewModel.onEvent(ExerciseLibraryIntent.DetailAddToCart(it)) },
-            onClearExerciseDetail = { viewModel.onEvent(ExerciseLibraryIntent.ClearExerciseDetail) },
+            onCardTap = { viewModel.onEvent(ExerciseLibraryIntent.CardSelectionToggled(it)) },
         )
     }
     val workoutBuilderActions = remember(viewModel, onNavigateToSessionBookingEditor) {
@@ -122,16 +130,6 @@ fun ExerciseLibraryScreen(
             onCancelSelectionBarEdit = { viewModel.onEvent(ExerciseLibraryIntent.CancelSelectionBarEdit) },
         )
     }
-    val gymMapChromeActions = remember(viewModel, onNavigateToWorkoutCalendar) {
-        GymMapChromeActions(
-            onFocusStripQuadrantTap = { viewModel.onEvent(ExerciseLibraryIntent.FocusStripQuadrantTapped(it)) },
-            onNavigateToWorkoutCalendar = {
-                viewModel.onEvent(ExerciseLibraryIntent.DismissAddExerciseSuccess)
-                onNavigateToWorkoutCalendar()
-            },
-        )
-    }
-
     UiStateContent(
         state = screenState,
         modifier = modifier,
@@ -142,14 +140,7 @@ fun ExerciseLibraryScreen(
                     state = data,
                     catalogActions = catalogActions,
                     workoutBuilderActions = workoutBuilderActions,
-                    gymMapChromeActions = gymMapChromeActions,
                 )
-                data.libraryList.selectedExerciseForDetail?.let { detail ->
-                    ExerciseDetailDialog(
-                        detail = detail,
-                        onDismiss = catalogActions.onClearExerciseDetail,
-                    )
-                }
             }
         },
     )
@@ -161,11 +152,8 @@ fun ExerciseLibraryScreenContent(
     state: ExerciseLibraryUiState,
     catalogActions: ExerciseCatalogActions,
     workoutBuilderActions: WorkoutBuilderActions,
-    gymMapChromeActions: GymMapChromeActions,
 ) {
     val token = GymTheme.token
-    val listToggleAddCd = stringResource(R.string.exercise_library_list_toggle_add_cd)
-    val listToggleRemoveCd = stringResource(R.string.exercise_library_cart_remove_item_cd)
     val fadeSpec = tween<Float>(
         durationMillis = token.motion.duration.standard,
         easing = token.motion.easing.standard,
@@ -194,7 +182,6 @@ fun ExerciseLibraryScreenContent(
     val cartVisible = state.cart.itemDrafts.isNotEmpty()
     val cartCollapsedInset = token.bodyAnalysis.exerciseLibrarySelectionBarCollapsedListBottomInset
     val listBottomPadding = if (cartVisible) cartCollapsedInset else token.spacing.none
-    val bodyTok = token.bodyAnalysis
     val cartItems = remember(state.libraryList.sections, state.cart.draftOrder) {
         val byId = state.libraryList.sections.asSequence().flatMap { it.items.asSequence() }
             .associateBy { it.id }
@@ -216,31 +203,6 @@ fun ExerciseLibraryScreenContent(
                     actions = catalogActions,
                     modifier = Modifier.fillMaxWidth(),
                 )
-            }
-            // Heatmap and focus-muscle quadrants (sticky)
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = token.spacing.md,
-                        end = token.spacing.md,
-                        top = token.spacing.xs,
-                        bottom = bodyTok.exerciseLibrarySearchToSummaryGap,
-                    ),
-            ) {
-                ExerciseLibraryWeeklyHeatmapCard(
-                    state = state.weeklyHeatmap,
-                    onClick = gymMapChromeActions.onNavigateToWorkoutCalendar,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Spacer(modifier = Modifier.height(token.spacing.md))
-                    ExerciseLibraryFocusMusclesSection(
-                        imageNames = state.focusMusclesStrip,
-                        onQuadrantClick = gymMapChromeActions.onFocusStripQuadrantTap,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
             }
             Box(
                 modifier = Modifier
@@ -298,10 +260,7 @@ fun ExerciseLibraryScreenContent(
                                     modifier = Modifier
                                         .padding(horizontal = token.spacing.md),
                                     section = section,
-                                    onNavigateDetail = catalogActions.onExerciseClick,
-                                    onToggleSelection = catalogActions.onLibraryListToggle,
-                                    toggleAddContentDescription = listToggleAddCd,
-                                    toggleRemoveContentDescription = listToggleRemoveCd,
+                                    onCardTap = catalogActions.onCardTap,
                                 )
                             }
                         }

@@ -30,4 +30,14 @@ object PrimitiveAlphaTokens {
     const val IMAGE_CARD_SELECTED_TINT = 0.08f
     /** Weaker in-cart (non-active) tint on exercise library tiles. */
     const val IMAGE_CARD_WEAK_SELECTION_TINT = 0.04f
+    /** Primary tint over exercise library card image when in cart (active or inactive). */
+    const val EXERCISE_LIBRARY_CARD_CART_OVERLAY_TINT = 0.18f
+    /** Bottom stop of the in-image title scrim (black overlay, ~0x80 over image). */
+    const val EXERCISE_LIBRARY_CARD_IMAGE_SCRIM_BOTTOM_STOP = 0.5f
+    /** Transparent alpha for gradient / overlay starts. */
+    const val OVERLAY_ALPHA_TRANSPARENT = 0f
+    /** Selection scale for the active cart line on exercise library cards. */
+    const val EXERCISE_LIBRARY_CARD_SELECTED_GRAPHICS_SCALE = 1.05f
+    /** Identity scale combined with press feedback on image cards. */
+    const val GRAPHICS_SCALE_NEUTRAL = 1f
 }

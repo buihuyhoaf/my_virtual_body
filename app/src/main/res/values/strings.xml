@@ -188,6 +188,22 @@
     <string name="exercise_category_stretching">Kéo giãn</string>
     <string name="exercise_category_cardio">Cardio</string>
     <string name="exercise_library_empty_title">Không tìm thấy bài tập</string>
+
+    <!-- Exercise Dashboard -->
+    <string name="exercise_dashboard_last_session">Buổi gần nhất</string>
+    <string name="exercise_dashboard_date_today">Hôm nay</string>
+    <string name="exercise_dashboard_date_yesterday">Hôm qua</string>
+    <string name="exercise_dashboard_no_session">Chưa có buổi tập</string>
+    <string name="exercise_dashboard_metric_kcal">kcal</string>
+    <string name="exercise_dashboard_metric_min">phút</string>
+    <string name="exercise_dashboard_coach_default">Hôm nay tập gì?</string>
+    <string name="exercise_dashboard_coach_morning">Khởi động nhẹ rồi vào guồng nhé.</string>
+    <string name="exercise_dashboard_coach_afternoon">Buổi chiều rồi — chọn một nhóm và bắt đầu.</string>
+    <string name="exercise_dashboard_coach_evening">Cuối ngày rồi — một buổi mobility có thể hợp.</string>
+    <string name="exercise_dashboard_region_upper">Thân trên</string>
+    <string name="exercise_dashboard_region_lower">Chân</string>
+    <string name="exercise_dashboard_region_core">Core / bụng</string>
+
     <string name="exercise_library_empty_message">Thử đổi bộ lọc hoặc từ khóa tìm kiếm.</string>
     <string name="exercise_library_card_subtitle_fallback">—</string>
     <string name="exercise_library_card_region_equipment">%1$s · %2$s</string>

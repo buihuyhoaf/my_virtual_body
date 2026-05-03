@@ -1,46 +1,34 @@
 package com.hoabui.virtualbody3d.ui.common_ui.organism.exercise
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.semantics.Role
-import androidx.compose.runtime.Immutable
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.BorderStroke
+import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCaloriesVisualLevel
+import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.CardSize
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCard
-import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCardBadgeChrome
-import com.hoabui.virtualbody3d.ui.common_ui.molecule.card.GImageCardHolisticCapsuleLabel
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.ExerciseLibraryCardImage
 import com.hoabui.virtualbody3d.ui.exerciselibrary.model.toCoilModel
-import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.ui.common_ui.atom.icon.GIcon
-import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
-import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCaloriesVisualLevel
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
-import com.hoabui.virtualbody3d.ui.theme.toCaloriesVisualLevelColor
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
 
 @Immutable
@@ -66,73 +54,21 @@ data class GExerciseSectionUiModel(
     val items: List<GExerciseCardUiModel>,
 )
 
-@Composable
-private fun ExerciseLibraryListCornerToggleSticker(
-    inCart: Boolean,
-    toggleAddContentDescription: String,
-    toggleRemoveContentDescription: String,
-    onClick: () -> Unit,
-) {
-    val token = GymTheme.token
-    Box(
-        modifier = Modifier
-            .size(token.bodyAnalysis.exerciseLibraryCornerStickerTouchTargetSize)
-            .clickable(
-                role = Role.Button,
-                onClick = onClick,
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(token.bodyAnalysis.exerciseLibraryCornerStickerDiameter)
-                .clip(CircleShape)
-                .background(
-                    token.colors.surfaceSubtle.copy(alpha = PrimitiveAlphaTokens.SUBTLE_LAYER),
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            GIcon(
-                imageVector = if (inCart) {
-                    ExerciseLibraryPhosphorIcons.listToggleInCart
-                } else {
-                    ExerciseLibraryPhosphorIcons.listToggleNotInCart
-                },
-                contentDescription = if (inCart) {
-                    toggleRemoveContentDescription
-                } else {
-                    toggleAddContentDescription
-                },
-                modifier = Modifier.size(token.bodyAnalysis.exerciseLibraryCornerActionGlyphSize),
-                tint = token.colors.primary,
-            )
-        }
-    }
-}
-
 /**
  * Horizontal row of exercise cards only (no section title). Use with a sticky or inline header when embedding in a parent list.
  *
- * @param onNavigateDetail Opens exercise detail / info (body tap on image and text only; no cart mutation).
- * @param onToggleSelection When non-null, shows the top-end add/check control; invokes symmetric cart toggle only.
- * @param toggleAddContentDescription Accessibility label when the exercise is not in the cart.
- * @param toggleRemoveContentDescription Accessibility label when the exercise is already in the cart.
+ * @param onCardTap Single tap toggles add/remove from cart.
  */
 @Composable
 fun GExerciseSectionCardRow(
     section: GExerciseSectionUiModel,
     modifier: Modifier = Modifier,
-    onNavigateDetail: (exerciseId: String) -> Unit = {},
-    onToggleSelection: ((exerciseId: String) -> Unit)? = null,
-    toggleAddContentDescription: String = "",
-    toggleRemoveContentDescription: String = "",
-    badgeContent: (@Composable (GExerciseCardUiModel) -> Unit)? = null,
+    onCardTap: (exerciseId: String) -> Unit = {},
 ) {
     val token = GymTheme.token
     val resourceProvider = LocalResourceProvider.current
     val hapticFeedback = LocalHapticFeedback.current
-    val latestOnNavigateDetail = rememberUpdatedState(onNavigateDetail)
-    val latestOnToggleSelection = rememberUpdatedState(onToggleSelection)
+    val libraryTint = token.bodyAnalysis.exerciseLibraryCardSelectionOverlayTintAlpha
     LazyRow(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(token.spacing.xs),
@@ -140,79 +76,79 @@ fun GExerciseSectionCardRow(
     ) {
         items(section.items, key = { it.id }, contentType = { _ -> "exercise_card" }) { item ->
             val coilModel = remember(item.image) { item.image.toCoilModel(resourceProvider) }
-            val chrome = if (badgeContent != null) {
-                GImageCardBadgeChrome.None
-            } else {
-                GImageCardBadgeChrome.Holistic
+            val scrimBottomAlpha = token.bodyAnalysis.exerciseLibraryCardImageBottomScrimBottomAlpha
+            val titleStyle = remember(token.typography.labelMedium) {
+                token.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
             }
-            val badgeSlot: (@Composable BoxScope.() -> Unit)? = if (badgeContent != null) {
-                { badgeContent.invoke(item) }
-            } else if (item.badgeText != null) {
-                val badgeText = item.badgeText
-                { GImageCardHolisticCapsuleLabel(badgeText) }
-            } else {
-                null
-            }
-            val onOpenDetail = remember(item.id) {
-                { latestOnNavigateDetail.value(item.id) }
-            }
-            val inCart = item.isSelected || item.isInCartInactive
-            val uptoPrefix = stringResource(R.string.exercise_library_card_upto_prefix)
-            val uptoSuffix = stringResource(R.string.exercise_library_card_upto_suffix)
-            val secondLineAnnotated = if (
-                item.libraryUptoKcal != null && item.subtitleCaloriesVisualLevel != null
+            val selectionBorder = remember(
+                token.colors.primary,
+                token.bodyAnalysis.exerciseLibraryCardSelectedBorderWidth,
             ) {
-                val kcal = item.libraryUptoKcal
-                val level = item.subtitleCaloriesVisualLevel
-                val muted =
-                    token.colors.textSecondary.copy(alpha = PrimitiveAlphaTokens.IMAGE_CARD_OVERLAY_MEDIUM)
-                val highlight = level.toCaloriesVisualLevelColor(token)
-                buildAnnotatedString {
-                    withStyle(SpanStyle(color = muted)) { append(uptoPrefix) }
-                    withStyle(SpanStyle(color = highlight)) { append(kcal.toString()) }
-                    withStyle(SpanStyle(color = muted)) { append(uptoSuffix) }
-                }
-            } else {
-                null
+                BorderStroke(
+                    token.bodyAnalysis.exerciseLibraryCardSelectedBorderWidth,
+                    token.colors.primary,
+                )
             }
-            val secondLineColor =
-                if (secondLineAnnotated == null) {
-                    item.subtitleCaloriesVisualLevel?.toCaloriesVisualLevelColor(token)
-                } else {
-                    null
-                }
-            val imageOverlayTop: (@Composable BoxScope.() -> Unit)? =
-                if (onToggleSelection != null) {
-                    {
-                        ExerciseLibraryListCornerToggleSticker(
-                            inCart = inCart,
-                            toggleAddContentDescription = toggleAddContentDescription,
-                            toggleRemoveContentDescription = toggleRemoveContentDescription,
-                            onClick = {
-                                hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
-                                latestOnToggleSelection.value?.invoke(item.id)
-                            },
-                        )
-                    }
-                } else {
-                    null
-                }
+            val selectionScale = if (item.isSelected) {
+                token.bodyAnalysis.exerciseLibraryCardSelectedGraphicsScale
+            } else {
+                PrimitiveAlphaTokens.GRAPHICS_SCALE_NEUTRAL
+            }
+            val showWeak = item.isInCartInactive && !item.isSelected
             GImageCard(
                 model = coilModel,
                 contentDescription = item.title,
-                firstLineText = item.title,
-                secondLineText = item.subtitle,
-                secondLineAnnotatedText = secondLineAnnotated,
-                secondLineColor = secondLineColor,
+                firstLineText = "",
+                secondLineText = "",
+                secondLineAnnotatedText = null,
+                secondLineColor = null,
                 cardSize = CardSize.Small,
-                badge = badgeSlot,
-                badgeChrome = chrome,
-                imageOverlayTopEnd = imageOverlayTop,
-                imageOverlayTopEndEdgeInset = false,
+                badge = null,
+                imageOverlayBottomFullWidth = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                Brush.verticalGradient(
+                                    colorStops = arrayOf(
+                                        0f to Color.Black.copy(alpha = PrimitiveAlphaTokens.OVERLAY_ALPHA_TRANSPARENT),
+                                        1f to Color.Black.copy(alpha = scrimBottomAlpha),
+                                    ),
+                                ),
+                            )
+                            .padding(
+                                horizontal = token.spacing.xs,
+                                vertical = token.spacing.xs,
+                            ),
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(token.spacing.xxxs),
+                        ) {
+                            GText(
+                                text = item.title,
+                                style = titleStyle,
+                                color = token.colors.surface,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                },
+                imageOverlayTopEnd = null,
                 reserveExerciseLibraryTextEndInset = false,
+                showTextSection = false,
+                selectionScale = selectionScale,
+                selectionBorderStroke = if (item.isSelected) selectionBorder else null,
+                weakSelectionBorderless = showWeak,
+                selectionTintAlpha = if (item.isSelected) libraryTint else null,
+                weakSelectionTintAlpha = if (showWeak) libraryTint else null,
                 selectionHighlight = item.isSelected,
-                weakSelectionHighlight = item.isInCartInactive,
-                onClick = onOpenDetail,
+                weakSelectionHighlight = showWeak,
+                onClick = {
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
+                    onCardTap(item.id)
+                },
             )
         }
     }
@@ -222,11 +158,7 @@ fun GExerciseSectionCardRow(
 fun GExerciseSectionRow(
     section: GExerciseSectionUiModel,
     modifier: Modifier = Modifier,
-    onNavigateDetail: (exerciseId: String) -> Unit = {},
-    onToggleSelection: ((exerciseId: String) -> Unit)? = null,
-    toggleAddContentDescription: String = "",
-    toggleRemoveContentDescription: String = "",
-    badgeContent: (@Composable (GExerciseCardUiModel) -> Unit)? = null,
+    onCardTap: (exerciseId: String) -> Unit = {},
 ) {
     val token = GymTheme.token
     Column(
@@ -236,11 +168,7 @@ fun GExerciseSectionRow(
         GSectionHeader(title = section.title)
         GExerciseSectionCardRow(
             section = section,
-            onNavigateDetail = onNavigateDetail,
-            onToggleSelection = onToggleSelection,
-            toggleAddContentDescription = toggleAddContentDescription,
-            toggleRemoveContentDescription = toggleRemoveContentDescription,
-            badgeContent = badgeContent,
+            onCardTap = onCardTap,
         )
     }
 }

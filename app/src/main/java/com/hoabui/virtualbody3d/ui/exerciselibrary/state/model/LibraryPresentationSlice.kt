@@ -14,6 +14,5 @@ import kotlinx.collections.immutable.persistentMapOf
 data class LibraryPresentationSlice(
     val sections: ImmutableList<ExerciseLibrarySectionRowUiModel> = persistentListOf(),
     val exerciseMeasurementById: ImmutableMap<String, ExerciseMeasurementMode> = persistentMapOf(),
-    val selectedExerciseForDetail: ExerciseDetailSheetUiModel? = null,
     val isAddToSessionEnabled: Boolean = false,
 )

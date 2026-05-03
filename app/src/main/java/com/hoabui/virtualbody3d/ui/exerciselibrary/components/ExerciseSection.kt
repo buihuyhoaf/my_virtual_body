@@ -13,10 +13,7 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibrarySe
 fun ExerciseSection(
     modifier: Modifier = Modifier,
     section: ExerciseLibrarySectionRowUiModel,
-    onNavigateDetail: (String) -> Unit = {},
-    onToggleSelection: ((String) -> Unit)? = null,
-    toggleAddContentDescription: String = "",
-    toggleRemoveContentDescription: String = "",
+    onCardTap: (String) -> Unit = {},
 ) {
     val regionLabel = stringResource(ExerciseDisplayResources.bodyRegionResId(section.bodyRegion))
     val uiSection = remember(section.bodyRegion, section.items, regionLabel) {
@@ -29,9 +26,6 @@ fun ExerciseSection(
     GExerciseSectionCardRow(
         section = uiSection,
         modifier = modifier,
-        onNavigateDetail = onNavigateDetail,
-        onToggleSelection = onToggleSelection,
-        toggleAddContentDescription = toggleAddContentDescription,
-        toggleRemoveContentDescription = toggleRemoveContentDescription,
+        onCardTap = onCardTap,
     )
 }

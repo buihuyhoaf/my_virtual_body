@@ -149,10 +149,14 @@ private fun resolveCardSizeStyle(cardSize: CardSize): CardSizeStyle {
     }
 }
 
-private fun Modifier.pressScale(interactionSource: MutableInteractionSource, scale: Float): Modifier =
+private fun Modifier.cardPressAndSelectionScale(
+    pressScale: Float,
+    selectionScale: Float,
+): Modifier =
     this.graphicsLayer {
-        scaleX = scale
-        scaleY = scale
+        val s = selectionScale * pressScale
+        scaleX = s
+        scaleY = s
     }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -168,8 +172,13 @@ private fun Modifier.pressScale(interactionSource: MutableInteractionSource, sca
  * @param trailingOverlayEnd Optional overlay on the **whole** card [BoxScope]; caller sets alignment (e.g. [Alignment.TopEnd] or [Alignment.BottomEnd]).
  * @param reserveExerciseLibraryTextEndInset When `true` and [cardSize] is [CardSize.ExerciseLibraryTile], reserves right padding on the text row for a **bottom-end** overlay. Use `false` for **top-end** actions so titles use full width.
  *
- * @param selectionHighlight When `true`, uses primary border and subtle elevation for selected state.
- * @param weakSelectionHighlight When `true` (and selection is not strong), uses a softer border/tint for in-cart items.
+ * @param imageOverlayBottomFullWidth Optional overlay pinned to the bottom of the image, full width (e.g. gradient scrim + title).
+ * @param showTextSection When `false`, only the image area is shown; card height collapses to [imageSlotHeight].
+ * @param selectionScale Persistent scale when [selectionHighlight] (e.g. 1.05); multiplied with press feedback.
+ * @param selectionBorderStroke When non-null and [selectionHighlight], used instead of the default primary border.
+ * @param weakSelectionBorderless When `true` with [weakSelectionHighlight], uses the default subtle border (no in-cart ring).
+ * @param selectionTintAlpha When non-null, overrides alpha for the strong selection primary overlay.
+ * @param weakSelectionTintAlpha When non-null, overrides alpha for the weak selection primary overlay.
  */
 @Composable
 fun GImageCard(
@@ -188,6 +197,8 @@ fun GImageCard(
     cardSize: CardSize = CardSize.Medium,
     badge: (@Composable BoxScope.() -> Unit)? = null,
     badgeChrome: GImageCardBadgeChrome = GImageCardBadgeChrome.Holistic,
+    /** Optional overlay on the image bottom, full width; drawn above the image, below top badges. */
+    imageOverlayBottomFullWidth: (@Composable BoxScope.() -> Unit)? = null,
     /** Optional overlay on the image (e.g. bottom-end quick action); drawn above the image, below badge hit-testing order depends on declaration order. */
     imageOverlayEnd: (@Composable BoxScope.() -> Unit)? = null,
     /** Optional overlay on the image top-trailing corner (e.g. library list toggle). Composed after [badge] so it wins z-order in that corner. */
@@ -201,6 +212,12 @@ fun GImageCard(
     trailingOverlayEnd: (@Composable BoxScope.() -> Unit)? = null,
     reserveExerciseLibraryTextEndInset: Boolean = false,
     textSectionLeading: (@Composable RowScope.() -> Unit)? = null,
+    showTextSection: Boolean = true,
+    selectionScale: Float = 1f,
+    selectionBorderStroke: BorderStroke? = null,
+    weakSelectionBorderless: Boolean = false,
+    selectionTintAlpha: Float? = null,
+    weakSelectionTintAlpha: Float? = null,
     selectionHighlight: Boolean = false,
     weakSelectionHighlight: Boolean = false,
     onClick: (() -> Unit)? = null,
@@ -224,19 +241,25 @@ fun GImageCard(
 
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
+    val pressScaleAnimated by animateFloatAsState(
         targetValue = if (isPressed && onClick != null) 0.96f else 1f,
         label = "g_image_card_scale",
     )
+    val pressScaleForModifier = if (onClick != null) pressScaleAnimated else 1f
+
+    val effectiveCardHeight = if (showTextSection) cardHeight else imageSlotHeight
 
     val cardModifier = modifier
         .width(cardWidth)
-        .height(cardHeight)
-        .pressScale(interactionSource, scale)
+        .height(effectiveCardHeight)
+        .cardPressAndSelectionScale(pressScaleForModifier, selectionScale)
 
     val cardElevation = if (selectionHighlight) token.elevation.level1 else token.elevation.level0
     val borderStroke = when {
-        selectionHighlight -> BorderStroke(token.borderWidth.thin, token.colors.primary)
+        selectionHighlight ->
+            selectionBorderStroke ?: BorderStroke(token.borderWidth.thin, token.colors.primary)
+        weakSelectionHighlight && weakSelectionBorderless ->
+            BorderStroke(token.borderWidth.hairline, token.colors.borderSubtle)
         weakSelectionHighlight -> BorderStroke(token.borderWidth.thin, token.colors.outlineSoft)
         else -> BorderStroke(token.borderWidth.hairline, token.colors.borderSubtle)
     }
@@ -268,14 +291,18 @@ fun GImageCard(
                     secondLineColor = secondLineColor,
                     badge = badge,
                     badgeChrome = badgeChrome,
+                    imageOverlayBottomFullWidth = imageOverlayBottomFullWidth,
                     imageOverlayEnd = imageOverlayEnd,
                     imageOverlayTopEnd = imageOverlayTopEnd,
                     imageOverlayTopEndEdgeInset = imageOverlayTopEndEdgeInset,
                     trailingOverlayEnd = trailingOverlayEnd,
                     reserveExerciseLibraryTextEndInset = reserveExerciseLibraryTextEndInset,
                     textSectionLeading = textSectionLeading,
+                    showTextSection = showTextSection,
                     selectionHighlight = selectionHighlight,
                     weakSelectionHighlight = weakSelectionHighlight,
+                    selectionTintAlpha = selectionTintAlpha,
+                    weakSelectionTintAlpha = weakSelectionTintAlpha,
                 )
             }
         }
@@ -303,14 +330,18 @@ fun GImageCard(
                     secondLineColor = secondLineColor,
                     badge = badge,
                     badgeChrome = badgeChrome,
+                    imageOverlayBottomFullWidth = imageOverlayBottomFullWidth,
                     imageOverlayEnd = imageOverlayEnd,
                     imageOverlayTopEnd = imageOverlayTopEnd,
                     imageOverlayTopEndEdgeInset = imageOverlayTopEndEdgeInset,
                     trailingOverlayEnd = trailingOverlayEnd,
                     reserveExerciseLibraryTextEndInset = reserveExerciseLibraryTextEndInset,
                     textSectionLeading = textSectionLeading,
+                    showTextSection = showTextSection,
                     selectionHighlight = selectionHighlight,
                     weakSelectionHighlight = weakSelectionHighlight,
+                    selectionTintAlpha = selectionTintAlpha,
+                    weakSelectionTintAlpha = weakSelectionTintAlpha,
                 )
             }
         }
@@ -332,16 +363,22 @@ private fun GImageCardStack(
     secondLineColor: Color?,
     badge: (@Composable BoxScope.() -> Unit)?,
     badgeChrome: GImageCardBadgeChrome,
+    imageOverlayBottomFullWidth: (@Composable BoxScope.() -> Unit)?,
     imageOverlayEnd: (@Composable BoxScope.() -> Unit)?,
     imageOverlayTopEnd: (@Composable BoxScope.() -> Unit)?,
     imageOverlayTopEndEdgeInset: Boolean,
     trailingOverlayEnd: (@Composable BoxScope.() -> Unit)?,
     reserveExerciseLibraryTextEndInset: Boolean,
     textSectionLeading: (@Composable RowScope.() -> Unit)?,
+    showTextSection: Boolean,
     selectionHighlight: Boolean,
     weakSelectionHighlight: Boolean,
+    selectionTintAlpha: Float?,
+    weakSelectionTintAlpha: Float?,
 ) {
     val token = GymTheme.token
+    val strongTint = selectionTintAlpha ?: token.bodyAnalysis.gImageCardSelectedSurfaceTintAlpha
+    val weakTint = weakSelectionTintAlpha ?: token.bodyAnalysis.gImageCardWeakSelectionSurfaceTintAlpha
     val reserveQuickAddEndInset =
         trailingOverlayEnd != null &&
             cardSize == CardSize.ExerciseLibraryTile &&
@@ -352,9 +389,7 @@ private fun GImageCardStack(
                 Modifier
                     .fillMaxSize()
                     .background(
-                        color = token.colors.primary.copy(
-                            alpha = token.bodyAnalysis.gImageCardSelectedSurfaceTintAlpha,
-                        ),
+                        color = token.colors.primary.copy(alpha = strongTint),
                     ),
             )
         } else if (weakSelectionHighlight) {
@@ -362,9 +397,7 @@ private fun GImageCardStack(
                 Modifier
                     .fillMaxSize()
                     .background(
-                        color = token.colors.primary.copy(
-                            alpha = token.bodyAnalysis.gImageCardWeakSelectionSurfaceTintAlpha,
-                        ),
+                        color = token.colors.primary.copy(alpha = weakTint),
                     ),
             )
         }
@@ -382,11 +415,13 @@ private fun GImageCardStack(
             secondLineColor = secondLineColor,
             badge = badge,
             badgeChrome = badgeChrome,
+            imageOverlayBottomFullWidth = imageOverlayBottomFullWidth,
             imageOverlayEnd = imageOverlayEnd,
             imageOverlayTopEnd = imageOverlayTopEnd,
             imageOverlayTopEndEdgeInset = imageOverlayTopEndEdgeInset,
             textSectionLeading = textSectionLeading,
             reserveQuickAddEndInset = reserveQuickAddEndInset,
+            showTextSection = showTextSection,
         )
         trailingOverlayEnd?.invoke(this@Box)
     }
@@ -407,11 +442,13 @@ private fun GImageCardContent(
     secondLineColor: Color?,
     badge: (@Composable BoxScope.() -> Unit)?,
     badgeChrome: GImageCardBadgeChrome,
+    imageOverlayBottomFullWidth: (@Composable BoxScope.() -> Unit)?,
     imageOverlayEnd: (@Composable BoxScope.() -> Unit)?,
     imageOverlayTopEnd: (@Composable BoxScope.() -> Unit)?,
     imageOverlayTopEndEdgeInset: Boolean,
     textSectionLeading: (@Composable RowScope.() -> Unit)?,
     reserveQuickAddEndInset: Boolean,
+    showTextSection: Boolean,
 ) {
     val token = GymTheme.token
     val isLibraryTile = cardSize == CardSize.ExerciseLibraryTile
@@ -430,12 +467,17 @@ private fun GImageCardContent(
         token.spacing.none
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(imageSlotHeight),
-        ) {
+    val imageBoxModifier = if (showTextSection) {
+        Modifier
+            .fillMaxWidth()
+            .height(imageSlotHeight)
+    } else {
+        Modifier.fillMaxSize()
+    }
+
+    @Composable
+    fun ImageSlot() {
+        Box(modifier = imageBoxModifier) {
             AsyncImage(
                 model = model,
                 contentDescription = contentDescription,
@@ -444,6 +486,15 @@ private fun GImageCardContent(
                     .clip(imageClip),
                 contentScale = ContentScale.Crop,
             )
+            if (imageOverlayBottomFullWidth != null) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth(),
+                ) {
+                    imageOverlayBottomFullWidth.invoke(this)
+                }
+            }
             if (badge != null) {
                 Box(
                     modifier = Modifier
@@ -500,44 +551,54 @@ private fun GImageCardContent(
                 }
             }
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .padding(horizontal = textHorizontalPadding)
-                .padding(top = textTopInset, end = textRowEndPadding),
-            verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.spacedBy(token.spacing.xxxs),
-        ) {
-            textSectionLeading?.invoke(this)
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(token.spacing.xxxs),
+    }
+
+    if (showTextSection) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            ImageSlot()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(horizontal = textHorizontalPadding)
+                    .padding(top = textTopInset, end = textRowEndPadding),
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(token.spacing.xxxs),
             ) {
-                GText(
-                    text = firstLineText,
-                    style = sizeStyle.firstLineStyle,
-                    color = token.colors.textPrimary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                if (secondLineAnnotatedText != null) {
+                textSectionLeading?.invoke(this)
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(token.spacing.xxxs),
+                ) {
                     GText(
-                        text = secondLineAnnotatedText,
-                        style = sizeStyle.secondLineStyle,
+                        text = firstLineText,
+                        style = sizeStyle.firstLineStyle,
+                        color = token.colors.textPrimary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-                } else {
-                    GText(
-                        text = secondLineText,
-                        style = sizeStyle.secondLineStyle,
-                        color = subtitleColor,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+                    if (secondLineAnnotatedText != null) {
+                        GText(
+                            text = secondLineAnnotatedText,
+                            style = sizeStyle.secondLineStyle,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    } else {
+                        GText(
+                            text = secondLineText,
+                            style = sizeStyle.secondLineStyle,
+                            color = subtitleColor,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                 }
             }
+        }
+    } else {
+        Box(modifier = Modifier.fillMaxSize()) {
+            ImageSlot()
         }
     }
 }

@@ -16,6 +16,7 @@ import com.hoabui.virtualbody3d.ui.theme.tokens.component.StatusPopupTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.SurfaceTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.WorkoutCalendarTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.ThinkingCardTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.ExerciseDashboardTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymBodyDetailTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymCameraTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymLoginTokens
@@ -29,6 +30,7 @@ import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymStatusPopupTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymSurfaceTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymThinkingCardTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymWorkoutCalendarTokens
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.gymExerciseDashboardTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveBorderTokens
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveColorTokens
@@ -64,6 +66,7 @@ data class GymToken(
     val meal: MealTokens,
     val bodyDetail: BodyDetailTokens,
     val workoutCalendar: WorkoutCalendarTokens,
+    val dashboardExercise: ExerciseDashboardTokens,
 )
 
 @Immutable
@@ -152,6 +155,7 @@ fun darkGymToken(
         primitiveBorder,
         elevation
     ),
+    dashboardExercise = gymExerciseDashboardTokens(primitiveSpacing, primitiveRadius, primitiveBorder),
     )
 }
 
@@ -213,5 +217,6 @@ fun lightGymToken(
         primitiveBorder,
         elevation
     ),
+    dashboardExercise = gymExerciseDashboardTokens(primitiveSpacing, primitiveRadius, primitiveBorder),
     )
 }

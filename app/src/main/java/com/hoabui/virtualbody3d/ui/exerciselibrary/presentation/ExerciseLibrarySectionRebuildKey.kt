@@ -1,6 +1,7 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.presentation
 
 import androidx.compose.runtime.Immutable
+import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
 import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.domain.model.exercise.normalizeExerciseLibraryQuery
@@ -11,6 +12,7 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUi
 internal data class ExerciseLibrarySectionRebuildKey(
     val normalizedQuery: String,
     val category: ExerciseCategory?,
+    val bodyRegionsSignature: String,
     val equipment: EquipmentType?,
     val cartKeySignature: String,
     /** Stable semantic fingerprint of grouped catalog content (not map identity). */
@@ -33,6 +35,10 @@ internal fun exerciseLibrarySectionRebuildKey(
     return ExerciseLibrarySectionRebuildKey(
         normalizedQuery = normalizeExerciseLibraryQuery(filters.filters.searchQuery),
         category = filters.filters.selectedExerciseCategory,
+        bodyRegionsSignature = filters.filters.selectedBodyRegions
+            ?.sortedBy { it.ordinal }
+            ?.joinToString(separator = ",") { it.name }
+            .orEmpty(),
         equipment = filters.filters.selectedEquipment,
         cartKeySignature = cartSig,
         catalogContentSignature = catalogGroupedContentSignature(catalog),

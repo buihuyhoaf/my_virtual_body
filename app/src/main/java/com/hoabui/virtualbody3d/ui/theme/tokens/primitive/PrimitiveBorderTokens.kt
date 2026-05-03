@@ -10,6 +10,8 @@ data class PrimitiveBorderTokens(
     val hairline: Dp,
     val thin: Dp,
     val medium: Dp,
+    /** Strong selection ring on exercise library list cards. */
+    val exerciseLibraryCardSelected: Dp,
 ) {
     companion object {
         fun default(): PrimitiveBorderTokens = PrimitiveBorderTokens(
@@ -17,6 +19,7 @@ data class PrimitiveBorderTokens(
             hairline = 1.dp,
             thin = 1.5.dp,
             medium = 2.dp,
+            exerciseLibraryCardSelected = 2.5.dp,
         )
     }
 }

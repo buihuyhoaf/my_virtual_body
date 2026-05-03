@@ -7,10 +7,6 @@ import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 sealed interface ExerciseLibraryChromeMode {
     data object Idle : ExerciseLibraryChromeMode
 
-    data class DetailOpen(
-        val exerciseId: String,
-    ) : ExerciseLibraryChromeMode
-
     data class EditingScheduleRow(
         val scheduleRowId: Long,
         val baselineCart: LibraryCartState,

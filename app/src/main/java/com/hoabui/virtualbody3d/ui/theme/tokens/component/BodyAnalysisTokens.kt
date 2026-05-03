@@ -179,6 +179,12 @@ data class BodyAnalysisTokens(
     val exerciseLibraryBookingTimeSlotHorizontalMinWidth: Dp,
     val gImageCardSelectedSurfaceTintAlpha: Float,
     val gImageCardWeakSelectionSurfaceTintAlpha: Float,
+    /** Shared primary overlay alpha for in-cart exercise library cards (active + inactive). */
+    val exerciseLibraryCardSelectionOverlayTintAlpha: Float,
+    val exerciseLibraryCardSelectedBorderWidth: Dp,
+    val exerciseLibraryCardSelectedGraphicsScale: Float,
+    /** Bottom gradient stop alpha (black) for in-image title / kcal scrim on library cards. */
+    val exerciseLibraryCardImageBottomScrimBottomAlpha: Float,
 )
 
 fun gymBodyAnalysisTokens(
@@ -346,5 +352,9 @@ fun gymBodyAnalysisTokens(
         exerciseLibraryBookingTimeSlotHorizontalMinWidth = layout.exerciseLibraryBookingTimeSlotHorizontalMinWidth,
         gImageCardSelectedSurfaceTintAlpha = alpha.IMAGE_CARD_SELECTED_TINT,
         gImageCardWeakSelectionSurfaceTintAlpha = alpha.IMAGE_CARD_WEAK_SELECTION_TINT,
+        exerciseLibraryCardSelectionOverlayTintAlpha = alpha.EXERCISE_LIBRARY_CARD_CART_OVERLAY_TINT,
+        exerciseLibraryCardSelectedBorderWidth = border.exerciseLibraryCardSelected,
+        exerciseLibraryCardSelectedGraphicsScale = alpha.EXERCISE_LIBRARY_CARD_SELECTED_GRAPHICS_SCALE,
+        exerciseLibraryCardImageBottomScrimBottomAlpha = alpha.EXERCISE_LIBRARY_CARD_IMAGE_SCRIM_BOTTOM_STOP,
     )
 }

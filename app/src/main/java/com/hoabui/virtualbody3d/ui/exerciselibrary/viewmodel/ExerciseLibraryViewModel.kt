@@ -6,10 +6,6 @@ import com.hoabui.virtualbody3d.core.base.UiStateViewModel
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.GymLocation
-import com.hoabui.virtualbody3d.domain.model.exercise.Muscle
-import com.hoabui.virtualbody3d.domain.model.exercise.MuscleDictionary
-import com.hoabui.virtualbody3d.domain.model.exercise.RegionBody
-import com.hoabui.virtualbody3d.domain.model.exercise.RegionGroup
 import com.hoabui.virtualbody3d.domain.model.exercise.bookingSlotStartsForDay
 import com.hoabui.virtualbody3d.domain.model.exercise.normalizeDurationMinutesSeconds
 import com.hoabui.virtualbody3d.domain.model.exercise.SESSION_BOOKING_GRID_FIRST_SLOT
@@ -22,7 +18,6 @@ import com.hoabui.virtualbody3d.domain.usecase.ExerciseLibraryCartCommand
 import com.hoabui.virtualbody3d.domain.usecase.GetExerciseLibraryUseCase
 import com.hoabui.virtualbody3d.domain.usecase.MigrateLegacyWorkoutSchedulesUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveGymLocationsUseCase
-import com.hoabui.virtualbody3d.domain.usecase.ObserveExerciseLibraryWeeklySummaryUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ResolveNextSlotSelectionAfterToggleUseCase
 import com.hoabui.virtualbody3d.domain.usecase.SessionBookingConfirmationWorkflow
 import com.hoabui.virtualbody3d.domain.usecase.SessionBookingWorkflowInput
@@ -32,8 +27,6 @@ import com.hoabui.virtualbody3d.domain.usecase.UpdateWorkoutScheduleFromCartDraf
 import com.hoabui.virtualbody3d.domain.repository.WorkoutScheduleRepository
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.CommitLibrarySessionBookingSuccessUiMapper
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseLibraryCatalogUiMapper
-import com.hoabui.virtualbody3d.ui.exerciselibrary.data.emptyFocusMusclesStripImageNames
-import com.hoabui.virtualbody3d.ui.exerciselibrary.data.focusMusclesStripImageNamesForCartExercises
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toCartSnapshot
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toLibraryCartDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toPendingSessionBooking
@@ -47,10 +40,8 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryCh
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.isCartDraftValidForSessionConfirm
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryWeeklyHeatmapState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.LibraryPresentationSlice
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SetRowDraft
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.WeeklyHeatmapDayUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.SessionBookingUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibraryIntent
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi.ExerciseLibrarySideEffect
@@ -80,7 +71,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.time.LocalDate
 import java.time.LocalTime
 import javax.inject.Inject
 
@@ -90,7 +80,6 @@ class ExerciseLibraryViewModel @Inject constructor(
     private val sessionBookingConfirmationWorkflow: SessionBookingConfirmationWorkflow,
     private val commitSuccessUiMapper: CommitLibrarySessionBookingSuccessUiMapper,
     private val observeGymLocationsUseCase: ObserveGymLocationsUseCase,
-    private val observeExerciseLibraryWeeklySummaryUseCase: ObserveExerciseLibraryWeeklySummaryUseCase,
     private val migrateLegacyWorkoutSchedulesUseCase: MigrateLegacyWorkoutSchedulesUseCase,
     private val exerciseLibraryUiMapper: ExerciseLibraryUiMapper,
     private val exerciseLibraryCatalogUiMapper: ExerciseLibraryCatalogUiMapper,
@@ -101,7 +90,6 @@ class ExerciseLibraryViewModel @Inject constructor(
     private val resolveNextSlotSelectionAfterToggleUseCase: ResolveNextSlotSelectionAfterToggleUseCase,
     private val updateWorkoutScheduleFromCartDraftUseCase: UpdateWorkoutScheduleFromCartDraftUseCase,
     private val workoutScheduleRepository: WorkoutScheduleRepository,
-    private val muscleDictionary: MuscleDictionary,
 ) : UiStateViewModel<ExerciseLibraryUiState, Unit>() {
 
     private val confirmBookingMutex = Mutex()
@@ -132,25 +120,16 @@ class ExerciseLibraryViewModel @Inject constructor(
     private val emptyLibrarySlice = LibraryPresentationSlice(
         sections = persistentListOf(),
         exerciseMeasurementById = persistentMapOf(),
-        selectedExerciseForDetail = null,
         isAddToSessionEnabled = false,
     )
 
     /**
-     * Library list + measurement + detail; only recomputes when section rebuild inputs or detail selection change.
+     * Library list + measurement; recomputes when [filterState] changes.
      */
     private val librarySliceFlow: StateFlow<LibraryPresentationSlice> =
-        combine(filterState, catalogExercisesById) { filters, exercisesById ->
-            Triple(
-                exerciseLibrarySectionRebuildKey(filters.catalog, filters),
-                (filters.chrome.mode as? ExerciseLibraryChromeMode.DetailOpen)?.exerciseId,
-                Pair(filters, exercisesById),
-            )
-        }
-            .distinctUntilChanged { a, b -> a.first == b.first && a.second == b.second }
-            .map { (_, _, pair) ->
-                val (filters, exercisesById) = pair
-                exerciseLibraryUiMapper.mapLibraryPresentation(filters, exercisesById)
+        filterState
+            .map { filters ->
+                exerciseLibraryUiMapper.mapLibraryPresentation(filters)
             }
             .stateIn(
                 scope = viewModelScope,
@@ -206,34 +185,16 @@ class ExerciseLibraryViewModel @Inject constructor(
                 initialValue = null,
             )
 
-    private val focusMusclesStripFlow: StateFlow<ImmutableList<String>> =
-        combine(filterState, catalogExercisesById) { base, byId ->
-            focusMusclesStripImageNamesForCartExercises(
-                cartExerciseIds = base.cart.draftOrder,
-                exercisesById = byId,
-                muscleDictionary = muscleDictionary,
-                clickSelectionMap = base.focusStripClickSelection,
-            )
-        }
-            .distinctUntilChanged()
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyFocusMusclesStripImageNames(),
-            )
-
     private val mergedScreenStateFlow: StateFlow<ExerciseLibraryUiState> =
         combine(
             librarySliceFlow,
             filterState,
             bookingProjectionFlow,
-            focusMusclesStripFlow,
-        ) { librarySlice, base, sessionBookingUiModel, focusStrip ->
+        ) { librarySlice, base, sessionBookingUiModel ->
             mergeExerciseLibraryPresentation(
                 base = base,
                 library = librarySlice,
                 sessionBookingUiModel = sessionBookingUiModel,
-                focusMusclesStrip = focusStrip,
             )
         }
             .distinctUntilChanged()
@@ -244,7 +205,6 @@ class ExerciseLibraryViewModel @Inject constructor(
                     base = ExerciseLibraryUiState(),
                     library = emptyLibrarySlice,
                     sessionBookingUiModel = null,
-                    focusMusclesStrip = emptyFocusMusclesStripImageNames(),
                 ),
             )
 
@@ -267,31 +227,6 @@ class ExerciseLibraryViewModel @Inject constructor(
                 )
             }
             .catch { setError(it.message ?: "Unknown error") }
-            .launchIn(viewModelScope)
-
-        observeExerciseLibraryWeeklySummaryUseCase(LocalDate.now())
-            .onEach { dayItems ->
-                val dayUiModels = dayItems.map { item ->
-                    WeeklyHeatmapDayUiModel(
-                        dayLabel = item.date.dayOfWeek.toVietnameseDayLabel(),
-                        dayOfMonth = item.date.dayOfMonth,
-                        densityLevel = item.sessionCount.coerceAtMost(3),
-                        isToday = item.isToday,
-                    )
-                }.toImmutableList()
-                dispatch(
-                    ExerciseLibraryUpdate.WeeklyHeatmapLoaded(
-                        LibraryWeeklyHeatmapState.Loaded(days = dayUiModels),
-                    ),
-                )
-            }
-            .catch { e ->
-                dispatch(
-                    ExerciseLibraryUpdate.WeeklyHeatmapLoaded(
-                        LibraryWeeklyHeatmapState.Error(e.message.orEmpty()),
-                    ),
-                )
-            }
             .launchIn(viewModelScope)
 
         observeSideEffects()
@@ -352,7 +287,6 @@ class ExerciseLibraryViewModel @Inject constructor(
             handleCatalogIntent(intent) -> Unit
             handleWorkoutBuilderIntent(intent) -> Unit
             handleSessionBookingIntent(intent) -> Unit
-            handleGymMapIntent(intent) -> Unit
             handleSelectionBarIntent(intent) -> Unit
         }
     }
@@ -362,29 +296,20 @@ class ExerciseLibraryViewModel @Inject constructor(
             updateSearchQuery(intent.query)
             true
         }
-        is ExerciseLibraryIntent.ExerciseClicked -> {
-            dismissAddExerciseSuccess()
-            selectExerciseForDetail(intent.exerciseId)
+        is ExerciseLibraryIntent.SetInitialExerciseCategoryFilter -> {
+            dispatchIntent(intent)
             true
         }
-        is ExerciseLibraryIntent.LibraryListToggle -> {
+        is ExerciseLibraryIntent.SetInitialBodyRegionFilter -> {
+            dispatchIntent(intent)
+            true
+        }
+        is ExerciseLibraryIntent.CardSelectionToggled -> {
             toggleExerciseInCartFromList(intent.exerciseId)
-            true
-        }
-        is ExerciseLibraryIntent.DetailAddToCart -> {
-            ensureInCartAndFocusFromDetail(intent.exerciseId)
             true
         }
         ExerciseLibraryIntent.DismissAddExerciseSuccess -> {
             dismissAddExerciseSuccess()
-            true
-        }
-        is ExerciseLibraryIntent.SelectExerciseForDetail -> {
-            selectExerciseForDetail(intent.exerciseId)
-            true
-        }
-        ExerciseLibraryIntent.ClearExerciseDetail -> {
-            clearExerciseDetail()
             true
         }
         else -> false
@@ -464,37 +389,6 @@ class ExerciseLibraryViewModel @Inject constructor(
         }
         ExerciseLibraryIntent.LongSessionProceedAnyway -> {
             onLongSessionProceedAnyway()
-            true
-        }
-        else -> false
-    }
-
-    private fun handleGymMapIntent(intent: ExerciseLibraryIntent): Boolean = when (intent) {
-        is ExerciseLibraryIntent.FocusStripQuadrantTapped -> {
-            onFocusStripQuadrantTapped(intent.index)
-            true
-        }
-        is ExerciseLibraryIntent.ToggleFocusStripRegionGroup -> {
-            onFocusStripRegionGroupToggle(intent.regionGroup)
-            true
-        }
-        is ExerciseLibraryIntent.ToggleFocusStripRegionBody -> {
-            onFocusStripRegionBodyToggle(
-                regionGroup = intent.regionGroup,
-                regionBody = intent.regionBody,
-            )
-            true
-        }
-        is ExerciseLibraryIntent.ToggleFocusStripMuscle -> {
-            onFocusStripMuscleToggle(
-                regionGroup = intent.regionGroup,
-                regionBody = intent.regionBody,
-                muscle = intent.muscle,
-            )
-            true
-        }
-        ExerciseLibraryIntent.ClearFocusStripSelection -> {
-            clearFocusStripSelection()
             true
         }
         else -> false
@@ -619,18 +513,6 @@ class ExerciseLibraryViewModel @Inject constructor(
         dispatch(ExerciseLibraryUpdate.CartFromDomain(snap))
         // Prefill weight from history when the exercise is newly added (not removed)
         if (!wasInCart && exerciseId in snap.itemDrafts) {
-            prefillFromHistory(exerciseId)
-        }
-    }
-
-    private fun ensureInCartAndFocusFromDetail(exerciseId: String) {
-        val wasInCart = exerciseId in filterState.value.cart.itemDrafts
-        val snap = toggleExerciseInCartUseCase(
-            filterState.value.toCartSnapshot(),
-            ExerciseLibraryCartCommand.EnsureInCartAndFocus(exerciseId),
-        )
-        dispatch(ExerciseLibraryUpdate.CartFromDomain(snap))
-        if (!wasInCart) {
             prefillFromHistory(exerciseId)
         }
     }
@@ -816,54 +698,8 @@ class ExerciseLibraryViewModel @Inject constructor(
         dispatchIntent(ExerciseLibraryIntent.DismissAddExerciseSuccess)
     }
 
-    private fun selectExerciseForDetail(exerciseId: String) {
-        dispatchIntent(ExerciseLibraryIntent.SelectExerciseForDetail(exerciseId))
-    }
-
-    private fun clearExerciseDetail() {
-        dispatchIntent(ExerciseLibraryIntent.ClearExerciseDetail)
-    }
-
     private fun toggleCartExpanded() {
         dispatchIntent(ExerciseLibraryIntent.ToggleCartExpanded)
-    }
-
-    private fun onFocusStripRegionGroupToggle(regionGroup: RegionGroup) {
-        dispatchIntent(ExerciseLibraryIntent.ToggleFocusStripRegionGroup(regionGroup))
-    }
-
-    private fun onFocusStripRegionBodyToggle(regionGroup: RegionGroup, regionBody: RegionBody) {
-        dispatchIntent(
-            ExerciseLibraryIntent.ToggleFocusStripRegionBody(
-                regionGroup = regionGroup,
-                regionBody = regionBody,
-            ),
-        )
-    }
-
-    private fun onFocusStripMuscleToggle(regionGroup: RegionGroup, regionBody: RegionBody, muscle: Muscle) {
-        dispatchIntent(
-            ExerciseLibraryIntent.ToggleFocusStripMuscle(
-                regionGroup = regionGroup,
-                regionBody = regionBody,
-                muscle = muscle,
-            ),
-        )
-    }
-
-    private fun clearFocusStripSelection() {
-        dispatchIntent(ExerciseLibraryIntent.ClearFocusStripSelection)
-    }
-
-    private fun onFocusStripQuadrantTapped(index: Int) {
-        val regionGroup = when (index) {
-            0 -> RegionGroup.UpperFront
-            1 -> RegionGroup.UpperBack
-            2 -> RegionGroup.LowerFront
-            3 -> RegionGroup.LowerBack
-            else -> return
-        }
-        onFocusStripRegionGroupToggle(regionGroup)
     }
 
     /**
@@ -945,14 +781,4 @@ class ExerciseLibraryViewModel @Inject constructor(
         const val SECONDS_STEP = 30
         const val MAX_SECONDS_IN_MINUTE = 59
     }
-}
-
-private fun java.time.DayOfWeek.toVietnameseDayLabel(): String = when (this) {
-    java.time.DayOfWeek.MONDAY -> "T2"
-    java.time.DayOfWeek.TUESDAY -> "T3"
-    java.time.DayOfWeek.WEDNESDAY -> "T4"
-    java.time.DayOfWeek.THURSDAY -> "T5"
-    java.time.DayOfWeek.FRIDAY -> "T6"
-    java.time.DayOfWeek.SATURDAY -> "T7"
-    java.time.DayOfWeek.SUNDAY -> "CN"
 }

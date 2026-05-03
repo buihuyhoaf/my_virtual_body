@@ -54,6 +54,7 @@ private fun isBottomBarTabSelected(
     if (destination == AppDestination.CenfitCoach) {
         return current.hasRoute(WorkoutCalendarRoute::class) ||
             current.hasRoute(ExerciseLibraryGraphRoute::class) ||
+            current.hasRoute(ExerciseDashboardRoute::class) ||
             current.hasRoute(ExerciseLibraryRoute::class) ||
             current.hasRoute(SessionBookingEditorRoute::class)
     }

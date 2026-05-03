@@ -92,6 +92,20 @@ class ExerciseLibraryPresentationKeysTest {
     }
 
     @Test
+    fun sectionRebuildKey_differentBodyRegions_notEqual() {
+        val grouped = catalogState(mapOf(BodyRegion.Chest to listOf(sampleExercise())))
+        val filtersChest =
+            ExerciseLibraryUiState(filters = LibraryFilterState(selectedBodyRegions = persistentSetOf(BodyRegion.Chest)))
+        val filtersLegs =
+            ExerciseLibraryUiState(filters = LibraryFilterState(selectedBodyRegions = persistentSetOf(BodyRegion.Legs)))
+        val kChest = exerciseLibrarySectionRebuildKey(grouped, filtersChest)
+        val kLegs = exerciseLibrarySectionRebuildKey(grouped, filtersLegs)
+        assertNotEquals(kChest, kLegs)
+        assertEquals("Chest", kChest.bodyRegionsSignature)
+        assertEquals("Legs", kLegs.bodyRegionsSignature)
+    }
+
+    @Test
     fun bookingPresentationKey_sameGymsDifferentImmutableListInstances_equal() {
         val dayMillis = LocalDateTime.of(2024, 6, 10, 12, 0)
             .atZone(zoneUtc)

@@ -9,7 +9,6 @@ import com.hoabui.virtualbody3d.domain.model.exercise.GymLocation
 import com.hoabui.virtualbody3d.domain.model.exercise.normalizeExerciseLibraryQuery
 import com.hoabui.virtualbody3d.domain.usecase.CanOpenExerciseLibrarySessionBookingUseCase
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.matchesLibrarySearch
-import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toExerciseDetailSheetUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toGExerciseCardUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.toLibraryCartDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.presentation.ExerciseLibraryBookingPresentationKey
@@ -17,7 +16,6 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.presentation.ExerciseLibraryS
 import com.hoabui.virtualbody3d.ui.exerciselibrary.presentation.exerciseLibraryBookingPresentationKey
 import com.hoabui.virtualbody3d.ui.exerciselibrary.presentation.exerciseLibrarySectionRebuildKey
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.BookingExerciseSummaryUi
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryChromeMode
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryCatalogEntryUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibrarySectionRowUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.ExerciseLibraryUiState
@@ -78,7 +76,6 @@ class ExerciseLibraryUiMapper @Inject constructor(
 
     fun mapLibraryPresentation(
         filtersForUi: ExerciseLibraryUiState,
-        exercisesById: Map<String, Exercise>,
     ): LibraryPresentationSlice {
         val catalog = filtersForUi.catalog
         val sectionKey = exerciseLibrarySectionRebuildKey(catalog, filtersForUi)
@@ -98,13 +95,9 @@ class ExerciseLibraryUiMapper @Inject constructor(
             cachedMeasurementById = measurementById
             lastSectionRebuildKey = sectionKey
         }
-        val selectedDetail = (filtersForUi.chrome.mode as? ExerciseLibraryChromeMode.DetailOpen)?.exerciseId?.let { id ->
-            exercisesById[id]?.toExerciseDetailSheetUiModel(appContext)
-        }
         return LibraryPresentationSlice(
             sections = sections,
             exerciseMeasurementById = measurementById,
-            selectedExerciseForDetail = selectedDetail,
             isAddToSessionEnabled = canOpenExerciseLibrarySessionBooking(
                 filtersForUi.toLibraryCartDraft(),
                 measurementById,
@@ -151,12 +144,14 @@ class ExerciseLibraryUiMapper @Inject constructor(
         val equipment = filters.filters.selectedEquipment
         val cartIds = filters.cart.itemDrafts.keys
         val activeId = filters.cart.activeExerciseId
+        val regions = filters.filters.selectedBodyRegions
         return BodyRegion.entries.mapNotNull { region ->
             val items = grouped[region]
                 ?.filter { entry ->
                     entry.matchesLibrarySearch(query) &&
                         (category == null || entry.category == category) &&
-                        (equipment == null || entry.equipment == equipment)
+                        (equipment == null || entry.equipment == equipment) &&
+                        (regions == null || entry.bodyRegion in regions)
                 }
                 ?.map { entry ->
                     entry.toGExerciseCardUiModel(appContext, cartIds, activeId)

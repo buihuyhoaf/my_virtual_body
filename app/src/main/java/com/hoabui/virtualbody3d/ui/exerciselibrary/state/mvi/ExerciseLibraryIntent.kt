@@ -1,10 +1,10 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.state.mvi
 
-import com.hoabui.virtualbody3d.domain.model.exercise.Muscle
-import com.hoabui.virtualbody3d.domain.model.exercise.RegionBody
-import com.hoabui.virtualbody3d.domain.model.exercise.RegionGroup
+import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.model.CartSetField
 import java.time.LocalTime
+import kotlinx.collections.immutable.ImmutableSet
 
 /**
  * User-driven intents. Cart and slot-toggle mutations are handled via [ExerciseLibraryUpdate]
@@ -16,11 +16,12 @@ sealed interface ExerciseLibraryIntent {
 
     data class SetSearchQuery(val query: String) : ExerciseLibraryIntent
 
-    data class ExerciseClicked(val exerciseId: String) : ExerciseLibraryIntent
+    data class SetInitialExerciseCategoryFilter(val category: ExerciseCategory) : ExerciseLibraryIntent
 
-    data class LibraryListToggle(val exerciseId: String) : ExerciseLibraryIntent
+    data class SetInitialBodyRegionFilter(val regions: ImmutableSet<BodyRegion>) : ExerciseLibraryIntent
 
-    data class DetailAddToCart(val exerciseId: String) : ExerciseLibraryIntent
+    /** Single tap on a library card: toggle add/remove from cart. */
+    data class CardSelectionToggled(val exerciseId: String) : ExerciseLibraryIntent
 
     data class SelectCartItem(val exerciseId: String) : ExerciseLibraryIntent
 
@@ -60,32 +61,11 @@ sealed interface ExerciseLibraryIntent {
 
     data object DismissAddExerciseSuccess : ExerciseLibraryIntent
 
-    data class SelectExerciseForDetail(val exerciseId: String) : ExerciseLibraryIntent
-
-    data object ClearExerciseDetail : ExerciseLibraryIntent
-
     data object ToggleCartExpanded : ExerciseLibraryIntent
-
-    data class FocusStripQuadrantTapped(val index: Int) : ExerciseLibraryIntent
 
     data object ConfirmSelectionBarEdit : ExerciseLibraryIntent
 
     data object CancelSelectionBarEdit : ExerciseLibraryIntent
 
     data class StartSelectionBarEditFromScheduleRow(val scheduleRowId: Long) : ExerciseLibraryIntent
-
-    data class ToggleFocusStripRegionGroup(val regionGroup: RegionGroup) : ExerciseLibraryIntent
-
-    data class ToggleFocusStripRegionBody(
-        val regionGroup: RegionGroup,
-        val regionBody: RegionBody,
-    ) : ExerciseLibraryIntent
-
-    data class ToggleFocusStripMuscle(
-        val regionGroup: RegionGroup,
-        val regionBody: RegionBody,
-        val muscle: Muscle,
-    ) : ExerciseLibraryIntent
-
-    data object ClearFocusStripSelection : ExerciseLibraryIntent
 }
