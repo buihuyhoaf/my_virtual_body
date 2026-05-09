@@ -20,15 +20,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
 import com.hoabui.virtualbody3d.core.extensions.onHeightMeasured
 import com.hoabui.virtualbody3d.core.extensions.verticalDraggable
 import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.ActiveExerciseInfo
-import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.WorkoutBuilderActions
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
 import kotlinx.coroutines.launch
@@ -42,7 +39,9 @@ internal fun SelectionBarSections(
     bookingEnabled: Boolean,
     isSelectionBarEditMode: Boolean,
     isSelectionBarConfirmEnabled: Boolean,
-    actions: WorkoutBuilderActions,
+    actions: SelectionBarInteractionCallbacks,
+    destructiveScheduleDeleteLabel: String? = null,
+    onDestructiveScheduleDelete: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val token = GymTheme.token
@@ -51,7 +50,12 @@ internal fun SelectionBarSections(
     val collapsedHeightPx = with(density) {
         token.bodyAnalysis.exerciseLibrarySelectionBarCollapsedListBottomInset.toPx()
     }
-    var fullContentHeightPx by remember { mutableFloatStateOf(with(density) { 400.dp.toPx() }) }
+    val measuringCapHeight =
+        token.bodyAnalysis.exerciseLibraryCartExpandedContentFallbackExtra +
+            token.bodyAnalysis.exerciseLibraryCartSetRowsListMaxHeight
+    var fullContentHeightPx by remember(measuringCapHeight, density) {
+        mutableFloatStateOf(with(density) { measuringCapHeight.toPx() })
+    }
     var expansionProgress by remember {
         mutableFloatStateOf(if (isCartExpanded) 1f else 0f)
     }
@@ -74,7 +78,7 @@ internal fun SelectionBarSections(
     val currentHeight = with(density) {
         (collapsedHeightPx + (rangePx * expansionProgress)).toDp()
     }
-    val velocityThreshold = with(density) { 500.dp.toPx() }
+    val velocityThreshold = token.bodyAnalysis.exerciseLibraryCartSnapVelocityThresholdPxPerSec
     val dragModifier = Modifier.verticalDraggable(
         onDragStart = { isDragging = true },
         onDrag = { dragAmount ->
@@ -106,14 +110,18 @@ internal fun SelectionBarSections(
         },
     )
 
+    val topRadius = token.bodyAnalysis.exerciseLibraryBookingSheetTopCornerRadius
+    val outerShape = RoundedCornerShape(topStart = topRadius, topEnd = topRadius)
+
     GSurface(
         modifier = modifier
             .fillMaxWidth()
-            .height(currentHeight)
-            .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
+            .height(currentHeight),
         color = token.colors.surface,
         shadowElevation = token.elevation.level3,
         treatment = GSurfaceTreatment.Flat,
+        border = null,
+        shape = outerShape,
     ) {
         Box(
             modifier = Modifier
@@ -123,7 +131,7 @@ internal fun SelectionBarSections(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 400.dp)
+                    .heightIn(max = measuringCapHeight)
                     .onHeightMeasured { heightPx ->
                         if (heightPx > collapsedHeightPx) {
                             fullContentHeightPx = heightPx
@@ -148,6 +156,8 @@ internal fun SelectionBarSections(
                     onAddToSession = actions.onNavigateToSessionBooking,
                     onConfirmSelectionBarEdit = actions.onConfirmSelectionBarEdit,
                     onCancelSelectionBarEdit = actions.onCancelSelectionBarEdit,
+                    destructiveScheduleDeleteLabel = destructiveScheduleDeleteLabel,
+                    onDestructiveScheduleDelete = onDestructiveScheduleDelete,
                 )
             }
         }

@@ -8,6 +8,7 @@ import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.util.CaloriesCalculator
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.ActiveExerciseInfo
+import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.toSelectionBarExerciseMeasurementKind
 
 private const val DEFAULT_BODY_WEIGHT_KG = 70.0
 
@@ -54,7 +55,7 @@ fun rememberActiveExerciseInfoFromLibraryState(
                     id = id,
                     title = cartItems.firstOrNull { it.id == id }?.title,
                     draft = draft,
-                    measurementMode = measurementMode,
+                    measurementKind = measurementMode.toSelectionBarExerciseMeasurementKind(),
                     estimatedCalories = estimatedCalories,
                 )
             }

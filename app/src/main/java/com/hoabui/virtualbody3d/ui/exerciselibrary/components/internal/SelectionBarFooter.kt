@@ -20,6 +20,8 @@ internal fun SelectionBarFooter(
     onAddToSession: () -> Unit,
     onConfirmSelectionBarEdit: () -> Unit,
     onCancelSelectionBarEdit: () -> Unit,
+    destructiveScheduleDeleteLabel: String? = null,
+    onDestructiveScheduleDelete: (() -> Unit)? = null,
 ) {
     val token = GymTheme.token
     Row(
@@ -41,6 +43,15 @@ internal fun SelectionBarFooter(
                 modifier = Modifier.weight(1f),
                 enabled = isConfirmEnabled,
             )
+            if (destructiveScheduleDeleteLabel != null && onDestructiveScheduleDelete != null) {
+                GButton(
+                    text = destructiveScheduleDeleteLabel,
+                    onClick = onDestructiveScheduleDelete,
+                    modifier = Modifier.weight(1f),
+                    variant = GButtonVariant.Ghost,
+                    contentColor = token.colors.error,
+                )
+            }
         } else {
             GButton(
                 text = stringResource(R.string.exercise_library_add_to_session),

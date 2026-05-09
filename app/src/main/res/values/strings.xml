@@ -525,6 +525,8 @@
     <string name="workout_calendar_metrics_duration">%1$d phút</string>
     <string name="workout_calendar_swipe_delete">Xóa</string>
     <string name="workout_calendar_swipe_edit">Sửa</string>
+    <string name="workout_calendar_edit_bar_save">Lưu</string>
+    <string name="workout_calendar_edit_bar_delete">Xóa khỏi lịch</string>
     <string name="workout_calendar_edit_pending">Tính năng chỉnh sửa lịch tập sẽ có sớm.</string>
     <string name="workout_calendar_delete_confirm_title">Xóa bài tập?</string>
     <string name="workout_calendar_delete_confirm_message">Xóa \"%1$s\" khỏi lịch cho %2$s?</string>

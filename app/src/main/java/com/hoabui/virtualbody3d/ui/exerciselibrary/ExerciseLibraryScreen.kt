@@ -121,8 +121,8 @@ fun ExerciseLibraryScreen(
                 )
             },
             onToggleCartExpanded = { viewModel.toggleCartExpanded() },
-            onConfirmSelectionBarEdit = { viewModel.confirmSelectionBarEdit() },
-            onCancelSelectionBarEdit = { viewModel.cancelSelectionBarEdit() },
+            onConfirmSelectionBarEdit = {  },
+            onCancelSelectionBarEdit = { },
         )
     }
     UiStateContent(

@@ -102,7 +102,7 @@ fun ActiveExerciseDraftEditorOrganism(
                 CartSetStepperSection(
                     exerciseId = activeId,
                     setRows = activeDraft.setRows,
-                    measurementMode = activeExerciseInfo.measurementMode,
+                    measurementKind = activeExerciseInfo.measurementKind,
                     onStepField = onStepCartField,
                     onSetFieldManual = onSetCartFieldManual,
                 )

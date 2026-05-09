@@ -1,12 +1,15 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.manager
 
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseLibraryCartSnapshot
+import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
 import com.hoabui.virtualbody3d.domain.usecase.ExerciseLibraryCartCommand
 import com.hoabui.virtualbody3d.domain.usecase.ToggleExerciseInCartUseCase
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.CartSetField
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.ExerciseDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.SetRowDraft
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryChromeMode
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.util.toCartSnapshot
 import com.hoabui.virtualbody3d.ui.exerciselibrary.util.withCartSnapshot
@@ -41,6 +44,9 @@ class ExerciseLibraryCartManager @Inject constructor(
     private val _isCartExpanded = MutableStateFlow(false)
     val isCartExpanded: StateFlow<Boolean> = _isCartExpanded.asStateFlow()
 
+    private val _chromeMode =
+        MutableStateFlow<ExerciseLibraryChromeMode>(ExerciseLibraryChromeMode.Idle)
+    val chromeMode: StateFlow<ExerciseLibraryChromeMode> = _chromeMode.asStateFlow()
 
     fun applyCartSnapshot(syntheticBefore: ExerciseLibraryUiState, snap: ExerciseLibraryCartSnapshot) {
         val updated = syntheticBefore.withCartSnapshot(snap)
@@ -79,11 +85,59 @@ class ExerciseLibraryCartManager @Inject constructor(
     }
 
     fun clearCartOnly() {
+        resetCartDraftAndChrome()
+    }
+
+    fun cancelSelectionBarEdit() {
+        resetCartDraftAndChrome()
+    }
+
+    fun enterScheduleRowSelectionBarEdit(schedule: WorkoutSchedule) {
+        val rowId = schedule.rowId ?: return
+        val draft = draftFromScheduledWorkout(schedule)
+        _itemDrafts.value = persistentMapOf(schedule.exerciseId to draft)
+        _draftOrder.value = persistentListOf(schedule.exerciseId)
+        _activeExerciseId.value = schedule.exerciseId
+        _isCartExpanded.value = false
+        _chromeMode.value =
+            ExerciseLibraryChromeMode.EditingScheduleRow(
+                scheduleRowId = rowId,
+                measurementModeFallback = schedule.measurementMode,
+            )
+    }
+
+    private fun resetCartDraftAndChrome() {
         _itemDrafts.value = persistentMapOf()
         _draftOrder.value = persistentListOf()
         _activeExerciseId.value = null
         _isCartExpanded.value = false
+        _chromeMode.value = ExerciseLibraryChromeMode.Idle
     }
+
+    private fun draftFromScheduledWorkout(schedule: WorkoutSchedule): ExerciseDraft =
+        when (schedule.measurementMode) {
+            ExerciseMeasurementMode.Strength -> {
+                val count = schedule.sets.coerceAtLeast(1)
+                ExerciseDraft(
+                    setRows = List(count) {
+                        SetRowDraft(reps = schedule.reps, weightKg = schedule.weightKg)
+                    }.toImmutableList(),
+                )
+            }
+            ExerciseMeasurementMode.Duration -> {
+                val totalSec = schedule.durationSeconds?.coerceAtLeast(0) ?: 0
+                ExerciseDraft(
+                    setRows = persistentListOf(
+                        SetRowDraft(
+                            reps = schedule.reps,
+                            weightKg = schedule.weightKg,
+                            minutes = totalSec / 60,
+                            seconds = totalSec % 60,
+                        ),
+                    ),
+                )
+            }
+        }
 
     fun stepCartField(exerciseId: String, setIndex: Int, field: CartSetField, delta: Int) {
         val draft = _itemDrafts.value[exerciseId] ?: return

@@ -26,7 +26,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,28 +37,29 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import coil.compose.AsyncImage
+import android.content.res.Configuration
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
-import com.hoabui.virtualbody3d.domain.util.CaloriesCalculator
+import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.SelectionBarExerciseMeasurementKind
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButtonVariant
 import com.hoabui.virtualbody3d.ui.common_ui.atom.divider.GDivider
 import com.hoabui.virtualbody3d.ui.common_ui.atom.field.GTextField
 import com.hoabui.virtualbody3d.ui.common_ui.atom.icon.GIcon
+import com.hoabui.virtualbody3d.ui.common_ui.atom.surface.GSurface
 import com.hoabui.virtualbody3d.ui.common_ui.atom.text.GText
 import com.hoabui.virtualbody3d.ui.common_ui.image.LocalResourceProvider
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
-import com.hoabui.virtualbody3d.ui.exerciselibrary.components.internal.SelectionBarSections
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.ActiveExerciseInfo
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.CartSetField
+import com.hoabui.virtualbody3d.ui.exerciselibrary.components.internal.SelectionBarInteractionCallbacks
+import com.hoabui.virtualbody3d.ui.exerciselibrary.components.internal.SelectionBarSections
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.SetRowDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.catalog.toCoilModel
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.util.isCartDraftValidForSessionConfirm
-import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.WorkoutBuilderActions
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.icons.ExerciseLibraryPhosphorIcons
+import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
 import com.hoabui.virtualbody3d.ui.theme.tokens.primitive.PrimitiveAlphaTokens
 import kotlinx.collections.immutable.ImmutableList
 
@@ -269,7 +269,7 @@ private fun StepperControl(
 private fun CartSetRowItem(
     setIndex: Int,
     row: SetRowDraft,
-    measurementMode: ExerciseMeasurementMode,
+    measurementKind: SelectionBarExerciseMeasurementKind,
     exerciseId: String,
     onStep: (field: CartSetField, delta: Int) -> Unit,
     onManual: (field: CartSetField, value: String) -> Unit,
@@ -293,8 +293,8 @@ private fun CartSetRowItem(
             color = token.colors.textSecondary,
             modifier = Modifier.width(token.spacing.xl),
         )
-        when (measurementMode) {
-            ExerciseMeasurementMode.Strength -> {
+        when (measurementKind) {
+            SelectionBarExerciseMeasurementKind.Strength -> {
                 StepperControl(
                     label = repsLabel,
                     displayValue = row.reps.toString(),
@@ -313,7 +313,7 @@ private fun CartSetRowItem(
                 )
             }
 
-            ExerciseMeasurementMode.Duration -> {
+            SelectionBarExerciseMeasurementKind.Duration -> {
                 StepperControl(
                     label = minutesLabel,
                     displayValue = row.minutes.toString(),
@@ -336,7 +336,7 @@ private fun CartSetRowItem(
 }
 
 // ─────────────────────────────────────────────────────────
-// Sets count stepper (composed beside exercise title in SelectionBarBody)
+// Sets count stepper (composed beside exercise title in expanded cart editors)
 // ─────────────────────────────────────────────────────────
 @Composable
 internal fun CartSetsCountStepper(
@@ -364,7 +364,7 @@ internal fun CartSetsCountStepper(
 fun CartSetStepperSection(
     exerciseId: String,
     setRows: ImmutableList<SetRowDraft>,
-    measurementMode: ExerciseMeasurementMode,
+    measurementKind: SelectionBarExerciseMeasurementKind,
     onStepField: (exerciseId: String, setIndex: Int, field: CartSetField, delta: Int) -> Unit,
     onSetFieldManual: (exerciseId: String, setIndex: Int, field: CartSetField, value: String) -> Unit,
     modifier: Modifier = Modifier,
@@ -386,7 +386,7 @@ fun CartSetStepperSection(
                 CartSetRowItem(
                     setIndex = index,
                     row = row,
-                    measurementMode = measurementMode,
+                    measurementKind = measurementKind,
                     exerciseId = exerciseId,
                     onStep = { field, delta -> onStepField(exerciseId, index, field, delta) },
                     onManual = { field, value ->
@@ -544,72 +544,67 @@ private fun ExerciseLibraryCartRemoveSticker(
 
 @Composable
 fun EditExerciseBar(
-    libraryState: ExerciseLibraryUiState,
-    isSelectionBarScheduleEditActive: Boolean,
-    selectionBarMeasurementModeFallback: ExerciseMeasurementMode?,
-    actions: WorkoutBuilderActions,
+    items: List<GExerciseCardUiModel>,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
     modifier: Modifier = Modifier,
+    activeExerciseInfo: ActiveExerciseInfo? = null,
+    isCartExpanded: Boolean = false,
+    isSaveEnabled: Boolean = false,
+    onDismissEditBar: () -> Unit = {},
+    onSelectCartItem: (String) -> Unit = {},
+    onRemoveCartItem: (String) -> Unit = {},
+    onClearCart: () -> Unit = {},
+    onToggleCartExpanded: () -> Unit = {},
+    onStepCartField: (String, Int, CartSetField, Int) -> Unit = { _, _, _, _ -> },
+    onSetCartFieldManual: (String, Int, CartSetField, String) -> Unit = { _, _, _, _ -> },
 ) {
-    val cartItems = remember(libraryState.libraryList.sections, libraryState.draftOrder) {
-        val byId = libraryState.libraryList.sections.asSequence().flatMap { it.items.asSequence() }
-            .associateBy { it.id }
-        libraryState.draftOrder.mapNotNull { byId[it] }
-    }
-    val isSelectionBarEditMode = isSelectionBarScheduleEditActive
-    val isSelectionBarConfirmEnabled = libraryState.isCartDraftValidForSessionConfirm(
-        selectionBarMeasurementModeFallback = selectionBarMeasurementModeFallback,
-    )
-    val activeExerciseInfo by remember(
-        libraryState.activeExerciseId,
-        libraryState.itemDrafts,
-        libraryState.libraryList.exerciseMeasurementById,
-        cartItems,
-    ) {
-        derivedStateOf {
-            libraryState.activeExerciseId?.let { id ->
-                val draft = libraryState.itemDrafts[id]
-                val measurementMode = libraryState.libraryList.exerciseMeasurementById[id]
-                    ?: ExerciseMeasurementMode.Strength
-                val estimatedCalories = draft?.let {
-                    val totalDurationSeconds = it.setRows.sumOf { setRow ->
-                        (setRow.minutes * 60) + setRow.seconds
-                    }
-                    val durationMinutes = totalDurationSeconds / 60.0
-                    val totalReps = it.setRows.sumOf { setRow -> setRow.reps }
-                    val loadValues = it.setRows.mapNotNull { setRow ->
-                        setRow.weightKg.takeIf { value -> value > 0.0 }
-                    }
-                    val averageLoad = if (loadValues.isNotEmpty()) loadValues.average() else 0.0
-                    CaloriesCalculator.estimateCalories(
-                        exerciseId = id,
-                        measurementMode = measurementMode,
-                        durationMinutes = durationMinutes,
-                        totalReps = totalReps,
-                        averageLoadKg = averageLoad,
-                        bodyWeightKg = DEFAULT_BODY_WEIGHT_KG,
-                        leanBodyMassKg = null,
-                    )
-                } ?: 0f
-                ActiveExerciseInfo(
-                    id = id,
-                    title = cartItems.firstOrNull { it.id == id }?.title,
-                    draft = draft,
-                    measurementMode = measurementMode,
-                    estimatedCalories = estimatedCalories,
-                )
-            }
-        }
-    }
     SelectionBarSections(
-        cartItems = cartItems,
+        cartItems = items,
         activeExerciseInfo = activeExerciseInfo,
-        isCartExpanded = libraryState.isCartExpanded,
-        bookingEnabled = libraryState.libraryList.isAddToSessionEnabled,
-        isSelectionBarEditMode = isSelectionBarEditMode,
-        isSelectionBarConfirmEnabled = isSelectionBarConfirmEnabled,
-        actions = actions,
+        isCartExpanded = isCartExpanded,
+        bookingEnabled = false,
+        isSelectionBarEditMode = true,
+        isSelectionBarConfirmEnabled = isSaveEnabled,
+        actions = SelectionBarInteractionCallbacks(
+            onSelectCartItem = onSelectCartItem,
+            onRemoveCartItem = onRemoveCartItem,
+            onClearCart = onClearCart,
+            onToggleCartExpanded = onToggleCartExpanded,
+            onStepCartField = onStepCartField,
+            onSetCartFieldManual = onSetCartFieldManual,
+            onNavigateToSessionBooking = {},
+            onConfirmSelectionBarEdit = onEdit,
+            onCancelSelectionBarEdit = onDismissEditBar,
+        ),
+        destructiveScheduleDeleteLabel = stringResource(R.string.workout_calendar_edit_bar_delete),
+        onDestructiveScheduleDelete = onDelete,
         modifier = modifier,
     )
+}
+
+@Preview(showBackground = true, name = "EditExerciseBar — Light")
+@Composable
+private fun PreviewEditExerciseBarLight() {
+    GymTheme {
+        EditExerciseBar(
+            items = emptyList(),
+            onEdit = {},
+            onDelete = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "EditExerciseBar — Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun PreviewEditExerciseBarDark() {
+    GymTheme(darkTheme = true) {
+        EditExerciseBar(
+            items = emptyList(),
+            onEdit = {},
+            onDelete = {},
+        )
+    }
 }
 
 // ─────────────────────────────────────────────────────────
@@ -617,5 +612,3 @@ fun EditExerciseBar(
 // ─────────────────────────────────────────────────────────
 
 private const val WEIGHT_FORMAT = "%.1f"
-// Default fallback when profile weight is unavailable in the selection bar UI state.
-private const val DEFAULT_BODY_WEIGHT_KG = 70.0

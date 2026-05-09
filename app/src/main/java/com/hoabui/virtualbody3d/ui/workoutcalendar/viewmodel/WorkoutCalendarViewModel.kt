@@ -9,12 +9,31 @@ import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarDaySummary
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarSessionBlock
 import com.hoabui.virtualbody3d.domain.model.calendar.caloriesToVisualLevel
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutScheduleDeleteResult
+import com.hoabui.virtualbody3d.domain.usecase.CancelSelectionBarEditUseCase
+import com.hoabui.virtualbody3d.domain.usecase.ConfirmSelectionBarEditUseCase
+import com.hoabui.virtualbody3d.domain.usecase.DeleteEditingScheduleRowUseCase
 import com.hoabui.virtualbody3d.domain.usecase.DeleteWorkoutScheduleUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetWorkoutDetailsUseCase
+import com.hoabui.virtualbody3d.domain.usecase.ObserveExerciseCatalogUseCase
+import com.hoabui.virtualbody3d.domain.usecase.ObserveExerciseLibraryChromeModeUseCase
+import com.hoabui.virtualbody3d.domain.usecase.ObserveExerciseLibraryUiStateUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveWorkoutCalendarMonthSummariesUseCase
 import com.hoabui.virtualbody3d.domain.usecase.RestoreWorkoutScheduleDeleteUseCase
-import dagger.hilt.android.lifecycle.HiltViewModel
+import com.hoabui.virtualbody3d.domain.usecase.SelectCartItemUseCase
+import com.hoabui.virtualbody3d.domain.usecase.SetCartFieldManualUseCase
+import com.hoabui.virtualbody3d.domain.usecase.StartSelectionBarEditFromScheduleRowUseCase
+import com.hoabui.virtualbody3d.domain.usecase.StepCartFieldUseCase
+import com.hoabui.virtualbody3d.domain.usecase.ToggleCartExpandedUseCase
+import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
+import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.ActiveExerciseInfo
+import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.CartSetField
+import com.hoabui.virtualbody3d.ui.exerciselibrary.util.isCartDraftValidForSessionConfirm
+import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.SelectionBarExerciseMeasurementKind
+import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.toSelectionBarExerciseMeasurementKind
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryChromeMode
+import com.hoabui.virtualbody3d.ui.workoutcalendar.mapper.EditExerciseBarUiMapper
 import javax.inject.Inject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import java.time.YearMonth
 import kotlin.math.roundToInt
@@ -24,6 +43,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
+import kotlinx.collections.immutable.ImmutableList
 
 data class WorkoutCalendarContent(
     val visibleYearMonth: YearMonth,
@@ -33,6 +53,12 @@ data class WorkoutCalendarContent(
     val sessionBlocks: List<WorkoutCalendarSessionBlock>,
     val dailyTotalCaloriesKcal: Int,
     val dailyCaloriesVisualLevel: WorkoutCaloriesVisualLevel,
+    /** Thumbnails for the inline schedule edit strip (cart draft order). */
+    val editBarItems: ImmutableList<GExerciseCardUiModel>,
+    val isEditBarVisible: Boolean,
+    val editBarActiveExerciseInfo: ActiveExerciseInfo?,
+    val editBarIsCartExpanded: Boolean,
+    val editBarSaveEnabled: Boolean,
 )
 
 data class WorkoutCalendarDeleteDialogState(
@@ -60,6 +86,18 @@ class WorkoutCalendarViewModel @Inject constructor(
     private val deleteWorkoutSchedule: DeleteWorkoutScheduleUseCase,
     private val restoreWorkoutScheduleDelete: RestoreWorkoutScheduleDeleteUseCase,
     private val sharedPreferences: SharedPreferences,
+    private val observeExerciseCatalogUseCase: ObserveExerciseCatalogUseCase,
+    private val observeExerciseLibraryUiStateUseCase: ObserveExerciseLibraryUiStateUseCase,
+    private val observeExerciseLibraryChromeModeUseCase: ObserveExerciseLibraryChromeModeUseCase,
+    private val editExerciseBarUiMapper: EditExerciseBarUiMapper,
+    private val startSelectionBarEditFromScheduleRowUseCase: StartSelectionBarEditFromScheduleRowUseCase,
+    private val confirmSelectionBarEditUseCase: ConfirmSelectionBarEditUseCase,
+    private val cancelSelectionBarEditUseCase: CancelSelectionBarEditUseCase,
+    private val deleteEditingScheduleRowUseCase: DeleteEditingScheduleRowUseCase,
+    private val selectCartItemUseCase: SelectCartItemUseCase,
+    private val stepCartFieldUseCase: StepCartFieldUseCase,
+    private val setCartFieldManualUseCase: SetCartFieldManualUseCase,
+    private val toggleCartExpandedUseCase: ToggleCartExpandedUseCase,
 ) : UiStateViewModel<WorkoutCalendarContent, WorkoutCalendarEvent>() {
 
     private val today: LocalDate = LocalDate.now()
@@ -82,27 +120,81 @@ class WorkoutCalendarViewModel @Inject constructor(
 
     private var pendingUndoDelete: WorkoutScheduleDeleteResult? = null
 
-    val visibleMonthState = _visibleMonth.asStateFlow()
-    val selectedDateState = _selectedDate.asStateFlow()
+    private val calendarGridSliceFlow =
+        combine(
+            _visibleMonth.flatMapLatest { ym -> observeMonthSummaries(ym) },
+            _selectedDate.flatMapLatest { d -> getWorkoutDetails(d) },
+            _visibleMonth,
+            _selectedDate,
+        ) { summaries, sessionBlocks, visibleYm, selectedDay ->
+            WorkoutCalendarGridSlice(
+                summariesByEpochDay = summaries,
+                sessionBlocks = sessionBlocks,
+                visibleYearMonth = visibleYm,
+                selectedDate = selectedDay,
+            )
+        }
+
 
     init {
+        observeExerciseCatalogUseCase.startCollection(viewModelScope) { throwable ->
+            sendEvent(
+                WorkoutCalendarEvent.TransientMessage(
+                    throwable.message ?: "Unknown error",
+                ),
+            )
+        }
+        val libraryFlow = observeExerciseLibraryUiStateUseCase.observe(viewModelScope)
+        val chromeFlow = observeExerciseLibraryChromeModeUseCase.chromeMode
         viewModelScope.launch {
             combine(
-                _visibleMonth.flatMapLatest { ym -> observeMonthSummaries(ym) },
-                _selectedDate.flatMapLatest { d -> getWorkoutDetails(d) },
-                _visibleMonth,
-                _selectedDate,
-            ) { summaries, sessionBlocks, vm, sd ->
-                val dailyCaloriesKcal = sessionBlocks
+                calendarGridSliceFlow,
+                libraryFlow,
+                chromeFlow,
+            ) { grid, libraryState, chrome ->
+                val dailyCaloriesKcal = grid.sessionBlocks
                     .sumOf { it.totalCaloriesKcal.toDouble() }
                     .roundToInt()
+                val chromeEditing = chrome as? ExerciseLibraryChromeMode.EditingScheduleRow
+                val isEditBarVisible = chromeEditing != null
+                val editBarItems =
+                    if (isEditBarVisible) {
+                        editExerciseBarUiMapper.draftThumbnailCards(libraryState)
+                    } else {
+                        editExerciseBarUiMapper.emptyDraftThumbnails()
+                    }
+                val measurementFallbackKind =
+                    chromeEditing?.measurementModeFallback?.toSelectionBarExerciseMeasurementKind()
+                        ?: SelectionBarExerciseMeasurementKind.Strength
+                val editBarActiveExerciseInfo =
+                    if (isEditBarVisible) {
+                        editExerciseBarUiMapper.activeExerciseForEditBar(
+                            libraryState,
+                            editBarItems,
+                            measurementFallbackKind,
+                        )
+                    } else {
+                        null
+                    }
+                val editBarSaveEnabled =
+                    isEditBarVisible &&
+                        libraryState.isCartDraftValidForSessionConfirm(
+                            selectionBarMeasurementModeFallback = chromeEditing?.measurementModeFallback,
+                        )
+                val editBarIsCartExpanded =
+                    isEditBarVisible && libraryState.isCartExpanded
                 WorkoutCalendarContent(
-                    visibleYearMonth = vm,
-                    selectedDate = sd,
-                    summariesByEpochDay = summaries,
-                    sessionBlocks = sessionBlocks,
+                    visibleYearMonth = grid.visibleYearMonth,
+                    selectedDate = grid.selectedDate,
+                    summariesByEpochDay = grid.summariesByEpochDay,
+                    sessionBlocks = grid.sessionBlocks,
                     dailyTotalCaloriesKcal = dailyCaloriesKcal,
                     dailyCaloriesVisualLevel = caloriesToVisualLevel(dailyCaloriesKcal.toFloat()),
+                    editBarItems = editBarItems,
+                    isEditBarVisible = isEditBarVisible,
+                    editBarActiveExerciseInfo = editBarActiveExerciseInfo,
+                    editBarIsCartExpanded = editBarIsCartExpanded,
+                    editBarSaveEnabled = editBarSaveEnabled,
                 )
             }.collect { content ->
                 setSuccess(content)
@@ -194,6 +286,51 @@ class WorkoutCalendarViewModel @Inject constructor(
     fun markSwipeHintSeen() {
         sharedPreferences.edit().putBoolean(Constants.PREF_WORKOUT_CALENDAR_SWIPE_HINT_SEEN, true).apply()
         _swipeHintSeen.value = true
+    }
+
+    fun startSelectionBarEditFromScheduleRow(rowId: Long) {
+        launchSafely {
+            startSelectionBarEditFromScheduleRowUseCase(rowId)
+        }
+    }
+
+    fun onEditBarConfirm() {
+        launchSafely {
+            confirmSelectionBarEditUseCase()
+        }
+    }
+
+    fun onEditBarDelete() {
+        launchSafely {
+            val deleted = deleteEditingScheduleRowUseCase()
+            if (deleted != null) {
+                pendingUndoDelete = deleted
+                _openSwipeRowId.value = null
+                sendEvent(WorkoutCalendarEvent.ScheduleDeletedShowUndoSnackbar)
+            } else {
+                sendEvent(WorkoutCalendarEvent.DeleteScheduleFailed)
+            }
+        }
+    }
+
+    fun dismissEditBar() {
+        cancelSelectionBarEditUseCase()
+    }
+
+    fun selectCartItem(exerciseId: String) {
+        selectCartItemUseCase(observeExerciseLibraryUiStateUseCase.snapshotForCartActions(), exerciseId)
+    }
+
+    fun stepCartField(exerciseId: String, setIndex: Int, field: CartSetField, delta: Int) {
+        stepCartFieldUseCase(exerciseId, setIndex, field, delta)
+    }
+
+    fun setCartFieldManual(exerciseId: String, setIndex: Int, field: CartSetField, value: String) {
+        setCartFieldManualUseCase(exerciseId, setIndex, field, value)
+    }
+
+    fun toggleCartExpandedForSelectionBar() {
+        toggleCartExpandedUseCase()
     }
 
     override fun onError(throwable: Throwable) {

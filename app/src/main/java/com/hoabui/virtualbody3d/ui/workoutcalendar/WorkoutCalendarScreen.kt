@@ -1,6 +1,5 @@
 package com.hoabui.virtualbody3d.ui.workoutcalendar
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -21,6 +20,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
-import com.hoabui.virtualbody3d.core.base.UiState
 import com.hoabui.virtualbody3d.domain.model.calendar.WorkoutCalendarSessionBlockUiModel
 import com.hoabui.virtualbody3d.domain.model.calendar.toUiModel
 import com.hoabui.virtualbody3d.ui.common_ui.atom.button.GButton
@@ -46,8 +45,6 @@ import com.hoabui.virtualbody3d.ui.common_ui.organism.workoutcalendar.WorkoutCal
 import com.hoabui.virtualbody3d.ui.common_ui.organism.workoutcalendar.WorkoutCalendarMonthGridOrganism
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.EditExerciseBar
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.WorkoutBuilderActions
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.workoutcalendar.model.buildMonthGridCells
 import com.hoabui.virtualbody3d.ui.workoutcalendar.viewmodel.WorkoutCalendarContent
@@ -61,7 +58,6 @@ import java.util.Locale
 @Composable
 fun WorkoutCalendarScreen(
     onBack: () -> Unit,
-    onNavigateToSessionBookingEditor: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: WorkoutCalendarViewModel = hiltViewModel(),
 ) {
@@ -115,7 +111,6 @@ fun WorkoutCalendarScreen(
                     data = data,
                     today = today,
                     viewModel = viewModel,
-                    onNavigateToSessionBookingEditor = onNavigateToSessionBookingEditor,
                 )
             }
 
@@ -130,7 +125,6 @@ private fun WorkoutCalendarSuccessContent(
     data: WorkoutCalendarContent,
     today: LocalDate,
     viewModel: WorkoutCalendarViewModel,
-    onNavigateToSessionBookingEditor: () -> Unit,
 ) {
     val cal = GymTheme.token.workoutCalendar
     val token = GymTheme.token
@@ -145,6 +139,13 @@ private fun WorkoutCalendarSuccessContent(
         summaries = data.summariesByEpochDay,
     )
 
+    val listBottomPadding =
+        if (data.isEditBarVisible) {
+            token.bodyAnalysis.exerciseLibrarySelectionBarCollapsedListBottomInset
+        } else {
+            token.spacing.none
+        }
+
     // Map session blocks to UI models
     val sessionBlockUiModels: List<WorkoutCalendarSessionBlockUiModel> =
         data.sessionBlocks.map { block -> block.toUiModel() }
@@ -154,47 +155,9 @@ private fun WorkoutCalendarSuccessContent(
     val pendingSwipeCloseRowId by viewModel.pendingSwipeCloseRowId.collectAsStateWithLifecycle()
     val swipeHintSeen by viewModel.swipeHintSeen.collectAsStateWithLifecycle()
 
-    val selectionBarActions =
-        remember(viewModel, onNavigateToSessionBookingEditor) {
-            WorkoutBuilderActions(
-                onSelectCartItem = {
-                    viewModel.selectCartItem(it)
-                },
-                onRemoveCartItem = {
-                    viewModel.removeCartItem(it)
-                },
-                onClearCart = { viewModel.clearCart() },
-                onNavigateToSessionBooking = {
-                    onNavigateToSessionBookingEditor()
-                },
-                onNavigateToWorkoutCalendar = {},
-                onStepCartField = { exerciseId, setIndex, field, delta ->
-                    viewModel.stepCartField(
-                        exerciseId = exerciseId,
-                        setIndex = setIndex,
-                        field = field,
-                        delta = delta,
-                    )
-                },
-                onSetCartFieldManual = { exerciseId, setIndex, field, value ->
-                    viewModel.setCartFieldManual(
-                        exerciseId = exerciseId,
-                        setIndex = setIndex,
-                        field = field,
-                        value = value,
-                    )
-                },
-                onToggleCartExpanded = {
-                    viewModel.toggleCartExpanded()
-                },
-                onConfirmSelectionBarEdit = {
-                    viewModel.confirmSelectionBarEdit()
-                },
-                onCancelSelectionBarEdit = {
-                    viewModel.cancelSelectionBarEdit()
-                },
-            )
-        }
+    BackHandler(enabled = data.isEditBarVisible) {
+        viewModel.dismissEditBar()
+    }
 
     val fadeSpec = tween<Float>(
         durationMillis = token.motion.duration.standard,
@@ -203,12 +166,6 @@ private fun WorkoutCalendarSuccessContent(
     val cartEnterSlide = tween<IntOffset>(
         durationMillis = token.motion.duration.standard,
         easing = token.motion.easing.standard,
-    )
-
-    BackHandler(
-        onBack = {
-            viewModel.cancelSelectionBarEdit()
-        },
     )
 
     deleteDialog?.let { dialog ->
@@ -289,7 +246,7 @@ private fun WorkoutCalendarSuccessContent(
             )
         }
         AnimatedVisibility(
-            visible = cartVisible,
+            visible = data.isEditBarVisible,
             modifier = Modifier.align(Alignment.BottomCenter),
             enter = fadeIn(fadeSpec) + slideInVertically(
                 animationSpec = cartEnterSlide,
@@ -301,11 +258,20 @@ private fun WorkoutCalendarSuccessContent(
             ),
         ) {
             EditExerciseBar(
-                libraryState = libraryData,
-                isSelectionBarScheduleEditActive = isSelectionBarScheduleEditActive,
-                selectionBarMeasurementModeFallback = selectionBarMeasurementModeFallback,
-                actions = selectionBarActions,
+                items = data.editBarItems,
+                onEdit = viewModel::onEditBarConfirm,
+                onDelete = viewModel::onEditBarDelete,
                 modifier = Modifier.fillMaxWidth(),
+                activeExerciseInfo = data.editBarActiveExerciseInfo,
+                isCartExpanded = data.editBarIsCartExpanded,
+                isSaveEnabled = data.editBarSaveEnabled,
+                onDismissEditBar = viewModel::dismissEditBar,
+                onSelectCartItem = viewModel::selectCartItem,
+                onRemoveCartItem = {},
+                onClearCart = {},
+                onToggleCartExpanded = viewModel::toggleCartExpandedForSelectionBar,
+                onStepCartField = viewModel::stepCartField,
+                onSetCartFieldManual = viewModel::setCartFieldManual,
             )
         }
     }

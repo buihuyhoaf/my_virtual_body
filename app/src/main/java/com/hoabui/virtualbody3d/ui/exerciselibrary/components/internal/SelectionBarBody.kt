@@ -6,12 +6,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exerciselibrary.ActiveExerciseDraftEditorOrganism
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.ActiveExerciseInfo
-import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.WorkoutBuilderActions
 
 @Composable
 internal fun ColumnScope.SelectionBarBody(
     activeExerciseInfo: ActiveExerciseInfo?,
-    actions: WorkoutBuilderActions,
+    actions: SelectionBarInteractionCallbacks,
 ) {
     ActiveExerciseDraftEditorOrganism(
         activeExerciseInfo = activeExerciseInfo,

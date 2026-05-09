@@ -130,20 +130,15 @@ fun AppNavGraph(
                 )
             }
         }
-        composable<WorkoutCalendarRoute> { backStackEntry ->
+        composable<WorkoutCalendarRoute> { _ ->
             val onWorkoutCalendarBack = {
                 navController.popWorkoutCalendarOrFallback()
             }
-            val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry(ExerciseLibraryGraphRoute)
-            }
-            val exerciseLibraryViewModel: ExerciseLibraryViewModel = hiltViewModel(parentEntry)
             WorkoutCalendarScreen(
                 onBack = onWorkoutCalendarBack,
                 onNavigateToSessionBookingEditor = {
                     navController.navigate(SessionBookingEditorRoute)
                 },
-                exerciseLibraryViewModel = exerciseLibraryViewModel,
             )
         }
         composable<AddRoute> {

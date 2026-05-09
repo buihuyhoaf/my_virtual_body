@@ -4,17 +4,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.hoabui.virtualbody3d.ui.common_ui.organism.exercise.GExerciseCardUiModel
+import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.ActiveExerciseInfo
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.CartDragHandle
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.CartThumbnailRow
-import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.ActiveExerciseInfo
-import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.WorkoutBuilderActions
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 
 @Composable
 internal fun SelectionBarHeader(
     cartItems: List<GExerciseCardUiModel>,
     activeExerciseInfo: ActiveExerciseInfo?,
-    actions: WorkoutBuilderActions,
+    actions: SelectionBarInteractionCallbacks,
     dragModifier: Modifier,
     isSelectionBarEditMode: Boolean,
 ) {

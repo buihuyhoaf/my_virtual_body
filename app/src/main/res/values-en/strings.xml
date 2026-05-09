@@ -93,6 +93,8 @@
     <string name="workout_calendar_metrics_duration">%1$d min</string>
     <string name="workout_calendar_swipe_delete">Delete</string>
     <string name="workout_calendar_swipe_edit">Edit</string>
+    <string name="workout_calendar_edit_bar_save">Save</string>
+    <string name="workout_calendar_edit_bar_delete">Remove from schedule</string>
     <string name="workout_calendar_edit_pending">Editing scheduled workouts isn\'t available yet.</string>
     <string name="workout_calendar_delete_confirm_title">Remove exercise?</string>
     <string name="workout_calendar_delete_confirm_message">Remove \"%1$s\" from the schedule for %2$s?</string>
