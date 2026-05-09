@@ -3,7 +3,6 @@ package com.hoabui.virtualbody3d.domain.model.exercise
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.ExerciseDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.SetRowDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.catalog.LibraryPresentationSlice
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryChromeMode
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.util.isCartDraftValidForSessionConfirm
 import kotlinx.collections.immutable.persistentListOf
@@ -60,7 +59,7 @@ class ExerciseDurationTest {
                 exerciseMeasurementById = modes,
             ),
         )
-        assertTrue(state.isCartDraftValidForSessionConfirm(ExerciseLibraryChromeMode.Idle))
+        assertTrue(state.isCartDraftValidForSessionConfirm())
     }
 
     @Test
@@ -74,6 +73,6 @@ class ExerciseDurationTest {
                 exerciseMeasurementById = modes,
             ),
         )
-        assertFalse(state.isCartDraftValidForSessionConfirm(ExerciseLibraryChromeMode.Idle))
+        assertFalse(state.isCartDraftValidForSessionConfirm())
     }
 }

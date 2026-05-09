@@ -10,7 +10,6 @@ class ClearCartUseCase @Inject constructor(
 ) {
     operator fun invoke() {
         exerciseLibraryCartManager.clearCartOnly()
-        exerciseLibraryCartManager.setChromeIdle()
         bookingManager.resetBookingAfterCartClear()
     }
 }

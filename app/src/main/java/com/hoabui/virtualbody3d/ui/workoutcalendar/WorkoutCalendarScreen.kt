@@ -45,10 +45,8 @@ import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
 import com.hoabui.virtualbody3d.ui.common_ui.organism.workoutcalendar.WorkoutCalendarDayExerciseListOrganism
 import com.hoabui.virtualbody3d.ui.common_ui.organism.workoutcalendar.WorkoutCalendarMonthGridOrganism
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
-import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySelectionBar
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryChromeMode
+import com.hoabui.virtualbody3d.ui.exerciselibrary.components.EditExerciseBar
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel.ExerciseLibraryViewModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.WorkoutBuilderActions
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.workoutcalendar.model.buildMonthGridCells
@@ -66,7 +64,6 @@ fun WorkoutCalendarScreen(
     onNavigateToSessionBookingEditor: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: WorkoutCalendarViewModel = hiltViewModel(),
-    exerciseLibraryViewModel: ExerciseLibraryViewModel,
 ) {
     val today = LocalDate.now()
     val screen by viewModel.state.collectAsStateWithLifecycle()
@@ -118,7 +115,6 @@ fun WorkoutCalendarScreen(
                     data = data,
                     today = today,
                     viewModel = viewModel,
-                    exerciseLibraryViewModel = exerciseLibraryViewModel,
                     onNavigateToSessionBookingEditor = onNavigateToSessionBookingEditor,
                 )
             }
@@ -134,7 +130,6 @@ private fun WorkoutCalendarSuccessContent(
     data: WorkoutCalendarContent,
     today: LocalDate,
     viewModel: WorkoutCalendarViewModel,
-    exerciseLibraryViewModel: ExerciseLibraryViewModel,
     onNavigateToSessionBookingEditor: () -> Unit,
 ) {
     val cal = GymTheme.token.workoutCalendar
@@ -159,30 +154,22 @@ private fun WorkoutCalendarSuccessContent(
     val pendingSwipeCloseRowId by viewModel.pendingSwipeCloseRowId.collectAsStateWithLifecycle()
     val swipeHintSeen by viewModel.swipeHintSeen.collectAsStateWithLifecycle()
 
-    val libraryScreen by exerciseLibraryViewModel.state.collectAsStateWithLifecycle()
-    val chromeMode by exerciseLibraryViewModel.chromeMode.collectAsStateWithLifecycle()
-    val libraryData: ExerciseLibraryUiState? =
-        (libraryScreen as? UiState.Success)?.data
-    val cartVisible = libraryData?.itemDrafts?.isNotEmpty() == true
-    val listBottomPadding =
-        if (cartVisible) token.bodyAnalysis.exerciseLibrarySelectionBarCollapsedListBottomInset else token.spacing.none
-
     val selectionBarActions =
-        remember(exerciseLibraryViewModel, onNavigateToSessionBookingEditor) {
+        remember(viewModel, onNavigateToSessionBookingEditor) {
             WorkoutBuilderActions(
                 onSelectCartItem = {
-                    exerciseLibraryViewModel.selectCartItem(it)
+                    viewModel.selectCartItem(it)
                 },
                 onRemoveCartItem = {
-                    exerciseLibraryViewModel.removeCartItem(it)
+                    viewModel.removeCartItem(it)
                 },
-                onClearCart = { exerciseLibraryViewModel.clearCart() },
-                onAddToSession = {
+                onClearCart = { viewModel.clearCart() },
+                onNavigateToSessionBooking = {
                     onNavigateToSessionBookingEditor()
                 },
                 onNavigateToWorkoutCalendar = {},
                 onStepCartField = { exerciseId, setIndex, field, delta ->
-                    exerciseLibraryViewModel.stepCartField(
+                    viewModel.stepCartField(
                         exerciseId = exerciseId,
                         setIndex = setIndex,
                         field = field,
@@ -190,7 +177,7 @@ private fun WorkoutCalendarSuccessContent(
                     )
                 },
                 onSetCartFieldManual = { exerciseId, setIndex, field, value ->
-                    exerciseLibraryViewModel.setCartFieldManual(
+                    viewModel.setCartFieldManual(
                         exerciseId = exerciseId,
                         setIndex = setIndex,
                         field = field,
@@ -198,13 +185,13 @@ private fun WorkoutCalendarSuccessContent(
                     )
                 },
                 onToggleCartExpanded = {
-                    exerciseLibraryViewModel.toggleCartExpanded()
+                    viewModel.toggleCartExpanded()
                 },
                 onConfirmSelectionBarEdit = {
-                    exerciseLibraryViewModel.confirmSelectionBarEdit()
+                    viewModel.confirmSelectionBarEdit()
                 },
                 onCancelSelectionBarEdit = {
-                    exerciseLibraryViewModel.cancelSelectionBarEdit()
+                    viewModel.cancelSelectionBarEdit()
                 },
             )
         }
@@ -219,9 +206,8 @@ private fun WorkoutCalendarSuccessContent(
     )
 
     BackHandler(
-        enabled = chromeMode is ExerciseLibraryChromeMode.EditingScheduleRow,
         onBack = {
-            exerciseLibraryViewModel.cancelSelectionBarEdit()
+            viewModel.cancelSelectionBarEdit()
         },
     )
 
@@ -293,7 +279,7 @@ private fun WorkoutCalendarSuccessContent(
                 onDeleteAffordanceClick = viewModel::onDeleteAffordanceClicked,
                 onEditAffordanceClick = { rowId, _ ->
                     viewModel.onEditAffordanceClicked(rowId)
-                    exerciseLibraryViewModel.startSelectionBarEditFromScheduleRow(rowId)
+                    viewModel.startSelectionBarEditFromScheduleRow(rowId)
                 },
                 onSwipeHintConsumed = viewModel::markSwipeHintSeen,
                 modifier = Modifier
@@ -302,26 +288,25 @@ private fun WorkoutCalendarSuccessContent(
                     .weight(1f),
             )
         }
-        if (libraryData != null) {
-            AnimatedVisibility(
-                visible = cartVisible,
-                modifier = Modifier.align(Alignment.BottomCenter),
-                enter = fadeIn(fadeSpec) + slideInVertically(
-                    animationSpec = cartEnterSlide,
-                    initialOffsetY = { it },
-                ),
-                exit = fadeOut(fadeSpec) + slideOutVertically(
-                    animationSpec = cartEnterSlide,
-                    targetOffsetY = { it },
-                ),
-            ) {
-                ExerciseLibrarySelectionBar(
-                    libraryState = libraryData,
-                    chromeMode = chromeMode,
-                    actions = selectionBarActions,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
+        AnimatedVisibility(
+            visible = cartVisible,
+            modifier = Modifier.align(Alignment.BottomCenter),
+            enter = fadeIn(fadeSpec) + slideInVertically(
+                animationSpec = cartEnterSlide,
+                initialOffsetY = { it },
+            ),
+            exit = fadeOut(fadeSpec) + slideOutVertically(
+                animationSpec = cartEnterSlide,
+                targetOffsetY = { it },
+            ),
+        ) {
+            EditExerciseBar(
+                libraryState = libraryData,
+                isSelectionBarScheduleEditActive = isSelectionBarScheduleEditActive,
+                selectionBarMeasurementModeFallback = selectionBarMeasurementModeFallback,
+                actions = selectionBarActions,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }

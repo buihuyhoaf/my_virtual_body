@@ -2,17 +2,15 @@ package com.hoabui.virtualbody3d.ui.exerciselibrary.util
 
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.normalizeDurationMinutesSeconds
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryChromeMode
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 
 fun ExerciseLibraryUiState.isCartDraftValidForSessionConfirm(
-    chromeMode: ExerciseLibraryChromeMode,
+    selectionBarMeasurementModeFallback: ExerciseMeasurementMode? = null,
 ): Boolean {
     if (itemDrafts.isEmpty()) return false
-    val editMode = chromeMode as? ExerciseLibraryChromeMode.EditingScheduleRow
     return itemDrafts.all { (id, draft) ->
         val mode = libraryList.exerciseMeasurementById[id]
-            ?: editMode?.measurementMode
+            ?: selectionBarMeasurementModeFallback
             ?: ExerciseMeasurementMode.Strength
         when (mode) {
             ExerciseMeasurementMode.Strength -> {

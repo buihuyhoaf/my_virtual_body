@@ -20,7 +20,7 @@ import com.hoabui.virtualbody3d.ui.theme.GymTheme
 import com.hoabui.virtualbody3d.ui.theme.tokens.component.GSurfaceTreatment
 
 /**
- * Slim bottom bar: cart thumbnails, clear all, and primary CTA to continue on the workout calendar.
+ * Slim bottom bar: cart thumbnails, clear all, and primary CTA to navigate to session booking.
  */
 @Composable
 fun ExerciseLibraryCartBar(
@@ -61,7 +61,7 @@ fun ExerciseLibraryCartBar(
             )
             GButton(
                 text = stringResource(R.string.exercise_library_add_to_session),
-                onClick = actions.onNavigateToWorkoutCalendar,
+                onClick = actions.onNavigateToSessionBooking,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = token.spacing.sm)
@@ -108,7 +108,7 @@ private fun previewStubExerciseLibraryActions(): WorkoutBuilderActions {
         onSelectCartItem = noopS,
         onRemoveCartItem = noopS,
         onClearCart = noop,
-        onAddToSession = noop,
+        onNavigateToSessionBooking = noop,
         onNavigateToWorkoutCalendar = noop,
         onStepCartField = noop2,
         onSetCartFieldManual = noop3,

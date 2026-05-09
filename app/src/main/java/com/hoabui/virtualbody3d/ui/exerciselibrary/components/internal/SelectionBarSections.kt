@@ -145,7 +145,7 @@ internal fun SelectionBarSections(
                     isSelectionBarEditMode = isSelectionBarEditMode,
                     bookingEnabled = bookingEnabled,
                     isConfirmEnabled = isSelectionBarConfirmEnabled,
-                    onAddToSession = actions.onAddToSession,
+                    onAddToSession = actions.onNavigateToSessionBooking,
                     onConfirmSelectionBarEdit = actions.onConfirmSelectionBarEdit,
                     onCancelSelectionBarEdit = actions.onCancelSelectionBarEdit,
                 )

@@ -6,7 +6,7 @@ data class WorkoutBuilderActions(
     val onSelectCartItem: (String) -> Unit,
     val onRemoveCartItem: (String) -> Unit,
     val onClearCart: () -> Unit,
-    val onAddToSession: () -> Unit,
+    val onNavigateToSessionBooking: () -> Unit,
     val onNavigateToWorkoutCalendar: () -> Unit,
     val onStepCartField: (exerciseId: String, setIndex: Int, field: CartSetField, delta: Int) -> Unit,
     val onSetCartFieldManual: (exerciseId: String, setIndex: Int, field: CartSetField, value: String) -> Unit,

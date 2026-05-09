@@ -22,33 +22,32 @@ internal fun SelectionBarFooter(
     onCancelSelectionBarEdit: () -> Unit,
 ) {
     val token = GymTheme.token
-    val horizontal = Modifier
-        .fillMaxWidth()
-        .padding(token.spacing.sm)
-    if (isSelectionBarEditMode) {
-        Row(
-            modifier = horizontal,
-            horizontalArrangement = Arrangement.spacedBy(token.spacing.sm),
-        ) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = token.spacing.sm, vertical = token.spacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(token.spacing.sm),
+    ) {
+        if (isSelectionBarEditMode) {
             GButton(
-                text = stringResource(R.string.exercise_library_selection_confirm),
-                onClick = onConfirmSelectionBarEdit,
-                modifier = Modifier.weight(1f),
-                enabled = isConfirmEnabled,
-            )
-            GButton(
-                text = stringResource(R.string.exercise_library_selection_cancel),
+                text = stringResource(R.string.exercise_library_booking_cancel),
                 onClick = onCancelSelectionBarEdit,
                 modifier = Modifier.weight(1f),
                 variant = GButtonVariant.Outlined,
             )
+            GButton(
+                text = stringResource(R.string.exercise_library_booking_confirm),
+                onClick = onConfirmSelectionBarEdit,
+                modifier = Modifier.weight(1f),
+                enabled = isConfirmEnabled,
+            )
+        } else {
+            GButton(
+                text = stringResource(R.string.exercise_library_add_to_session),
+                onClick = onAddToSession,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = bookingEnabled,
+            )
         }
-    } else {
-        GButton(
-            text = stringResource(R.string.exercise_library_add_to_session),
-            onClick = onAddToSession,
-            modifier = horizontal,
-            enabled = bookingEnabled,
-        )
     }
 }

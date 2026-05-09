@@ -19,11 +19,9 @@ import com.hoabui.virtualbody3d.domain.usecase.PrepareLibrarySessionConfirmResul
 import com.hoabui.virtualbody3d.domain.usecase.CancelSelectionBarEditUseCase
 import com.hoabui.virtualbody3d.domain.usecase.CanConfirmLibrarySessionBookingUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ClearCartUseCase
-import com.hoabui.virtualbody3d.domain.usecase.ConfirmSelectionBarEditUseCase
 import com.hoabui.virtualbody3d.domain.usecase.DismissSessionBookingUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetWorkoutScheduleByRowUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveExerciseCatalogUseCase
-import com.hoabui.virtualbody3d.domain.usecase.ObserveExerciseLibraryChromeModeUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveExerciseLibraryUiStateUseCase
 import com.hoabui.virtualbody3d.domain.usecase.OnBookingClearTimeSelectionUseCase
 import com.hoabui.virtualbody3d.domain.usecase.OnBookingDateSelectedUseCase
@@ -54,7 +52,6 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.manager.ExerciseLibraryCartMa
 import com.hoabui.virtualbody3d.ui.exerciselibrary.manager.ExerciseLibrarySearchManager
 import com.hoabui.virtualbody3d.ui.exerciselibrary.mapper.ExerciseLibraryUiMapper
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.CartSetField
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryChromeMode
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiEffect
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSession
@@ -441,7 +438,7 @@ class ExerciseLibraryViewModelTest {
 
         vm.startSelectionBarEditFromScheduleRow(42L)
         delay(WAIT_FOR_COMBINE_MS)
-        assertTrue(vm.chromeMode.value is ExerciseLibraryChromeMode.EditingScheduleRow)
+        assertTrue(vm.isSelectionBarScheduleEditActive.value)
 
         vm.confirmSelectionBarEdit()
         delay(WAIT_FOR_COMBINE_MS)
@@ -457,7 +454,7 @@ class ExerciseLibraryViewModelTest {
                 durationSeconds = null,
             )
         }
-        assertFalse(vm.chromeMode.value is ExerciseLibraryChromeMode.EditingScheduleRow)
+        assertFalse(vm.isSelectionBarScheduleEditActive.value)
     }
 
     @Test
@@ -486,7 +483,7 @@ class ExerciseLibraryViewModelTest {
         coVerify(exactly = 0) {
             updateSchedule.invoke(any(), any(), any(), any(), any(), any(), any())
         }
-        assertFalse(vm.chromeMode.value is ExerciseLibraryChromeMode.EditingScheduleRow)
+        assertFalse(vm.isSelectionBarScheduleEditActive.value)
     }
 
     private companion object {

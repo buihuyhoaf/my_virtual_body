@@ -35,8 +35,6 @@ data class BodyRegionDetailRoute(val region: String)
 
 @Serializable
 data class ExerciseLibraryRoute(
-    /** When set, library opens with the selection bar expanded in edit mode for this Room row. */
-    val scheduleRowIdToEdit: Long? = null,
     /** [ExerciseCategory.name] from dashboard shortcuts; XOR with [initialBodyRegions]. */
     val initialExerciseCategory: String? = null,
     /** [BodyRegion.name] entries for composite dashboard tiles; XOR with [initialExerciseCategory]. */

@@ -1,5 +1,6 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -29,22 +30,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import android.util.Log
 import com.hoabui.virtualbody3d.R
+import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBar
+import com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBarBackIcon
 import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
 import com.hoabui.virtualbody3d.ui.components.UiStateContent
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryCartBar
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibraryEmptyState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySearchLayer
-import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySelectionBar
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseSection
-import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
-import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
-import com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBar
-import com.hoabui.virtualbody3d.ui.common_ui.molecule.topbar.GTopBarBackIcon
 import com.hoabui.virtualbody3d.ui.exerciselibrary.data.ExerciseDisplayResources
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryChromeMode
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel.ExerciseLibraryViewModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.ExerciseCatalogActions
@@ -65,14 +63,13 @@ private object ExerciseLibraryListContentTypes {
 fun ExerciseLibraryScreen(
     modifier: Modifier = Modifier,
     onNavigateToWorkoutCalendar: () -> Unit,
+    onNavigateToSessionBooking: () -> Unit,
     onBack: () -> Unit,
-    scheduleRowIdToEdit: Long? = null,
     initialExerciseCategory: String? = null,
     initialBodyRegions: List<String>? = null,
     viewModel: ExerciseLibraryViewModel = hiltViewModel(),
 ) {
     val screenState by viewModel.state.collectAsStateWithLifecycle()
-    val chromeMode by viewModel.chromeMode.collectAsStateWithLifecycle()
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
@@ -92,24 +89,18 @@ fun ExerciseLibraryScreen(
             )
         }
     }
-    LaunchedEffect(scheduleRowIdToEdit) {
-        val rowId = scheduleRowIdToEdit ?: return@LaunchedEffect
-        viewModel.startSelectionBarEditFromScheduleRow(rowId)
-    }
     val catalogActions = remember(viewModel) {
         ExerciseCatalogActions(
             onQueryChange = { viewModel.setSearchQuery(it) },
             onCardTap = { viewModel.toggleCardSelection(it) },
         )
     }
-    val workoutBuilderActions = remember(viewModel, onNavigateToWorkoutCalendar) {
+    val workoutBuilderActions = remember(viewModel, onNavigateToWorkoutCalendar, onNavigateToSessionBooking) {
         WorkoutBuilderActions(
             onSelectCartItem = { viewModel.selectCartItem(it) },
             onRemoveCartItem = { viewModel.removeCartItem(it) },
             onClearCart = { viewModel.clearCart() },
-            onAddToSession = {
-                onNavigateToWorkoutCalendar()
-            },
+            onNavigateToSessionBooking = onNavigateToSessionBooking,
             onNavigateToWorkoutCalendar = {
                 onNavigateToWorkoutCalendar()
             },
@@ -153,7 +144,6 @@ fun ExerciseLibraryScreen(
                     modifier = Modifier
                         .fillMaxSize(),
                     state = data,
-                    chromeMode = chromeMode,
                     catalogActions = catalogActions,
                     workoutBuilderActions = workoutBuilderActions,
                 )
@@ -166,7 +156,6 @@ fun ExerciseLibraryScreen(
 fun ExerciseLibraryScreenContent(
     modifier: Modifier = Modifier,
     state: ExerciseLibraryUiState,
-    chromeMode: ExerciseLibraryChromeMode,
     catalogActions: ExerciseCatalogActions,
     workoutBuilderActions: WorkoutBuilderActions,
 ) {
@@ -297,21 +286,12 @@ fun ExerciseLibraryScreenContent(
                 targetOffsetY = { it },
             ),
         ) {
-            if (chromeMode is ExerciseLibraryChromeMode.EditingScheduleRow) {
-                ExerciseLibrarySelectionBar(
-                    libraryState = state,
-                    chromeMode = chromeMode,
-                    actions = workoutBuilderActions,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            } else {
-                ExerciseLibraryCartBar(
-                    libraryState = state,
-                    actions = workoutBuilderActions,
-                    cartItems = cartItems,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
+            ExerciseLibraryCartBar(
+                libraryState = state,
+                actions = workoutBuilderActions,
+                cartItems = cartItems,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }

@@ -4,11 +4,8 @@ import androidx.lifecycle.viewModelScope
 import com.hoabui.virtualbody3d.core.base.UiStateViewModel
 import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
-import com.hoabui.virtualbody3d.domain.usecase.CancelSelectionBarEditUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ClearCartUseCase
-import com.hoabui.virtualbody3d.domain.usecase.ConfirmSelectionBarEditUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveExerciseCatalogUseCase
-import com.hoabui.virtualbody3d.domain.usecase.ObserveExerciseLibraryChromeModeUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ObserveExerciseLibraryUiStateUseCase
 import com.hoabui.virtualbody3d.domain.usecase.RemoveCartItemUseCase
 import com.hoabui.virtualbody3d.domain.usecase.SelectCartItemUseCase
@@ -16,19 +13,14 @@ import com.hoabui.virtualbody3d.domain.usecase.SetCartFieldManualUseCase
 import com.hoabui.virtualbody3d.domain.usecase.SetInitialBodyRegionFilterUseCase
 import com.hoabui.virtualbody3d.domain.usecase.SetInitialExerciseCategoryFilterUseCase
 import com.hoabui.virtualbody3d.domain.usecase.SetSearchQueryUseCase
-import com.hoabui.virtualbody3d.domain.usecase.StartSelectionBarEditFromScheduleRowUseCase
 import com.hoabui.virtualbody3d.domain.usecase.StepCartFieldUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ToggleCardSelectionUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ToggleCartExpandedUseCase
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.CartSetField
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryChromeMode
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryEvent
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableSet
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
@@ -37,7 +29,6 @@ import javax.inject.Inject
 class ExerciseLibraryViewModel @Inject constructor(
     private val observeExerciseCatalogUseCase: ObserveExerciseCatalogUseCase,
     private val observeExerciseLibraryUiStateUseCase: ObserveExerciseLibraryUiStateUseCase,
-    private val observeExerciseLibraryChromeModeUseCase: ObserveExerciseLibraryChromeModeUseCase,
     private val setSearchQueryUseCase: SetSearchQueryUseCase,
     private val setInitialExerciseCategoryFilterUseCase: SetInitialExerciseCategoryFilterUseCase,
     private val setInitialBodyRegionFilterUseCase: SetInitialBodyRegionFilterUseCase,
@@ -48,14 +39,8 @@ class ExerciseLibraryViewModel @Inject constructor(
     private val stepCartFieldUseCase: StepCartFieldUseCase,
     private val setCartFieldManualUseCase: SetCartFieldManualUseCase,
     private val toggleCartExpandedUseCase: ToggleCartExpandedUseCase,
-    private val startSelectionBarEditFromScheduleRowUseCase: StartSelectionBarEditFromScheduleRowUseCase,
-    private val cancelSelectionBarEditUseCase: CancelSelectionBarEditUseCase,
-    private val confirmSelectionBarEditUseCase: ConfirmSelectionBarEditUseCase,
 ) : UiStateViewModel<ExerciseLibraryUiState, ExerciseLibraryEvent>() {
 
-    private val _chromeMode =
-        MutableStateFlow<ExerciseLibraryChromeMode>(ExerciseLibraryChromeMode.Idle)
-    val chromeMode: StateFlow<ExerciseLibraryChromeMode> = _chromeMode.asStateFlow()
 
     init {
         observeExerciseCatalogUseCase.startCollection(viewModelScope) {
@@ -63,9 +48,6 @@ class ExerciseLibraryViewModel @Inject constructor(
         }
         observeExerciseLibraryUiStateUseCase.observe(viewModelScope)
             .onEach { setSuccess(it) }
-            .launchIn(viewModelScope)
-        observeExerciseLibraryChromeModeUseCase.observe(viewModelScope)
-            .onEach { _chromeMode.value = it }
             .launchIn(viewModelScope)
     }
 
@@ -117,24 +99,5 @@ class ExerciseLibraryViewModel @Inject constructor(
     fun toggleCartExpanded() {
         sendEvent(ExerciseLibraryEvent.CartExpandedToggled)
         toggleCartExpandedUseCase()
-    }
-
-    fun startSelectionBarEditFromScheduleRow(scheduleRowId: Long) {
-        sendEvent(ExerciseLibraryEvent.SelectionBarEditStarted(scheduleRowId))
-        launchSafely {
-            startSelectionBarEditFromScheduleRowUseCase(scheduleRowId)
-        }
-    }
-
-    fun cancelSelectionBarEdit() {
-        sendEvent(ExerciseLibraryEvent.SelectionBarEditCancelled)
-        cancelSelectionBarEditUseCase()
-    }
-
-    fun confirmSelectionBarEdit() {
-        sendEvent(ExerciseLibraryEvent.SelectionBarEditConfirmed)
-        launchSafely {
-            confirmSelectionBarEditUseCase()
-        }
     }
 }

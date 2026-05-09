@@ -250,7 +250,6 @@ class ExerciseLibraryBookingManager @Inject constructor(
                 cartManager.clearCartOnly()
                 _sessionBookingInput.value = null
                 _sessionBookingWorkflowPhase.value = SessionBookingWorkflowPhase.Idle
-                cartManager.setChromeIdle()
             }
         }
     }

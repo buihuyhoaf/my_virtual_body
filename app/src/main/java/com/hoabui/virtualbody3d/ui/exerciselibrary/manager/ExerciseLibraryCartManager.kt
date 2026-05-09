@@ -4,13 +4,12 @@ import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseLibraryCartSnapshot
 import com.hoabui.virtualbody3d.domain.usecase.ExerciseLibraryCartCommand
 import com.hoabui.virtualbody3d.domain.usecase.ToggleExerciseInCartUseCase
-import com.hoabui.virtualbody3d.ui.exerciselibrary.util.toCartSnapshot
-import com.hoabui.virtualbody3d.ui.exerciselibrary.util.withCartSnapshot
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.CartSetField
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.ExerciseDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.SetRowDraft
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryChromeMode
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.util.toCartSnapshot
+import com.hoabui.virtualbody3d.ui.exerciselibrary.util.withCartSnapshot
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
@@ -42,16 +41,6 @@ class ExerciseLibraryCartManager @Inject constructor(
     private val _isCartExpanded = MutableStateFlow(false)
     val isCartExpanded: StateFlow<Boolean> = _isCartExpanded.asStateFlow()
 
-    private val _chromeMode = MutableStateFlow<ExerciseLibraryChromeMode>(ExerciseLibraryChromeMode.Idle)
-    val chromeMode: StateFlow<ExerciseLibraryChromeMode> = _chromeMode.asStateFlow()
-
-    fun setChromeMode(mode: ExerciseLibraryChromeMode) {
-        _chromeMode.value = mode
-    }
-
-    fun setChromeIdle() {
-        _chromeMode.value = ExerciseLibraryChromeMode.Idle
-    }
 
     fun applyCartSnapshot(syntheticBefore: ExerciseLibraryUiState, snap: ExerciseLibraryCartSnapshot) {
         val updated = syntheticBefore.withCartSnapshot(snap)
@@ -90,41 +79,6 @@ class ExerciseLibraryCartManager @Inject constructor(
     }
 
     fun clearCartOnly() {
-        _itemDrafts.value = persistentMapOf()
-        _draftOrder.value = persistentListOf()
-        _activeExerciseId.value = null
-        _isCartExpanded.value = false
-    }
-
-    fun setCartExpanded(expanded: Boolean) {
-        _isCartExpanded.value = expanded
-    }
-
-    fun setSelectionBarEditCart(
-        itemDrafts: ImmutableMap<String, ExerciseDraft>,
-        draftOrder: ImmutableList<String>,
-        activeExerciseId: String,
-        isCartExpanded: Boolean = true,
-    ) {
-        _itemDrafts.value = itemDrafts
-        _draftOrder.value = draftOrder
-        _activeExerciseId.value = activeExerciseId
-        _isCartExpanded.value = isCartExpanded
-    }
-
-    fun restoreCartFromBaseline(
-        itemDrafts: ImmutableMap<String, ExerciseDraft>,
-        draftOrder: ImmutableList<String>,
-        activeExerciseId: String?,
-        isCartExpanded: Boolean,
-    ) {
-        _itemDrafts.value = itemDrafts
-        _draftOrder.value = draftOrder
-        _activeExerciseId.value = activeExerciseId
-        _isCartExpanded.value = isCartExpanded
-    }
-
-    fun clearCartForIsolatedSelectionEdit() {
         _itemDrafts.value = persistentMapOf()
         _draftOrder.value = persistentListOf()
         _activeExerciseId.value = null

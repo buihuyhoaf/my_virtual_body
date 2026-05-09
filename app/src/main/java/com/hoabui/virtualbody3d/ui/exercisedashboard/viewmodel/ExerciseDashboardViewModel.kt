@@ -72,7 +72,7 @@ class ExerciseDashboardViewModel @Inject constructor(
         }
         return DashboardCoachUiModel(
             speechText = appContext.getString(res),
-            coachImageRes = R.drawable.whitecat,
+            coachImageRes = R.drawable.fitness_character_ready_stance_202605032000,
         )
     }
 

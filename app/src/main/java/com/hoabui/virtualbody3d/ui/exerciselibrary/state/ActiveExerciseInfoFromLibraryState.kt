@@ -12,7 +12,7 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.ActiveExerciseInfo
 private const val DEFAULT_BODY_WEIGHT_KG = 70.0
 
 /**
- * Derives the same [ActiveExerciseInfo] as [com.hoabui.virtualbody3d.ui.exerciselibrary.components.ExerciseLibrarySelectionBar].
+ * Derives [ActiveExerciseInfo] for cart editing surfaces from the current library state.
  */
 @Composable
 fun rememberActiveExerciseInfoFromLibraryState(

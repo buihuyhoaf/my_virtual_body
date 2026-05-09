@@ -38,7 +38,6 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.components.AddExerciseSuccess
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.CartThumbnailRow
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.LongSessionWarningDialog
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.AddExerciseSuccessSummary
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryChromeMode
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.rememberActiveExerciseInfoFromLibraryState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.rememberCartItemsFromLibraryState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.util.isCartDraftValidForSessionConfirm
@@ -116,7 +115,7 @@ fun SessionBookingEditorScreen(
                 viewModel.removeCartItem(it)
             },
             onClearCart = { viewModel.clearCart() },
-            onAddToSession = {},
+            onNavigateToSessionBooking = {},
             onNavigateToWorkoutCalendar = {},
             onStepCartField = { exerciseId, setIndex, field, delta ->
                 viewModel.stepCartField(
@@ -177,7 +176,7 @@ private fun SessionBookingEditorScreenContent(
     val scroll = rememberScrollState()
     val bookingUi = data.sessionBookingUiModel
     val input = data.sessionBookingInput
-    val confirmEnabled = library.isCartDraftValidForSessionConfirm(ExerciseLibraryChromeMode.Idle) &&
+    val confirmEnabled = library.isCartDraftValidForSessionConfirm() &&
         (bookingUi?.isBookingConfirmEnabled == true) &&
         (input?.isConfirming != true)
 
