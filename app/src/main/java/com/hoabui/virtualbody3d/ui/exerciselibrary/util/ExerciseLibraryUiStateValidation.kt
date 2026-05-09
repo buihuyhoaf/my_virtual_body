@@ -5,7 +5,9 @@ import com.hoabui.virtualbody3d.domain.model.exercise.normalizeDurationMinutesSe
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryChromeMode
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 
-fun ExerciseLibraryUiState.isCartDraftValidForSessionConfirm(): Boolean {
+fun ExerciseLibraryUiState.isCartDraftValidForSessionConfirm(
+    chromeMode: ExerciseLibraryChromeMode,
+): Boolean {
     if (itemDrafts.isEmpty()) return false
     val editMode = chromeMode as? ExerciseLibraryChromeMode.EditingScheduleRow
     return itemDrafts.all { (id, draft) ->

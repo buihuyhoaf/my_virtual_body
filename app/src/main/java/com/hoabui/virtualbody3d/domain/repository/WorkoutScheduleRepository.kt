@@ -13,8 +13,6 @@ interface WorkoutScheduleRepository {
 
     fun observeSchedulesInDayRange(startDay: Long, endDay: Long): Flow<List<WorkoutSchedule>>
 
-    suspend fun getAllSchedules(): List<WorkoutSchedule>
-
     /** Returns a single schedule row by Room primary key, or null if missing. */
     suspend fun getWorkoutScheduleByRowId(rowId: Long): WorkoutSchedule?
 

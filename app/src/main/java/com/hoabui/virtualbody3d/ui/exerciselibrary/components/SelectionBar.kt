@@ -546,6 +546,7 @@ private fun ExerciseLibraryCartRemoveSticker(
 @Composable
 fun ExerciseLibrarySelectionBar(
     libraryState: ExerciseLibraryUiState,
+    chromeMode: ExerciseLibraryChromeMode,
     actions: WorkoutBuilderActions,
     modifier: Modifier = Modifier,
 ) {
@@ -554,8 +555,8 @@ fun ExerciseLibrarySelectionBar(
             .associateBy { it.id }
         libraryState.draftOrder.mapNotNull { byId[it] }
     }
-    val isSelectionBarEditMode = libraryState.chromeMode is ExerciseLibraryChromeMode.EditingScheduleRow
-    val isSelectionBarConfirmEnabled = libraryState.isCartDraftValidForSessionConfirm()
+    val isSelectionBarEditMode = chromeMode is ExerciseLibraryChromeMode.EditingScheduleRow
+    val isSelectionBarConfirmEnabled = libraryState.isCartDraftValidForSessionConfirm(chromeMode)
     val activeExerciseInfo by remember(
         libraryState.activeExerciseId,
         libraryState.itemDrafts,

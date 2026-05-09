@@ -8,7 +8,7 @@ import com.hoabui.virtualbody3d.domain.model.exercise.GymLocation
 import com.hoabui.virtualbody3d.domain.model.exercise.normalizeExerciseLibraryQuery
 import com.hoabui.virtualbody3d.ui.exerciselibrary.catalog.ExerciseLibraryCatalogEntryUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.catalog.LibraryPresentationSlice
-import com.hoabui.virtualbody3d.ui.exerciselibrary.sessionbooking.SessionBookingUiModel
+import com.hoabui.virtualbody3d.ui.exerciselibrary.sessionbooking.SessionBookingInput
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.PersistentMap
@@ -19,6 +19,7 @@ internal data class BookingPipelineRow(
     val dedupeKey: ExerciseLibraryBookingPresentationKey?,
     val filtersWithMeasurement: ExerciseLibraryUiState,
     val gymLocations: ImmutableList<GymLocation>,
+    val sessionBookingInput: SessionBookingInput?,
 )
 
 @Immutable
@@ -31,9 +32,10 @@ internal data class ExerciseLibraryBookingPresentationKey(
 
 internal fun exerciseLibraryBookingPresentationKey(
     filtersWithMeasurement: ExerciseLibraryUiState,
+    sessionBookingInput: SessionBookingInput,
     gymLocationsVersion: ImmutableList<GymLocation>,
 ): ExerciseLibraryBookingPresentationKey {
-    val inp = filtersWithMeasurement.sessionBookingInput!!
+    val inp = sessionBookingInput
     val bookingInputSignature = buildString {
         append(inp.selectedDateMillis)
         append('|')
@@ -73,7 +75,6 @@ internal fun exerciseLibraryBookingPresentationKey(
 internal fun mergeExerciseLibraryPresentation(
     base: ExerciseLibraryUiState,
     library: LibraryPresentationSlice,
-    sessionBookingUiModel: SessionBookingUiModel?,
 ): ExerciseLibraryUiState =
     base.copy(
         libraryList = base.libraryList.copy(
@@ -81,7 +82,6 @@ internal fun mergeExerciseLibraryPresentation(
             exerciseMeasurementById = library.exerciseMeasurementById,
             isAddToSessionEnabled = library.isAddToSessionEnabled,
         ),
-        sessionBookingUiModel = sessionBookingUiModel,
     )
 
 @Immutable

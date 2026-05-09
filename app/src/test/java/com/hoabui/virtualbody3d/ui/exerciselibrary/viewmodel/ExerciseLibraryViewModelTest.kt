@@ -9,19 +9,41 @@ import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
 import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
-import com.hoabui.virtualbody3d.domain.model.exercise.GymLocation
 import com.hoabui.virtualbody3d.domain.model.exercise.Muscle
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
 import com.hoabui.virtualbody3d.domain.usecase.BookWorkoutSessionUseCase
 import com.hoabui.virtualbody3d.domain.usecase.CommitLibrarySessionBookingResult
 import com.hoabui.virtualbody3d.domain.usecase.ConfirmExerciseLibrarySessionUseCase
 import com.hoabui.virtualbody3d.domain.usecase.GetExerciseLibraryUseCase
-import com.hoabui.virtualbody3d.domain.usecase.MigrateLegacyWorkoutSchedulesUseCase
-import com.hoabui.virtualbody3d.domain.usecase.ObserveGymLocationsUseCase
 import com.hoabui.virtualbody3d.domain.usecase.PrepareLibrarySessionConfirmResult
+import com.hoabui.virtualbody3d.domain.usecase.CancelSelectionBarEditUseCase
 import com.hoabui.virtualbody3d.domain.usecase.CanConfirmLibrarySessionBookingUseCase
-import com.hoabui.virtualbody3d.domain.usecase.CanOpenExerciseLibrarySessionBookingUseCase
+import com.hoabui.virtualbody3d.domain.usecase.ClearCartUseCase
+import com.hoabui.virtualbody3d.domain.usecase.ConfirmSelectionBarEditUseCase
+import com.hoabui.virtualbody3d.domain.usecase.DismissSessionBookingUseCase
+import com.hoabui.virtualbody3d.domain.usecase.GetWorkoutScheduleByRowUseCase
+import com.hoabui.virtualbody3d.domain.usecase.ObserveExerciseCatalogUseCase
+import com.hoabui.virtualbody3d.domain.usecase.ObserveExerciseLibraryChromeModeUseCase
+import com.hoabui.virtualbody3d.domain.usecase.ObserveExerciseLibraryUiStateUseCase
+import com.hoabui.virtualbody3d.domain.usecase.OnBookingClearTimeSelectionUseCase
+import com.hoabui.virtualbody3d.domain.usecase.OnBookingDateSelectedUseCase
+import com.hoabui.virtualbody3d.domain.usecase.OnBookingLocationSelectedUseCase
+import com.hoabui.virtualbody3d.domain.usecase.OnBookingSlotToggledUseCase
+import com.hoabui.virtualbody3d.domain.usecase.OnLongSessionEditUseCase
+import com.hoabui.virtualbody3d.domain.usecase.OnLongSessionProceedAnywayUseCase
+import com.hoabui.virtualbody3d.domain.usecase.OpenSessionBookingUseCase
+import com.hoabui.virtualbody3d.domain.usecase.RemoveCartItemUseCase
+import com.hoabui.virtualbody3d.domain.usecase.RunExerciseLibraryBookingConfirmationUseCase
+import com.hoabui.virtualbody3d.domain.usecase.SelectCartItemUseCase
 import com.hoabui.virtualbody3d.domain.usecase.SessionBookingConfirmationWorkflow
+import com.hoabui.virtualbody3d.domain.usecase.SetCartFieldManualUseCase
+import com.hoabui.virtualbody3d.domain.usecase.SetInitialBodyRegionFilterUseCase
+import com.hoabui.virtualbody3d.domain.usecase.SetInitialExerciseCategoryFilterUseCase
+import com.hoabui.virtualbody3d.domain.usecase.SetSearchQueryUseCase
+import com.hoabui.virtualbody3d.domain.usecase.StartSelectionBarEditFromScheduleRowUseCase
+import com.hoabui.virtualbody3d.domain.usecase.StepCartFieldUseCase
+import com.hoabui.virtualbody3d.domain.usecase.ToggleCardSelectionUseCase
+import com.hoabui.virtualbody3d.domain.usecase.ToggleCartExpandedUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ResolveNextSlotSelectionAfterToggleUseCase
 import com.hoabui.virtualbody3d.domain.usecase.ToggleExerciseInCartUseCase
 import com.hoabui.virtualbody3d.domain.usecase.UpdateWorkoutScheduleFromCartDraftUseCase
@@ -29,7 +51,6 @@ import com.hoabui.virtualbody3d.domain.usecase.ValidateSessionBookingUseCase
 import com.hoabui.virtualbody3d.domain.repository.WorkoutScheduleRepository
 import com.hoabui.virtualbody3d.ui.exerciselibrary.manager.ExerciseLibraryBookingManager
 import com.hoabui.virtualbody3d.ui.exerciselibrary.manager.ExerciseLibraryCartManager
-import com.hoabui.virtualbody3d.ui.exerciselibrary.manager.ExerciseLibraryChromeManager
 import com.hoabui.virtualbody3d.ui.exerciselibrary.manager.ExerciseLibrarySearchManager
 import com.hoabui.virtualbody3d.ui.exerciselibrary.mapper.ExerciseLibraryUiMapper
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.CartSetField
@@ -46,9 +67,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -107,7 +126,6 @@ class ExerciseLibraryViewModelTest {
         mapper: ExerciseLibraryUiMapper,
     ): ExerciseLibraryManagers {
         val search = ExerciseLibrarySearchManager()
-        val chrome = ExerciseLibraryChromeManager()
         val cart = ExerciseLibraryCartManager(ToggleExerciseInCartUseCase())
         val booking = ExerciseLibraryBookingManager(
             ResolveNextSlotSelectionAfterToggleUseCase(),
@@ -115,35 +133,71 @@ class ExerciseLibraryViewModelTest {
             canConfirmLibrarySessionBookingUseCase,
             mapper,
             cart,
-            chrome,
         )
-        return ExerciseLibraryManagers(search, cart, booking, chrome)
+        return ExerciseLibraryManagers(search, cart, booking)
     }
 
     private data class ExerciseLibraryManagers(
         val search: ExerciseLibrarySearchManager,
         val cart: ExerciseLibraryCartManager,
         val booking: ExerciseLibraryBookingManager,
-        val chrome: ExerciseLibraryChromeManager,
     )
+
+    private fun exerciseLibraryViewModelFromDeps(
+        getLibrary: GetExerciseLibraryUseCase,
+        mapper: ExerciseLibraryUiMapper,
+        updateSchedule: UpdateWorkoutScheduleFromCartDraftUseCase,
+        scheduleRepo: WorkoutScheduleRepository,
+        managers: ExerciseLibraryManagers,
+    ): ExerciseLibraryViewModel {
+        val observeCatalog = ObserveExerciseCatalogUseCase(getLibrary)
+        val observeUiState = ObserveExerciseLibraryUiStateUseCase(
+            observeCatalog,
+            managers.search,
+            managers.cart,
+            mapper,
+        )
+        val observeChromeMode = ObserveExerciseLibraryChromeModeUseCase(managers.cart)
+        val getScheduleRow = GetWorkoutScheduleByRowUseCase(scheduleRepo)
+        return ExerciseLibraryViewModel(
+            observeExerciseCatalogUseCase = observeCatalog,
+            observeExerciseLibraryUiStateUseCase = observeUiState,
+            observeExerciseLibraryChromeModeUseCase = observeChromeMode,
+            setSearchQueryUseCase = SetSearchQueryUseCase(managers.search),
+            setInitialExerciseCategoryFilterUseCase = SetInitialExerciseCategoryFilterUseCase(managers.search),
+            setInitialBodyRegionFilterUseCase = SetInitialBodyRegionFilterUseCase(managers.search),
+            toggleCardSelectionUseCase = ToggleCardSelectionUseCase(
+                observeUiState,
+                observeCatalog,
+                managers.cart,
+            ),
+            selectCartItemUseCase = SelectCartItemUseCase(managers.cart),
+            removeCartItemUseCase = RemoveCartItemUseCase(managers.cart),
+            clearCartUseCase = ClearCartUseCase(managers.cart, managers.booking),
+            stepCartFieldUseCase = StepCartFieldUseCase(managers.cart),
+            setCartFieldManualUseCase = SetCartFieldManualUseCase(managers.cart),
+            toggleCartExpandedUseCase = ToggleCartExpandedUseCase(managers.cart),
+            startSelectionBarEditFromScheduleRowUseCase = StartSelectionBarEditFromScheduleRowUseCase(
+                getScheduleRow,
+                managers.cart,
+            ),
+            cancelSelectionBarEditUseCase = CancelSelectionBarEditUseCase(managers.cart),
+            confirmSelectionBarEditUseCase = ConfirmSelectionBarEditUseCase(
+                observeUiState,
+                getScheduleRow,
+                updateSchedule,
+                managers.cart,
+            ),
+        )
+    }
 
     private fun createViewModel(
         exercises: Map<BodyRegion, List<Exercise>> = mapOf(BodyRegion.Chest to listOf(sampleExercise())),
     ): ExerciseLibraryViewModel {
         val getLibrary = mockk<GetExerciseLibraryUseCase>()
         every { getLibrary() } returns flowOf(exercises)
-        val locations = mockk<ObserveGymLocationsUseCase>()
-        every { locations() } returns flow {
-            emit(listOf(GymLocation(id = "default", displayName = "Default")))
-            awaitCancellation()
-        }
-        val migrate = mockk<MigrateLegacyWorkoutSchedulesUseCase>()
-        coEvery { migrate() } returns Unit
         val appContext = mockk<Context>(relaxed = true)
-        val mapper = ExerciseLibraryUiMapper(
-            appContext,
-            CanOpenExerciseLibrarySessionBookingUseCase(),
-        )
+        val mapper = ExerciseLibraryUiMapper(appContext)
         val confirmUseCase = mockk<ConfirmExerciseLibrarySessionUseCase>()
         every {
             confirmUseCase.prepare(any(), any(), any(), any(), any(), any())
@@ -170,18 +224,12 @@ class ExerciseLibraryViewModelTest {
         val scheduleRepo = mockk<WorkoutScheduleRepository>(relaxed = true)
         val canConfirm = CanConfirmLibrarySessionBookingUseCase(ValidateSessionBookingUseCase())
         val m = exerciseLibraryManagers(workflow, canConfirm, mapper)
-        return ExerciseLibraryViewModel(
+        return exerciseLibraryViewModelFromDeps(
             getLibrary,
-            locations,
-            migrate,
             mapper,
-            canConfirm,
             updateSchedule,
             scheduleRepo,
-            m.search,
-            m.cart,
-            m.booking,
-            m.chrome,
+            m,
         )
     }
 
@@ -191,18 +239,8 @@ class ExerciseLibraryViewModelTest {
     ): ExerciseLibraryViewModel {
         val getLibrary = mockk<GetExerciseLibraryUseCase>()
         every { getLibrary() } returns flowOf(exercises)
-        val locations = mockk<ObserveGymLocationsUseCase>()
-        every { locations() } returns flow {
-            emit(listOf(GymLocation(id = "default", displayName = "Default")))
-            awaitCancellation()
-        }
-        val migrate = mockk<MigrateLegacyWorkoutSchedulesUseCase>()
-        coEvery { migrate() } returns Unit
         val appContext = mockk<Context>(relaxed = true)
-        val mapper = ExerciseLibraryUiMapper(
-            appContext,
-            CanOpenExerciseLibrarySessionBookingUseCase(),
-        )
+        val mapper = ExerciseLibraryUiMapper(appContext)
         val confirmUseCase = mockk<ConfirmExerciseLibrarySessionUseCase>()
         every {
             confirmUseCase.prepare(any(), any(), any(), any(), any(), any())
@@ -228,18 +266,12 @@ class ExerciseLibraryViewModelTest {
         val updateSchedule = mockk<UpdateWorkoutScheduleFromCartDraftUseCase>(relaxed = true)
         val scheduleRepo = mockk<WorkoutScheduleRepository>(relaxed = true)
         val mgr = exerciseLibraryManagers(workflow, canConfirmLibrarySessionBookingUseCase, mapper)
-        return ExerciseLibraryViewModel(
+        return exerciseLibraryViewModelFromDeps(
             getLibrary,
-            locations,
-            migrate,
             mapper,
-            canConfirmLibrarySessionBookingUseCase,
             updateSchedule,
             scheduleRepo,
-            mgr.search,
-            mgr.cart,
-            mgr.booking,
-            mgr.chrome,
+            mgr,
         )
     }
 
@@ -255,18 +287,8 @@ class ExerciseLibraryViewModelTest {
     ): ExerciseLibraryViewModel {
         val getLibrary = mockk<GetExerciseLibraryUseCase>()
         every { getLibrary() } returns flowOf(mapOf(BodyRegion.Chest to listOf(sampleExercise())))
-        val locations = mockk<ObserveGymLocationsUseCase>()
-        every { locations() } returns flow {
-            emit(listOf(GymLocation(id = "default", displayName = "Default")))
-            awaitCancellation()
-        }
-        val migrate = mockk<MigrateLegacyWorkoutSchedulesUseCase>()
-        coEvery { migrate() } returns Unit
         val appContext = mockk<Context>(relaxed = true)
-        val mapper = ExerciseLibraryUiMapper(
-            appContext,
-            CanOpenExerciseLibrarySessionBookingUseCase(),
-        )
+        val mapper = ExerciseLibraryUiMapper(appContext)
         val confirmUseCase = mockk<ConfirmExerciseLibrarySessionUseCase>()
         every {
             confirmUseCase.prepare(any(), any(), any(), any(), any(), any())
@@ -277,18 +299,12 @@ class ExerciseLibraryViewModelTest {
         val workflow = SessionBookingConfirmationWorkflow(confirmUseCase)
         val canConfirm = CanConfirmLibrarySessionBookingUseCase(ValidateSessionBookingUseCase())
         val mgr = exerciseLibraryManagers(workflow, canConfirm, mapper)
-        return ExerciseLibraryViewModel(
+        return exerciseLibraryViewModelFromDeps(
             getLibrary,
-            locations,
-            migrate,
             mapper,
-            canConfirm,
             updateSchedule,
             scheduleRepo,
-            mgr.search,
-            mgr.cart,
-            mgr.booking,
-            mgr.chrome,
+            mgr,
         )
     }
 
@@ -368,32 +384,6 @@ class ExerciseLibraryViewModelTest {
     }
 
     @Test
-    fun openSessionBooking_thenDismiss_clearsInput() = runBlocking {
-        val vm = createViewModel()
-        vm.toggleCardSelection("ex1")
-        vm.setCartFieldManual("ex1", 0, CartSetField.SETS, "3")
-        vm.setCartFieldManual("ex1", 0, CartSetField.REPS, "10")
-        vm.openSessionBooking()
-        assertNotNull(vm.successData().sessionBookingInput)
-        vm.dismissSessionBooking()
-        assertNull(vm.successData().sessionBookingInput)
-    }
-
-    @Test
-    fun bookingSlotToggle_reusesCachedSections() = runBlocking {
-        val vm = createViewModel()
-        vm.toggleCardSelection("ex1")
-        vm.setCartFieldManual("ex1", 0, CartSetField.SETS, "3")
-        vm.setCartFieldManual("ex1", 0, CartSetField.REPS, "10")
-        vm.openSessionBooking()
-        delay(WAIT_FOR_COMBINE_MS)
-        val beforeSections = vm.successData().libraryList.sections
-        vm.onBookingSlotToggled(LocalTime.of(10, 0))
-        delay(WAIT_FOR_COMBINE_MS)
-        assertTrue(beforeSections === vm.successData().libraryList.sections)
-    }
-
-    @Test
     fun searchQueryChange_rebuildsSections() = runBlocking {
         val vm = createViewModel()
         delay(WAIT_FOR_COMBINE_MS)
@@ -401,72 +391,6 @@ class ExerciseLibraryViewModelTest {
         vm.setSearchQuery("___no_match_xyz___")
         delay(WAIT_FOR_COMBINE_MS)
         assertFalse(beforeSections === vm.successData().libraryList.sections)
-    }
-
-    @Test
-    fun searchQueryChange_whileBookingOpen_doesNotInvokeValidate() = runBlocking {
-        val validate = spyk(CanConfirmLibrarySessionBookingUseCase(ValidateSessionBookingUseCase()))
-
-        val vm = createViewModelWithBookingUseCaseMocks(
-            canConfirmLibrarySessionBookingUseCase = validate,
-        )
-        vm.toggleCardSelection("ex1")
-        vm.setCartFieldManual("ex1", 0, CartSetField.SETS, "3")
-        vm.setCartFieldManual("ex1", 0, CartSetField.REPS, "10")
-        vm.openSessionBooking()
-        delay(WAIT_FOR_COMBINE_MS)
-
-        clearMocks(validate, answers = false, recordedCalls = true)
-
-        vm.setSearchQuery("needle")
-        delay(WAIT_FOR_COMBINE_MS)
-
-        verify(exactly = 0) {
-            validate(any(), any(), any(), any(), any(), any())
-        }
-    }
-
-    @Test
-    fun bookingSlotToggle_afterSearch_reinvokesValidate() = runBlocking {
-        val validate = spyk(CanConfirmLibrarySessionBookingUseCase(ValidateSessionBookingUseCase()))
-
-        val vm = createViewModelWithBookingUseCaseMocks(
-            canConfirmLibrarySessionBookingUseCase = validate,
-        )
-        vm.toggleCardSelection("ex1")
-        vm.setCartFieldManual("ex1", 0, CartSetField.SETS, "3")
-        vm.setCartFieldManual("ex1", 0, CartSetField.REPS, "10")
-        vm.openSessionBooking()
-        delay(WAIT_FOR_COMBINE_MS)
-        vm.setSearchQuery("ignore")
-        delay(WAIT_FOR_COMBINE_MS)
-
-        clearMocks(validate, answers = false, recordedCalls = true)
-
-        vm.onBookingSlotToggled(LocalTime.of(10, 0))
-        delay(WAIT_FOR_COMBINE_MS)
-
-        verify(atLeast = 1) {
-            validate(any(), any(), any(), any(), any(), any())
-        }
-    }
-
-    @Test
-    fun searchQueryChange_whileBookingOpen_updatesSearchAndKeepsSessionBooking() = runBlocking {
-        val vm = createViewModel()
-        vm.toggleCardSelection("ex1")
-        vm.setCartFieldManual("ex1", 0, CartSetField.SETS, "3")
-        vm.setCartFieldManual("ex1", 0, CartSetField.REPS, "10")
-        vm.openSessionBooking()
-        delay(WAIT_FOR_COMBINE_MS)
-        assertNotNull(vm.successData().sessionBookingUiModel)
-
-        vm.setSearchQuery("filter-text")
-        delay(WAIT_FOR_COMBINE_MS)
-
-        val data = vm.successData()
-        assertEquals("filter-text", data.searchQuery)
-        assertNotNull(data.sessionBookingUiModel)
     }
 
     @Test
@@ -484,81 +408,6 @@ class ExerciseLibraryViewModelTest {
         vm.setCartFieldManual("ex1", 0, CartSetField.REPS, "10")
         delay(WAIT_FOR_COMBINE_MS)
         assertTrue(vm.successData().libraryList.isAddToSessionEnabled)
-    }
-
-    @Test
-    fun confirmSessionBooking_success_clearsCartAndEmitsSummaryEffect() = runBlocking {
-        val getLibrary = mockk<GetExerciseLibraryUseCase>()
-        every { getLibrary() } returns flowOf(mapOf(BodyRegion.Chest to listOf(sampleExercise())))
-        val locations = mockk<ObserveGymLocationsUseCase>()
-        every { locations() } returns flow {
-            emit(listOf(GymLocation(id = "default", displayName = "Default")))
-            awaitCancellation()
-        }
-        val migrate = mockk<MigrateLegacyWorkoutSchedulesUseCase>()
-        coEvery { migrate() } returns Unit
-        val appContext = mockk<Context>(relaxed = true)
-        val mapper = ExerciseLibraryUiMapper(
-            appContext,
-            CanOpenExerciseLibrarySessionBookingUseCase(),
-        )
-        val bookInner = mockk<BookWorkoutSessionUseCase>()
-        val resolvedFromRepo = WorkoutSession(
-            id = "booked-session",
-            startInstant = Instant.parse("1970-01-01T10:00:00Z"),
-            endInstant = Instant.parse("1970-01-01T11:00:00Z"),
-            locationId = "default",
-        )
-        coEvery { bookInner(any(), any()) } returns BookWorkoutSessionResult.Success(1, resolvedFromRepo)
-        val confirmUseCase = ConfirmExerciseLibrarySessionUseCase(bookInner, ValidateSessionBookingUseCase())
-        val workflow = SessionBookingConfirmationWorkflow(confirmUseCase)
-        val updateSchedule = mockk<UpdateWorkoutScheduleFromCartDraftUseCase>(relaxed = true)
-        val scheduleRepo = mockk<WorkoutScheduleRepository>(relaxed = true)
-        val canConfirm = CanConfirmLibrarySessionBookingUseCase(ValidateSessionBookingUseCase())
-        val mgr = exerciseLibraryManagers(workflow, canConfirm, mapper)
-        val vm = ExerciseLibraryViewModel(
-            getLibrary,
-            locations,
-            migrate,
-            mapper,
-            canConfirm,
-            updateSchedule,
-            scheduleRepo,
-            mgr.search,
-            mgr.cart,
-            mgr.booking,
-            mgr.chrome,
-        )
-        vm.toggleCardSelection("ex1")
-        vm.setCartFieldManual("ex1", 0, CartSetField.SETS, "3")
-        vm.setCartFieldManual("ex1", 0, CartSetField.REPS, "10")
-        vm.openSessionBooking()
-        vm.onBookingSlotToggled(LocalTime.of(10, 0))
-        delay(WAIT_FOR_COMBINE_MS)
-        vm.onBookingSlotToggled(LocalTime.of(10, 30))
-        delay(WAIT_FOR_COMBINE_MS)
-        assertTrue(requireNotNull(vm.successData().sessionBookingUiModel).isBookingConfirmEnabled)
-        var successEffect: ExerciseLibraryUiEffect.ShowAddExerciseSuccess? = null
-        val collectJob = launch {
-            vm.uiEffects.collect { effect ->
-                if (effect is ExerciseLibraryUiEffect.ShowAddExerciseSuccess) {
-                    successEffect = effect
-                    return@collect
-                }
-            }
-        }
-        vm.confirmSessionBooking()
-        delay(WAIT_FOR_COMBINE_MS)
-        val d = vm.successData()
-        assertTrue(d.itemDrafts.isEmpty())
-        val summary = requireNotNull(successEffect).summary
-        assertEquals(1, summary.exerciseCount)
-        assertEquals("Sample", summary.primaryExerciseTitle)
-        assertEquals(
-            60L,
-            halfOpenInstantIntervalDurationMinutes(summary.sessionStartInstant, summary.sessionEndInstant),
-        )
-        collectJob.cancel()
     }
 
     @Test
@@ -592,7 +441,7 @@ class ExerciseLibraryViewModelTest {
 
         vm.startSelectionBarEditFromScheduleRow(42L)
         delay(WAIT_FOR_COMBINE_MS)
-        assertTrue(vm.successData().chromeMode is ExerciseLibraryChromeMode.EditingScheduleRow)
+        assertTrue(vm.chromeMode.value is ExerciseLibraryChromeMode.EditingScheduleRow)
 
         vm.confirmSelectionBarEdit()
         delay(WAIT_FOR_COMBINE_MS)
@@ -608,7 +457,7 @@ class ExerciseLibraryViewModelTest {
                 durationSeconds = null,
             )
         }
-        assertFalse(vm.successData().chromeMode is ExerciseLibraryChromeMode.EditingScheduleRow)
+        assertFalse(vm.chromeMode.value is ExerciseLibraryChromeMode.EditingScheduleRow)
     }
 
     @Test
@@ -637,7 +486,7 @@ class ExerciseLibraryViewModelTest {
         coVerify(exactly = 0) {
             updateSchedule.invoke(any(), any(), any(), any(), any(), any(), any())
         }
-        assertFalse(vm.successData().chromeMode is ExerciseLibraryChromeMode.EditingScheduleRow)
+        assertFalse(vm.chromeMode.value is ExerciseLibraryChromeMode.EditingScheduleRow)
     }
 
     private companion object {

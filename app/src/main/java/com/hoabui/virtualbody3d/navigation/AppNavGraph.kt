@@ -20,6 +20,7 @@ import com.hoabui.virtualbody3d.ui.body.screen.HomeScreen
 import com.hoabui.virtualbody3d.ui.exercisedashboard.ExerciseDashboardScreen
 import com.hoabui.virtualbody3d.ui.exerciselibrary.ExerciseLibraryScreen
 import com.hoabui.virtualbody3d.ui.exerciselibrary.sessionbooking.SessionBookingEditorScreen
+import com.hoabui.virtualbody3d.ui.exerciselibrary.sessionbooking.SessionBookingEditorViewModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel.ExerciseLibraryViewModel
 import com.hoabui.virtualbody3d.ui.workoutcalendar.WorkoutCalendarScreen
 import com.hoabui.virtualbody3d.ui.login.LoginScreen
@@ -112,7 +113,7 @@ fun AppNavGraph(
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(ExerciseLibraryGraphRoute)
                 }
-                val viewModel: ExerciseLibraryViewModel = hiltViewModel(parentEntry)
+                val viewModel: SessionBookingEditorViewModel = hiltViewModel(parentEntry)
                 SessionBookingEditorScreen(
                     viewModel = viewModel,
                     onBack = { navController.popBackStack() },

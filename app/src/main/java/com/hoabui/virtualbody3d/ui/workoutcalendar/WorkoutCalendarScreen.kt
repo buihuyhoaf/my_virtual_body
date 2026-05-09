@@ -160,6 +160,7 @@ private fun WorkoutCalendarSuccessContent(
     val swipeHintSeen by viewModel.swipeHintSeen.collectAsStateWithLifecycle()
 
     val libraryScreen by exerciseLibraryViewModel.state.collectAsStateWithLifecycle()
+    val chromeMode by exerciseLibraryViewModel.chromeMode.collectAsStateWithLifecycle()
     val libraryData: ExerciseLibraryUiState? =
         (libraryScreen as? UiState.Success)?.data
     val cartVisible = libraryData?.itemDrafts?.isNotEmpty() == true
@@ -177,7 +178,6 @@ private fun WorkoutCalendarSuccessContent(
                 },
                 onClearCart = { exerciseLibraryViewModel.clearCart() },
                 onAddToSession = {
-                    exerciseLibraryViewModel.dismissAddExerciseSuccess()
                     onNavigateToSessionBookingEditor()
                 },
                 onNavigateToWorkoutCalendar = {},
@@ -219,7 +219,7 @@ private fun WorkoutCalendarSuccessContent(
     )
 
     BackHandler(
-        enabled = libraryData?.chromeMode is ExerciseLibraryChromeMode.EditingScheduleRow,
+        enabled = chromeMode is ExerciseLibraryChromeMode.EditingScheduleRow,
         onBack = {
             exerciseLibraryViewModel.cancelSelectionBarEdit()
         },
@@ -317,6 +317,7 @@ private fun WorkoutCalendarSuccessContent(
             ) {
                 ExerciseLibrarySelectionBar(
                     libraryState = libraryData,
+                    chromeMode = chromeMode,
                     actions = selectionBarActions,
                     modifier = Modifier.fillMaxWidth(),
                 )

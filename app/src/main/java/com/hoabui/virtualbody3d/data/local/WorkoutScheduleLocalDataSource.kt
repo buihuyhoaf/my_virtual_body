@@ -24,8 +24,6 @@ class WorkoutScheduleLocalDataSource @Inject constructor(
     fun observeSchedulesInRange(startDay: Long, endDay: Long): Flow<List<WorkoutScheduleEntity>> =
         scheduleDao.observeSchedulesInRange(startDay, endDay)
 
-    suspend fun getAllSchedules(): List<WorkoutScheduleEntity> = scheduleDao.getAllSchedules()
-
     suspend fun getScheduleByRowId(rowId: Long): WorkoutScheduleEntity? = scheduleDao.getByRowId(rowId)
 
     suspend fun updateScheduleEntity(entity: WorkoutScheduleEntity) = scheduleDao.update(entity)

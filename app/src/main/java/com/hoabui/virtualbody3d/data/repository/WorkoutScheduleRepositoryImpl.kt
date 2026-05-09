@@ -89,15 +89,6 @@ class WorkoutScheduleRepositoryImpl @Inject constructor(
             .flowOn(ioDispatcher)
     }
 
-    override suspend fun getAllSchedules(): List<WorkoutSchedule> = withContext(ioDispatcher) {
-        try {
-            localDataSource.getAllSchedules().map { it.toDomain() }
-        } catch (t: Throwable) {
-            Log.e(WORKOUT_DB_TRACE_LOG_TAG, "getAllSchedules failed", t)
-            throw t
-        }
-    }
-
     override suspend fun getWorkoutScheduleByRowId(rowId: Long): WorkoutSchedule? = withContext(ioDispatcher) {
         try {
             localDataSource.getScheduleByRowId(rowId)?.toDomain()

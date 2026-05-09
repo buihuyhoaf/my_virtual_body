@@ -1,5 +1,7 @@
 package com.hoabui.virtualbody3d.ui.exerciselibrary.sessionbooking
 
+import android.content.res.Configuration
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabui.virtualbody3d.R
@@ -35,39 +38,38 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.components.AddExerciseSuccess
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.CartThumbnailRow
 import com.hoabui.virtualbody3d.ui.exerciselibrary.components.LongSessionWarningDialog
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.AddExerciseSuccessSummary
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiEffect
-import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryChromeMode
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.rememberActiveExerciseInfoFromLibraryState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.rememberCartItemsFromLibraryState
-import com.hoabui.virtualbody3d.ui.exerciselibrary.sessionbooking.SessionBookingWorkflowPhase
 import com.hoabui.virtualbody3d.ui.exerciselibrary.util.isCartDraftValidForSessionConfirm
-import com.hoabui.virtualbody3d.ui.exerciselibrary.viewmodel.ExerciseLibraryViewModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.SessionBookingActions
 import com.hoabui.virtualbody3d.ui.exerciselibrary.wiring.WorkoutBuilderActions
 import com.hoabui.virtualbody3d.ui.theme.GymTheme
-import android.content.res.Configuration
-import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun SessionBookingEditorScreen(
     onBack: () -> Unit,
     onNavigateToWorkoutCalendar: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ExerciseLibraryViewModel = hiltViewModel(),
+    viewModel: SessionBookingEditorViewModel = hiltViewModel(),
 ) {
     val screenState by viewModel.state.collectAsStateWithLifecycle()
-    val data: ExerciseLibraryUiState? = (screenState as? UiState.Success)?.data
+
     var addSuccessSummary by remember { mutableStateOf<AddExerciseSuccessSummary?>(null) }
 
     LaunchedEffect(viewModel) {
-        viewModel.uiEffects.collect { effect ->
-            when (effect) {
-                is ExerciseLibraryUiEffect.ShowAddExerciseSuccess -> {
-                    addSuccessSummary = effect.summary
+        viewModel.events.collect { event ->
+            Log.d("SessionBooking", "Booking screen collect event: $event")
+            when (event) {
+                is SessionBookingEvent.ShowAddExerciseSuccess -> {
+                    addSuccessSummary = event.summary
                 }
+                else -> {}
             }
         }
     }
+
+    val data: SessionBookingEditorPresentationState? = (screenState as? UiState.Success)?.data
 
     LaunchedEffect(data?.sessionBookingInput) {
         if (data != null && data.sessionBookingInput == null) {
@@ -102,9 +104,6 @@ fun SessionBookingEditorScreen(
             onLongSessionEdit = { viewModel.onLongSessionEdit() },
             onLongSessionProceedAnyway = {
                 viewModel.onLongSessionProceedAnyway()
-            },
-            onDismissAddExerciseSuccess = {
-                viewModel.dismissAddExerciseSuccess()
             },
         )
     }
@@ -162,7 +161,7 @@ fun SessionBookingEditorScreen(
 
 @Composable
 private fun SessionBookingEditorScreenContent(
-    data: ExerciseLibraryUiState,
+    data: SessionBookingEditorPresentationState,
     addSuccessSummary: AddExerciseSuccessSummary?,
     onDismissAddSuccess: () -> Unit,
     onBack: () -> Unit,
@@ -172,12 +171,13 @@ private fun SessionBookingEditorScreenContent(
     modifier: Modifier = Modifier,
 ) {
     val token = GymTheme.token
-    val cartItems = rememberCartItemsFromLibraryState(data)
-    val activeExerciseInfo = rememberActiveExerciseInfoFromLibraryState(data, cartItems)
+    val library = data.libraryUi
+    val cartItems = rememberCartItemsFromLibraryState(library)
+    val activeExerciseInfo = rememberActiveExerciseInfoFromLibraryState(library, cartItems)
     val scroll = rememberScrollState()
     val bookingUi = data.sessionBookingUiModel
     val input = data.sessionBookingInput
-    val confirmEnabled = data.isCartDraftValidForSessionConfirm() &&
+    val confirmEnabled = library.isCartDraftValidForSessionConfirm(ExerciseLibraryChromeMode.Idle) &&
         (bookingUi?.isBookingConfirmEnabled == true) &&
         (input?.isConfirming != true)
 
@@ -234,7 +234,7 @@ private fun SessionBookingEditorScreenContent(
             ) {
                 CartThumbnailRow(
                     cartItems = cartItems,
-                    activeExerciseId = data.activeExerciseId,
+                    activeExerciseId = library.activeExerciseId,
                     onSelectCartItem = workoutBuilderActions.onSelectCartItem,
                     onRemoveCartItem = workoutBuilderActions.onRemoveCartItem,
                     onClearAll = workoutBuilderActions.onClearCart,

@@ -23,9 +23,6 @@ interface WorkoutScheduleDao {
     @Query("SELECT * FROM workout_schedules ORDER BY dayKey ASC, id ASC")
     fun observeAllSchedules(): Flow<List<WorkoutScheduleEntity>>
 
-    @Query("SELECT * FROM workout_schedules ORDER BY dayKey ASC, id ASC")
-    suspend fun getAllSchedules(): List<WorkoutScheduleEntity>
-
     @Query("SELECT * FROM workout_schedules WHERE clientId = :clientId LIMIT 1")
     suspend fun findByClientId(clientId: String): WorkoutScheduleEntity?
 

@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import android.util.Log
 import com.hoabui.virtualbody3d.R
 import com.hoabui.virtualbody3d.ui.common_ui.molecule.section.GSectionHeader
 import com.hoabui.virtualbody3d.ui.common_ui.organism.scaffold.GScaffold
@@ -71,6 +72,14 @@ fun ExerciseLibraryScreen(
     viewModel: ExerciseLibraryViewModel = hiltViewModel(),
 ) {
     val screenState by viewModel.state.collectAsStateWithLifecycle()
+    val chromeMode by viewModel.chromeMode.collectAsStateWithLifecycle()
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            Log.d("ExerciseLibrary", "Library screen collect event: $event")
+        }
+    }
+
     val filterAppliedKey =
         "${initialExerciseCategory.orEmpty()}|${initialBodyRegions?.sorted()?.joinToString()}"
     LaunchedEffect(filterAppliedKey, initialExerciseCategory, initialBodyRegions) {
@@ -99,11 +108,9 @@ fun ExerciseLibraryScreen(
             onRemoveCartItem = { viewModel.removeCartItem(it) },
             onClearCart = { viewModel.clearCart() },
             onAddToSession = {
-                viewModel.dismissAddExerciseSuccess()
                 onNavigateToWorkoutCalendar()
             },
             onNavigateToWorkoutCalendar = {
-                viewModel.dismissAddExerciseSuccess()
                 onNavigateToWorkoutCalendar()
             },
             onStepCartField = { exerciseId, setIndex, field, delta ->
@@ -146,6 +153,7 @@ fun ExerciseLibraryScreen(
                     modifier = Modifier
                         .fillMaxSize(),
                     state = data,
+                    chromeMode = chromeMode,
                     catalogActions = catalogActions,
                     workoutBuilderActions = workoutBuilderActions,
                 )
@@ -158,6 +166,7 @@ fun ExerciseLibraryScreen(
 fun ExerciseLibraryScreenContent(
     modifier: Modifier = Modifier,
     state: ExerciseLibraryUiState,
+    chromeMode: ExerciseLibraryChromeMode,
     catalogActions: ExerciseCatalogActions,
     workoutBuilderActions: WorkoutBuilderActions,
 ) {
@@ -288,9 +297,10 @@ fun ExerciseLibraryScreenContent(
                 targetOffsetY = { it },
             ),
         ) {
-            if (state.chromeMode is ExerciseLibraryChromeMode.EditingScheduleRow) {
+            if (chromeMode is ExerciseLibraryChromeMode.EditingScheduleRow) {
                 ExerciseLibrarySelectionBar(
                     libraryState = state,
+                    chromeMode = chromeMode,
                     actions = workoutBuilderActions,
                     modifier = Modifier.fillMaxWidth(),
                 )

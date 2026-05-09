@@ -6,7 +6,7 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ExerciseLibraryPresentationSlicesTest {
@@ -26,12 +26,10 @@ class ExerciseLibraryPresentationSlicesTest {
         val merged = mergeExerciseLibraryPresentation(
             base = base,
             library = lib,
-            sessionBookingUiModel = null,
         )
         assertEquals("squat", merged.searchQuery)
         assertEquals(lib.sections, merged.libraryList.sections)
         assertEquals(lib.exerciseMeasurementById, merged.libraryList.exerciseMeasurementById)
         assertEquals(true, merged.libraryList.isAddToSessionEnabled)
-        assertNull(merged.sessionBookingUiModel)
     }
 }

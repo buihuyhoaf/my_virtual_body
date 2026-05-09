@@ -45,7 +45,7 @@ class ExerciseLibraryPresentationKeysTest {
         selectedDateMillis: Long,
         locationId: String = "gym1",
         searchQuery: String = "",
-    ): ExerciseLibraryUiState {
+    ): Pair<ExerciseLibraryUiState, SessionBookingInput> {
         val input = SessionBookingInput(
             selectedDateMillis = selectedDateMillis,
             selectedLocationId = locationId,
@@ -54,10 +54,7 @@ class ExerciseLibraryPresentationKeysTest {
             longSessionAcknowledged = false,
             isConfirming = false,
         )
-        return ExerciseLibraryUiState(
-            searchQuery = searchQuery,
-            sessionBookingInput = input,
-        )
+        return ExerciseLibraryUiState(searchQuery = searchQuery) to input
     }
 
     @Test
@@ -106,7 +103,7 @@ class ExerciseLibraryPresentationKeysTest {
             .atZone(zoneUtc)
             .toInstant()
             .toEpochMilli()
-        val state = minimalBookingState(selectedDateMillis = dayMillis)
+        val (state, input) = minimalBookingState(selectedDateMillis = dayMillis)
         val gymsA = persistentListOf(
             GymLocation(id = "g1", displayName = "One"),
             GymLocation(id = "g2", displayName = "Two"),
@@ -115,8 +112,8 @@ class ExerciseLibraryPresentationKeysTest {
             GymLocation(id = "g1", displayName = "One"),
             GymLocation(id = "g2", displayName = "Two"),
         )
-        val keyA = exerciseLibraryBookingPresentationKey(state, gymsA)
-        val keyB = exerciseLibraryBookingPresentationKey(state, gymsB)
+        val keyA = exerciseLibraryBookingPresentationKey(state, input, gymsA)
+        val keyB = exerciseLibraryBookingPresentationKey(state, input, gymsB)
         assertEquals(keyA, keyB)
     }
 
@@ -127,10 +124,11 @@ class ExerciseLibraryPresentationKeysTest {
             .toInstant()
             .toEpochMilli()
         val base = minimalBookingState(selectedDateMillis = dayMillis, searchQuery = "alpha")
-        val withOtherSearch = minimalBookingState(selectedDateMillis = dayMillis, searchQuery = "beta")
+        val withOtherSearch =
+            minimalBookingState(selectedDateMillis = dayMillis, searchQuery = "beta")
         val gyms = persistentListOf(GymLocation(id = "gym1", displayName = "Gym"))
-        val keyA = exerciseLibraryBookingPresentationKey(base, gyms)
-        val keyB = exerciseLibraryBookingPresentationKey(withOtherSearch, gyms)
+        val keyA = exerciseLibraryBookingPresentationKey(base.first, base.second, gyms)
+        val keyB = exerciseLibraryBookingPresentationKey(withOtherSearch.first, withOtherSearch.second, gyms)
         assertEquals(keyA, keyB)
     }
 }

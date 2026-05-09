@@ -12,5 +12,4 @@ data class SessionBookingActions(
     val onConfirmSessionBooking: () -> Unit,
     val onLongSessionEdit: () -> Unit,
     val onLongSessionProceedAnyway: () -> Unit,
-    val onDismissAddExerciseSuccess: () -> Unit,
 )

@@ -3,14 +3,14 @@ package com.hoabui.virtualbody3d.ui.exerciselibrary.manager
 import com.hoabui.virtualbody3d.domain.model.exercise.BodyRegion
 import com.hoabui.virtualbody3d.domain.model.exercise.EquipmentType
 import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseCategory
-import dagger.hilt.android.scopes.ViewModelScoped
+import dagger.hilt.android.scopes.ActivityRetainedScoped
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
-@ViewModelScoped
+@ActivityRetainedScoped
 class ExerciseLibrarySearchManager @Inject constructor() {
 
     private val _searchQuery = MutableStateFlow("")

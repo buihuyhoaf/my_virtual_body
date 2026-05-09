@@ -2,7 +2,10 @@ package com.hoabui.virtualbody3d.ui.exerciselibrary.manager
 
 import android.util.Log
 import com.hoabui.virtualbody3d.domain.model.exercise.Exercise
+import com.hoabui.virtualbody3d.domain.model.exercise.ExerciseMeasurementMode
 import com.hoabui.virtualbody3d.domain.model.exercise.GymLocation
+import com.hoabui.virtualbody3d.domain.model.exercise.LibraryCartDraft
+import com.hoabui.virtualbody3d.domain.model.exercise.isValidForSessionConfirm
 import com.hoabui.virtualbody3d.domain.model.exercise.bookingSlotStartsForDay
 import com.hoabui.virtualbody3d.domain.model.exercise.SESSION_BOOKING_GRID_FIRST_SLOT
 import com.hoabui.virtualbody3d.domain.model.exercise.SESSION_BOOKING_GRID_LAST_SLOT
@@ -21,7 +24,7 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
 import com.hoabui.virtualbody3d.ui.exerciselibrary.util.toAddExerciseSuccessSummary
 import com.hoabui.virtualbody3d.ui.exerciselibrary.util.toLibraryCartDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.util.toPendingSessionBooking
-import dagger.hilt.android.scopes.ViewModelScoped
+import dagger.hilt.android.scopes.ActivityRetainedScoped
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toPersistentSet
@@ -34,14 +37,13 @@ import kotlinx.coroutines.sync.withLock
 import java.time.LocalTime
 import javax.inject.Inject
 
-@ViewModelScoped
+@ActivityRetainedScoped
 class ExerciseLibraryBookingManager @Inject constructor(
     private val resolveNextSlotSelectionAfterToggleUseCase: ResolveNextSlotSelectionAfterToggleUseCase,
     private val sessionBookingConfirmationWorkflow: SessionBookingConfirmationWorkflow,
     private val canConfirmLibrarySessionBookingUseCase: CanConfirmLibrarySessionBookingUseCase,
     private val exerciseLibraryUiMapper: ExerciseLibraryUiMapper,
     private val cartManager: ExerciseLibraryCartManager,
-    private val chromeManager: ExerciseLibraryChromeManager,
 ) {
 
     private val confirmBookingMutex = Mutex()
@@ -72,6 +74,12 @@ class ExerciseLibraryBookingManager @Inject constructor(
         _sessionBookingInput.value = null
         _sessionBookingWorkflowPhase.value = SessionBookingWorkflowPhase.Idle
     }
+
+    fun canOpenSessionBooking(
+        cart: LibraryCartDraft,
+        exerciseMeasurementById: Map<String, ExerciseMeasurementMode>,
+    ): Boolean =
+        cart.itemDrafts.isNotEmpty() && cart.isValidForSessionConfirm(exerciseMeasurementById)
 
     fun resetBookingAfterCartClear() {
         _sessionBookingInput.value = null
@@ -134,13 +142,14 @@ class ExerciseLibraryBookingManager @Inject constructor(
 
     suspend fun runBookingConfirmation(
         getMergedState: () -> ExerciseLibraryUiState,
+        getSessionBookingInput: () -> SessionBookingInput?,
         getCatalogExercisesById: () -> Map<String, Exercise>,
         getGymLocations: () -> ImmutableList<GymLocation>,
         emitUiEffect: suspend (ExerciseLibraryUiEffect) -> Unit,
     ) {
         confirmBookingMutex.withLock {
             val filters = getMergedState()
-            val input = filters.sessionBookingInput
+            val input = getSessionBookingInput()
             if (input == null) {
                 Log.d(BOOKING_LOG_TAG, "runBookingConfirmation: skip — sessionBookingInput is null")
                 return@withLock
@@ -241,7 +250,7 @@ class ExerciseLibraryBookingManager @Inject constructor(
                 cartManager.clearCartOnly()
                 _sessionBookingInput.value = null
                 _sessionBookingWorkflowPhase.value = SessionBookingWorkflowPhase.Idle
-                chromeManager.setIdle()
+                cartManager.setChromeIdle()
             }
         }
     }

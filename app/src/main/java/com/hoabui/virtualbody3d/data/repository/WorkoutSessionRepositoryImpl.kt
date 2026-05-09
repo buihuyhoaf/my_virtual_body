@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.room.withTransaction
 import com.hoabui.virtualbody3d.BuildConfig
 import com.hoabui.virtualbody3d.data.local.GymLocationCatalog
-import com.hoabui.virtualbody3d.data.local.WorkoutSessionLocalDataSource
 import com.hoabui.virtualbody3d.data.local.db.WORKOUT_DB_TRACE_LOG_TAG
 import com.hoabui.virtualbody3d.data.local.WorkoutScheduleLocalDataSource
 import com.hoabui.virtualbody3d.data.local.db.VirtualBodyDatabase
@@ -12,9 +11,7 @@ import com.hoabui.virtualbody3d.data.local.db.WorkoutSessionDao
 import com.hoabui.virtualbody3d.data.mapper.toDomain
 import com.hoabui.virtualbody3d.data.mapper.toDto
 import com.hoabui.virtualbody3d.data.mapper.toEntity
-import com.hoabui.virtualbody3d.data.model.WorkoutSessionDto
 import com.hoabui.virtualbody3d.di.IoDispatcher
-import com.hoabui.virtualbody3d.domain.model.exercise.SESSION_BOOKING_DURATION_MINUTES
 import com.hoabui.virtualbody3d.domain.model.exercise.SessionExerciseLine
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSchedule
 import com.hoabui.virtualbody3d.domain.model.exercise.WorkoutSession
@@ -29,7 +26,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.time.Clock
-import java.time.Instant
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.inject.Inject
@@ -37,7 +33,6 @@ import javax.inject.Singleton
 
 @Singleton
 class WorkoutSessionRepositoryImpl @Inject constructor(
-    private val sessionLocalDataSource: WorkoutSessionLocalDataSource,
     private val workoutScheduleRepository: WorkoutScheduleRepository,
     private val gymLocationCatalog: GymLocationCatalog,
     private val virtualBodyDatabase: VirtualBodyDatabase,
@@ -157,50 +152,6 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
                 Log.e(WORKOUT_DB_TRACE_LOG_TAG, "bookSession transaction failed", t)
                 BookWorkoutSessionResult.Conflict
             }
-        }
-    }
-
-    override suspend fun migrateLegacySchedulesIfNeeded() {
-        val systemZone = Clock.systemDefaultZone().zone
-        val legacy = workoutScheduleRepository.getAllSchedules()
-            .filter { it.sessionId == null }
-            .sortedBy { it.scheduledAt.atZone(systemZone).toInstant().toEpochMilli() }
-        var idx = 0
-        while (idx < legacy.size) {
-            val first = legacy[idx]
-            val locationId = first.locationId
-            val clusterStartMillis = first.scheduledAt.atZone(systemZone).toInstant().toEpochMilli()
-            var j = idx + 1
-            while (j < legacy.size) {
-                val next = legacy[j]
-                if (next.locationId != locationId) break
-                if (next.scheduledAt.atZone(systemZone).toInstant().toEpochMilli() <=
-                    clusterStartMillis + SESSION_BOOKING_DURATION_MINUTES * 60_000
-                ) {
-                    j++
-                } else {
-                    break
-                }
-            }
-            val cluster = legacy.subList(idx, j)
-            val startMillis = cluster.minOf { it.scheduledAt.atZone(systemZone).toInstant().toEpochMilli() }
-            val start = Instant.ofEpochMilli(startMillis)
-            val end = start.plusSeconds(SESSION_BOOKING_DURATION_MINUTES * 60L)
-            val sessionId = UUID.randomUUID().toString()
-            sessionLocalDataSource.insertSession(
-                WorkoutSessionDto(
-                    id = sessionId,
-                    startEpochMillis = start.toEpochMilli(),
-                    endEpochMillis = end.toEpochMilli(),
-                    locationId = locationId,
-                ),
-            )
-            for (sch in cluster) {
-                workoutScheduleRepository.saveWorkoutSchedule(
-                    sch.copy(sessionId = sessionId),
-                )
-            }
-            idx = j
         }
     }
 }

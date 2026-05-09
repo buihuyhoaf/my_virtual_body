@@ -31,7 +31,4 @@ interface WorkoutSessionRepository {
     fun observeWorkoutSessionsInDayRange(startDay: Long, endDay: Long): Flow<List<WorkoutSession>>
 
     fun observeGymLocations(): Flow<List<GymLocation>>
-
-    /** Idempotent: merges legacy schedules without [sessionId] into sessions once. */
-    suspend fun migrateLegacySchedulesIfNeeded()
 }

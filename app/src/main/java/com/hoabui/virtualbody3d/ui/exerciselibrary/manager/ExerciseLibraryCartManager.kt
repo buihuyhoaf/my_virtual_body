@@ -9,8 +9,9 @@ import com.hoabui.virtualbody3d.ui.exerciselibrary.util.withCartSnapshot
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.CartSetField
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.ExerciseDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.SetRowDraft
+import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryChromeMode
 import com.hoabui.virtualbody3d.ui.exerciselibrary.state.ExerciseLibraryUiState
-import dagger.hilt.android.scopes.ViewModelScoped
+import dagger.hilt.android.scopes.ActivityRetainedScoped
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
@@ -23,7 +24,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
-@ViewModelScoped
+@ActivityRetainedScoped
 class ExerciseLibraryCartManager @Inject constructor(
     private val toggleExerciseInCartUseCase: ToggleExerciseInCartUseCase,
 ) {
@@ -40,6 +41,17 @@ class ExerciseLibraryCartManager @Inject constructor(
 
     private val _isCartExpanded = MutableStateFlow(false)
     val isCartExpanded: StateFlow<Boolean> = _isCartExpanded.asStateFlow()
+
+    private val _chromeMode = MutableStateFlow<ExerciseLibraryChromeMode>(ExerciseLibraryChromeMode.Idle)
+    val chromeMode: StateFlow<ExerciseLibraryChromeMode> = _chromeMode.asStateFlow()
+
+    fun setChromeMode(mode: ExerciseLibraryChromeMode) {
+        _chromeMode.value = mode
+    }
+
+    fun setChromeIdle() {
+        _chromeMode.value = ExerciseLibraryChromeMode.Idle
+    }
 
     fun applyCartSnapshot(syntheticBefore: ExerciseLibraryUiState, snap: ExerciseLibraryCartSnapshot) {
         val updated = syntheticBefore.withCartSnapshot(snap)

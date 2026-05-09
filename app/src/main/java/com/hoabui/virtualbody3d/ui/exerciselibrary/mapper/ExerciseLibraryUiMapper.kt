@@ -15,10 +15,8 @@ import com.hoabui.virtualbody3d.domain.model.exercise.SESSION_BOOKING_SLOT_STEP_
 import com.hoabui.virtualbody3d.domain.model.exercise.bookingSlotStartsForDay
 import com.hoabui.virtualbody3d.domain.model.exercise.normalizeDurationMinutesSeconds
 import com.hoabui.virtualbody3d.domain.model.exercise.normalizeExerciseLibraryQuery
-import com.hoabui.virtualbody3d.domain.usecase.CanOpenExerciseLibrarySessionBookingUseCase
 import com.hoabui.virtualbody3d.ui.exerciselibrary.util.matchesLibrarySearch
 import com.hoabui.virtualbody3d.ui.exerciselibrary.util.toGExerciseCardUiModel
-import com.hoabui.virtualbody3d.ui.exerciselibrary.util.toLibraryCartDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.cart.ExerciseDraft
 import com.hoabui.virtualbody3d.ui.exerciselibrary.catalog.ExerciseLibraryCatalogEntryUiModel
 import com.hoabui.virtualbody3d.ui.exerciselibrary.catalog.ExerciseLibrarySectionRowUiModel
@@ -47,7 +45,6 @@ import javax.inject.Inject
 
 class ExerciseLibraryUiMapper @Inject constructor(
     @ApplicationContext private val appContext: Context,
-    private val canOpenExerciseLibrarySessionBooking: CanOpenExerciseLibrarySessionBookingUseCase,
 ) {
 
     fun buildBookingExerciseSnapshotForOpen(
@@ -88,25 +85,21 @@ class ExerciseLibraryUiMapper @Inject constructor(
         return LibraryPresentationSlice(
             sections = sections,
             exerciseMeasurementById = measurementById,
-            isAddToSessionEnabled = canOpenExerciseLibrarySessionBooking(
-                filtersForUi.toLibraryCartDraft(),
-                measurementById,
-            ),
+            isAddToSessionEnabled = false,
         )
     }
 
     fun mapBookingPresentation(
         filtersWithMeasurement: ExerciseLibraryUiState,
+        sessionBookingInput: SessionBookingInput,
         gymLocations: ImmutableList<GymLocation>,
         isBookingConfirmEnabled: Boolean,
-    ): SessionBookingUiModel? {
-        val input = filtersWithMeasurement.sessionBookingInput ?: return null
-        return buildSessionBookingUiModel(
-            input = input,
+    ): SessionBookingUiModel =
+        buildSessionBookingUiModel(
+            input = sessionBookingInput,
             locations = gymLocations,
             isBookingConfirmEnabled = isBookingConfirmEnabled,
         )
-    }
 
     private fun buildSections(
         grouped: PersistentMap<BodyRegion, ImmutableList<ExerciseLibraryCatalogEntryUiModel>>,
